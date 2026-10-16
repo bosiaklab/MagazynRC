@@ -151,7 +151,7 @@
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-5 space-y-4 shadow-2xl my-6 max-h-[90vh] flex flex-col">
       <div class="flex justify-between items-start border-b border-slate-700 pb-3">
         <div>
-          <span class="text-[11px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-400 border border-indigo-700/50">Gemini 1.5 Flash</span>
+          <span class="text-[11px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-400 border border-indigo-700/50">Gemini AI OCR</span>
           <h3 class="text-lg font-bold text-white mt-1">Przyjęcie Dostawy z Dokumentu</h3>
           <p id="aiDocInfo" class="text-xs text-slate-400 mt-0.5">Analiza obrazu...</p>
         </div>
@@ -312,10 +312,10 @@
   </div>
 
   <script>
-    // --- KONFIGURACJA API ---
+    // --- KONFIGURACJA SUPABASE I GEMINI API ---
     const SUPABASE_BASE_URL = 'https://gojacqzjkrfjlnwokyeg.supabase.co/rest/v1';
     const SUPABASE_KEY = 'sb_publishable_EuUrE98PR8SAVwnrIMP60g_RUAL0KSp';
-    const GEMINI_API_KEY = 'AQ.Ab8RN6LnIz6I3whEhkHEelR8fiWSO6dxFS-nlpValcc8w9tvZw';
+    const GEMINI_API_KEY = 'AQ.Ab8RN6JQHVTxqmEE-mAigOjJGt4ghfMGxGYDTjNUt0MGeq2f5Q';
 
     const DEFAULT_LOCAL_ITEMS = [
       { id: '1', barcode: 'RC-590001', name: 'Kawa ziarnista 1kg', category: 'Catering', location: 'Magazyn - Regał A1', qty: 20, inField: 0, minQty: 5, unit: 'opak.' },
@@ -346,7 +346,6 @@
       } catch (e) {}
     }
 
-    // --- BEZPOŚREDNIE ZAPYTANIE REST DO SUPABASE Z TIMEOUTEM 3 SEKUNDY ---
     async function apiRequest(endpoint, method = 'GET', body = null) {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 3500);
@@ -358,21 +357,13 @@
         'Prefer': 'return=representation'
       };
 
-      const options = {
-        method,
-        headers,
-        signal: controller.signal
-      };
-
+      const options = { method, headers, signal: controller.signal };
       if (body) options.body = JSON.stringify(body);
 
       try {
         const res = await fetch(`${SUPABASE_BASE_URL}${endpoint}`, options);
         clearTimeout(timeoutId);
-        if (!res.ok) {
-          const errText = await res.text();
-          throw new Error(`HTTP ${res.status}: ${errText}`);
-        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return await res.json();
       } catch (err) {
         clearTimeout(timeoutId);
@@ -404,9 +395,8 @@
         renderInventory();
 
       } catch (err) {
-        console.warn('Direct Supabase fetch failed, fallback to local storage:', err.message);
         isCloudOnline = false;
-        document.getElementById('syncStatus').innerText = '🟡 Tryb lokalny (brak blokad)';
+        document.getElementById('syncStatus').innerText = '🟡 Tryb lokalny (pełna gotowość)';
         document.getElementById('syncStatus').className = 'text-[10px] text-amber-400 font-bold';
         renderInventory();
       }
@@ -423,7 +413,6 @@
       }
     }
 
-    // --- RENDEROWANIE INTERFEJSU ---
     function renderInventory() {
       const search = document.getElementById('searchFilter').value.toLowerCase();
       const filter = document.getElementById('categoryFilter').value;
@@ -445,7 +434,7 @@
       });
 
       if (filtered.length === 0) {
-        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-sm">Brak pozycji w bazie. Kliknij "+ Dodaj", aby dodać pierwszy towar.</div>`;
+        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-sm">Brak pozycji w bazie. Kliknij "+ Dodaj", aby dodać towar.</div>`;
         return;
       }
 
@@ -516,7 +505,6 @@
       }).join('');
     }
 
-    // --- ZMNIEJSZANIE ZDJĘCIA W TELEFONIE ---
     function compressImage(file, maxWidth = 1280, quality = 0.8) {
       return new Promise((resolve, reject) => {
         const img = new Image();
@@ -539,7 +527,6 @@
       });
     }
 
-    // --- GEMINI 1.5 FLASH (AI ODCZYT FAKTUR) ---
     function triggerInvoiceUpload() {
       document.getElementById('invoiceInput').click();
     }
@@ -576,32 +563,50 @@ Zwróć wynik WYŁĄCZNIE jako czysty obiekt JSON (bez znaczników markdown, bez
   ]
 }`;
 
-        document.getElementById('aiDocInfo').innerText = "Analiza dokumentu przez Gemini 1.5 Flash...";
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+        // Bezpośrednie wywołanie Gemini z obsługą nowego klucza
+        const models = ['gemini-1.5-flash', 'gemini-2.5-flash', 'gemini-3.8-flash'];
+        let parsed = null;
+        let lastError = '';
 
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'x-goog-api-key': GEMINI_API_KEY
-          },
-          body: JSON.stringify({
-            contents: [{
-              parts: [
-                { text: promptText },
-                { inline_data: { mime_type: 'image/jpeg', data: base64Data } }
-              ]
-            }]
-          })
-        });
+        for (const model of models) {
+          try {
+            document.getElementById('aiDocInfo').innerText = `Analiza dokumentu (model: ${model})...`;
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
 
-        const result = await response.json();
-        if (result.error) throw new Error(result.error.message);
-        if (!result.candidates || !result.candidates[0]) throw new Error("Brak odpowiedzi AI");
+            const response = await fetch(endpoint, {
+              method: 'POST',
+              headers: { 
+                'Content-Type': 'application/json',
+                'x-goog-api-key': GEMINI_API_KEY
+              },
+              body: JSON.stringify({
+                contents: [{
+                  parts: [
+                    { text: promptText },
+                    { inline_data: { mime_type: 'image/jpeg', data: base64Data } }
+                  ]
+                }]
+              })
+            });
 
-        let rawText = result.candidates[0].content.parts[0].text.trim();
-        rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
-        const parsed = JSON.parse(rawText);
+            const result = await response.json();
+            if (result.error) {
+              lastError = result.error.message;
+              continue;
+            }
+
+            if (result.candidates && result.candidates[0]) {
+              let rawText = result.candidates[0].content.parts[0].text.trim();
+              rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+              parsed = JSON.parse(rawText);
+              break;
+            }
+          } catch (e) {
+            lastError = e.message;
+          }
+        }
+
+        if (!parsed) throw new Error(lastError || "Nie udało się odczytać dokumentu.");
 
         currentExtractedDelivery = {
           docNumber: parsed.docNumber || 'WZ/FA-' + Date.now().toString().slice(-6),
