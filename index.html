@@ -480,7 +480,31 @@
       }).join('');
     }
 
-    // --- MODUŁ GEMINI AI OCR (ODCZYT FAKTUR ZE ZDJĘCIA Z AUTOMATYCZNYM FALLBACKIEM) ---
+    // --- FUNKCJA ZMNIEJSZAJĄCA ZDJĘCIE PRZED WYSŁANIEM (DZIĘKI TEMU AI DZIAŁA W UŁAMKU SEKUNDY) ---
+    function compressImage(file, maxWidth = 1280, quality = 0.8) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/jpeg', quality);
+          resolve(dataUrl);
+        };
+        img.onerror = reject;
+        img.src = URL.createObjectURL(file);
+      });
+    }
+
+    // --- MODUŁ GEMINI AI OCR (ODCZYT FAKTUR ZE ZDJĘCIA) ---
     function triggerInvoiceUpload() {
       document.getElementById('invoiceInput').click();
     }
@@ -498,16 +522,15 @@
       document.getElementById('aiItemsContainer').classList.add('hidden');
       document.getElementById('aiModalActions').classList.add('hidden');
       document.getElementById('aiImagePreviewContainer').classList.add('hidden');
-      document.getElementById('aiDocInfo').innerText = "Trwa przetwarzanie obrazu przez AI...";
+      document.getElementById('aiDocInfo').innerText = "Optymalizacja zdjęcia i analiza...";
 
-      const reader = new FileReader();
-      reader.onload = async function(e) {
-        const base64Data = e.target.result.split(',')[1];
-        const previewUrl = e.target.result;
-        document.getElementById('aiImagePreview').src = previewUrl;
+      try {
+        // Skompresuj zdjęcie w przeglądarce telefonu do bezpiecznego rozmiaru
+        const compressedDataUrl = await compressImage(file, 1280, 0.8);
+        const base64Data = compressedDataUrl.split(',')[1];
+        document.getElementById('aiImagePreview').src = compressedDataUrl;
 
-        try {
-          const promptText = `Przeanalizuj to zdjęcie faktury lub dokumentu dostawy WZ.
+        const promptText = `Przeanalizuj to zdjęcie faktury lub dokumentu dostawy WZ.
 Zwróć wynik WYŁĄCZNIE jako czysty obiekt JSON (bez znaczników markdown, bez słowa json) o strukturze:
 {
   "docNumber": "numer faktury lub dokumentu WZ",
@@ -521,73 +544,73 @@ Zwróć wynik WYŁĄCZNIE jako czysty obiekt JSON (bez znaczników markdown, bez
   ]
 }`;
 
-          // Lista modeli z automatycznym przełączaniem przy przeciążeniu serwerów Google
-          const modelsToTry = [
-            'gemini-2.5-flash',
-            'gemini-3.8-flash',
-            'gemini-1.5-flash'
-          ];
+        // Używamy stabilnych, odpornych na przeciążenia modeli w kolejności priorytetu
+        const modelsToTry = [
+          'gemini-3.5-flash-lite',
+          'gemini-3.6-flash',
+          'gemini-3.1-flash-lite',
+          'gemini-3.8-flash'
+        ];
 
-          let lastError = null;
-          let parsed = null;
+        let lastError = null;
+        let parsed = null;
 
-          for (const model of modelsToTry) {
-            try {
-              document.getElementById('aiDocInfo').innerText = `Analiza dokumentu (model: ${model})...`;
-              const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeApiKey}`;
+        for (const model of modelsToTry) {
+          try {
+            document.getElementById('aiDocInfo').innerText = `Analiza dokumentu (model: ${model})...`;
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${activeApiKey}`;
 
-              const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 
-                  'Content-Type': 'application/json',
-                  'x-goog-api-key': activeApiKey
-                },
-                body: JSON.stringify({
-                  contents: [{
-                    parts: [
-                      { text: promptText },
-                      { inline_data: { mime_type: file.type || 'image/jpeg', data: base64Data } }
-                    ]
-                  }]
-                })
-              });
+            const response = await fetch(endpoint, {
+              method: 'POST',
+              headers: { 
+                'Content-Type': 'application/json',
+                'x-goog-api-key': activeApiKey
+              },
+              body: JSON.stringify({
+                contents: [{
+                  parts: [
+                    { text: promptText },
+                    { inline_data: { mime_type: 'image/jpeg', data: base64Data } }
+                  ]
+                }]
+              })
+            });
 
-              const result = await response.json();
-              if (result.error) {
-                lastError = result.error.message;
-                continue; // Próbuj kolejny model
-              }
-
-              if (result.candidates && result.candidates[0]) {
-                let rawText = result.candidates[0].content.parts[0].text.trim();
-                rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
-                parsed = JSON.parse(rawText);
-                break; // Sukces, przerywamy pętlę
-              }
-            } catch (err) {
-              lastError = err.message;
+            const result = await response.json();
+            if (result.error) {
+              lastError = result.error.message;
+              continue; // Spróbuj kolejny model z listy
             }
+
+            if (result.candidates && result.candidates[0]) {
+              let rawText = result.candidates[0].content.parts[0].text.trim();
+              rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+              parsed = JSON.parse(rawText);
+              break; // Sukces!
+            }
+          } catch (err) {
+            lastError = err.message;
           }
-
-          if (!parsed) {
-            throw new Error(lastError || "Nie udało się połączyć z żadnym z modeli AI");
-          }
-
-          currentExtractedDelivery = {
-            docNumber: parsed.docNumber || 'WZ/FA-' + Date.now().toString().slice(-6),
-            supplier: parsed.supplier || 'Dostawca',
-            items: parsed.items || [],
-            imagePreview: previewUrl
-          };
-
-          displayExtractedItems(currentExtractedDelivery);
-
-        } catch (err) {
-          alert("Błąd podczas analizy faktury przez AI: " + err.message);
-          closeAiModal();
         }
-      };
-      reader.readAsDataURL(file);
+
+        if (!parsed) {
+          throw new Error(lastError || "Serwery AI były chwilowo zajęte. Spróbuj ponownie za moment.");
+        }
+
+        currentExtractedDelivery = {
+          docNumber: parsed.docNumber || 'WZ/FA-' + Date.now().toString().slice(-6),
+          supplier: parsed.supplier || 'Dostawca',
+          items: parsed.items || [],
+          imagePreview: compressedDataUrl
+        };
+
+        displayExtractedItems(currentExtractedDelivery);
+
+      } catch (err) {
+        alert("Błąd podczas analizy faktury przez AI: " + err.message);
+        closeAiModal();
+      }
+
       event.target.value = '';
     }
 
