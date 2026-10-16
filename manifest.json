@@ -1,0 +1,16 @@
+{
+  "name": "MagazynRC System",
+  "short_name": "MagazynRC",
+  "start_url": "/MagazynRC/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2633/2633320.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
