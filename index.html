@@ -3,18 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>MagazynPRO - System Magazynowy</title>
+  <title>MagazynRC - Chmura Cloud</title>
+  
+  <!-- Konfiguracja PWA (Aplikacja na Androida / Telefon) -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22MagazynRC%20System%22%2C%22short_name%22%3A%22MagazynRC%22%2C%22start_url%22%3A%22%2FMagazynRC%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f172a%22%2C%22theme_color%22%3A%22%230f172a%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fcdn-icons-png.flaticon.com%2F512%2F2633%2F2633320.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
+
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Skaner kodów -->
   <script src="https://unpkg.com/html5-qrcode"></script>
   <!-- Generator Kodów QR -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Supabase Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body { -webkit-tap-highlight-color: transparent; }
     #reader__scan_region video { border-radius: 0.75rem; object-fit: cover; }
-    
-    /* Styl dedykowany do druku etykiety */
     @media print {
       body * { visibility: hidden; }
       #printArea, #printArea * { visibility: visible; }
@@ -29,8 +36,8 @@
     <div class="flex items-center space-x-2">
       <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-lg">M</div>
       <div>
-        <h1 class="font-bold text-base leading-tight">MagazynRC <span class="text-xs font-normal text-emerald-400 bg-emerald-950/60 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v1.1</span></h1>
-        <p class="text-xs text-slate-400">System Ewidencji i Etykiet QR</p>
+        <h1 class="font-bold text-base leading-tight">MagazynRC <span class="text-xs font-normal text-sky-400 bg-sky-950/60 border border-sky-700/50 px-1.5 py-0.5 rounded ml-1">Cloud Sync</span></h1>
+        <p id="syncStatus" class="text-[10px] text-amber-400">Łączenie z chmurą...</p>
       </div>
     </div>
     <div class="flex gap-2">
@@ -53,7 +60,7 @@
         <p id="statTotalItems" class="text-2xl font-bold text-white mt-0.5">0</p>
       </div>
       <div class="bg-slate-800/90 border border-slate-700 p-3 rounded-xl">
-        <p class="text-xs text-slate-400">W wydaniu / Teren</p>
+        <p class="text-xs text-slate-400">W terenie / Zlecenie</p>
         <p id="statInField" class="text-2xl font-bold text-amber-400 mt-0.5">0</p>
       </div>
       <div class="bg-slate-800/90 border border-slate-700 p-3 rounded-xl">
@@ -69,7 +76,7 @@
           <h2 class="font-bold text-sm text-white flex items-center gap-2">
             <span>📷</span> Skaner Kodów (Kamera / Bluetooth)
           </h2>
-          <p class="text-xs text-slate-400">Zeskanuj kod QR z etykiety, aby zarządzać stanem</p>
+          <p class="text-xs text-slate-400">Zeskanuj kod QR, aby zaktualizować stan na żywo</p>
         </div>
         <button id="btnToggleCamera" onclick="toggleCamera()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition shadow">
           Uruchom kamerę
@@ -86,25 +93,15 @@
           id="barcodeInput" 
           placeholder="Kliknij pod czytnik lub wpisz kod ręcznie..." 
           class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
-        >
+        />
         <button type="submit" class="bg-slate-700 hover:bg-slate-600 px-4 py-2.5 rounded-xl text-xs font-semibold transition">
           Szukaj
         </button>
       </form>
     </section>
 
-    <!-- ZAKŁADKI -->
-    <div class="flex border-b border-slate-700 gap-6 text-sm font-medium">
-      <button id="tabStockBtn" onclick="switchTab('stock')" class="pb-2.5 border-b-2 border-emerald-500 text-emerald-400">
-        📦 Stany Magazynowe
-      </button>
-      <button id="tabLogsBtn" onclick="switchTab('logs')" class="pb-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200">
-        🕒 Historia Ruchów
-      </button>
-    </div>
-
     <!-- WIDOK STANÓW -->
-    <section id="viewStock" class="space-y-3">
+    <section class="space-y-3">
       <div class="flex flex-col sm:flex-row gap-2">
         <input 
           type="text" 
@@ -112,7 +109,7 @@
           oninput="renderInventory()" 
           placeholder="Szukaj po nazwie, kategorii, lokalizacji..." 
           class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500"
-        >
+        />
         <select id="categoryFilter" onchange="renderInventory()" class="bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
           <option value="ALL">Wszystkie kategorie</option>
           <option value="LOW">⚠️ Tylko niski stan</option>
@@ -120,16 +117,9 @@
         </select>
       </div>
 
-      <div id="inventoryList" class="space-y-2.5"></div>
-    </section>
-
-    <!-- WIDOK HISTORII -->
-    <section id="viewLogs" class="hidden space-y-3">
-      <div class="flex justify-between items-center">
-        <p class="text-xs text-slate-400">Ostatnie operacje</p>
-        <button onclick="clearLogs()" class="text-xs text-rose-400 hover:underline">Wyczyść historię</button>
+      <div id="inventoryList" class="space-y-2.5">
+        <div class="text-center py-8 text-slate-500 text-sm">Pobieranie danych z chmury...</div>
       </div>
-      <div id="logsList" class="space-y-2"></div>
     </section>
 
   </main>
@@ -169,11 +159,6 @@
             <button onclick="setStepQty(10)" class="bg-slate-700/60 hover:bg-slate-700 px-3 py-2 rounded-xl text-xs">+10</button>
           </div>
         </div>
-
-        <div>
-          <label class="text-xs text-slate-300 block mb-1">Notatka (np. nr zlecenia, kierowca):</label>
-          <input type="text" id="modalNote" placeholder="Komentarz do historii operacji..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
-        </div>
       </div>
 
       <div class="grid grid-cols-2 gap-2.5 pt-2">
@@ -191,9 +176,8 @@
         </button>
       </div>
 
-      <!-- Przycisk generowania etykiety QR -->
       <button onclick="openPrintLabelModal()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow transition">
-        <span>🏷️</span> Generuj i Drukuj Etykietę QR
+        <span>🏷️</span> Drukuj Etykietę QR
       </button>
 
       <div class="flex justify-between items-center pt-2 border-t border-slate-700 text-xs">
@@ -212,7 +196,7 @@
       </div>
 
       <div>
-        <label class="text-xs text-slate-300 block mb-1">Kod (zostaw puste, wygeneruje się sam):</label>
+        <label class="text-xs text-slate-300 block mb-1">Kod:</label>
         <div class="flex gap-2">
           <input type="text" id="newBarcode" placeholder="Np. RC-001" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-mono">
           <button type="button" onclick="generateRandomCode()" class="bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-xl text-xs font-semibold">Losuj</button>
@@ -220,17 +204,17 @@
       </div>
 
       <div>
-        <label class="text-xs text-slate-300 block mb-1">Nazwa towaru / sprzętu *:</label>
-        <input type="text" id="newName" required placeholder="Np. Kawa ziarnista 1kg / Skrzynia" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+        <label class="text-xs text-slate-300 block mb-1">Nazwa towaru *:</label>
+        <input type="text" id="newName" required placeholder="Np. Kawa ziarnista 1kg" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
       </div>
 
       <div class="grid grid-cols-2 gap-2.5">
         <div>
           <label class="text-xs text-slate-300 block mb-1">Kategoria:</label>
-          <input type="text" id="newCategory" placeholder="Np. Catering / Sprzęt" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+          <input type="text" id="newCategory" placeholder="Np. Catering" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
         </div>
         <div>
-          <label class="text-xs text-slate-300 block mb-1">Lokalizacja / Regał:</label>
+          <label class="text-xs text-slate-300 block mb-1">Lokalizacja:</label>
           <input type="text" id="newLocation" placeholder="Np. Regał A1" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
         </div>
       </div>
@@ -252,30 +236,30 @@
 
       <div class="flex justify-end gap-2 pt-3">
         <button type="button" onclick="closeNewItemModal()" class="px-4 py-2 rounded-xl text-xs text-slate-300 hover:bg-slate-700">Anuluj</button>
-        <button type="submit" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2 rounded-xl text-xs">Zapisz i drukuj</button>
+        <button type="submit" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2 rounded-xl text-xs">Zapisz w chmurze</button>
       </div>
     </form>
   </div>
 
-  <!-- UKRYTY OBSZAR DRUKOWANIA ETYKIETY -->
+  <!-- OBSZAR DRUKU -->
   <div id="printArea" class="hidden">
     <div style="border: 2px dashed #333; padding: 15px; border-radius: 8px; display: inline-block; width: 320px; font-family: Arial, sans-serif;">
-      <h2 id="printItemName" style="font-size: 16px; font-weight: bold; margin: 0 0 5px 0; color: black;">Nazwa Towaru</h2>
-      <p id="printItemCategory" style="font-size: 11px; margin: 0 0 10px 0; color: #555; text-transform: uppercase;">Kategoria • Lokalizacja</p>
+      <h2 id="printItemName" style="font-size: 16px; font-weight: bold; margin: 0 0 5px 0; color: black;"></h2>
+      <p id="printItemCategory" style="font-size: 11px; margin: 0 0 10px 0; color: #555; text-transform: uppercase;"></p>
       <div id="printQRCode" style="display: flex; justify-content: center; margin: 10px 0;"></div>
-      <p id="printItemBarcode" style="font-size: 14px; font-family: monospace; font-weight: bold; margin: 5px 0 0 0; color: black;">KOD</p>
+      <p id="printItemBarcode" style="font-size: 14px; font-family: monospace; font-weight: bold; margin: 5px 0 0 0; color: black;"></p>
     </div>
   </div>
 
   <script>
-    const DEFAULT_ITEMS = [
-      { id: '1', barcode: 'RC-590001', name: 'Kawa ziarnista 1kg', category: 'Catering', location: 'Magazyn - Regał A1', qty: 20, inField: 0, minQty: 5, unit: 'opak.' },
-      { id: '2', barcode: 'RC-590002', name: 'Warnik do wody 15L', category: 'Sprzęt', location: 'Strefa B - Regał B2', qty: 6, inField: 2, minQty: 2, unit: 'szt.' },
-      { id: '3', barcode: 'RC-590003', name: 'Skrzynia transportowa Euro', category: 'Logistyka', location: 'Sektor C', qty: 25, inField: 10, minQty: 8, unit: 'szt.' }
-    ];
+    // 🔑 PAMIĘTAJ O WPISANIU SWOICH DANYCH Z SUPABASE TUTAJ:
+    const SUPABASE_URL = 'TUTAJ_WKLEJ_PROJECT_URL';
+    const SUPABASE_ANON_KEY = 'TUTAJ_WKLEJ_ANON_PUBLIC_KEY';
 
-    let inventory = JSON.parse(localStorage.getItem('magazyn_items')) || DEFAULT_ITEMS;
-    let logs = JSON.parse(localStorage.getItem('magazyn_logs')) || [];
+    const { createClient } = supabase;
+    const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let inventory = [];
     let selectedItemId = null;
     let html5QrCode = null;
     let isCameraRunning = false;
@@ -295,11 +279,35 @@
       } catch (e) {}
     }
 
-    function saveData() {
-      localStorage.setItem('magazyn_items', JSON.stringify(inventory));
-      localStorage.setItem('magazyn_logs', JSON.stringify(logs));
+    async function fetchInventory() {
+      const { data, error } = await db.from('inventory').select('*').order('name', { ascending: true });
+      if (error) {
+        document.getElementById('syncStatus').innerText = 'Błąd połączenia z chmurą!';
+        document.getElementById('syncStatus').className = 'text-[10px] text-rose-400';
+        return;
+      }
+      inventory = data.map(item => ({
+        id: item.id,
+        barcode: item.barcode,
+        name: item.name,
+        category: item.category,
+        location: item.location,
+        qty: item.qty,
+        inField: item.in_field,
+        minQty: item.min_qty,
+        unit: item.unit
+      }));
+      document.getElementById('syncStatus').innerText = '🟢 Połączono z chmurą na żywo';
+      document.getElementById('syncStatus').className = 'text-[10px] text-emerald-400';
       renderInventory();
-      renderLogs();
+    }
+
+    function setupRealtimeSync() {
+      db.channel('public:inventory')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory' }, payload => {
+          fetchInventory();
+        })
+        .subscribe();
     }
 
     function renderInventory() {
@@ -358,28 +366,6 @@
       }).join('');
     }
 
-    function renderLogs() {
-      const list = document.getElementById('logsList');
-      if (logs.length === 0) {
-        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-sm">Brak historii operacji.</div>`;
-        return;
-      }
-      list.innerHTML = logs.slice(0, 50).map(log => `
-        <div class="bg-slate-800 border border-slate-700 rounded-xl p-3 flex justify-between items-center text-xs">
-          <div>
-            <span class="font-bold text-white">${log.itemName}</span>
-            <span class="text-slate-400 ml-1">(${log.actionLabel})</span>
-            ${log.note ? `<p class="text-slate-400 mt-0.5">💬 ${log.note}</p>` : ''}
-          </div>
-          <div class="text-right">
-            <span class="font-bold ${log.color}">${log.qtyChange}</span>
-            <span class="block text-[10px] text-slate-500">${log.timestamp}</span>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    // --- SKANER ---
     function handleScannedCode(code) {
       if (!code) return;
       const cleanCode = code.trim();
@@ -389,7 +375,7 @@
       if (found) {
         openActionModal(found.id);
       } else {
-        if (confirm(`Kod "${cleanCode}" nie istnieje w bazie.\nCzy dodać nową pozycję z tym kodem?`)) {
+        if (confirm(`Kod "${cleanCode}" nie istnieje w bazie chmurowej.\nCzy dodać nową pozycję?`)) {
           openNewItemModal(cleanCode);
         }
       }
@@ -437,14 +423,13 @@
       ).then(() => {
         isCameraRunning = true;
       }).catch(err => {
-        alert("Błąd dostępu do kamery. Upewnij się, że używasz połączenia HTTPS.");
+        alert("Błąd dostępu do kamery. Upewnij się, że używasz HTTPS.");
         container.classList.add('hidden');
         btn.innerText = 'Uruchom kamerę';
         btn.classList.replace('bg-rose-600', 'bg-indigo-600');
       });
     }
 
-    // --- AKCJE MAGAZYNOWE ---
     function openActionModal(id) {
       const item = inventory.find(i => i.id === id);
       if (!item) return;
@@ -457,7 +442,6 @@
       document.getElementById('modalItemUnit').innerText = item.unit || 'szt.';
       document.getElementById('modalItemInField').innerText = item.inField || 0;
       document.getElementById('modalStepQty').value = 1;
-      document.getElementById('modalNote').value = '';
 
       const modal = document.getElementById('actionModal');
       modal.classList.remove('hidden');
@@ -479,80 +463,52 @@
       document.getElementById('modalStepQty').value = val;
     }
 
-    function executeStockAction(type) {
+    async function executeStockAction(type) {
       const item = inventory.find(i => i.id === selectedItemId);
       if (!item) return;
 
       const amount = Math.max(1, parseInt(document.getElementById('modalStepQty').value) || 1);
-      const note = document.getElementById('modalNote').value.trim();
-      let actionLabel = '', qtyChange = '', color = 'text-emerald-400';
+      let newQty = item.qty;
+      let newInField = item.inField;
 
       if (type === 'ADD') {
-        item.qty += amount;
-        actionLabel = 'Przyjęcie';
-        qtyChange = `+${amount} ${item.unit}`;
+        newQty += amount;
       } else if (type === 'REMOVE') {
-        item.qty = Math.max(0, item.qty - amount);
-        actionLabel = 'Wydanie';
-        qtyChange = `-${amount} ${item.unit}`;
-        color = 'text-rose-400';
+        newQty = Math.max(0, newQty - amount);
       } else if (type === 'TO_FIELD') {
-        item.qty = Math.max(0, item.qty - amount);
-        item.inField = (item.inField || 0) + amount;
-        actionLabel = 'Wydanie w teren';
-        qtyChange = `🚚 ${amount} ${item.unit}`;
-        color = 'text-amber-400';
+        newQty = Math.max(0, newQty - amount);
+        newInField += amount;
       } else if (type === 'FROM_FIELD') {
-        item.inField = Math.max(0, (item.inField || 0) - amount);
-        item.qty += amount;
-        actionLabel = 'Zwrot z terenu';
-        qtyChange = `🔄 +${amount} ${item.unit}`;
-        color = 'text-sky-400';
+        newInField = Math.max(0, newInField - amount);
+        newQty += amount;
       }
 
-      logs.unshift({ itemName: item.name, actionLabel, qtyChange, note, color, timestamp: new Date().toLocaleString('pl-PL') });
-      saveData();
+      const { error } = await db.from('inventory').update({
+        qty: newQty,
+        in_field: newInField,
+        updated_at: new Date()
+      }).eq('id', selectedItemId);
+
+      if (error) {
+        alert('Błąd zapisu w chmurze: ' + error.message);
+        return;
+      }
+
       closeActionModal();
     }
 
-    function deleteCurrentItem() {
+    async function deleteCurrentItem() {
       if (!confirm('Usunąć tę pozycję z bazy?')) return;
-      inventory = inventory.filter(i => i.id !== selectedItemId);
-      saveData();
+      const { error } = await db.from('inventory').delete().eq('id', selectedItemId);
+      if (error) {
+        alert('Błąd usuwania: ' + error.message);
+        return;
+      }
       closeActionModal();
     }
 
-    // --- DRUKOWANIE ETYKIETY QR ---
-    function openPrintLabelModal() {
-      const item = inventory.find(i => i.id === selectedItemId);
-      if (!item) return;
-
-      document.getElementById('printItemName').innerText = item.name;
-      document.getElementById('printItemCategory').innerText = `${item.category} • ${item.location}`;
-      document.getElementById('printItemBarcode').innerText = item.barcode;
-
-      // Generowanie kodu QR
-      const qrContainer = document.getElementById('printQRCode');
-      qrContainer.innerHTML = '';
-      new QRCode(qrContainer, {
-        text: item.barcode,
-        width: 140,
-        height: 140,
-        colorDark: "#000000",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H
-      });
-
-      // Wywołanie okna drukowania przeglądarki
-      setTimeout(() => {
-        window.print();
-      }, 300);
-    }
-
-    // --- NOWA POZYCJA ---
     function generateRandomCode() {
-      const rnd = 'RC-' + Math.floor(100000 + Math.random() * 900000);
-      document.getElementById('newBarcode').value = rnd;
+      document.getElementById('newBarcode').value = 'RC-' + Math.floor(100000 + Math.random() * 900000);
     }
 
     function openNewItemModal(prefillBarcode) {
@@ -572,7 +528,7 @@
       document.getElementById('newItemModal').classList.remove('flex');
     }
 
-    function saveNewItem(e) {
+    async function saveNewItem(e) {
       e.preventDefault();
       const newItem = {
         id: Date.now().toString(),
@@ -581,41 +537,40 @@
         category: document.getElementById('newCategory').value.trim() || 'Ogólne',
         location: document.getElementById('newLocation').value.trim() || '-',
         qty: parseInt(document.getElementById('newQty').value) || 0,
-        inField: 0,
+        in_field: 0,
         unit: document.getElementById('newUnit').value.trim() || 'szt.',
-        minQty: parseInt(document.getElementById('newMinQty').value) || 0
+        min_qty: parseInt(document.getElementById('newMinQty').value) || 0
       };
 
-      inventory.unshift(newItem);
-      logs.unshift({ itemName: newItem.name, actionLabel: 'Nowa pozycja', qtyChange: `+${newItem.qty} ${newItem.unit}`, note: `Kod: ${newItem.barcode}`, color: 'text-emerald-400', timestamp: new Date().toLocaleString('pl-PL') });
+      const { error } = await db.from('inventory').insert([newItem]);
+      if (error) {
+        alert('Błąd dodawania: ' + error.message);
+        return;
+      }
 
-      saveData();
       closeNewItemModal();
     }
 
-    function switchTab(tab) {
-      const viewStock = document.getElementById('viewStock');
-      const viewLogs = document.getElementById('viewLogs');
-      const tabStockBtn = document.getElementById('tabStockBtn');
-      const tabLogsBtn = document.getElementById('tabLogsBtn');
+    function openPrintLabelModal() {
+      const item = inventory.find(i => i.id === selectedItemId);
+      if (!item) return;
 
-      if (tab === 'stock') {
-        viewStock.classList.remove('hidden');
-        viewLogs.classList.add('hidden');
-        tabStockBtn.className = 'pb-2.5 border-b-2 border-emerald-500 text-emerald-400';
-        tabLogsBtn.className = 'pb-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200';
-      } else {
-        viewStock.classList.add('hidden');
-        viewLogs.classList.remove('hidden');
-        tabLogsBtn.className = 'pb-2.5 border-b-2 border-emerald-500 text-emerald-400';
-        tabStockBtn.className = 'pb-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200';
-      }
-    }
+      document.getElementById('printItemName').innerText = item.name;
+      document.getElementById('printItemCategory').innerText = `${item.category} • ${item.location}`;
+      document.getElementById('printItemBarcode').innerText = item.barcode;
 
-    function clearLogs() {
-      if (!confirm('Wyczyścić historię?')) return;
-      logs = [];
-      saveData();
+      const qrContainer = document.getElementById('printQRCode');
+      qrContainer.innerHTML = '';
+      new QRCode(qrContainer, {
+        text: item.barcode,
+        width: 140,
+        height: 140,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+
+      setTimeout(() => { window.print(); }, 300);
     }
 
     function exportCSV() {
@@ -639,8 +594,8 @@
       link.click();
     }
 
-    renderInventory();
-    renderLogs();
+    fetchInventory();
+    setupRealtimeSync();
   </script>
 </body>
 </html>
