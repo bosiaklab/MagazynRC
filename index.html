@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MagazynPRO - System Magazynowy</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Biblioteka skanera kodów kreskowych i QR -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <style>
+    body { -webkit-tap-highlight-color: transparent; }
+    #reader__scan_region video { border-radius: 0.75rem; object-fit: cover; }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen pb-24 font-sans">
+
+  <!-- NAGŁÓWEK -->
+  <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-30 px-4 py-3 flex items-center justify-between shadow-md">
+    <div class="flex items-center space-x-2">
+      <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-lg">M</div>
+      <div>
+        <h1 class="font-bold text-base leading-tight">MagazynPRO <span class="text-xs font-normal text-emerald-400 bg-emerald-950/60 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v1.0</span></h1>
+        <p class="text-xs text-slate-400">Prywatny System Ewidencji</p>
+      </div>
+    </div>
+    <div class="flex gap-2">
+      <button onclick="exportCSV()" class="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-2 rounded-lg font-medium flex items-center gap-1.5 transition">
+        <span>📊</span> Eksport CSV
+      </button>
+      <button onclick="openNewItemModal('')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs px-3 py-2 rounded-lg font-bold flex items-center gap-1 transition">
+        <span>+</span> Dodaj
+      </button>
+    </div>
+  </header>
+
+  <!-- GŁÓWNY KONTENER -->
+  <main class="max-w-4xl mx-auto p-4 space-y-5">
+
+    <!-- KARTY PODSUMOWANIA -->
+    <div class="grid grid-cols-3 gap-3">
+      <div class="bg-slate-800/90 border border-slate-700 p-3 rounded-xl">
+        <p class="text-xs text-slate-400">Pozycji w bazie</p>
+        <p id="statTotalItems" class="text-2xl font-bold text-white mt-0.5">0</p>
+      </div>
+      <div class="bg-slate-800/90 border border-slate-700 p-3 rounded-xl">
+        <p class="text-xs text-slate-400">Wydane w teren</p>
+        <p id="statInField" class="text-2xl font-bold text-amber-400 mt-0.5">0</p>
+      </div>
+      <div class="bg-slate-800/90 border border-slate-700 p-3 rounded-xl">
+        <p class="text-xs text-slate-400">Braki / Niski stan</p>
+        <p id="statLowStock" class="text-2xl font-bold text-rose-400 mt-0.5">0</p>
+      </div>
+    </div>
+
+    <!-- SEKCJA SKANERA -->
+    <section class="bg-slate-800 border border-slate-700 rounded-2xl p-4 shadow-lg space-y-3">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h2 class="font-bold text-sm text-white flex items-center gap-2">
+            <span>📷</span> Skaner Kodów (Kamera / Czytnik Bluetooth)
+          </h2>
+          <p class="text-xs text-slate-400">Zeskanuj kod, aby od razu wydać, przyjąć lub dodać nowy towar</p>
+        </div>
+        <button id="btnToggleCamera" onclick="toggleCamera()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition shadow">
+          Uruchom kamerę
+        </button>
+      </div>
+
+      <!-- Podgląd kamery -->
+      <div id="cameraContainer" class="hidden overflow-hidden rounded-xl bg-black border border-slate-700">
+        <div id="reader" class="w-full"></div>
+      </div>
+
+      <!-- Pole pod skaner ręczny Bluetooth lub szybkie wpisanie -->
+      <form onsubmit="handleManualBarcodeSubmit(event)" class="flex gap-2">
+        <input 
+          type="text" 
+          id="barcodeInput" 
+          placeholder="Kliknij tutaj pod czytnik Bluetooth lub wpisz kod ręcznie..." 
+          class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+        >
+        <button type="submit" class="bg-slate-700 hover:bg-slate-600 px-4 py-2.5 rounded-xl text-xs font-semibold transition">
+          Szukaj kodu
+        </button>
+      </form>
+    </section>
+
+    <!-- ZAKŁADKI NAWIGACYJNE -->
+    <div class="flex border-b border-slate-700 gap-6 text-sm font-medium">
+      <button id="tabStockBtn" onclick="switchTab('stock')" class="pb-2.5 border-b-2 border-emerald-500 text-emerald-400">
+        📦 Stany Magazynowe
+      </button>
+      <button id="tabLogsBtn" onclick="switchTab('logs')" class="pb-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200">
+        🕒 Historia Ruchów
+      </button>
+    </div>
+
+    <!-- WIDOK 1: LISTA STANÓW MAGAZYNOWYCH -->
+    <section id="viewStock" class="space-y-3">
+      <div class="flex flex-col sm:flex-row gap-2">
+        <input 
+          type="text" 
+          id="searchFilter" 
+          oninput="renderInventory()" 
+          placeholder="Filtruj po nazwie, kategorii, lokalizacji lub kodzie..." 
+          class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500"
+        >
+        <select id="categoryFilter" onchange="renderInventory()" class="bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+          <option value="ALL">Wszystkie kategorie</option>
+          <option value="LOW">⚠️ Tylko niski stan</option>
+          <option value="FIELD">🚚 Wydane w teren</option>
+        </select>
+      </div>
+
+      <!-- Kontener kart towarów -->
+      <div id="inventoryList" class="space-y-2.5"></div>
+    </section>
+
+    <!-- WIDOK 2: HISTORIA RUCHÓW (LOGI) -->
+    <section id="viewLogs" class="hidden space-y-3">
+      <div class="flex justify-between items-center">
+        <p class="text-xs text-slate-400">Ostatnie operacje magazynowe</p>
+        <button onclick="clearLogs()" class="text-xs text-rose-400 hover:underline">Wyczyść historię</button>
+      </div>
+      <div id="logsList" class="space-y-2"></div>
+    </section>
+
+  </main>
+
+  <!-- MODAL 1: SZYBKA AKCJA PO ZESKANOWANIU / KLIKNIĘCIU POZYCJI -->
+  <div id="actionModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+      <div class="flex justify-between items-start">
+        <div>
+          <span id="modalItemCategory" class="text-[11px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-slate-700 text-slate-300">Kategoria</span>
+          <h3 id="modalItemName" class="text-lg font-bold text-white mt-1">Nazwa Towaru</h3>
+          <p id="modalItemBarcode" class="text-xs text-slate-400 font-mono">KOD: ---</p>
+        </div>
+        <button onclick="closeActionModal()" class="text-slate-400 hover:text-white text-xl font-bold px-2">✕</button>
+      </div>
+
+      <!-- Aktualny bilans -->
+      <div class="grid grid-cols-2 gap-3 bg-slate-900/90 p-3.5 rounded-xl border border-slate-700/80">
+        <div>
+          <span class="text-xs text-slate-400 block">Na magazynie (Dostępne)</span>
+          <span id="modalItemQty" class="text-2xl font-black text-emerald-400">0</span>
+          <span id="modalItemUnit" class="text-xs text-slate-400 ml-1">szt.</span>
+        </div>
+        <div>
+          <span class="text-xs text-slate-400 block">W terenie / Na zleceniu</span>
+          <span id="modalItemInField" class="text-2xl font-black text-amber-400">0</span>
+        </div>
+      </div>
+
+      <!-- Ilość operacji i notatka -->
+      <div class="space-y-3">
+        <div>
+          <label class="text-xs text-slate-300 block mb-1">Ilość do operacji:</label>
+          <div class="flex items-center gap-2">
+            <button onclick="adjustStepQty(-1)" class="bg-slate-700 hover:bg-slate-600 w-10 h-10 rounded-xl font-bold text-lg">-</button>
+            <input type="number" id="modalStepQty" value="1" min="1" class="w-20 text-center bg-slate-900 border border-slate-700 rounded-xl py-2 font-bold text-base text-white">
+            <button onclick="adjustStepQty(1)" class="bg-slate-700 hover:bg-slate-600 w-10 h-10 rounded-xl font-bold text-lg">+</button>
+            <button onclick="setStepQty(5)" class="bg-slate-700/60 hover:bg-slate-700 px-3 py-2 rounded-xl text-xs">+5</button>
+            <button onclick="setStepQty(10)" class="bg-slate-700/60 hover:bg-slate-700 px-3 py-2 rounded-xl text-xs">+10</button>
+          </div>
+        </div>
+
+        <div>
+          <label class="text-xs text-slate-300 block mb-1">Notatka (np. nazwa realizacji, kierowca, uwaga):</label>
+          <input type="text" id="modalNote" placeholder="Opcjonalny komentarz do historii..." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+        </div>
+      </div>
+
+      <!-- Przyciski operacji -->
+      <div class="grid grid-cols-2 gap-2.5 pt-2">
+        <button onclick="executeStockAction('ADD')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow">
+          <span>📥</span> Przyjmij na stan (+)
+        </button>
+        <button onclick="executeStockAction('REMOVE')" class="bg-rose-600 hover:bg-rose-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow">
+          <span>📤</span> Wydaj / Zużyj (-)
+        </button>
+        <button onclick="executeStockAction('TO_FIELD')" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow">
+          <span>🚚</span> Wydaj w teren
+        </button>
+        <button onclick="executeStockAction('FROM_FIELD')" class="bg-sky-600 hover:bg-sky-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow">
+          <span>🔄</span> Zwrot z terenu
+        </button>
+      </div>
+
+      <div class="flex justify-between items-center pt-2 border-t border-slate-700 text-xs">
+        <button onclick="deleteCurrentItem()" class="text-rose-400 hover:underline">Usuń pozycję z bazy</button>
+        <button onclick="closeActionModal()" class="text-slate-400 hover:text-white">Zamknij</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: DODAWANIE NOWEJ POZYCJI -->
+  <div id="newItemModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <form onsubmit="saveNewItem(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-5 space-y-3.5 shadow-2xl">
+      <div class="flex justify-between items-center">
+        <h3 class="text-base font-bold text-white">Nowa pozycja magazynowa</h3>
+        <button type="button" onclick="closeNewItemModal()" class="text-slate-400 hover:text-white">✕</button>
+      </div>
+
+      <div>
+        <label class="text-xs text-slate-300 block mb-1">Kod kreskowy / QR (zostaw puste, by wygenerować):</label>
+        <input type="text" id="newBarcode" placeholder="Np. 5901234567890" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-mono">
+      </div>
+
+      <div>
+        <label class="text-xs text-slate-300 block mb-1">Nazwa towaru / sprzętu *:</label>
+        <input type="text" id="newName" required placeholder="Np. Kawa ziarnista 1kg / Termos 10L" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+      </div>
+
+      <div class="grid grid-cols-2 gap-2.5">
+        <div>
+          <label class="text-xs text-slate-300 block mb-1">Kategoria:</label>
+          <input type="text" id="newCategory" placeholder="Np. Spożywcze / Sprzęt" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+        </div>
+        <div>
+          <label class="text-xs text-slate-300 block mb-1">Lokalizacja / Regał:</label>
+          <input type="text" id="newLocation" placeholder="Np. Regał A-2" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2.5">
+        <div>
+          <label class="text-xs text-slate-300 block mb-1">Stan początkowy:</label>
+          <input type="number" id="newQty" value="1" min="0" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+        </div>
+        <div>
+          <label class="text-xs text-slate-300 block mb-1">Jednostka:</label>
+          <input type="text" id="newUnit" value="szt." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+        </div>
+        <div>
+          <label class="text-xs text-slate-300 block mb-1">Alarm poniżej:</label>
+          <input type="number" id="newMinQty" value="3" min="0" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-3">
+        <button type="button" onclick="closeNewItemModal()" class="px-4 py-2 rounded-xl text-xs text-slate-300 hover:bg-slate-700">Anuluj</button>
+        <button type="submit" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2 rounded-xl text-xs">Zapisz w bazie</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    // --- 1. DANE STARTOWE (PRZYKŁADOWA BAZA) ---
+    const DEFAULT_ITEMS = [
+      { id: '1', barcode: '5900001001', name: 'Kawa ziarnista Espresso 1kg', category: 'Spożywcze', location: 'Regał A1', qty: 14, inField: 0, minQty: 5, unit: 'opak.' },
+      { id: '2', barcode: '5900001002', name: 'Warnik / Perkolator 15L', category: 'Sprzęt', location: 'Strefa B', qty: 4, inField: 2, minQty: 2, unit: 'szt.' },
+      { id: '3', barcode: '5900001003', name: 'Skrzynia transportowa Euro', category: 'Logistyka', location: 'Strefa C', qty: 18, inField: 12, minQty: 10, unit: 'szt.' },
+      { id: '4', barcode: '5900001004', name: 'Serwetki gastronomiczne białe', category: 'Jednorazowe', location: 'Regał A3', qty: 2, inField: 0, minQty: 5, unit: 'karton' }
+    ];
+
+    let inventory = JSON.parse(localStorage.getItem('magazyn_items')) || DEFAULT_ITEMS;
+    let logs = JSON.parse(localStorage.getItem('magazyn_logs')) || [];
+    let selectedItemId = null;
+    let html5QrCode = null;
+    let isCameraRunning = false;
+
+    // --- 2. SYNTEZATOR DŹWIĘKU SKANERA ("BEEP") ---
+    function playBeep() {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1400, ctx.currentTime);
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.12);
+      } catch (e) {}
+    }
+
+    // --- 3. ZAPIS I RENDEROWANIE BAZY ---
+    function saveData() {
+      localStorage.setItem('magazyn_items', JSON.stringify(inventory));
+      localStorage.setItem('magazyn_logs', JSON.stringify(logs));
+      renderInventory();
+      renderLogs();
+    }
+
+    function renderInventory() {
+      const search = document.getElementById('searchFilter').value.toLowerCase();
+      const filter = document.getElementById('categoryFilter').value;
+      const list = document.getElementById('inventoryList');
+
+      // Aktualizacja statystyk
+      document.getElementById('statTotalItems').innerText = inventory.length;
+      document.getElementById('statInField').innerText = inventory.reduce((sum, i) => sum + (Number(i.inField) || 0), 0);
+      document.getElementById('statLowStock').innerText = inventory.filter(i => i.qty <= i.minQty).length;
+
+      const filtered = inventory.filter(item => {
+        const matchesText = item.name.toLowerCase().includes(search) ||
+                            item.barcode.toLowerCase().includes(search) ||
+                            (item.category && item.category.toLowerCase().includes(search)) ||
+                            (item.location && item.location.toLowerCase().includes(search));
+        if (!matchesText) return false;
+        if (filter === 'LOW') return item.qty <= item.minQty;
+        if (filter === 'FIELD') return (item.inField || 0) > 0;
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-sm">Brak pozycji spełniających kryteria.</div>`;
+        return;
+      }
+
+      list.innerHTML = filtered.map(item => {
+        const isLow = item.qty <= item.minQty;
+        return `
+          <div onclick="openActionModal('${item.id}')" class="bg-slate-800 hover:bg-slate-750 border ${isLow ? 'border-rose-500/60' : 'border-slate-700'} rounded-xl p-3.5 flex items-center justify-between cursor-pointer transition shadow-sm">
+            <div class="space-y-1 pr-3">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-700 text-slate-300">${item.category || 'Ogólne'}</span>
+                <span class="text-xs text-slate-400">📍 ${item.location || 'Brak lok.'}</span>
+                <span class="text-xs text-slate-500 font-mono">#${item.barcode}</span>
+              </div>
+              <h4 class="font-bold text-sm text-white">${item.name}</h4>
+              ${isLow ? `<span class="inline-block text-[11px] text-rose-400 font-medium">⚠️ Niski stan (min: ${item.minQty})</span>` : ''}
+            </div>
+            <div class="text-right flex items-center gap-3">
+              ${item.inField > 0 ? `
+                <div class="bg-amber-950/60 border border-amber-700/50 px-2.5 py-1 rounded-lg text-center">
+                  <span class="text-[10px] text-amber-300 block">W terenie</span>
+                  <span class="font-bold text-sm text-amber-400">${item.inField}</span>
+                </div>
+              ` : ''}
+              <div class="bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-700 min-w-[68px] text-center">
+                <span class="text-[10px] text-slate-400 block">Magazyn</span>
+                <span class="font-black text-base ${isLow ? 'text-rose-400' : 'text-emerald-400'}">${item.qty}</span>
+                <span class="text-[10px] text-slate-400">${item.unit || 'szt.'}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderLogs() {
+      const list = document.getElementById('logsList');
+      if (logs.length === 0) {
+        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-sm">Brak zapisanych operacji.</div>`;
+        return;
+      }
+      list.innerHTML = logs.slice(0, 50).map(log => `
+        <div class="bg-slate-800 border border-slate-700 rounded-xl p-3 flex justify-between items-center text-xs">
+          <div>
+            <span class="font-bold text-white">${log.itemName}</span>
+            <span class="text-slate-400 ml-1">(${log.actionLabel})</span>
+            ${log.note ? `<p class="text-slate-400 mt-0.5">💬 ${log.note}</p>` : ''}
+          </div>
+          <div class="text-right">
+            <span class="font-bold ${log.color}">${log.qtyChange}</span>
+            <span class="block text-[10px] text-slate-500">${log.timestamp}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // --- 4. OBSŁUGA SKANOWANIA (KAMERA + CZYTNIK BLUETOOTH) ---
+    function handleScannedCode(code) {
+      if (!code) return;
+      const cleanCode = code.trim();
+      playBeep();
+
+      const found = inventory.find(i => i.barcode.toLowerCase() === cleanCode.toLowerCase());
+      if (found) {
+        openActionModal(found.id);
+      } else {
+        if (confirm(`Kod "${cleanCode}" nie istnieje jeszcze w bazie.\nCzy chcesz dodać nową pozycję z tym kodem?`)) {
+          openNewItemModal(cleanCode);
+        }
+      }
+    }
+
+    function handleManualBarcodeSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('barcodeInput');
+      handleScannedCode(input.value);
+      input.value = '';
+    }
+
+    function toggleCamera() {
+      const container = document.getElementById('cameraContainer');
+      const btn = document.getElementById('btnToggleCamera');
+
+      if (isCameraRunning && html5QrCode) {
+        html5QrCode.stop().then(() => {
+          container.classList.add('hidden');
+          btn.innerText = 'Uruchom kamerę';
+          btn.classList.replace('bg-rose-600', 'bg-indigo-600');
+          isCameraRunning = false;
+        });
+        return;
+      }
+
+      container.classList.remove('hidden');
+      btn.innerText = 'Zatrzymaj kamerę';
+      btn.classList.replace('bg-indigo-600', 'bg-rose-600');
+
+      html5QrCode = new Html5Qrcode("reader");
+      html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 140 } },
+        (decodedText) => {
+          // Zatrzymaj kamerę po udanym skanie i otwórz okno akcji
+          html5QrCode.stop().then(() => {
+            container.classList.add('hidden');
+            btn.innerText = 'Uruchom kamerę';
+            btn.classList.replace('bg-rose-600', 'bg-indigo-600');
+            isCameraRunning = false;
+            handleScannedCode(decodedText);
+          });
+        },
+        () => {}
+      ).then(() => {
+        isCameraRunning = true;
+      }).catch(err => {
+        alert("Nie udało się uruchomić kamery. Upewnij się, że strona jest otwarta przez bezpieczne połączenie (HTTPS lub localhost) oraz że przyznałeś uprawnienia do aparatu.");
+        container.classList.add('hidden');
+        btn.innerText = 'Uruchom kamerę';
+        btn.classList.replace('bg-rose-600', 'bg-indigo-600');
+      });
+    }
+
+    // --- 5. MODALE I OPERACJE NA STANACH ---
+    function openActionModal(id) {
+      const item = inventory.find(i => i.id === id);
+      if (!item) return;
+      selectedItemId = id;
+
+      document.getElementById('modalItemCategory').innerText = `${item.category || 'Ogólne'} • ${item.location || 'Brak lok.'}`;
+      document.getElementById('modalItemName').innerText = item.name;
+      document.getElementById('modalItemBarcode').innerText = `KOD: ${item.barcode}`;
+      document.getElementById('modalItemQty').innerText = item.qty;
+      document.getElementById('modalItemUnit').innerText = item.unit || 'szt.';
+      document.getElementById('modalItemInField').innerText = item.inField || 0;
+      document.getElementById('modalStepQty').value = 1;
+      document.getElementById('modalNote').value = '';
+
+      const modal = document.getElementById('actionModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeActionModal() {
+      const modal = document.getElementById('actionModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      selectedItemId = null;
+    }
+
+    function adjustStepQty(delta) {
+      const input = document.getElementById('modalStepQty');
+      const next = Math.max(1, (parseInt(input.value) || 1) + delta);
+      input.value = next;
+    }
+
+    function setStepQty(val) {
+      document.getElementById('modalStepQty').value = val;
+    }
+
+    function executeStockAction(type) {
+      const item = inventory.find(i => i.id === selectedItemId);
+      if (!item) return;
+
+      const amount = Math.max(1, parseInt(document.getElementById('modalStepQty').value) || 1);
+      const note = document.getElementById('modalNote').value.trim();
+      let actionLabel = '';
+      let qtyChange = '';
+      let color = 'text-emerald-400';
+
+      if (type === 'ADD') {
+        item.qty += amount;
+        actionLabel = 'Przyjęcie na magazyn';
+        qtyChange = `+${amount} ${item.unit}`;
+        color = 'text-emerald-400';
+      } else if (type === 'REMOVE') {
+        if (item.qty < amount && !confirm('Uwaga! Stan magazynowy jest mniejszy niż wybrana ilość. Kontynuować?')) return;
+        item.qty = Math.max(0, item.qty - amount);
+        actionLabel = 'Wydanie / Zużycie';
+        qtyChange = `-${amount} ${item.unit}`;
+        color = 'text-rose-400';
+      } else if (type === 'TO_FIELD') {
+        if (item.qty < amount && !confirm('Uwaga! Na magazynie jest mniej sztuk niż chcesz wydać w teren. Kontynuować?')) return;
+        item.qty = Math.max(0, item.qty - amount);
+        item.inField = (item.inField || 0) + amount;
+        actionLabel = 'Wydanie w teren';
+        qtyChange = `🚚 ${amount} ${item.unit}`;
+        color = 'text-amber-400';
+      } else if (type === 'FROM_FIELD') {
+        item.inField = Math.max(0, (item.inField || 0) - amount);
+        item.qty += amount;
+        actionLabel = 'Zwrot z terenu';
+        qtyChange = `🔄 +${amount} ${item.unit}`;
+        color = 'text-sky-400';
+      }
+
+      logs.unshift({
+        itemName: item.name,
+        actionLabel,
+        qtyChange,
+        note,
+        color,
+        timestamp: new Date().toLocaleString('pl-PL')
+      });
+
+      saveData();
+      closeActionModal();
+    }
+
+    function deleteCurrentItem() {
+      if (!confirm('Czy na pewno chcesz trwale usunąć tę pozycję z bazy?')) return;
+      inventory = inventory.filter(i => i.id !== selectedItemId);
+      saveData();
+      closeActionModal();
+    }
+
+    // --- 6. DODAWANIE NOWEJ POZYCJI ---
+    function openNewItemModal(prefillBarcode) {
+      document.getElementById('newBarcode').value = prefillBarcode || '';
+      document.getElementById('newName').value = '';
+      document.getElementById('newCategory').value = '';
+      document.getElementById('newLocation').value = '';
+      document.getElementById('newQty').value = 1;
+
+      const modal = document.getElementById('newItemModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeNewItemModal() {
+      const modal = document.getElementById('newItemModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function saveNewItem(e) {
+      e.preventDefault();
+      const barcode = document.getElementById('newBarcode').value.trim() || ('MAG-' + Math.floor(100000 + Math.random() * 900000));
+      const newItem = {
+        id: Date.now().toString(),
+        barcode,
+        name: document.getElementById('newName').value.trim(),
+        category: document.getElementById('newCategory').value.trim() || 'Ogólne',
+        location: document.getElementById('newLocation').value.trim() || '-',
+        qty: parseInt(document.getElementById('newQty').value) || 0,
+        inField: 0,
+        unit: document.getElementById('newUnit').value.trim() || 'szt.',
+        minQty: parseInt(document.getElementById('newMinQty').value) || 0
+      };
+
+      inventory.unshift(newItem);
+      logs.unshift({
+        itemName: newItem.name,
+        actionLabel: 'Utworzono pozycję',
+        qtyChange: `+${newItem.qty} ${newItem.unit}`,
+        note: `Kod: ${newItem.barcode}`,
+        color: 'text-emerald-400',
+        timestamp: new Date().toLocaleString('pl-PL')
+      });
+
+      saveData();
+      closeNewItemModal();
+    }
+
+    // --- 7. ZAKŁADKI I EKSPORT DO EXCELA (CSV) ---
+    function switchTab(tab) {
+      const viewStock = document.getElementById('viewStock');
+      const viewLogs = document.getElementById('viewLogs');
+      const tabStockBtn = document.getElementById('tabStockBtn');
+      const tabLogsBtn = document.getElementById('tabLogsBtn');
+
+      if (tab === 'stock') {
+        viewStock.classList.remove('hidden');
+        viewLogs.classList.add('hidden');
+        tabStockBtn.className = 'pb-2.5 border-b-2 border-emerald-500 text-emerald-400';
+        tabLogsBtn.className = 'pb-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200';
+      } else {
+        viewStock.classList.add('hidden');
+        viewLogs.classList.remove('hidden');
+        tabLogsBtn.className = 'pb-2.5 border-b-2 border-emerald-500 text-emerald-400';
+        tabStockBtn.className = 'pb-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200';
+      }
+    }
+
+    function clearLogs() {
+      if (!confirm('Wyczyścić całą historię operacji?')) return;
+      logs = [];
+      saveData();
+    }
+
+    function exportCSV() {
+      const headers = ['Kod kreskowy', 'Nazwa', 'Kategoria', 'Lokalizacja', 'Stan Magazyn', 'W terenie', 'Jednostka', 'Stan minimalny'];
+      const rows = inventory.map(i => [
+        `"${i.barcode}"`,
+        `"${i.name.replace(/"/g, '""')}"`,
+        `"${i.category}"`,
+        `"${i.location}"`,
+        i.qty,
+        i.inField || 0,
+        `"${i.unit}"`,
+        i.minQty
+      ]);
+
+      // Dodajemy BOM (\uFEFF), aby polski Excel poprawnie odczytał polskie znaki
+      const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `stan_magazynu_${new Date().toISOString().slice(0,10)}.csv`;
+      link.click();
+    }
+
+    // Inicjalizacja na starcie
+    renderInventory();
+    renderLogs();
+  </script>
+</body>
+</html>
