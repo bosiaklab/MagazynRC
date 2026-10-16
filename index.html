@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>MagazynRC - Chmura Cloud</title>
   
-  <!-- Wbudowany manifest bezpośrednio w kodzie (pomija błędy zewnętrznych skanerów) -->
+  <!-- Wbudowany manifest bezpośrednio w kodzie -->
   <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22MagazynRC%20System%22%2C%22short_name%22%3A%22MagazynRC%22%2C%22start_url%22%3A%22%2FMagazynRC%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f172a%22%2C%22theme_color%22%3A%22%230f172a%22%2C%22icons%22%3A%5B%5D%7D">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -252,9 +252,9 @@
   </div>
 
   <script>
-    // 🔑 PAMIĘTAJ O WPISANIU SWOICH DANYCH Z SUPABASE TUTAJ:
-    const SUPABASE_URL = 'TUTAJ_WKLEJ_PROJECT_URL';
-    const SUPABASE_ANON_KEY = 'TUTAJ_WKLEJ_ANON_PUBLIC_KEY';
+    // Konfiguracja Supabase z Twoimi danymi
+    const SUPABASE_URL = 'https://gojacqzjkrfjlnwokyeg.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_EuUrE98PR8SAVwnrIMP60g_RUAL0KSp';
 
     const { createClient } = supabase;
     const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -284,6 +284,7 @@
       if (error) {
         document.getElementById('syncStatus').innerText = 'Błąd połączenia z chmurą!';
         document.getElementById('syncStatus').className = 'text-[10px] text-rose-400';
+        console.error(error);
         return;
       }
       inventory = data.map(item => ({
