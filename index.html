@@ -247,12 +247,13 @@
   </div>
 
   <script>
-    // --- 1. DANE STARTOWE (PRZYKŁADOWA BAZA) ---
+    // --- 1. TWOJE DOMYŚLNE TOWARY I KATEGORIE ---
     const DEFAULT_ITEMS = [
-      { id: '1', barcode: '5900001001', name: 'Kawa ziarnista Espresso 1kg', category: 'Spożywcze', location: 'Regał A1', qty: 14, inField: 0, minQty: 5, unit: 'opak.' },
-      { id: '2', barcode: '5900001002', name: 'Warnik / Perkolator 15L', category: 'Sprzęt', location: 'Strefa B', qty: 4, inField: 2, minQty: 2, unit: 'szt.' },
-      { id: '3', barcode: '5900001003', name: 'Skrzynia transportowa Euro', category: 'Logistyka', location: 'Strefa C', qty: 18, inField: 12, minQty: 10, unit: 'szt.' },
-      { id: '4', barcode: '5900001004', name: 'Serwetki gastronomiczne białe', category: 'Jednorazowe', location: 'Regał A3', qty: 2, inField: 0, minQty: 5, unit: 'karton' }
+      { id: '1', barcode: '590001', name: 'Kawa ziarnistа 1kg', category: 'Catering', location: 'Magazyn Główny - Regał A1', qty: 20, inField: 0, minQty: 5, unit: 'opak.' },
+      { id: '2', barcode: '590002', name: 'Warnik do wody 15L', category: 'Sprzęt Eventowy', location: 'Strefa Sprzętowa - Regał B2', qty: 6, inField: 2, minQty: 2, unit: 'szt.' },
+      { id: '3', barcode: '590003', name: 'Skrzynia transportowa Euro', category: 'Logistyka', location: 'Magazyn Główny - Sektor C', qty: 25, inField: 10, minQty: 8, unit: 'szt.' },
+      { id: '4', barcode: '590004', name: 'Tacka bankietowa czarna', category: 'Zastawa', location: 'Magazyn Główny - Regał A3', qty: 50, inField: 30, minQty: 15, unit: 'szt.' },
+      { id: '5', barcode: '590005', name: 'Obrus gastronomiczny biały', category: 'Tekstylia', location: 'Pralnia / Magazyn', qty: 40, inField: 20, minQty: 10, unit: 'szt.' }
     ];
 
     let inventory = JSON.parse(localStorage.getItem('magazyn_items')) || DEFAULT_ITEMS;
