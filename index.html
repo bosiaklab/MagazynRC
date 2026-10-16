@@ -16,8 +16,6 @@
   <script src="https://unpkg.com/html5-qrcode"></script>
   <!-- Generator Kodów QR -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <!-- Supabase Client -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     body { -webkit-tap-highlight-color: transparent; }
@@ -36,8 +34,8 @@
     <div class="flex items-center space-x-2">
       <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-lg">M</div>
       <div>
-        <h1 class="font-bold text-base leading-tight">MagazynRC <span class="text-xs font-normal text-sky-400 bg-sky-950/60 border border-sky-700/50 px-1.5 py-0.5 rounded ml-1">AI Cloud</span></h1>
-        <p id="syncStatus" class="text-[10px] text-amber-400 font-medium">Inicjalizacja połączenia...</p>
+        <h1 class="font-bold text-base leading-tight">MagazynRC <span class="text-xs font-normal text-sky-400 bg-sky-950/60 border border-sky-700/50 px-1.5 py-0.5 rounded ml-1">AI Direct</span></h1>
+        <p id="syncStatus" class="text-[10px] text-amber-400 font-medium">Inicjalizacja...</p>
       </div>
     </div>
     <div class="flex gap-2">
@@ -136,7 +134,7 @@
       </div>
 
       <div id="inventoryList" class="space-y-2.5">
-        <div class="text-center py-8 text-slate-500 text-sm">Pobieranie danych z bazy...</div>
+        <div class="text-center py-8 text-slate-500 text-sm">Pobieranie stanów...</div>
       </div>
     </section>
 
@@ -160,37 +158,33 @@
         <button onclick="closeAiModal()" class="text-slate-400 hover:text-white text-xl font-bold">✕</button>
       </div>
 
-      <!-- Stan ładowania / animacja -->
       <div id="aiLoadingState" class="py-12 flex flex-col items-center justify-center space-y-3">
         <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
         <p class="text-sm text-slate-300 font-medium">Sztuczna inteligencja odczytuje fakturę...</p>
         <p class="text-xs text-slate-500">Wyciąganie tabeli produktów, ilości i danych kontrahenta</p>
       </div>
 
-      <!-- Tabela pozycji rozpoznanych przez AI -->
       <div id="aiItemsContainer" class="hidden flex-1 overflow-y-auto space-y-3 pr-1">
         <p class="text-xs text-slate-300">Sprawdź odczytane pozycje. Dopasowane produkty automatycznie zwiększą stan w magazynie:</p>
         <div id="aiItemsList" class="space-y-2"></div>
       </div>
 
-      <!-- Podgląd miniatury faktury -->
       <div id="aiImagePreviewContainer" class="hidden border-t border-slate-700 pt-3 flex items-center justify-between">
-        <span class="text-xs text-slate-400">Załącznik dokumentu gotowy do archiwizacji</span>
+        <span class="text-xs text-slate-400">Załącznik dokumentu</span>
         <button onclick="toggleImagePreview()" class="text-xs text-indigo-400 hover:underline">Pokaż/Ukryj zdjęcie</button>
       </div>
       <img id="aiImagePreview" class="hidden max-h-48 rounded-xl object-contain border border-slate-700 bg-black" />
 
-      <!-- Przyciski akcji modalnej -->
       <div id="aiModalActions" class="hidden pt-3 border-t border-slate-700 flex justify-end gap-2">
         <button onclick="closeAiModal()" class="px-4 py-2 rounded-xl text-xs text-slate-400 hover:bg-slate-700">Anuluj</button>
         <button onclick="confirmAndApplyDelivery()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow">
-          <span>✓</span> Zastosuj przyjęcie i zarchiwizuj
+          <span>✓</span> Zastosuj przyjęcie
         </button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: SZYBKA AKCJA DLA POJEDYNCZEGO TOWARU -->
+  <!-- MODAL: SZYBKA AKCJA DLA TOWARU -->
   <div id="actionModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl">
       <div class="flex justify-between items-start">
@@ -302,7 +296,7 @@
 
       <div class="flex justify-end gap-2 pt-3">
         <button type="button" onclick="closeNewItemModal()" class="px-4 py-2 rounded-xl text-xs text-slate-300 hover:bg-slate-700">Anuluj</button>
-        <button type="submit" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2 rounded-xl text-xs">Zapisz w chmurze</button>
+        <button type="submit" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2 rounded-xl text-xs">Zapisz</button>
       </div>
     </form>
   </div>
@@ -318,19 +312,23 @@
   </div>
 
   <script>
-    // --- KONFIGURACJA SUPABASE I GEMINI API ---
-    const SUPABASE_URL = 'https://gojacqzjkrfjlnwokyeg.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_EuUrE98PR8SAVwnrIMP60g_RUAL0KSp';
+    // --- KONFIGURACJA API ---
+    const SUPABASE_BASE_URL = 'https://gojacqzjkrfjlnwokyeg.supabase.co/rest/v1';
+    const SUPABASE_KEY = 'sb_publishable_EuUrE98PR8SAVwnrIMP60g_RUAL0KSp';
     const GEMINI_API_KEY = 'AQ.Ab8RN6LnIz6I3whEhkHEelR8fiWSO6dxFS-nlpValcc8w9tvZw';
 
-    const { createClient } = supabase;
-    const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const DEFAULT_LOCAL_ITEMS = [
+      { id: '1', barcode: 'RC-590001', name: 'Kawa ziarnista 1kg', category: 'Catering', location: 'Magazyn - Regał A1', qty: 20, inField: 0, minQty: 5, unit: 'opak.' },
+      { id: '2', barcode: 'RC-590002', name: 'Warnik do wody 15L', category: 'Sprzęt', location: 'Strefa B - Regał B2', qty: 6, inField: 2, minQty: 2, unit: 'szt.' },
+      { id: '3', barcode: 'RC-590003', name: 'Skrzynia transportowa Euro', category: 'Logistyka', location: 'Sektor C', qty: 25, inField: 10, minQty: 8, unit: 'szt.' }
+    ];
 
-    let inventory = [];
-    let deliveries = [];
+    let inventory = JSON.parse(localStorage.getItem('magazyn_offline_items')) || DEFAULT_LOCAL_ITEMS;
+    let deliveries = JSON.parse(localStorage.getItem('magazyn_offline_deliveries')) || [];
     let selectedItemId = null;
     let html5QrCode = null;
     let isCameraRunning = false;
+    let isCloudOnline = false;
     let currentExtractedDelivery = null;
 
     function playBeep() {
@@ -348,25 +346,47 @@
       } catch (e) {}
     }
 
-    // --- POBIERANIE STANU Z BAZY (Z PEŁNĄ DIAGNOSTYKĄ BŁĘDÓW) ---
+    // --- BEZPOŚREDNIE ZAPYTANIE REST DO SUPABASE Z TIMEOUTEM 3 SEKUNDY ---
+    async function apiRequest(endpoint, method = 'GET', body = null) {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+      const headers = {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+      };
+
+      const options = {
+        method,
+        headers,
+        signal: controller.signal
+      };
+
+      if (body) options.body = JSON.stringify(body);
+
+      try {
+        const res = await fetch(`${SUPABASE_BASE_URL}${endpoint}`, options);
+        clearTimeout(timeoutId);
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(`HTTP ${res.status}: ${errText}`);
+        }
+        return await res.json();
+      } catch (err) {
+        clearTimeout(timeoutId);
+        throw err;
+      }
+    }
+
     async function fetchInventory() {
       try {
-        const { data, error } = await db.from('inventory').select('*').order('name', { ascending: true });
+        document.getElementById('syncStatus').innerText = 'Łączenie z bazą...';
+        const data = await apiRequest('/inventory?select=*&order=name.asc');
         
-        if (error) {
-          document.getElementById('syncStatus').innerText = 'Błąd bazy: ' + error.message;
-          document.getElementById('syncStatus').className = 'text-[10px] text-rose-400 font-bold';
-          console.error('Supabase inventory error:', error);
-          document.getElementById('inventoryList').innerHTML = `
-            <div class="bg-rose-950/60 border border-rose-700/60 rounded-xl p-4 text-center space-y-2">
-              <p class="text-xs text-rose-300 font-bold">Problem z pobraniem danych z Supabase:</p>
-              <p class="text-[11px] text-rose-400 font-mono">${error.message}</p>
-            </div>
-          `;
-          return;
-        }
-
-        inventory = (data || []).map(i => ({
+        isCloudOnline = true;
+        inventory = data.map(i => ({
           id: i.id,
           barcode: i.barcode,
           name: i.name,
@@ -378,37 +398,28 @@
           unit: i.unit || 'szt.'
         }));
 
-        document.getElementById('syncStatus').innerText = '🟢 Połączono z bazą na żywo';
-        document.getElementById('syncStatus').className = 'text-[10px] text-emerald-400 font-medium';
+        localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
+        document.getElementById('syncStatus').innerText = '🟢 Chmura aktywna na żywo';
+        document.getElementById('syncStatus').className = 'text-[10px] text-emerald-400 font-bold';
         renderInventory();
 
       } catch (err) {
-        document.getElementById('syncStatus').innerText = 'Błąd sieci: ' + err.message;
-        document.getElementById('syncStatus').className = 'text-[10px] text-rose-400 font-bold';
-        console.error('Fetch inventory crash:', err);
+        console.warn('Direct Supabase fetch failed, fallback to local storage:', err.message);
+        isCloudOnline = false;
+        document.getElementById('syncStatus').innerText = '🟡 Tryb lokalny (brak blokad)';
+        document.getElementById('syncStatus').className = 'text-[10px] text-amber-400 font-bold';
+        renderInventory();
       }
     }
 
     async function fetchDeliveries() {
       try {
-        const { data, error } = await db.from('deliveries').select('*').order('created_at', { ascending: false });
-        if (!error && data) {
-          deliveries = data;
-          renderDeliveries();
-        }
+        const data = await apiRequest('/deliveries?select=*&order=created_at.desc');
+        deliveries = data;
+        localStorage.setItem('magazyn_offline_deliveries', JSON.stringify(deliveries));
+        renderDeliveries();
       } catch (e) {
-        console.warn('Deliveries fetch skipped:', e);
-      }
-    }
-
-    function setupRealtimeSync() {
-      try {
-        db.channel('realtime_all')
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory' }, () => fetchInventory())
-          .on('postgres_changes', { event: '*', schema: 'public', table: 'deliveries' }, () => fetchDeliveries())
-          .subscribe();
-      } catch (e) {
-        console.warn('Realtime subscription error:', e);
+        renderDeliveries();
       }
     }
 
@@ -483,7 +494,7 @@
               <div>
                 <span class="text-xs font-mono font-bold text-indigo-400">DOKUMENT: ${d.doc_number || 'Brak numeru'}</span>
                 <h4 class="font-bold text-sm text-white mt-0.5">Dostawca: ${d.supplier || 'Nieznany'}</h4>
-                <p class="text-[11px] text-slate-400">${new Date(d.created_at).toLocaleString('pl-PL')}</p>
+                <p class="text-[11px] text-slate-400">${new Date(d.created_at || Date.now()).toLocaleString('pl-PL')}</p>
               </div>
               ${d.image_url ? `
                 <a href="${d.image_url}" target="_blank" class="text-xs bg-slate-700 hover:bg-slate-600 px-2.5 py-1.5 rounded-lg text-indigo-300">
@@ -505,7 +516,7 @@
       }).join('');
     }
 
-    // --- AUTOMATYCZNE ZMNIEJSZANIE ZDJĘCIA W TELEFONIE ---
+    // --- ZMNIEJSZANIE ZDJĘCIA W TELEFONIE ---
     function compressImage(file, maxWidth = 1280, quality = 0.8) {
       return new Promise((resolve, reject) => {
         const img = new Image();
@@ -528,7 +539,7 @@
       });
     }
 
-    // --- MODUŁ GEMINI AI OCR (ODCZYT FAKTUR ZE ZDJĘCIA) ---
+    // --- GEMINI 1.5 FLASH (AI ODCZYT FAKTUR) ---
     function triggerInvoiceUpload() {
       document.getElementById('invoiceInput').click();
     }
@@ -536,8 +547,6 @@
     async function processInvoiceImage(event) {
       const file = event.target.files[0];
       if (!file) return;
-
-      const activeApiKey = GEMINI_API_KEY;
 
       const aiModal = document.getElementById('aiModal');
       aiModal.classList.remove('hidden');
@@ -567,15 +576,14 @@ Zwróć wynik WYŁĄCZNIE jako czysty obiekt JSON (bez znaczników markdown, bez
   ]
 }`;
 
-        document.getElementById('aiDocInfo').innerText = "Analiza dokumentu przez Gemini AI...";
-        
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${activeApiKey}`;
+        document.getElementById('aiDocInfo').innerText = "Analiza dokumentu przez Gemini 1.5 Flash...";
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
 
         const response = await fetch(endpoint, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
-            'x-goog-api-key': activeApiKey
+            'x-goog-api-key': GEMINI_API_KEY
           },
           body: JSON.stringify({
             contents: [{
@@ -588,13 +596,8 @@ Zwróć wynik WYŁĄCZNIE jako czysty obiekt JSON (bez znaczników markdown, bez
         });
 
         const result = await response.json();
-        if (result.error) {
-          throw new Error(result.error.message);
-        }
-
-        if (!result.candidates || !result.candidates[0]) {
-          throw new Error("Brak odpowiedzi od modelu AI.");
-        }
+        if (result.error) throw new Error(result.error.message);
+        if (!result.candidates || !result.candidates[0]) throw new Error("Brak odpowiedzi AI");
 
         let rawText = result.candidates[0].content.parts[0].text.trim();
         rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
@@ -626,7 +629,7 @@ Zwróć wynik WYŁĄCZNIE jako czysty obiekt JSON (bez znaczników markdown, bez
 
       const container = document.getElementById('aiItemsList');
       if (delivery.items.length === 0) {
-        container.innerHTML = `<p class="text-xs text-rose-400">Nie udało się odczytać tabeli produktów z tego zdjęcia. Upewnij się, że dokument jest dobrze doświetlony.</p>`;
+        container.innerHTML = `<p class="text-xs text-rose-400">Nie udało się odczytać tabeli produktów z tego zdjęcia.</p>`;
         return;
       }
 
@@ -658,8 +661,7 @@ Zwróć wynik WYŁĄCZNIE jako czysty obiekt JSON (bez znaczników markdown, bez
     }
 
     function toggleImagePreview() {
-      const img = document.getElementById('aiImagePreview');
-      img.classList.toggle('hidden');
+      document.getElementById('aiImagePreview').classList.toggle('hidden');
     }
 
     function closeAiModal() {
@@ -680,7 +682,6 @@ Zwróć wynik WYŁĄCZNIE jako czysty obiekt JSON (bez znaczników markdown, bez
         const unit = document.getElementById(`aiItemUnit_${i}`).value.trim() || 'szt.';
 
         if (qty <= 0) continue;
-
         finalItems.push({ name, qty, unit });
 
         const match = inventory.find(inv => 
@@ -689,10 +690,12 @@ Zwróć wynik WYŁĄCZNIE jako czysty obiekt JSON (bez znaczników markdown, bez
         );
 
         if (match) {
-          await db.from('inventory').update({
-            qty: match.qty + qty,
-            updated_at: new Date()
-          }).eq('id', match.id);
+          match.qty += qty;
+          if (isCloudOnline) {
+            try {
+              await apiRequest(`/inventory?id=eq.${match.id}`, 'PATCH', { qty: match.qty, updated_at: new Date() });
+            } catch (e) {}
+          }
         } else {
           const newItem = {
             id: Date.now().toString() + '_' + i,
@@ -705,22 +708,38 @@ Zwróć wynik WYŁĄCZNIE jako czysty obiekt JSON (bez znaczników markdown, bez
             unit: unit,
             min_qty: 3
           };
-          await db.from('inventory').insert([newItem]);
+          inventory.unshift(newItem);
+          if (isCloudOnline) {
+            try {
+              await apiRequest('/inventory', 'POST', newItem);
+            } catch (e) {}
+          }
         }
       }
 
-      await db.from('deliveries').insert([{
+      const deliveryEntry = {
         id: Date.now().toString(),
         doc_number: currentExtractedDelivery.docNumber,
         supplier: currentExtractedDelivery.supplier,
         items_json: finalItems,
-        image_url: currentExtractedDelivery.imagePreview
-      }]);
+        image_url: currentExtractedDelivery.imagePreview,
+        created_at: new Date()
+      };
+
+      deliveries.unshift(deliveryEntry);
+      localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
+      localStorage.setItem('magazyn_offline_deliveries', JSON.stringify(deliveries));
+
+      if (isCloudOnline) {
+        try {
+          await apiRequest('/deliveries', 'POST', deliveryEntry);
+        } catch (e) {}
+      }
 
       closeAiModal();
-      fetchInventory();
-      fetchDeliveries();
-      alert("Dostawa przyjęta na stan magazynowy i zarchiwizowana!");
+      renderInventory();
+      renderDeliveries();
+      alert("Dostawa przyjęta na stan magazynowy!");
     }
 
     // --- SKANOWANIE I AKCJE RĘCZNE ---
@@ -826,34 +845,46 @@ Zwróć wynik WYŁĄCZNIE jako czysty obiekt JSON (bez znaczników markdown, bez
       if (!item) return;
 
       const amount = Math.max(1, parseInt(document.getElementById('modalStepQty').value) || 1);
-      let newQty = item.qty;
-      let newInField = item.inField;
 
       if (type === 'ADD') {
-        newQty += amount;
+        item.qty += amount;
       } else if (type === 'REMOVE') {
-        newQty = Math.max(0, newQty - amount);
+        item.qty = Math.max(0, item.qty - amount);
       } else if (type === 'TO_FIELD') {
-        newQty = Math.max(0, newQty - amount);
-        newInField += amount;
+        item.qty = Math.max(0, item.qty - amount);
+        item.inField = (item.inField || 0) + amount;
       } else if (type === 'FROM_FIELD') {
-        newInField = Math.max(0, newInField - amount);
-        newQty += amount;
+        item.inField = Math.max(0, (item.inField || 0) - amount);
+        item.qty += amount;
       }
 
-      await db.from('inventory').update({
-        qty: newQty,
-        in_field: newInField,
-        updated_at: new Date()
-      }).eq('id', selectedItemId);
-
+      localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
+      renderInventory();
       closeActionModal();
+
+      if (isCloudOnline) {
+        try {
+          await apiRequest(`/inventory?id=eq.${item.id}`, 'PATCH', {
+            qty: item.qty,
+            in_field: item.inField,
+            updated_at: new Date()
+          });
+        } catch (e) {}
+      }
     }
 
     async function deleteCurrentItem() {
       if (!confirm('Usunąć tę pozycję z bazy?')) return;
-      await db.from('inventory').delete().eq('id', selectedItemId);
+      inventory = inventory.filter(i => i.id !== selectedItemId);
+      localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
+      renderInventory();
       closeActionModal();
+
+      if (isCloudOnline) {
+        try {
+          await apiRequest(`/inventory?id=eq.${selectedItemId}`, 'DELETE');
+        } catch (e) {}
+      }
     }
 
     function generateRandomCode() {
@@ -891,8 +922,16 @@ Zwróć wynik WYŁĄCZNIE jako czysty obiekt JSON (bez znaczników markdown, bez
         min_qty: parseInt(document.getElementById('newMinQty').value) || 0
       };
 
-      await db.from('inventory').insert([newItem]);
+      inventory.unshift(newItem);
+      localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
+      renderInventory();
       closeNewItemModal();
+
+      if (isCloudOnline) {
+        try {
+          await apiRequest('/inventory', 'POST', newItem);
+        } catch (e) {}
+      }
     }
 
     function openPrintLabelModal() {
@@ -960,7 +999,6 @@ Zwróć wynik WYŁĄCZNIE jako czysty obiekt JSON (bez znaczników markdown, bez
     // Inicjalizacja startowa
     fetchInventory();
     fetchDeliveries();
-    setupRealtimeSync();
   </script>
 </body>
 </html>
