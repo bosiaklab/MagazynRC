@@ -3,22 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>MagazynRC - Chmura Cloud</title>
+  <title>MagazynRC - WMS & AI Delivery</title>
   
-  <!-- Wbudowany manifest bezpośrednio w kodzie -->
-  <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22MagazynRC%20System%22%2C%22short_name%22%3A%22MagazynRC%22%2C%22start_url%22%3A%22%2FMagazynRC%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f172a%22%2C%22theme_color%22%3A%22%230f172a%22%2C%22icons%22%3A%5B%5D%7D">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#0f172a">
+  <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22MagazynRC%20System%22%2C%22short_name%22%3A%22MagazynRC%22%2C%22start_url%22%3A%22%2FMagazynRC%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f172a%22%2C%22theme_color%22%3A%22%230f172a%22%7D">
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Skaner kodów -->
+  <!-- Skaner kodów kreskowych i QR -->
   <script src="https://unpkg.com/html5-qrcode"></script>
   <!-- Generator Kodów QR -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <!-- Supabase Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
     body { -webkit-tap-highlight-color: transparent; }
     #reader__scan_region video { border-radius: 0.75rem; object-fit: cover; }
@@ -36,19 +36,22 @@
     <div class="flex items-center space-x-2">
       <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-lg">M</div>
       <div>
-        <h1 class="font-bold text-base leading-tight">MagazynRC <span class="text-xs font-normal text-sky-400 bg-sky-950/60 border border-sky-700/50 px-1.5 py-0.5 rounded ml-1">Cloud Sync</span></h1>
-        <p id="syncStatus" class="text-[10px] text-amber-400">Łączenie z chmurą...</p>
+        <h1 class="font-bold text-base leading-tight">MagazynRC <span class="text-xs font-normal text-sky-400 bg-sky-950/60 border border-sky-700/50 px-1.5 py-0.5 rounded ml-1">AI Cloud</span></h1>
+        <p id="syncStatus" class="text-[10px] text-amber-400">Łączenie z bazą...</p>
       </div>
     </div>
     <div class="flex gap-2">
-      <button onclick="exportCSV()" class="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-2 rounded-lg font-medium flex items-center gap-1.5 transition">
-        <span>📊</span> CSV
+      <button onclick="triggerInvoiceUpload()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-2 rounded-lg font-bold flex items-center gap-1.5 transition shadow">
+        <span>📸</span> Odczytaj Fakturę AI
       </button>
       <button onclick="openNewItemModal('')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs px-3 py-2 rounded-lg font-bold flex items-center gap-1 transition">
         <span>+</span> Dodaj
       </button>
     </div>
   </header>
+
+  <!-- UKRYTY INPUT DLA APARATU / ZDJĘCIA FAKTURY -->
+  <input type="file" id="invoiceInput" accept="image/*" capture="environment" class="hidden" onchange="processInvoiceImage(event)">
 
   <!-- GŁÓWNY KONTENER -->
   <main class="max-w-4xl mx-auto p-4 space-y-5">
@@ -76,9 +79,9 @@
           <h2 class="font-bold text-sm text-white flex items-center gap-2">
             <span>📷</span> Skaner Kodów (Kamera / Bluetooth)
           </h2>
-          <p class="text-xs text-slate-400">Zeskanuj kod QR, aby zaktualizować stan na żywo</p>
+          <p class="text-xs text-slate-400">Skanuj kod QR lub kreskowy, aby przyjąć / wydać towar</p>
         </div>
-        <button id="btnToggleCamera" onclick="toggleCamera()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2.5 rounded-xl transition shadow">
+        <button id="btnToggleCamera" onclick="toggleCamera()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition shadow">
           Uruchom kamerę
         </button>
       </div>
@@ -100,8 +103,18 @@
       </form>
     </section>
 
-    <!-- WIDOK STANÓW -->
-    <section class="space-y-3">
+    <!-- ZAKŁADKI: STANY / ARCHIWUM FAKTUR -->
+    <div class="flex border-b border-slate-700 gap-6 text-sm font-medium">
+      <button id="tabStockBtn" onclick="switchMainTab('stock')" class="pb-2.5 border-b-2 border-emerald-500 text-emerald-400">
+        📦 Stany Magazynowe
+      </button>
+      <button id="tabDeliveriesBtn" onclick="switchMainTab('deliveries')" class="pb-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200">
+        📑 Archiwum Faktur & WZ
+      </button>
+    </div>
+
+    <!-- WIDOK 1: STANY MAGAZYNOWE -->
+    <section id="viewStock" class="space-y-3">
       <div class="flex flex-col sm:flex-row gap-2">
         <input 
           type="text" 
@@ -110,21 +123,74 @@
           placeholder="Szukaj po nazwie, kategorii, lokalizacji..." 
           class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500"
         />
-        <select id="categoryFilter" onchange="renderInventory()" class="bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
-          <option value="ALL">Wszystkie kategorie</option>
-          <option value="LOW">⚠️ Tylko niski stan</option>
-          <option value="FIELD">🚚 Wydane w teren</option>
-        </select>
+        <div class="flex gap-2">
+          <select id="categoryFilter" onchange="renderInventory()" class="bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+            <option value="ALL">Wszystkie kategorie</option>
+            <option value="LOW">⚠️ Tylko niski stan</option>
+            <option value="FIELD">🚚 Wydane w teren</option>
+          </select>
+          <button onclick="exportCSV()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-2 rounded-xl text-xs font-medium text-slate-300">
+            CSV
+          </button>
+        </div>
       </div>
 
       <div id="inventoryList" class="space-y-2.5">
-        <div class="text-center py-8 text-slate-500 text-sm">Pobieranie danych z chmury...</div>
+        <div class="text-center py-8 text-slate-500 text-sm">Pobieranie danych z bazy...</div>
       </div>
+    </section>
+
+    <!-- WIDOK 2: ARCHIWUM FAKTUR I DOSTAW -->
+    <section id="viewDeliveries" class="hidden space-y-3">
+      <p class="text-xs text-slate-400">Zarejestrowane dokumenty dostaw i odczyty AI</p>
+      <div id="deliveriesList" class="space-y-3"></div>
     </section>
 
   </main>
 
-  <!-- MODAL 1: SZYBKA AKCJA I DRUK ETYKIETY -->
+  <!-- MODAL AI OCR: WERYFIKACJA POZYCJI Z FAKTURY -->
+  <div id="aiModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-4 z-50 overflow-y-auto">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-5 space-y-4 shadow-2xl my-6 max-h-[90vh] flex flex-col">
+      <div class="flex justify-between items-start border-b border-slate-700 pb-3">
+        <div>
+          <span class="text-[11px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-400 border border-indigo-700/50">Gemini AI OCR</span>
+          <h3 class="text-lg font-bold text-white mt-1">Przyjęcie Dostawy z Dokumentu</h3>
+          <p id="aiDocInfo" class="text-xs text-slate-400 mt-0.5">Analiza obrazu...</p>
+        </div>
+        <button onclick="closeAiModal()" class="text-slate-400 hover:text-white text-xl font-bold">✕</button>
+      </div>
+
+      <!-- Stan ładowania / animacja -->
+      <div id="aiLoadingState" class="py-12 flex flex-col items-center justify-center space-y-3">
+        <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+        <p class="text-sm text-slate-300 font-medium">Sztuczna inteligencja odczytuje fakturę...</p>
+        <p class="text-xs text-slate-500">Wyciąganie tabeli produktów, ilości i danych kontrahenta</p>
+      </div>
+
+      <!-- Tabela pozycji rozpoznanych przez AI -->
+      <div id="aiItemsContainer" class="hidden flex-1 overflow-y-auto space-y-3 pr-1">
+        <p class="text-xs text-slate-300">Sprawdź odczytane pozycje. Dopasowane produkty automatycznie zwiększą stan w magazynie:</p>
+        <div id="aiItemsList" class="space-y-2"></div>
+      </div>
+
+      <!-- Podgląd miniatury faktury -->
+      <div id="aiImagePreviewContainer" class="hidden border-t border-slate-700 pt-3 flex items-center justify-between">
+        <span class="text-xs text-slate-400">Załącznik dokumentu gotowy do archiwizacji</span>
+        <button onclick="toggleImagePreview()" class="text-xs text-indigo-400 hover:underline">Pokaż/Ukryj zdjęcie</button>
+      </div>
+      <img id="aiImagePreview" class="hidden max-h-48 rounded-xl object-contain border border-slate-700 bg-black" />
+
+      <!-- Przyciski akcji modalnej -->
+      <div id="aiModalActions" class="hidden pt-3 border-t border-slate-700 flex justify-end gap-2">
+        <button onclick="closeAiModal()" class="px-4 py-2 rounded-xl text-xs text-slate-400 hover:bg-slate-700">Anuluj</button>
+        <button onclick="confirmAndApplyDelivery()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow">
+          <span>✓</span> Zastosuj przyjęcie i zarchiwizuj
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SZYBKA AKCJA DLA POJEDYNCZEGO TOWARU -->
   <div id="actionModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl">
       <div class="flex justify-between items-start">
@@ -138,7 +204,7 @@
 
       <div class="grid grid-cols-2 gap-3 bg-slate-900/90 p-3.5 rounded-xl border border-slate-700/80">
         <div>
-          <span class="text-xs text-slate-400 block">Dostępne na magazynie</span>
+          <span class="text-xs text-slate-400 block">Dostępne w magazynie</span>
           <span id="modalItemQty" class="text-2xl font-black text-emerald-400">0</span>
           <span id="modalItemUnit" class="text-xs text-slate-400 ml-1">szt.</span>
         </div>
@@ -187,7 +253,7 @@
     </div>
   </div>
 
-  <!-- MODAL 2: DODAWANIE NOWEJ POZYCJI -->
+  <!-- MODAL: DODAWANIE NOWEJ POZYCJI -->
   <div id="newItemModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
     <form onsubmit="saveNewItem(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-5 space-y-3.5 shadow-2xl">
       <div class="flex justify-between items-center">
@@ -196,7 +262,7 @@
       </div>
 
       <div>
-        <label class="text-xs text-slate-300 block mb-1">Kod:</label>
+        <label class="text-xs text-slate-300 block mb-1">Kod kreskowy / QR:</label>
         <div class="flex gap-2">
           <input type="text" id="newBarcode" placeholder="Np. RC-001" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-mono">
           <button type="button" onclick="generateRandomCode()" class="bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-xl text-xs font-semibold">Losuj</button>
@@ -252,17 +318,20 @@
   </div>
 
   <script>
-    // Konfiguracja Supabase z Twoimi danymi
+    // --- KONFIGURACJA SUPABASE I GEMINI API ---
     const SUPABASE_URL = 'https://gojacqzjkrfjlnwokyeg.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_EuUrE98PR8SAVwnrIMP60g_RUAL0KSp';
+    const GEMINI_API_KEY = 'AQ.Ab8RN6LnIz6I3whEhkHEelR8fiWSO6dxFS-nlpValcc8w9tvZw';
 
     const { createClient } = supabase;
     const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let inventory = [];
+    let deliveries = [];
     let selectedItemId = null;
     let html5QrCode = null;
     let isCameraRunning = false;
+    let currentExtractedDelivery = null;
 
     function playBeep() {
       try {
@@ -279,38 +348,46 @@
       } catch (e) {}
     }
 
+    // --- POBIERANIE STANU Z BAZY ---
     async function fetchInventory() {
       const { data, error } = await db.from('inventory').select('*').order('name', { ascending: true });
       if (error) {
-        document.getElementById('syncStatus').innerText = 'Błąd połączenia z chmurą!';
+        document.getElementById('syncStatus').innerText = 'Błąd bazy danych!';
         document.getElementById('syncStatus').className = 'text-[10px] text-rose-400';
-        console.error(error);
         return;
       }
-      inventory = data.map(item => ({
-        id: item.id,
-        barcode: item.barcode,
-        name: item.name,
-        category: item.category,
-        location: item.location,
-        qty: item.qty,
-        inField: item.in_field,
-        minQty: item.min_qty,
-        unit: item.unit
+      inventory = data.map(i => ({
+        id: i.id,
+        barcode: i.barcode,
+        name: i.name,
+        category: i.category,
+        location: i.location,
+        qty: i.qty,
+        inField: i.in_field,
+        minQty: i.min_qty,
+        unit: i.unit
       }));
-      document.getElementById('syncStatus').innerText = '🟢 Połączono z chmurą na żywo';
+      document.getElementById('syncStatus').innerText = '🟢 Połączono z bazą na żywo';
       document.getElementById('syncStatus').className = 'text-[10px] text-emerald-400';
       renderInventory();
     }
 
+    async function fetchDeliveries() {
+      const { data, error } = await db.from('deliveries').select('*').order('created_at', { ascending: false });
+      if (!error && data) {
+        deliveries = data;
+        renderDeliveries();
+      }
+    }
+
     function setupRealtimeSync() {
-      db.channel('public:inventory')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory' }, payload => {
-          fetchInventory();
-        })
+      db.channel('realtime_all')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'inventory' }, () => fetchInventory())
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'deliveries' }, () => fetchDeliveries())
         .subscribe();
     }
 
+    // --- RENDEROWANIE INTERFEJSU ---
     function renderInventory() {
       const search = document.getElementById('searchFilter').value.toLowerCase();
       const filter = document.getElementById('categoryFilter').value;
@@ -367,6 +444,233 @@
       }).join('');
     }
 
+    function renderDeliveries() {
+      const list = document.getElementById('deliveriesList');
+      if (deliveries.length === 0) {
+        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-sm">Brak zarchiwizowanych faktur. Kliknij u góry "Odczytaj Fakturę AI".</div>`;
+        return;
+      }
+      list.innerHTML = deliveries.map(d => {
+        const items = d.items_json || [];
+        return `
+          <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 space-y-2">
+            <div class="flex justify-between items-start">
+              <div>
+                <span class="text-xs font-mono font-bold text-indigo-400">DOKUMENT: ${d.doc_number || 'Brak numeru'}</span>
+                <h4 class="font-bold text-sm text-white mt-0.5">Dostawca: ${d.supplier || 'Nieznany'}</h4>
+                <p class="text-[11px] text-slate-400">${new Date(d.created_at).toLocaleString('pl-PL')}</p>
+              </div>
+              ${d.image_url ? `
+                <a href="${d.image_url}" target="_blank" class="text-xs bg-slate-700 hover:bg-slate-600 px-2.5 py-1.5 rounded-lg text-indigo-300">
+                  Podgląd skanu ↗
+                </a>
+              ` : ''}
+            </div>
+            <div class="bg-slate-900/80 rounded-lg p-2.5 text-xs space-y-1">
+              <span class="text-[10px] text-slate-500 block uppercase font-bold">Przyjęte pozycje:</span>
+              ${items.map(it => `
+                <div class="flex justify-between text-slate-300">
+                  <span>• ${it.name}</span>
+                  <span class="font-bold text-emerald-400">+${it.qty}${it.unit || 'szt.'}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // --- MODUŁ GEMINI AI OCR (ODCZYT FAKTUR ZE ZDJĘCIA) ---
+    function triggerInvoiceUpload() {
+      document.getElementById('invoiceInput').click();
+    }
+
+    async function processInvoiceImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const activeApiKey = GEMINI_API_KEY;
+
+      const aiModal = document.getElementById('aiModal');
+      aiModal.classList.remove('hidden');
+      aiModal.classList.add('flex');
+      document.getElementById('aiLoadingState').classList.remove('hidden');
+      document.getElementById('aiItemsContainer').classList.add('hidden');
+      document.getElementById('aiModalActions').classList.add('hidden');
+      document.getElementById('aiImagePreviewContainer').classList.add('hidden');
+      document.getElementById('aiDocInfo').innerText = "Trwa przetwarzanie obrazu przez Gemini Flash...";
+
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        const base64Data = e.target.result.split(',')[1];
+        const previewUrl = e.target.result;
+        document.getElementById('aiImagePreview').src = previewUrl;
+
+        try {
+          const promptText = `Przeanalizuj to zdjęcie faktury lub dokumentu dostawy WZ.
+Zwróć wynik WYŁĄCZNIE jako czysty obiekt JSON (bez znaczników markdown, bez słowa json) o strukturze:
+{
+  "docNumber": "numer faktury lub dokumentu WZ",
+  "supplier": "nazwa sprzedawcy/dostawcy",
+  "items": [
+    {
+      "name": "dokładna nazwa towaru",
+      "qty": 10,
+      "unit": "szt. lub opak. lub kg"
+    }
+  ]
+}`;
+
+          const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${activeApiKey}`, {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'x-goog-api-key': activeApiKey
+            },
+            body: JSON.stringify({
+              contents: [{
+                parts: [
+                  { text: promptText },
+                  { inline_data: { mime_type: file.type || 'image/jpeg', data: base64Data } }
+                ]
+              }]
+            })
+          });
+
+          const result = await response.json();
+          if (!result.candidates || !result.candidates[0]) {
+            throw new Error(result.error ? result.error.message : "Brak odpowiedzi od modelu AI");
+          }
+
+          let rawText = result.candidates[0].content.parts[0].text.trim();
+          rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+          const parsed = JSON.parse(rawText);
+
+          currentExtractedDelivery = {
+            docNumber: parsed.docNumber || 'WZ/FA-' + Date.now().toString().slice(-6),
+            supplier: parsed.supplier || 'Dostawca',
+            items: parsed.items || [],
+            imagePreview: previewUrl
+          };
+
+          displayExtractedItems(currentExtractedDelivery);
+
+        } catch (err) {
+          alert("Błąd podczas analizy faktury przez AI: " + err.message);
+          closeAiModal();
+        }
+      };
+      reader.readAsDataURL(file);
+      event.target.value = '';
+    }
+
+    function displayExtractedItems(delivery) {
+      document.getElementById('aiLoadingState').classList.add('hidden');
+      document.getElementById('aiItemsContainer').classList.remove('hidden');
+      document.getElementById('aiModalActions').classList.remove('hidden');
+      document.getElementById('aiImagePreviewContainer').classList.remove('hidden');
+      document.getElementById('aiDocInfo').innerText = `Dokument: ${delivery.docNumber} • ${delivery.supplier}`;
+
+      const container = document.getElementById('aiItemsList');
+      if (delivery.items.length === 0) {
+        container.innerHTML = `<p class="text-xs text-rose-400">Nie udało się odczytać tabeli produktów z tego zdjęcia. Upewnij się, że dokument jest dobrze doświetlony.</p>`;
+        return;
+      }
+
+      container.innerHTML = delivery.items.map((item, index) => {
+        const match = inventory.find(i => 
+          i.name.toLowerCase().includes(item.name.toLowerCase()) || 
+          item.name.toLowerCase().includes(i.name.toLowerCase())
+        );
+
+        return `
+          <div class="bg-slate-900 border ${match ? 'border-emerald-600/60' : 'border-amber-600/60'} rounded-xl p-3 flex items-center justify-between gap-3">
+            <div class="flex-1">
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${match ? 'bg-emerald-950 text-emerald-300' : 'bg-amber-950 text-amber-300'}">
+                  ${match ? '✓ Dopasowano w bazie' : '+ Nowy towar'}
+                </span>
+                ${match ? `<span class="text-xs text-slate-400">Aktualny stan: ${match.qty}${match.unit}</span>` : ''}
+              </div>
+              <input type="text" id="aiItemName_${index}" value="${item.name}" class="bg-transparent font-bold text-sm text-white w-full focus:outline-none focus:border-b border-indigo-500 mt-1">
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs text-slate-400">+</span>
+              <input type="number" id="aiItemQty_${index}" value="${item.qty}" min="1" class="w-16 bg-slate-800 border border-slate-700 rounded-lg p-1.5 text-center font-bold text-emerald-400 text-sm">
+              <input type="text" id="aiItemUnit_${index}" value="${item.unit || 'szt.'}" class="w-12 bg-slate-800 border border-slate-700 rounded-lg p-1.5 text-center text-xs text-slate-300">
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleImagePreview() {
+      const img = document.getElementById('aiImagePreview');
+      img.classList.toggle('hidden');
+    }
+
+    function closeAiModal() {
+      const aiModal = document.getElementById('aiModal');
+      aiModal.classList.add('hidden');
+      aiModal.classList.remove('flex');
+      currentExtractedDelivery = null;
+    }
+
+    async function confirmAndApplyDelivery() {
+      if (!currentExtractedDelivery || !currentExtractedDelivery.items) return;
+
+      const finalItems = [];
+
+      for (let i = 0; i < currentExtractedDelivery.items.length; i++) {
+        const name = document.getElementById(`aiItemName_${i}`).value.trim();
+        const qty = parseInt(document.getElementById(`aiItemQty_${i}`).value) || 0;
+        const unit = document.getElementById(`aiItemUnit_${i}`).value.trim() || 'szt.';
+
+        if (qty <= 0) continue;
+
+        finalItems.push({ name, qty, unit });
+
+        const match = inventory.find(inv => 
+          inv.name.toLowerCase().includes(name.toLowerCase()) || 
+          name.toLowerCase().includes(inv.name.toLowerCase())
+        );
+
+        if (match) {
+          await db.from('inventory').update({
+            qty: match.qty + qty,
+            updated_at: new Date()
+          }).eq('id', match.id);
+        } else {
+          const newItem = {
+            id: Date.now().toString() + '_' + i,
+            barcode: 'RC-' + Math.floor(100000 + Math.random() * 900000),
+            name: name,
+            category: 'Dostawa',
+            location: 'Rampa / Magazyn',
+            qty: qty,
+            in_field: 0,
+            unit: unit,
+            min_qty: 3
+          };
+          await db.from('inventory').insert([newItem]);
+        }
+      }
+
+      await db.from('deliveries').insert([{
+        id: Date.now().toString(),
+        doc_number: currentExtractedDelivery.docNumber,
+        supplier: currentExtractedDelivery.supplier,
+        items_json: finalItems,
+        image_url: currentExtractedDelivery.imagePreview
+      }]);
+
+      closeAiModal();
+      fetchInventory();
+      fetchDeliveries();
+      alert("Dostawa przyjęta na stan magazynowy i zarchiwizowana!");
+    }
+
+    // --- SKANOWANIE I AKCJE RĘCZNE ---
     function handleScannedCode(code) {
       if (!code) return;
       const cleanCode = code.trim();
@@ -376,7 +680,7 @@
       if (found) {
         openActionModal(found.id);
       } else {
-        if (confirm(`Kod "${cleanCode}" nie istnieje w bazie chmurowej.\nCzy dodać nową pozycję?`)) {
+        if (confirm(`Kod "${cleanCode}" nie istnieje w bazie.\nCzy dodać nową pozycję?`)) {
           openNewItemModal(cleanCode);
         }
       }
@@ -424,7 +728,7 @@
       ).then(() => {
         isCameraRunning = true;
       }).catch(err => {
-        alert("Błąd dostępu do kamery. Upewnij się, że używasz HTTPS.");
+        alert("Błąd dostępu do aparatu.");
         container.classList.add('hidden');
         btn.innerText = 'Uruchom kamerę';
         btn.classList.replace('bg-rose-600', 'bg-indigo-600');
@@ -484,27 +788,18 @@
         newQty += amount;
       }
 
-      const { error } = await db.from('inventory').update({
+      await db.from('inventory').update({
         qty: newQty,
         in_field: newInField,
         updated_at: new Date()
       }).eq('id', selectedItemId);
-
-      if (error) {
-        alert('Błąd zapisu w chmurze: ' + error.message);
-        return;
-      }
 
       closeActionModal();
     }
 
     async function deleteCurrentItem() {
       if (!confirm('Usunąć tę pozycję z bazy?')) return;
-      const { error } = await db.from('inventory').delete().eq('id', selectedItemId);
-      if (error) {
-        alert('Błąd usuwania: ' + error.message);
-        return;
-      }
+      await db.from('inventory').delete().eq('id', selectedItemId);
       closeActionModal();
     }
 
@@ -543,12 +838,7 @@
         min_qty: parseInt(document.getElementById('newMinQty').value) || 0
       };
 
-      const { error } = await db.from('inventory').insert([newItem]);
-      if (error) {
-        alert('Błąd dodawania: ' + error.message);
-        return;
-      }
-
+      await db.from('inventory').insert([newItem]);
       closeNewItemModal();
     }
 
@@ -574,6 +864,25 @@
       setTimeout(() => { window.print(); }, 300);
     }
 
+    function switchMainTab(tab) {
+      const viewStock = document.getElementById('viewStock');
+      const viewDeliveries = document.getElementById('viewDeliveries');
+      const tabStockBtn = document.getElementById('tabStockBtn');
+      const tabDeliveriesBtn = document.getElementById('tabDeliveriesBtn');
+
+      if (tab === 'stock') {
+        viewStock.classList.remove('hidden');
+        viewDeliveries.classList.add('hidden');
+        tabStockBtn.className = 'pb-2.5 border-b-2 border-emerald-500 text-emerald-400';
+        tabDeliveriesBtn.className = 'pb-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200';
+      } else {
+        viewStock.classList.add('hidden');
+        viewDeliveries.classList.remove('hidden');
+        tabDeliveriesBtn.className = 'pb-2.5 border-b-2 border-emerald-500 text-emerald-400';
+        tabStockBtn.className = 'pb-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200';
+      }
+    }
+
     function exportCSV() {
       const headers = ['Kod', 'Nazwa', 'Kategoria', 'Lokalizacja', 'Magazyn', 'W terenie', 'Jednostka', 'Min'];
       const rows = inventory.map(i => [
@@ -595,7 +904,9 @@
       link.click();
     }
 
+    // Inicjalizacja startowa
     fetchInventory();
+    fetchDeliveries();
     setupRealtimeSync();
   </script>
 </body>
