@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>MagazynRC - WMS & AI Delivery</title>
   
   <meta name="mobile-web-app-capable" content="yes">
@@ -27,23 +27,20 @@
     }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen pb-24 font-sans">
+<body class="bg-slate-900 text-slate-100 min-h-screen pb-32 font-sans select-none">
 
-  <!-- NAGŁÓWEK -->
-  <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-30 px-4 py-3 flex items-center justify-between shadow-md">
-    <div class="flex items-center space-x-2">
-      <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-lg">M</div>
+  <!-- NAGŁÓWEK GÓRNY -->
+  <header class="bg-slate-800/90 backdrop-blur border-b border-slate-700/80 sticky top-0 z-30 px-4 py-2.5 flex items-center justify-between shadow-md">
+    <div class="flex items-center space-x-2.5">
+      <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-base shadow">M</div>
       <div>
-        <h1 class="font-bold text-base leading-tight">MagazynRC <span class="text-xs font-normal text-sky-400 bg-sky-950/60 border border-sky-700/50 px-1.5 py-0.5 rounded ml-1">AI Direct</span></h1>
-        <p id="syncStatus" class="text-[10px] text-amber-400 font-medium">Inicjalizacja...</p>
+        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-sky-400 bg-sky-950/70 border border-sky-700/50 px-1 py-0.5 rounded ml-1">v1.5 PRO</span></h1>
+        <p id="syncStatus" class="text-[10px] text-amber-400 font-medium leading-none mt-0.5">Inicjalizacja...</p>
       </div>
     </div>
-    <div class="flex gap-2">
-      <button onclick="triggerInvoiceUpload()" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs px-3.5 py-2 rounded-lg font-bold flex items-center gap-1.5 transition shadow">
-        <span>⚡</span> Szybki Skan Faktury
-      </button>
-      <button onclick="openNewItemModal('')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs px-3 py-2 rounded-lg font-bold flex items-center gap-1 transition">
-        <span>+</span> Dodaj
+    <div class="flex items-center gap-1.5">
+      <button onclick="exportCSV()" class="bg-slate-700/80 hover:bg-slate-700 text-slate-200 text-xs px-2.5 py-1.5 rounded-lg font-medium flex items-center gap-1 border border-slate-600/50">
+        <span>📊</span> CSV
       </button>
     </div>
   </header>
@@ -51,36 +48,36 @@
   <!-- UKRYTY INPUT DLA APARATU / ZDJĘCIA FAKTURY -->
   <input type="file" id="invoiceInput" accept="image/*" capture="environment" class="hidden" onchange="processInvoiceImage(event)">
 
-  <!-- GŁÓWNY KONTENER -->
-  <main class="max-w-4xl mx-auto p-4 space-y-5">
+  <!-- GŁÓWNY KONTENER TREŚCI -->
+  <main class="max-w-4xl mx-auto p-3.5 space-y-4">
 
     <!-- KARTY PODSUMOWANIA -->
-    <div class="grid grid-cols-3 gap-3">
-      <div class="bg-slate-800/90 border border-slate-700 p-3 rounded-xl">
-        <p class="text-xs text-slate-400">Pozycji w bazie</p>
-        <p id="statTotalItems" class="text-2xl font-bold text-white mt-0.5">0</p>
+    <div class="grid grid-cols-3 gap-2.5">
+      <div class="bg-slate-800/80 border border-slate-700/70 p-2.5 rounded-xl text-center">
+        <p class="text-[11px] text-slate-400">Pozycji w bazie</p>
+        <p id="statTotalItems" class="text-xl font-bold text-white mt-0.5">0</p>
       </div>
-      <div class="bg-slate-800/90 border border-slate-700 p-3 rounded-xl">
-        <p class="text-xs text-slate-400">W terenie / Zlecenie</p>
-        <p id="statInField" class="text-2xl font-bold text-amber-400 mt-0.5">0</p>
+      <div class="bg-slate-800/80 border border-slate-700/70 p-2.5 rounded-xl text-center">
+        <p class="text-[11px] text-slate-400">W terenie</p>
+        <p id="statInField" class="text-xl font-bold text-amber-400 mt-0.5">0</p>
       </div>
-      <div class="bg-slate-800/90 border border-slate-700 p-3 rounded-xl">
-        <p class="text-xs text-slate-400">Niski stan</p>
-        <p id="statLowStock" class="text-2xl font-bold text-rose-400 mt-0.5">0</p>
+      <div class="bg-slate-800/80 border border-slate-700/70 p-2.5 rounded-xl text-center">
+        <p class="text-[11px] text-slate-400">Niski stan</p>
+        <p id="statLowStock" class="text-xl font-bold text-rose-400 mt-0.5">0</p>
       </div>
     </div>
 
-    <!-- SEKCJA SKANERA -->
-    <section class="bg-slate-800 border border-slate-700 rounded-2xl p-4 shadow-lg space-y-3">
-      <div class="flex flex-wrap items-center justify-between gap-2">
+    <!-- SEKCJA SKANERA KAMERY I WYSZUKIWARKI BLUETOOTH -->
+    <section id="scannerSection" class="bg-slate-800/90 border border-slate-700 rounded-2xl p-3.5 shadow-lg space-y-3">
+      <div class="flex items-center justify-between">
         <div>
-          <h2 class="font-bold text-sm text-white flex items-center gap-2">
-            <span>📷</span> Skaner Kodów (Kamera / Bluetooth)
+          <h2 class="font-bold text-xs text-white flex items-center gap-1.5">
+            <span>📷</span> Skaner Kodów (Kamera / BT)
           </h2>
-          <p class="text-xs text-slate-400">Skanuj kod QR lub kreskowy, aby wydać lub przyjąć towar</p>
+          <p class="text-[11px] text-slate-400">Wibracja haptyczna aktywna po odczycie</p>
         </div>
-        <button id="btnToggleCamera" onclick="toggleCamera()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition shadow">
-          Uruchom kamerę
+        <button id="btnToggleCamera" onclick="toggleCamera()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-1.5 rounded-xl transition shadow">
+          Włącz kamerę
         </button>
       </div>
 
@@ -93,69 +90,85 @@
           type="text" 
           id="barcodeInput" 
           placeholder="Kliknij pod czytnik lub wpisz kod ręcznie..." 
-          class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+          class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
         />
-        <button type="submit" class="bg-slate-700 hover:bg-slate-600 px-4 py-2.5 rounded-xl text-xs font-semibold transition">
+        <button type="submit" class="bg-slate-700 hover:bg-slate-600 px-3.5 py-2 rounded-xl text-xs font-semibold transition">
           Szukaj
         </button>
       </form>
     </section>
 
-    <!-- ZAKŁADKI: STANY / ARCHIWUM FAKTUR -->
-    <div class="flex border-b border-slate-700 gap-6 text-sm font-medium">
-      <button id="tabStockBtn" onclick="switchMainTab('stock')" class="pb-2.5 border-b-2 border-emerald-500 text-emerald-400">
-        📦 Stany Magazynowe
-      </button>
-      <button id="tabDeliveriesBtn" onclick="switchMainTab('deliveries')" class="pb-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200">
-        📑 Archiwum Faktur & WZ
-      </button>
-    </div>
-
     <!-- WIDOK 1: STANY MAGAZYNOWE -->
     <section id="viewStock" class="space-y-3">
-      <div class="flex flex-col sm:flex-row gap-2">
+      <div class="flex gap-2">
         <input 
           type="text" 
           id="searchFilter" 
           oninput="renderInventory()" 
-          placeholder="Szukaj po nazwie, kategorii, lokalizacji..." 
-          class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500"
+          placeholder="Szukaj po nazwie, kategorii, regale..." 
+          class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500"
         />
-        <div class="flex gap-2">
-          <select id="categoryFilter" onchange="renderInventory()" class="bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
-            <option value="ALL">Wszystkie kategorie</option>
-            <option value="LOW">⚠️ Tylko niski stan</option>
-            <option value="FIELD">🚚 Wydane w teren</option>
-          </select>
-          <button onclick="exportCSV()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-2 rounded-xl text-xs font-medium text-slate-300">
-            CSV
-          </button>
-        </div>
+        <select id="categoryFilter" onchange="renderInventory()" class="bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+          <option value="ALL">Wszystko</option>
+          <option value="LOW">⚠️ Braki</option>
+          <option value="FIELD">🚚 Teren</option>
+        </select>
       </div>
 
-      <div id="inventoryList" class="space-y-2.5">
-        <div class="text-center py-8 text-slate-500 text-sm">Pobieranie stanów...</div>
+      <div id="inventoryList" class="space-y-2">
+        <div class="text-center py-8 text-slate-500 text-xs">Pobieranie stanów magazynu...</div>
       </div>
     </section>
 
     <!-- WIDOK 2: ARCHIWUM FAKTUR I DOSTAW -->
     <section id="viewDeliveries" class="hidden space-y-3">
-      <p class="text-xs text-slate-400">Zarejestrowane dokumenty dostaw i odczyty AI</p>
-      <div id="deliveriesList" class="space-y-3"></div>
+      <div class="flex items-center justify-between">
+        <p class="text-xs text-slate-400">Zarejestrowane dokumenty dostaw i odczyty AI</p>
+      </div>
+      <div id="deliveriesList" class="space-y-2.5"></div>
     </section>
 
   </main>
 
+  <!-- DOLNY PASEK NAWIGACJI (THUMB BAR DLA WYGODY JEDNEJ RĘKI) -->
+  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 border-t border-slate-800 backdrop-blur-md px-3 py-2 flex items-center justify-around shadow-2xl">
+    <button onclick="switchMainTab('stock')" id="navBtnStock" class="flex flex-col items-center gap-1 text-emerald-400 py-1 px-2.5 transition active:scale-95">
+      <span class="text-lg">📦</span>
+      <span class="text-[10px] font-bold">Magazyn</span>
+    </button>
+
+    <button onclick="toggleCameraFocus()" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 py-1 px-2.5 transition active:scale-95">
+      <span class="text-lg">📷</span>
+      <span class="text-[10px] font-bold">Skanuj</span>
+    </button>
+
+    <!-- WYRÓŻNIONY ŚRODKOWY PRZYCISK: FAKTURA AI -->
+    <button onclick="triggerInvoiceUpload()" class="flex flex-col items-center justify-center -mt-5 bg-gradient-to-tr from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white w-14 h-14 rounded-full shadow-lg border-2 border-slate-900 active:scale-90 transition">
+      <span class="text-xl">⚡</span>
+      <span class="text-[9px] font-black uppercase tracking-tighter">AI FAKT</span>
+    </button>
+
+    <button onclick="switchMainTab('deliveries')" id="navBtnDeliveries" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 py-1 px-2.5 transition active:scale-95">
+      <span class="text-lg">📑</span>
+      <span class="text-[10px] font-bold">Dokumenty</span>
+    </button>
+
+    <button onclick="openNewItemModal('')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 py-1 px-2.5 transition active:scale-95">
+      <span class="text-lg">➕</span>
+      <span class="text-[10px] font-bold">Nowy</span>
+    </button>
+  </nav>
+
   <!-- MODAL AI OCR: WERYFIKACJA POZYCJI Z FAKTURY -->
   <div id="aiModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-4 z-50 overflow-y-auto">
-    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-5 space-y-4 shadow-2xl my-6 max-h-[92vh] flex flex-col">
-      <div class="flex justify-between items-start border-b border-slate-700 pb-3">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3.5 shadow-2xl my-6 max-h-[92vh] flex flex-col">
+      <div class="flex justify-between items-start border-b border-slate-700 pb-2.5">
         <div>
-          <span class="text-[11px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50">Gemini AI OCR</span>
-          <h3 class="text-lg font-bold text-white mt-1">Przyjęcie Dostawy z Faktury / WZ</h3>
+          <span class="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50">Gemini AI OCR</span>
+          <h3 class="text-base font-bold text-white mt-1">Przyjęcie Dostawy z Faktury / WZ</h3>
           <p id="aiDocInfo" class="text-xs text-slate-400 mt-0.5">Analiza obrazu...</p>
         </div>
-        <button onclick="closeAiModal()" class="text-slate-400 hover:text-white text-xl font-bold">✕</button>
+        <button onclick="closeAiModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
       </div>
 
       <div id="aiLoadingState" class="py-12 flex flex-col items-center justify-center space-y-3">
@@ -165,32 +178,32 @@
       </div>
 
       <div id="aiItemsContainer" class="hidden flex-1 overflow-y-auto space-y-3 pr-1">
-        <div id="aiSummaryBanner" class="bg-slate-900 border border-indigo-800/50 p-3 rounded-xl flex justify-between text-xs">
+        <div id="aiSummaryBanner" class="bg-slate-900 border border-indigo-800/50 p-2.5 rounded-xl flex justify-between text-xs">
           <div>
-            <span class="text-slate-400 block">Dostawca:</span>
-            <strong id="aiSupplierName" class="text-white text-sm">---</strong>
+            <span class="text-slate-400 block text-[10px]">Dostawca:</span>
+            <strong id="aiSupplierName" class="text-white text-xs">---</strong>
           </div>
           <div>
-            <span class="text-slate-400 block">Dokument:</span>
-            <strong id="aiDocNum" class="text-indigo-400 text-sm font-mono">---</strong>
+            <span class="text-slate-400 block text-[10px]">Dokument:</span>
+            <strong id="aiDocNum" class="text-indigo-400 text-xs font-mono">---</strong>
           </div>
           <div class="text-right">
-            <span class="text-slate-400 block">Suma Brutto:</span>
-            <strong id="aiTotalGross" class="text-emerald-400 text-sm">---</strong>
+            <span class="text-slate-400 block text-[10px]">Suma Brutto:</span>
+            <strong id="aiTotalGross" class="text-emerald-400 text-xs">---</strong>
           </div>
         </div>
 
-        <p class="text-xs text-slate-300">Sprawdź odczytane pozycje. Dopasowane produkty automatycznie powiększą stan:</p>
+        <p class="text-[11px] text-slate-300">Sprawdź odczytane pozycje:</p>
         <div id="aiItemsList" class="space-y-2"></div>
       </div>
 
-      <div id="aiImagePreviewContainer" class="hidden border-t border-slate-700 pt-3 flex items-center justify-between">
-        <span class="text-xs text-slate-400">Załącznik skanu dokumentu</span>
+      <div id="aiImagePreviewContainer" class="hidden border-t border-slate-700 pt-2.5 flex items-center justify-between">
+        <span class="text-xs text-slate-400">Załącznik skanu</span>
         <button onclick="toggleImagePreview()" class="text-xs text-indigo-400 hover:underline">Pokaż/Ukryj skan</button>
       </div>
-      <img id="aiImagePreview" class="hidden max-h-48 rounded-xl object-contain border border-slate-700 bg-black" />
+      <img id="aiImagePreview" class="hidden max-h-40 rounded-xl object-contain border border-slate-700 bg-black" />
 
-      <div id="aiModalActions" class="hidden pt-3 border-t border-slate-700 flex justify-end gap-2">
+      <div id="aiModalActions" class="hidden pt-2.5 border-t border-slate-700 flex justify-end gap-2">
         <button onclick="closeAiModal()" class="px-4 py-2 rounded-xl text-xs text-slate-400 hover:bg-slate-700">Anuluj</button>
         <button onclick="confirmAndApplyDelivery()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow">
           <span>✓</span> Zastosuj przyjęcie
@@ -201,42 +214,40 @@
 
   <!-- MODAL: SZYBKA AKCJA DLA TOWARU -->
   <div id="actionModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3.5 shadow-2xl">
       <div class="flex justify-between items-start">
         <div>
-          <span id="modalItemCategory" class="text-[11px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-slate-700 text-slate-300">Kategoria</span>
-          <h3 id="modalItemName" class="text-lg font-bold text-white mt-1">Nazwa Towaru</h3>
+          <span id="modalItemCategory" class="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-slate-700 text-slate-300">Kategoria</span>
+          <h3 id="modalItemName" class="text-base font-bold text-white mt-1">Nazwa Towaru</h3>
           <p id="modalItemBarcode" class="text-xs text-slate-400 font-mono">KOD: ---</p>
         </div>
-        <button onclick="closeActionModal()" class="text-slate-400 hover:text-white text-xl font-bold px-2">✕</button>
+        <button onclick="closeActionModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
       </div>
 
-      <div class="grid grid-cols-2 gap-3 bg-slate-900/90 p-3.5 rounded-xl border border-slate-700/80">
+      <div class="grid grid-cols-2 gap-2.5 bg-slate-900/90 p-3 rounded-xl border border-slate-700/80">
         <div>
-          <span class="text-xs text-slate-400 block">Dostępne w magazynie</span>
+          <span class="text-[11px] text-slate-400 block">Dostępne w magazynie</span>
           <span id="modalItemQty" class="text-2xl font-black text-emerald-400">0</span>
           <span id="modalItemUnit" class="text-xs text-slate-400 ml-1">szt.</span>
         </div>
         <div>
-          <span class="text-xs text-slate-400 block">W terenie / Zlecenie</span>
+          <span class="text-[11px] text-slate-400 block">W terenie / Zlecenie</span>
           <span id="modalItemInField" class="text-2xl font-black text-amber-400">0</span>
         </div>
       </div>
 
-      <div class="space-y-3">
-        <div>
-          <label class="text-xs text-slate-300 block mb-1">Ilość do operacji:</label>
-          <div class="flex items-center gap-2">
-            <button onclick="adjustStepQty(-1)" class="bg-slate-700 hover:bg-slate-600 w-10 h-10 rounded-xl font-bold text-lg">-</button>
-            <input type="number" id="modalStepQty" value="1" min="1" class="w-20 text-center bg-slate-900 border border-slate-700 rounded-xl py-2 font-bold text-base text-white">
-            <button onclick="adjustStepQty(1)" class="bg-slate-700 hover:bg-slate-600 w-10 h-10 rounded-xl font-bold text-lg">+</button>
-            <button onclick="setStepQty(5)" class="bg-slate-700/60 hover:bg-slate-700 px-3 py-2 rounded-xl text-xs">+5</button>
-            <button onclick="setStepQty(10)" class="bg-slate-700/60 hover:bg-slate-700 px-3 py-2 rounded-xl text-xs">+10</button>
-          </div>
+      <div class="space-y-2">
+        <label class="text-xs text-slate-300 block">Ilość do operacji:</label>
+        <div class="flex items-center gap-2">
+          <button onclick="adjustStepQty(-1)" class="bg-slate-700 hover:bg-slate-600 w-10 h-10 rounded-xl font-bold text-lg">-</button>
+          <input type="number" id="modalStepQty" value="1" min="1" class="w-16 text-center bg-slate-900 border border-slate-700 rounded-xl py-2 font-bold text-base text-white">
+          <button onclick="adjustStepQty(1)" class="bg-slate-700 hover:bg-slate-600 w-10 h-10 rounded-xl font-bold text-lg">+</button>
+          <button onclick="setStepQty(5)" class="bg-slate-700/60 hover:bg-slate-700 px-3 py-2 rounded-xl text-xs">+5</button>
+          <button onclick="setStepQty(10)" class="bg-slate-700/60 hover:bg-slate-700 px-3 py-2 rounded-xl text-xs">+10</button>
         </div>
       </div>
 
-      <div class="grid grid-cols-2 gap-2.5 pt-2">
+      <div class="grid grid-cols-2 gap-2 pt-1">
         <button onclick="executeStockAction('ADD')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow">
           <span>📥</span> Przyjmij (+)
         </button>
@@ -264,54 +275,54 @@
 
   <!-- MODAL: DODAWANIE NOWEJ POZYCJI -->
   <div id="newItemModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-    <form onsubmit="saveNewItem(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-5 space-y-3.5 shadow-2xl">
+    <form onsubmit="saveNewItem(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl">
       <div class="flex justify-between items-center">
-        <h3 class="text-base font-bold text-white">Nowa pozycja w magazynie</h3>
-        <button type="button" onclick="closeNewItemModal()" class="text-slate-400 hover:text-white">✕</button>
+        <h3 class="text-sm font-bold text-white">Nowa pozycja w magazynie</h3>
+        <button type="button" onclick="closeNewItemModal()" class="text-slate-400 hover:text-white p-1">✕</button>
       </div>
 
       <div>
-        <label class="text-xs text-slate-300 block mb-1">Kod kreskowy / QR:</label>
+        <label class="text-[11px] text-slate-300 block mb-1">Kod kreskowy / QR:</label>
         <div class="flex gap-2">
-          <input type="text" id="newBarcode" placeholder="Np. RC-001" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white font-mono">
-          <button type="button" onclick="generateRandomCode()" class="bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-xl text-xs font-semibold">Losuj</button>
+          <input type="text" id="newBarcode" placeholder="Np. RC-001" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white font-mono">
+          <button type="button" onclick="generateRandomCode()" class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded-xl text-xs font-semibold">Losuj</button>
         </div>
       </div>
 
       <div>
-        <label class="text-xs text-slate-300 block mb-1">Nazwa towaru *:</label>
-        <input type="text" id="newName" required placeholder="Np. Kawa ziarnista 1kg" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+        <label class="text-[11px] text-slate-300 block mb-1">Nazwa towaru *:</label>
+        <input type="text" id="newName" required placeholder="Np. Kawa ziarnista 1kg" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
       </div>
 
-      <div class="grid grid-cols-2 gap-2.5">
+      <div class="grid grid-cols-2 gap-2">
         <div>
-          <label class="text-xs text-slate-300 block mb-1">Kategoria:</label>
-          <input type="text" id="newCategory" placeholder="Np. Catering" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+          <label class="text-[11px] text-slate-300 block mb-1">Kategoria:</label>
+          <input type="text" id="newCategory" placeholder="Np. Catering" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white">
         </div>
         <div>
-          <label class="text-xs text-slate-300 block mb-1">Lokalizacja:</label>
-          <input type="text" id="newLocation" placeholder="Np. Regał A1" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
-        </div>
-      </div>
-
-      <div class="grid grid-cols-3 gap-2.5">
-        <div>
-          <label class="text-xs text-slate-300 block mb-1">Ilość start:</label>
-          <input type="number" id="newQty" value="1" min="0" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
-        </div>
-        <div>
-          <label class="text-xs text-slate-300 block mb-1">Jednostka:</label>
-          <input type="text" id="newUnit" value="szt." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
-        </div>
-        <div>
-          <label class="text-xs text-slate-300 block mb-1">Alarm min:</label>
-          <input type="number" id="newMinQty" value="3" min="0" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white">
+          <label class="text-[11px] text-slate-300 block mb-1">Lokalizacja:</label>
+          <input type="text" id="newLocation" placeholder="Np. Regał A1" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white">
         </div>
       </div>
 
-      <div class="flex justify-end gap-2 pt-3">
-        <button type="button" onclick="closeNewItemModal()" class="px-4 py-2 rounded-xl text-xs text-slate-300 hover:bg-slate-700">Anuluj</button>
-        <button type="submit" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2 rounded-xl text-xs">Zapisz</button>
+      <div class="grid grid-cols-3 gap-2">
+        <div>
+          <label class="text-[11px] text-slate-300 block mb-1">Ilość start:</label>
+          <input type="number" id="newQty" value="1" min="0" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2 py-1.5 text-xs text-white text-center">
+        </div>
+        <div>
+          <label class="text-[11px] text-slate-300 block mb-1">Jednostka:</label>
+          <input type="text" id="newUnit" value="szt." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2 py-1.5 text-xs text-white text-center">
+        </div>
+        <div>
+          <label class="text-[11px] text-slate-300 block mb-1">Alarm min:</label>
+          <input type="number" id="newMinQty" value="3" min="0" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2 py-1.5 text-xs text-white text-center">
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button type="button" onclick="closeNewItemModal()" class="px-3 py-1.5 rounded-xl text-xs text-slate-300 hover:bg-slate-700">Anuluj</button>
+        <button type="submit" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-4 py-1.5 rounded-xl text-xs">Zapisz</button>
       </div>
     </form>
   </div>
@@ -346,7 +357,13 @@
     let isCloudOnline = false;
     let currentExtractedDelivery = null;
 
-    function playBeep() {
+    // --- SYNTEZA DŹWIĘKU I WIBRACJA HAPTYCZNA ---
+    function triggerScanFeedback() {
+      // Wibracja haptyczna telefonu (60ms)
+      if (navigator.vibrate) {
+        try { navigator.vibrate(60); } catch (e) {}
+      }
+      // Dźwięk piknięcia
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
         const osc = ctx.createOscillator();
@@ -449,34 +466,34 @@
       });
 
       if (filtered.length === 0) {
-        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-sm">Brak pozycji w bazie. Kliknij "+ Dodaj", aby dodać towar.</div>`;
+        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak pozycji w bazie. Kliknij "Nowy" na dolnym pasku, aby dodać towar.</div>`;
         return;
       }
 
       list.innerHTML = filtered.map(item => {
         const isLow = item.qty <= item.minQty;
         return `
-          <div onclick="openActionModal('${item.id}')" class="bg-slate-800 hover:bg-slate-750 border ${isLow ? 'border-rose-500/60' : 'border-slate-700'} rounded-xl p-3.5 flex items-center justify-between cursor-pointer transition shadow-sm">
-            <div class="space-y-1 pr-3">
-              <div class="flex items-center gap-2 flex-wrap">
-                <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-700 text-slate-300">${item.category || 'Ogólne'}</span>
-                <span class="text-xs text-slate-400">📍 ${item.location || 'Brak lok.'}</span>
-                <span class="text-xs text-slate-500 font-mono">#${item.barcode}</span>
+          <div onclick="openActionModal('${item.id}')" class="bg-slate-800 hover:bg-slate-750 border ${isLow ? 'border-rose-500/60' : 'border-slate-700/80'} rounded-xl p-3 flex items-center justify-between cursor-pointer transition shadow-sm active:scale-[0.99]">
+            <div class="space-y-1 pr-2">
+              <div class="flex items-center gap-1.5 flex-wrap">
+                <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-slate-700 text-slate-300">${item.category || 'Ogólne'}</span>
+                <span class="text-[11px] text-slate-400">📍 ${item.location || 'Brak lok.'}</span>
+                <span class="text-[11px] text-slate-500 font-mono">#${item.barcode}</span>
               </div>
-              <h4 class="font-bold text-sm text-white">${item.name}</h4>
-              ${isLow ? `<span class="inline-block text-[11px] text-rose-400 font-medium">⚠️ Niski stan (min: ${item.minQty})</span>` : ''}
+              <h4 class="font-bold text-xs text-white">${item.name}</h4>
+              ${isLow ? `<span class="inline-block text-[10px] text-rose-400 font-medium">⚠️ Niski stan (min: ${item.minQty})</span>` : ''}
             </div>
-            <div class="text-right flex items-center gap-3">
+            <div class="text-right flex items-center gap-2">
               ${item.inField > 0 ? `
-                <div class="bg-amber-950/60 border border-amber-700/50 px-2.5 py-1 rounded-lg text-center">
-                  <span class="text-[10px] text-amber-300 block">W terenie</span>
-                  <span class="font-bold text-sm text-amber-400">${item.inField}</span>
+                <div class="bg-amber-950/60 border border-amber-700/50 px-2 py-0.5 rounded-lg text-center">
+                  <span class="text-[9px] text-amber-300 block">Teren</span>
+                  <span class="font-bold text-xs text-amber-400">${item.inField}</span>
                 </div>
               ` : ''}
-              <div class="bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-700 min-w-[68px] text-center">
-                <span class="text-[10px] text-slate-400 block">Magazyn</span>
-                <span class="font-black text-base ${isLow ? 'text-rose-400' : 'text-emerald-400'}">${item.qty}</span>
-                <span class="text-[10px] text-slate-400">${item.unit || 'szt.'}</span>
+              <div class="bg-slate-900 px-2.5 py-1 rounded-xl border border-slate-700 min-w-[56px] text-center">
+                <span class="text-[9px] text-slate-400 block">Magazyn</span>
+                <span class="font-black text-sm ${isLow ? 'text-rose-400' : 'text-emerald-400'}">${item.qty}</span>
+                <span class="text-[9px] text-slate-400">${item.unit || 'szt.'}</span>
               </div>
             </div>
           </div>
@@ -487,33 +504,33 @@
     function renderDeliveries() {
       const list = document.getElementById('deliveriesList');
       if (deliveries.length === 0) {
-        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-sm">Brak zarchiwizowanych faktur. Kliknij u góry "Szybki Skan Faktury".</div>`;
+        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak zarchiwizowanych faktur. Kliknij środkowy przycisk "⚡ AI FAKT".</div>`;
         return;
       }
       list.innerHTML = deliveries.map(d => {
         const items = d.items_json || [];
         return `
-          <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 space-y-2">
+          <div class="bg-slate-800 border border-slate-700 rounded-xl p-3 space-y-2">
             <div class="flex justify-between items-start">
               <div>
-                <span class="text-xs font-mono font-bold text-indigo-400">DOKUMENT: ${d.doc_number || 'Brak numeru'}</span>
-                <h4 class="font-bold text-sm text-white mt-0.5">Dostawca: ${d.supplier || 'Nieznany'}</h4>
-                <p class="text-[11px] text-slate-400">${new Date(d.created_at || Date.now()).toLocaleString('pl-PL')}</p>
+                <span class="text-[11px] font-mono font-bold text-indigo-400">DOKUMENT: ${d.doc_number || 'Brak numeru'}</span>
+                <h4 class="font-bold text-xs text-white mt-0.5">Dostawca: ${d.supplier || 'Nieznany'}</h4>
+                <p class="text-[10px] text-slate-400">${new Date(d.created_at || Date.now()).toLocaleString('pl-PL')}</p>
               </div>
               <div class="text-right">
                 ${d.total_gross ? `<span class="text-xs font-bold text-emerald-400 block">${d.total_gross} PLN</span>` : ''}
                 ${d.image_url ? `
-                  <a href="${d.image_url}" target="_blank" class="text-[11px] bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded text-indigo-300 inline-block mt-1">
+                  <a href="${d.image_url}" target="_blank" class="text-[10px] bg-slate-700 hover:bg-slate-600 px-2 py-0.5 rounded text-indigo-300 inline-block mt-1">
                     Skan ↗
                   </a>
                 ` : ''}
               </div>
             </div>
-            <div class="bg-slate-900/80 rounded-lg p-2.5 text-xs space-y-1">
-              <span class="text-[10px] text-slate-500 block uppercase font-bold">Pozycje:</span>
+            <div class="bg-slate-900/80 rounded-lg p-2 text-xs space-y-1">
+              <span class="text-[9px] text-slate-500 block uppercase font-bold">Pozycje:</span>
               ${items.map(it => `
-                <div class="flex justify-between text-slate-300">
-                  <span>• ${it.name}${it.netPrice ? `<span class="text-slate-500">(${it.netPrice} zł netto)</span>` : ''}</span>
+                <div class="flex justify-between text-slate-300 text-[11px]">
+                  <span>• ${it.name}${it.netPrice ? `<span class="text-slate-500">(${it.netPrice} zł)</span>` : ''}</span>
                   <span class="font-bold text-emerald-400">+${it.qty}${it.unit || 'szt.'}</span>
                 </div>
               `).join('')}
@@ -549,7 +566,7 @@
       document.getElementById('invoiceInput').click();
     }
 
-    // --- GEMINI OCR Z AUTOMATYCZNYM PRZELICZANIEM ZGRZEWEK NA SZTUKI ---
+    // --- GEMINI OCR Z PRZELICZANIEM ZGRZEWEK NA SZTUKI ---
     async function processInvoiceImage(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -641,6 +658,7 @@ Zwróć wynik jako czysty JSON:
         };
 
         displayExtractedItems(currentExtractedDelivery);
+        triggerScanFeedback(); // Wibracja po udanej analizie faktury
 
       } catch (err) {
         alert("Błąd podczas odczytu: " + err.message);
@@ -650,7 +668,6 @@ Zwróć wynik jako czysty JSON:
       event.target.value = '';
     }
 
-    // --- WIDOK Z PRZYCISKIEM SZYBKIEGO MNOŻENIA x12 ---
     function displayExtractedItems(delivery) {
       document.getElementById('aiLoadingState').classList.add('hidden');
       document.getElementById('aiItemsContainer').classList.remove('hidden');
@@ -676,25 +693,25 @@ Zwróć wynik jako czysty JSON:
         );
 
         return `
-          <div class="bg-slate-900 border ${match ? 'border-emerald-600/70' : 'border-amber-600/70'} rounded-xl p-3 space-y-2">
+          <div class="bg-slate-900 border ${match ? 'border-emerald-600/70' : 'border-amber-600/70'} rounded-xl p-2.5 space-y-1.5">
             <div class="flex items-center justify-between gap-2">
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded ${match ? 'bg-emerald-950 text-emerald-300 border border-emerald-700/50' : 'bg-amber-950 text-amber-300 border border-amber-700/50'}">
+              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${match ? 'bg-emerald-950 text-emerald-300 border border-emerald-700/50' : 'bg-amber-950 text-amber-300 border border-amber-700/50'}">
                 ${match ? `✓ Dopasowano: ${match.name}` : '+ Nowy towar'}
               </span>
-              <button type="button" onclick="multiplyToPieces(${index}, 12)" class="text-[10px] bg-slate-800 hover:bg-slate-700 border border-slate-600 text-indigo-300 px-2 py-0.5 rounded transition">
-                📦 Przelicz x12 na szt.
+              <button type="button" onclick="multiplyToPieces(${index}, 12)" class="text-[9px] bg-slate-800 hover:bg-slate-700 border border-slate-600 text-indigo-300 px-2 py-0.5 rounded transition">
+                📦 x12 na szt.
               </button>
             </div>
 
-            <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center justify-between gap-2">
               <div class="flex-1">
-                <input type="text" id="aiItemName_${index}" value="${match ? match.name : item.name}" class="bg-transparent font-bold text-sm text-white w-full focus:outline-none focus:border-b border-indigo-500">
+                <input type="text" id="aiItemName_${index}" value="${match ? match.name : item.name}" class="bg-transparent font-bold text-xs text-white w-full focus:outline-none focus:border-b border-indigo-500">
                 <input type="hidden" id="aiMatchedId_${index}" value="${match ? match.id : ''}">
               </div>
-              <div class="flex items-center gap-1.5">
+              <div class="flex items-center gap-1">
                 <span class="text-xs text-slate-400">+</span>
-                <input type="number" id="aiItemQty_${index}" value="${item.qty || 1}" min="1" class="w-16 bg-slate-800 border border-slate-700 rounded-lg p-1.5 text-center font-bold text-emerald-400 text-sm">
-                <input type="text" id="aiItemUnit_${index}" value="${item.unit || 'szt.'}" class="w-14 bg-slate-800 border border-slate-700 rounded-lg p-1.5 text-center text-xs text-slate-300">
+                <input type="number" id="aiItemQty_${index}" value="${item.qty || 1}" min="1" class="w-14 bg-slate-800 border border-slate-700 rounded-lg p-1 text-center font-bold text-emerald-400 text-xs">
+                <input type="text" id="aiItemUnit_${index}" value="${item.unit || 'szt.'}" class="w-12 bg-slate-800 border border-slate-700 rounded-lg p-1 text-center text-[11px] text-slate-300">
               </div>
             </div>
           </div>
@@ -706,9 +723,9 @@ Zwróć wynik jako czysty JSON:
       const qtyInput = document.getElementById(`aiItemQty_${index}`);
       const unitInput = document.getElementById(`aiItemUnit_${index}`);
       const currentVal = parseInt(qtyInput.value) || 1;
-      
       qtyInput.value = currentVal * multiplier;
       unitInput.value = 'szt.';
+      triggerScanFeedback();
     }
 
     function toggleImagePreview() {
@@ -785,6 +802,7 @@ Zwróć wynik jako czysty JSON:
         } catch (e) {}
       }
 
+      triggerScanFeedback();
       closeAiModal();
       renderInventory();
       renderDeliveries();
@@ -795,7 +813,7 @@ Zwróć wynik jako czysty JSON:
     function handleScannedCode(code) {
       if (!code) return;
       const cleanCode = code.trim();
-      playBeep();
+      triggerScanFeedback(); // Wibracja i dźwięk po skanie
 
       const found = inventory.find(i => i.barcode.toLowerCase() === cleanCode.toLowerCase());
       if (found) {
@@ -814,6 +832,15 @@ Zwróć wynik jako czysty JSON:
       input.value = '';
     }
 
+    function toggleCameraFocus() {
+      switchMainTab('stock');
+      const section = document.getElementById('scannerSection');
+      section.scrollIntoView({ behavior: 'smooth' });
+      if (!isCameraRunning) {
+        toggleCamera();
+      }
+    }
+
     function toggleCamera() {
       const container = document.getElementById('cameraContainer');
       const btn = document.getElementById('btnToggleCamera');
@@ -821,7 +848,7 @@ Zwróć wynik jako czysty JSON:
       if (isCameraRunning && html5QrCode) {
         html5QrCode.stop().then(() => {
           container.classList.add('hidden');
-          btn.innerText = 'Uruchom kamerę';
+          btn.innerText = 'Włącz kamerę';
           btn.classList.replace('bg-rose-600', 'bg-indigo-600');
           isCameraRunning = false;
         });
@@ -839,7 +866,7 @@ Zwróć wynik jako czysty JSON:
         (decodedText) => {
           html5QrCode.stop().then(() => {
             container.classList.add('hidden');
-            btn.innerText = 'Uruchom kamerę';
+            btn.innerText = 'Włącz kamerę';
             btn.classList.replace('bg-rose-600', 'bg-indigo-600');
             isCameraRunning = false;
             handleScannedCode(decodedText);
@@ -851,7 +878,7 @@ Zwróć wynik jako czysty JSON:
       }).catch(err => {
         alert("Błąd dostępu do aparatu.");
         container.classList.add('hidden');
-        btn.innerText = 'Uruchom kamerę';
+        btn.innerText = 'Włącz kamerę';
         btn.classList.replace('bg-rose-600', 'bg-indigo-600');
       });
     }
@@ -883,10 +910,12 @@ Zwróć wynik jako czysty JSON:
     function adjustStepQty(delta) {
       const input = document.getElementById('modalStepQty');
       input.value = Math.max(1, (parseInt(input.value) || 1) + delta);
+      if (navigator.vibrate) navigator.vibrate(20);
     }
 
     function setStepQty(val) {
       document.getElementById('modalStepQty').value = val;
+      if (navigator.vibrate) navigator.vibrate(25);
     }
 
     async function executeStockAction(type) {
@@ -907,6 +936,7 @@ Zwróć wynik jako czysty JSON:
         item.qty += amount;
       }
 
+      triggerScanFeedback();
       localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
       renderInventory();
       closeActionModal();
@@ -938,6 +968,7 @@ Zwróć wynik jako czysty JSON:
 
     function generateRandomCode() {
       document.getElementById('newBarcode').value = 'RC-' + Math.floor(100000 + Math.random() * 900000);
+      if (navigator.vibrate) navigator.vibrate(30);
     }
 
     function openNewItemModal(prefillBarcode) {
@@ -975,6 +1006,7 @@ Zwróć wynik jako czysty JSON:
       localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
       renderInventory();
       closeNewItemModal();
+      triggerScanFeedback();
 
       if (isCloudOnline) {
         try {
@@ -1008,20 +1040,21 @@ Zwróć wynik jako czysty JSON:
     function switchMainTab(tab) {
       const viewStock = document.getElementById('viewStock');
       const viewDeliveries = document.getElementById('viewDeliveries');
-      const tabStockBtn = document.getElementById('tabStockBtn');
-      const tabDeliveriesBtn = document.getElementById('tabDeliveriesBtn');
+      const navBtnStock = document.getElementById('navBtnStock');
+      const navBtnDeliveries = document.getElementById('navBtnDeliveries');
 
       if (tab === 'stock') {
         viewStock.classList.remove('hidden');
         viewDeliveries.classList.add('hidden');
-        tabStockBtn.className = 'pb-2.5 border-b-2 border-emerald-500 text-emerald-400';
-        tabDeliveriesBtn.className = 'pb-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200';
+        navBtnStock.className = 'flex flex-col items-center gap-1 text-emerald-400 py-1 px-2.5 transition active:scale-95';
+        navBtnDeliveries.className = 'flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 py-1 px-2.5 transition active:scale-95';
       } else {
         viewStock.classList.add('hidden');
         viewDeliveries.classList.remove('hidden');
-        tabDeliveriesBtn.className = 'pb-2.5 border-b-2 border-emerald-500 text-emerald-400';
-        tabStockBtn.className = 'pb-2.5 border-b-2 border-transparent text-slate-400 hover:text-slate-200';
+        navBtnDeliveries.className = 'flex flex-col items-center gap-1 text-emerald-400 py-1 px-2.5 transition active:scale-95';
+        navBtnStock.className = 'flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 py-1 px-2.5 transition active:scale-95';
       }
+      if (navigator.vibrate) navigator.vibrate(25);
     }
 
     function exportCSV() {
@@ -1045,7 +1078,6 @@ Zwróć wynik jako czysty JSON:
       link.click();
     }
 
-    // Inicjalizacja startowa
     fetchInventory();
     fetchDeliveries();
   </script>
