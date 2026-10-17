@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>MagazynRC - WMS & AI Delivery</title>
+  <title>MagazynRC - WMS & Price Intelligence</title>
   
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -34,7 +34,7 @@
     <div class="flex items-center space-x-2.5">
       <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-base shadow">M</div>
       <div>
-        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-sky-400 bg-sky-950/70 border border-sky-700/50 px-1 py-0.5 rounded ml-1">v1.8 SILENT HAPTIC</span></h1>
+        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-amber-400 bg-amber-950/70 border border-amber-700/50 px-1 py-0.5 rounded ml-1">v2.0 PRICE WATCH</span></h1>
         <p id="syncStatus" class="text-[10px] text-amber-400 font-medium leading-none mt-0.5">Inicjalizacja...</p>
       </div>
     </div>
@@ -51,19 +51,23 @@
   <!-- GŁÓWNY KONTENER TREŚCI -->
   <main class="max-w-4xl mx-auto p-3.5 space-y-4">
 
-    <!-- KARTY PODSUMOWANIA -->
-    <div class="grid grid-cols-3 gap-2.5">
-      <div class="bg-slate-800/80 border border-slate-700/70 p-2.5 rounded-xl text-center">
-        <p class="text-[11px] text-slate-400">Pozycji w bazie</p>
-        <p id="statTotalItems" class="text-xl font-bold text-white mt-0.5">0</p>
+    <!-- KARTY PODSUMOWANIA (4 WSKAŹNIKI Z ŁĄCZNĄ WARTOŚCIĄ BAZY) -->
+    <div class="grid grid-cols-4 gap-2">
+      <div class="bg-slate-800/80 border border-slate-700/70 p-2 rounded-xl text-center">
+        <p class="text-[10px] text-slate-400">Pozycji</p>
+        <p id="statTotalItems" class="text-base font-bold text-white mt-0.5">0</p>
       </div>
-      <div class="bg-slate-800/80 border border-slate-700/70 p-2.5 rounded-xl text-center">
-        <p class="text-[11px] text-slate-400">W terenie</p>
-        <p id="statInField" class="text-xl font-bold text-amber-400 mt-0.5">0</p>
+      <div class="bg-slate-800/80 border border-slate-700/70 p-2 rounded-xl text-center">
+        <p class="text-[10px] text-slate-400">Wartość netto</p>
+        <p id="statTotalValue" class="text-xs font-black text-emerald-400 mt-1">0 zł</p>
       </div>
-      <div class="bg-slate-800/80 border border-slate-700/70 p-2.5 rounded-xl text-center">
-        <p class="text-[11px] text-slate-400">Niski stan</p>
-        <p id="statLowStock" class="text-xl font-bold text-rose-400 mt-0.5">0</p>
+      <div class="bg-slate-800/80 border border-slate-700/70 p-2 rounded-xl text-center">
+        <p class="text-[10px] text-slate-400">W terenie</p>
+        <p id="statInField" class="text-base font-bold text-amber-400 mt-0.5">0</p>
+      </div>
+      <div class="bg-slate-800/80 border border-slate-700/70 p-2 rounded-xl text-center">
+        <p class="text-[10px] text-slate-400">Braki</p>
+        <p id="statLowStock" class="text-base font-bold text-rose-400 mt-0.5">0</p>
       </div>
     </div>
 
@@ -74,7 +78,7 @@
           <h2 class="font-bold text-xs text-white flex items-center gap-1.5">
             <span>📷</span> Skaner Kodów (Kamera / BT)
           </h2>
-          <p class="text-[11px] text-slate-400">Dyskretna wibracja haptyczna (bez dźwięku)</p>
+          <p class="text-[11px] text-slate-400">Prawy przycisk myszy na pozycji = Edycja ceny i danych</p>
         </div>
         <button id="btnToggleCamera" onclick="toggleCamera()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-1.5 rounded-xl transition shadow">
           Włącz kamerę
@@ -98,6 +102,19 @@
       </form>
     </section>
 
+    <!-- ZAKŁADKI GŁÓWNE -->
+    <div class="flex border-b border-slate-800 gap-4 text-xs font-medium">
+      <button onclick="switchMainTab('stock')" id="tabStockHeaderBtn" class="pb-2 border-b-2 border-emerald-500 text-emerald-400 font-bold">
+        📦 Stany Magazynowe
+      </button>
+      <button onclick="switchMainTab('alerts')" id="tabAlertsHeaderBtn" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1">
+        <span>⚠️</span> Alerty Cenowe <span id="alertsCountBadge" class="bg-rose-950 text-rose-300 border border-rose-700/50 text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
+      </button>
+      <button onclick="switchMainTab('deliveries')" id="tabDeliveriesHeaderBtn" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200">
+        📑 Archiwum Faktur & WZ
+      </button>
+    </div>
+
     <!-- WIDOK 1: STANY MAGAZYNOWE -->
     <section id="viewStock" class="space-y-3">
       <div class="flex flex-wrap gap-2 items-center justify-between">
@@ -115,7 +132,6 @@
             <option value="FIELD">🚚 Teren</option>
           </select>
         </div>
-        <!-- PRZYCISK TRYBU ZAZNACZANIA KILKU POZYCJI -->
         <button id="btnToggleSelectMode" onclick="toggleSelectMode()" class="bg-slate-800 hover:bg-slate-700 border border-slate-600/70 text-slate-300 text-xs px-3 py-2 rounded-xl font-bold flex items-center gap-1.5 transition">
           <span>☑️</span> Zaznacz
         </button>
@@ -139,7 +155,19 @@
       </div>
     </section>
 
-    <!-- WIDOK 2: ARCHIWUM FAKTUR I DOSTAW -->
+    <!-- WIDOK 2: ALERTY CENOWE (HISTORIA PODWYŻEK I OBNIŻEK) -->
+    <section id="viewAlerts" class="hidden space-y-3">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-xs font-bold text-white">Rejestr wykrytych zmian cenowych</h3>
+          <p class="text-[10px] text-slate-400">Porównanie cen z faktur z dotychczasowymi cenami zakupu</p>
+        </div>
+        <button onclick="clearPriceAlerts()" class="text-[11px] text-rose-400 hover:underline">Wyczyść alerty</button>
+      </div>
+      <div id="alertsList" class="space-y-2.5"></div>
+    </section>
+
+    <!-- WIDOK 3: ARCHIWUM FAKTUR I DOSTAW -->
     <section id="viewDeliveries" class="hidden space-y-3">
       <div class="flex items-center justify-between">
         <p class="text-xs text-slate-400">Zarejestrowane dokumenty dostaw i odczyty AI</p>
@@ -152,7 +180,7 @@
   <!-- PŁYWAJĄCE MENU KONTEKSTOWE (PRAWY PRZYCISK MYSZY) -->
   <div id="customContextMenu" class="fixed hidden z-50 bg-slate-800/95 border border-slate-700 rounded-xl shadow-2xl py-1.5 w-48 backdrop-blur-md">
     <button onclick="contextActionEdit()" class="w-full text-left px-3.5 py-2 text-xs text-slate-200 hover:bg-slate-700/80 flex items-center gap-2">
-      <span>✏️</span> Edytuj dane kartoteki
+      <span>✏️</span> Edytuj dane i cenę
     </button>
     <button onclick="contextActionOpenStock()" class="w-full text-left px-3.5 py-2 text-xs text-slate-200 hover:bg-slate-700/80 flex items-center gap-2">
       <span>⚡</span> Operacja stanu (+ / - / Teren)
@@ -173,9 +201,9 @@
       <span class="text-[10px] font-bold">Magazyn</span>
     </button>
 
-    <button onclick="toggleCameraFocus()" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 py-1 px-2.5 transition active:scale-95">
-      <span class="text-lg">📷</span>
-      <span class="text-[10px] font-bold">Skanuj</span>
+    <button onclick="switchMainTab('alerts')" id="navBtnAlerts" class="flex flex-col items-center gap-1 text-slate-400 hover:text-amber-400 py-1 px-2.5 transition active:scale-95">
+      <span class="text-lg">⚠️</span>
+      <span class="text-[10px] font-bold">Alerty Cen</span>
     </button>
 
     <button onclick="triggerInvoiceUpload()" class="flex flex-col items-center justify-center -mt-5 bg-gradient-to-tr from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white w-14 h-14 rounded-full shadow-lg border-2 border-slate-900 active:scale-90 transition">
@@ -194,7 +222,7 @@
     </button>
   </nav>
 
-  <!-- MODAL: EDYCJA DANYCH POZYCJI -->
+  <!-- MODAL: EDYCJA DANYCH POZYCJI I CENY -->
   <div id="editItemModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
     <form onsubmit="saveEditedItem(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-700 pb-2">
@@ -218,6 +246,17 @@
 
       <div class="grid grid-cols-2 gap-2">
         <div>
+          <label class="text-[11px] text-slate-300 block mb-1">Cena jedn. netto (PLN):</label>
+          <input type="number" step="0.01" id="editItemPrice" value="0.00" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-emerald-400 font-bold">
+        </div>
+        <div>
+          <label class="text-[11px] text-slate-300 block mb-1">Jednostka:</label>
+          <input type="text" id="editItemUnit" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2 py-1.5 text-xs text-white text-center">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2">
+        <div>
           <label class="text-[11px] text-slate-300 block mb-1">Kategoria:</label>
           <input type="text" id="editItemCategory" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white">
         </div>
@@ -227,15 +266,9 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-2 gap-2">
-        <div>
-          <label class="text-[11px] text-slate-300 block mb-1">Jednostka:</label>
-          <input type="text" id="editItemUnit" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2 py-1.5 text-xs text-white text-center">
-        </div>
-        <div>
-          <label class="text-[11px] text-slate-300 block mb-1">Alarm stanu minimalnego:</label>
-          <input type="number" id="editItemMinQty" value="3" min="0" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2 py-1.5 text-xs text-white text-center">
-        </div>
+      <div>
+        <label class="text-[11px] text-slate-300 block mb-1">Alarm stanu minimalnego:</label>
+        <input type="number" id="editItemMinQty" value="3" min="0" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2 py-1.5 text-xs text-white text-center">
       </div>
 
       <div class="flex justify-end gap-2 pt-2 border-t border-slate-700">
@@ -257,15 +290,19 @@
         <button onclick="closeActionModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
       </div>
 
-      <div class="grid grid-cols-2 gap-2.5 bg-slate-900/90 p-3 rounded-xl border border-slate-700/80">
+      <div class="grid grid-cols-3 gap-2 bg-slate-900/90 p-3 rounded-xl border border-slate-700/80 text-center">
         <div>
-          <span class="text-[11px] text-slate-400 block">Dostępne w magazynie</span>
-          <span id="modalItemQty" class="text-2xl font-black text-emerald-400">0</span>
-          <span id="modalItemUnit" class="text-xs text-slate-400 ml-1">szt.</span>
+          <span class="text-[10px] text-slate-400 block">Cena netto</span>
+          <span id="modalItemPrice" class="text-sm font-bold text-emerald-400">0.00 zł</span>
         </div>
         <div>
-          <span class="text-[11px] text-slate-400 block">W terenie / Zlecenie</span>
-          <span id="modalItemInField" class="text-2xl font-black text-amber-400">0</span>
+          <span class="text-[10px] text-slate-400 block">Magazyn</span>
+          <span id="modalItemQty" class="text-lg font-black text-emerald-400">0</span>
+          <span id="modalItemUnit" class="text-[10px] text-slate-400">szt.</span>
+        </div>
+        <div>
+          <span class="text-[10px] text-slate-400 block">W terenie</span>
+          <span id="modalItemInField" class="text-lg font-black text-amber-400">0</span>
         </div>
       </div>
 
@@ -297,7 +334,7 @@
 
       <div class="flex gap-2">
         <button onclick="openEditModal(selectedItemId)" class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow">
-          <span>✏️</span> Edytuj dane
+          <span>✏️</span> Edytuj dane i cenę
         </button>
         <button onclick="openPrintLabelModal()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow">
           <span>🏷️</span> Drukuj QR
@@ -334,6 +371,17 @@
 
       <div class="grid grid-cols-2 gap-2">
         <div>
+          <label class="text-[11px] text-slate-300 block mb-1">Cena jedn. netto (PLN):</label>
+          <input type="number" step="0.01" id="newPrice" value="0.00" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-emerald-400 font-bold">
+        </div>
+        <div>
+          <label class="text-[11px] text-slate-300 block mb-1">Jednostka:</label>
+          <input type="text" id="newUnit" value="szt." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2 py-1.5 text-xs text-white text-center">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2">
+        <div>
           <label class="text-[11px] text-slate-300 block mb-1">Kategoria:</label>
           <input type="text" id="newCategory" placeholder="Np. Catering" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white">
         </div>
@@ -343,14 +391,10 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-3 gap-2">
+      <div class="grid grid-cols-2 gap-2">
         <div>
           <label class="text-[11px] text-slate-300 block mb-1">Ilość start:</label>
           <input type="number" id="newQty" value="1" min="0" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2 py-1.5 text-xs text-white text-center">
-        </div>
-        <div>
-          <label class="text-[11px] text-slate-300 block mb-1">Jednostka:</label>
-          <input type="text" id="newUnit" value="szt." class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2 py-1.5 text-xs text-white text-center">
         </div>
         <div>
           <label class="text-[11px] text-slate-300 block mb-1">Alarm min:</label>
@@ -365,22 +409,22 @@
     </form>
   </div>
 
-  <!-- MODAL AI OCR: WERYFIKACJA I INTELIGENTNE SCALANIE DOSTAWY -->
+  <!-- MODAL AI OCR: WERYFIKACJA, SCALANIE I WYKRYWANIE ZMIAN CEN -->
   <div id="aiModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 shadow-2xl my-4 max-h-[94vh] flex flex-col">
       <div class="flex justify-between items-start border-b border-slate-700 pb-2.5">
         <div>
-          <span class="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50">Smart Merge OCR</span>
+          <span class="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50">Price Intelligence OCR</span>
           <h3 class="text-sm font-bold text-white mt-1">Przyjęcie Dostawy z Faktury / WZ</h3>
-          <p id="aiDocInfo" class="text-[11px] text-slate-400 mt-0.5">Analiza obrazu...</p>
+          <p id="aiDocInfo" class="text-[11px] text-slate-400 mt-0.5">Analiza obrazu i cen...</p>
         </div>
         <button onclick="closeAiModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
       </div>
 
       <div id="aiLoadingState" class="py-12 flex flex-col items-center justify-center space-y-3">
         <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-        <p class="text-sm text-slate-200 font-medium">Odczytywanie pozycji...</p>
-        <p class="text-xs text-slate-500">Przeliczanie zgrzewek na sztuki i wyszukiwanie w bazie</p>
+        <p class="text-sm text-slate-200 font-medium">Odczytywanie pozycji i cen...</p>
+        <p class="text-xs text-slate-500">Porównywanie z dotychczasowymi cenami w magazynie</p>
       </div>
 
       <div id="aiItemsContainer" class="hidden flex-1 overflow-y-auto space-y-3 pr-1">
@@ -399,7 +443,7 @@
           </div>
         </div>
 
-        <p class="text-[11px] text-slate-300">Sprawdź dopasowanie do magazynu (pozycje zostaną zsumowane z istniejącymi):</p>
+        <p class="text-[11px] text-slate-300">Wykryte pozycje i weryfikacja różnic cenowych:</p>
         <div id="aiItemsList" class="space-y-2.5"></div>
       </div>
 
@@ -412,7 +456,7 @@
       <div id="aiModalActions" class="hidden pt-2.5 border-t border-slate-700 flex justify-end gap-2">
         <button onclick="closeAiModal()" class="px-4 py-2 rounded-xl text-xs text-slate-400 hover:bg-slate-700">Anuluj</button>
         <button onclick="confirmAndApplyDelivery()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow">
-          <span>✓</span> Zastosuj przyjęcie
+          <span>✓</span> Zastosuj przyjęcie i aktualizuj ceny
         </button>
       </div>
     </div>
@@ -435,13 +479,14 @@
     const GEMINI_API_KEY = 'AQ.Ab8RN6JQHVTxqmEE-mAigOjJGt4ghfMGxGYDTjNUt0MGeq2f5Q';
 
     const DEFAULT_LOCAL_ITEMS = [
-      { id: '1', barcode: 'RC-590001', name: 'Kawa ziarnista 1kg', category: 'Catering', location: 'Magazyn - Regał A1', qty: 20, inField: 0, minQty: 5, unit: 'opak.' },
-      { id: '2', barcode: 'RC-590002', name: 'Warnik do wody 15L', category: 'Sprzęt', location: 'Strefa B - Regał B2', qty: 6, inField: 2, minQty: 2, unit: 'szt.' },
-      { id: '3', barcode: 'RC-590003', name: 'Skrzynia transportowa Euro', category: 'Logistyka', location: 'Sektor C', qty: 25, inField: 10, minQty: 8, unit: 'szt.' }
+      { id: '1', barcode: 'RC-590001', name: 'Kawa ziarnista 1kg', category: 'Catering', location: 'Magazyn - Regał A1', qty: 20, inField: 0, minQty: 5, unit: 'opak.', price: 54.00 },
+      { id: '2', barcode: 'RC-590002', name: 'Warnik do wody 15L', category: 'Sprzęt', location: 'Strefa B - Regał B2', qty: 6, inField: 2, minQty: 2, unit: 'szt.', price: 320.00 },
+      { id: '3', barcode: 'RC-590003', name: 'Skrzynia transportowa Euro', category: 'Logistyka', location: 'Sektor C', qty: 25, inField: 10, minQty: 8, unit: 'szt.', price: 65.00 }
     ];
 
     let inventory = JSON.parse(localStorage.getItem('magazyn_offline_items')) || DEFAULT_LOCAL_ITEMS;
     let deliveries = JSON.parse(localStorage.getItem('magazyn_offline_deliveries')) || [];
+    let priceAlerts = JSON.parse(localStorage.getItem('magazyn_offline_price_alerts')) || [];
     let selectedItemId = null;
     let contextMenuItemId = null;
     let html5QrCode = null;
@@ -449,16 +494,13 @@
     let isCloudOnline = false;
     let currentExtractedDelivery = null;
 
-    // Zmienne masowego zaznaczania
     let isSelectMode = false;
     let selectedItemIds = new Set();
 
-    // --- TYLKO WIBRACJA HAPTYCZNA (DŹWIĘK WYŁĄCZONY) ---
+    // Dyskretna wibracja haptyczna
     function triggerScanFeedback() {
       if (navigator.vibrate) {
-        try { 
-          navigator.vibrate(60); 
-        } catch (e) {}
+        try { navigator.vibrate(60); } catch (e) {}
       }
     }
 
@@ -487,20 +529,17 @@
       for (const item of inventory) {
         const cleanItem = normalizeText(item.name);
         const itemWords = cleanItem.split(' ').filter(w => w.length > 2);
-        
         let overlap = 0;
         for (const word of targetWords) {
           if (itemWords.some(iw => iw.includes(word) || word.includes(iw))) {
             overlap++;
           }
         }
-
         if (overlap >= 2 && overlap > maxOverlap) {
           maxOverlap = overlap;
           bestItem = item;
         }
       }
-
       return bestItem;
     }
 
@@ -544,7 +583,8 @@
           qty: Number(i.qty) || 0,
           inField: Number(i.in_field) || 0,
           minQty: Number(i.min_qty) || 0,
-          unit: i.unit || 'szt.'
+          unit: i.unit || 'szt.',
+          price: Number(i.price) || 0.00
         }));
 
         localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
@@ -571,15 +611,30 @@
       }
     }
 
-    // --- RENDEROWANIE Z OBSŁUGĄ CHECKBOXÓW I PRAWYM PRZYCISKIEM ---
+    async function fetchPriceAlerts() {
+      try {
+        const data = await apiRequest('/price_alerts?select=*&order=created_at.desc');
+        priceAlerts = data;
+        localStorage.setItem('magazyn_offline_price_alerts', JSON.stringify(priceAlerts));
+        renderPriceAlerts();
+      } catch (e) {
+        renderPriceAlerts();
+      }
+    }
+
+    // --- RENDEROWANIE STANU Z CENAMI I WARTOŚCIĄ ---
     function renderInventory() {
       const search = document.getElementById('searchFilter').value.toLowerCase();
       const filter = document.getElementById('categoryFilter').value;
       const list = document.getElementById('inventoryList');
 
+      // Statystyki
       document.getElementById('statTotalItems').innerText = inventory.length;
       document.getElementById('statInField').innerText = inventory.reduce((sum, i) => sum + (Number(i.inField) || 0), 0);
       document.getElementById('statLowStock').innerText = inventory.filter(i => i.qty <= i.minQty).length;
+      
+      const totalVal = inventory.reduce((sum, i) => sum + ((Number(i.qty) || 0) * (Number(i.price) || 0)), 0);
+      document.getElementById('statTotalValue').innerText = `${totalVal.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} zł`;
 
       const filtered = inventory.filter(item => {
         const matchesText = item.name.toLowerCase().includes(search) ||
@@ -593,13 +648,14 @@
       });
 
       if (filtered.length === 0) {
-        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak pozycji w bazie. Kliknij "Nowy" na dolnym pasku, aby dodać towar.</div>`;
+        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak pozycji w bazie. Kliknij "Nowy" na dole, aby dodać towar.</div>`;
         return;
       }
 
       list.innerHTML = filtered.map(item => {
         const isLow = item.qty <= item.minQty;
         const isChecked = selectedItemIds.has(item.id);
+        const itemVal = ((item.qty || 0) * (item.price || 0)).toFixed(2);
 
         return `
           <div 
@@ -607,7 +663,6 @@
             onclick="handleItemCardClick(event, '${item.id}')" 
             class="bg-slate-800 hover:bg-slate-750 border ${isLow ? 'border-rose-500/60' : 'border-slate-700/80'} rounded-xl p-3 flex items-center justify-between cursor-pointer transition shadow-sm active:scale-[0.99] relative"
           >
-            <!-- Checkbox do masowego zaznaczania -->
             ${isSelectMode ? `
               <div class="pr-2.5 flex items-center" onclick="event.stopPropagation()">
                 <input 
@@ -626,7 +681,11 @@
                 <span class="text-[11px] text-slate-500 font-mono">#${item.barcode}</span>
               </div>
               <h4 class="font-bold text-xs text-white">${item.name}</h4>
-              ${isLow ? `<span class="inline-block text-[10px] text-rose-400 font-medium">⚠️ Niski stan (min: ${item.minQty})</span>` : ''}
+              <div class="flex items-center gap-2 text-[10px]">
+                <span class="text-emerald-400 font-bold">${Number(item.price || 0).toFixed(2)} zł / ${item.unit || 'szt.'}</span>
+                <span class="text-slate-500">(Wartość: ${itemVal} zł)</span>
+                ${isLow ? `<span class="text-rose-400 font-medium">⚠️ Niski stan (min: ${item.minQty})</span>` : ''}
+              </div>
             </div>
 
             <div class="text-right flex items-center gap-2">
@@ -647,7 +706,54 @@
       }).join('');
     }
 
-    // --- OBSŁUGA MASOWEGO ZAZNACZANIA (MULTI-SELECT) ---
+    // --- RENDEROWANIE ALERTÓW CENOWYCH ---
+    function renderPriceAlerts() {
+      const list = document.getElementById('alertsList');
+      const badge = document.getElementById('alertsCountBadge');
+      
+      if (priceAlerts.length > 0) {
+        badge.innerText = priceAlerts.length;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+
+      if (priceAlerts.length === 0) {
+        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak zarejestrowanych zmian cen. System wykaże różnice automatycznie po skanowaniu kolejnych faktur.</div>`;
+        return;
+      }
+
+      list.innerHTML = priceAlerts.map(alert => {
+        const isIncrease = alert.diff_percent > 0;
+        return `
+          <div class="bg-slate-800 border ${isIncrease ? 'border-rose-600/60' : 'border-emerald-600/60'} rounded-xl p-3 flex items-center justify-between shadow-sm">
+            <div class="space-y-0.5">
+              <div class="flex items-center gap-1.5">
+                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${isIncrease ? 'bg-rose-950 text-rose-300 border border-rose-700/50' : 'bg-emerald-950 text-emerald-300 border border-emerald-700/50'}">
+                  ${isIncrease ? `🔺 PODWYŻKA +${alert.diff_percent}%` : `🔻 OBNIŻKA ${alert.diff_percent}%`}
+                </span>
+                <span class="text-[10px] text-slate-400 font-mono">${alert.doc_number || ''}</span>
+              </div>
+              <h4 class="font-bold text-xs text-white">${alert.item_name}</h4>
+              <p class="text-[10px] text-slate-400">Dostawca: ${alert.supplier || 'Nieznany'} • ${new Date(alert.created_at || Date.now()).toLocaleDateString('pl-PL')}</p>
+            </div>
+            <div class="text-right">
+              <span class="text-xs text-slate-400 line-through block">${Number(alert.old_price).toFixed(2)} zł</span>
+              <span class="text-sm font-black ${isIncrease ? 'text-rose-400' : 'text-emerald-400'}">${Number(alert.new_price).toFixed(2)} zł</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function clearPriceAlerts() {
+      if (!confirm("Wyczyścić historię alertów cenowych?")) return;
+      priceAlerts = [];
+      localStorage.setItem('magazyn_offline_price_alerts', JSON.stringify(priceAlerts));
+      renderPriceAlerts();
+    }
+
+    // --- MULTI-SELECT ---
     function toggleSelectMode() {
       isSelectMode = !isSelectMode;
       const btn = document.getElementById('btnToggleSelectMode');
@@ -669,31 +775,17 @@
     }
 
     function toggleSelectItem(id, isChecked) {
-      if (isChecked) {
-        selectedItemIds.add(id);
-      } else {
-        selectedItemIds.delete(id);
-      }
+      if (isChecked) selectedItemIds.add(id);
+      else selectedItemIds.delete(id);
       updateBulkSelectedCount();
       triggerScanFeedback();
     }
 
     function toggleSelectAll() {
       const search = document.getElementById('searchFilter').value.toLowerCase();
-      const filter = document.getElementById('categoryFilter').value;
-      const currentFiltered = inventory.filter(item => {
-        const matchesText = item.name.toLowerCase().includes(search) || item.barcode.toLowerCase().includes(search);
-        if (!matchesText) return false;
-        if (filter === 'LOW') return item.qty <= item.minQty;
-        if (filter === 'FIELD') return (item.inField || 0) > 0;
-        return true;
-      });
-
-      if (selectedItemIds.size === currentFiltered.length) {
-        selectedItemIds.clear();
-      } else {
-        currentFiltered.forEach(i => selectedItemIds.add(i.id));
-      }
+      const currentFiltered = inventory.filter(item => item.name.toLowerCase().includes(search) || item.barcode.toLowerCase().includes(search));
+      if (selectedItemIds.size === currentFiltered.length) selectedItemIds.clear();
+      else currentFiltered.forEach(i => selectedItemIds.add(i.id));
       updateBulkSelectedCount();
       renderInventory();
       triggerScanFeedback();
@@ -701,20 +793,12 @@
 
     function updateBulkSelectedCount() {
       const countLabel = document.getElementById('bulkSelectedCount');
-      if (countLabel) {
-        countLabel.innerText = `Wybrano: ${selectedItemIds.size}`;
-      }
+      if (countLabel) countLabel.innerText = `Wybrano: ${selectedItemIds.size}`;
     }
 
     async function deleteSelectedItems() {
-      if (selectedItemIds.size === 0) {
-        alert("Zaznacz przynajmniej jedną pozycję do usunięcia.");
-        return;
-      }
-
-      if (!confirm(`Czy na pewno chcesz usunąć ${selectedItemIds.size} zaznaczonych pozycji?`)) {
-        return;
-      }
+      if (selectedItemIds.size === 0) return alert("Zaznacz przynajmniej jedną pozycję do usunięcia.");
+      if (!confirm(`Czy na pewno chcesz usunąć ${selectedItemIds.size} zaznaczonych pozycji?`)) return;
 
       const idsToDelete = Array.from(selectedItemIds);
       inventory = inventory.filter(i => !selectedItemIds.has(i.id));
@@ -726,28 +810,21 @@
 
       if (isCloudOnline) {
         for (const id of idsToDelete) {
-          try {
-            await apiRequest(`/inventory?id=eq.${id}`, 'DELETE');
-          } catch (e) {}
+          try { await apiRequest(`/inventory?id=eq.${id}`, 'DELETE'); } catch (e) {}
         }
       }
     }
 
-    // --- OBSŁUGA MENU KONTEKSTOWEGO (PRAWY PRZYCISK MYSZY) ---
+    // --- MENU KONTEKSTOWE ---
     function handleItemContextMenu(e, id) {
       e.preventDefault();
       contextMenuItemId = id;
       selectedItemId = id;
-
       const menu = document.getElementById('customContextMenu');
       menu.classList.remove('hidden');
-
-      let x = e.clientX;
-      let y = e.clientY;
-
+      let x = e.clientX, y = e.clientY;
       if (x + 200 > window.innerWidth) x = window.innerWidth - 210;
       if (y + 180 > window.innerHeight) y = window.innerHeight - 190;
-
       menu.style.left = `${x}px`;
       menu.style.top = `${y}px`;
       triggerScanFeedback();
@@ -758,31 +835,10 @@
       if (menu) menu.classList.add('hidden');
     }
 
-    function contextActionEdit() {
-      hideContextMenu();
-      if (contextMenuItemId) openEditModal(contextMenuItemId);
-    }
-
-    function contextActionOpenStock() {
-      hideContextMenu();
-      if (contextMenuItemId) openActionModal(contextMenuItemId);
-    }
-
-    function contextActionPrintQR() {
-      hideContextMenu();
-      if (contextMenuItemId) {
-        selectedItemId = contextMenuItemId;
-        openPrintLabelModal();
-      }
-    }
-
-    function contextActionDelete() {
-      hideContextMenu();
-      if (contextMenuItemId) {
-        selectedItemId = contextMenuItemId;
-        deleteCurrentItem();
-      }
-    }
+    function contextActionEdit() { hideContextMenu(); if (contextMenuItemId) openEditModal(contextMenuItemId); }
+    function contextActionOpenStock() { hideContextMenu(); if (contextMenuItemId) openActionModal(contextMenuItemId); }
+    function contextActionPrintQR() { hideContextMenu(); if (contextMenuItemId) { selectedItemId = contextMenuItemId; openPrintLabelModal(); } }
+    function contextActionDelete() { hideContextMenu(); if (contextMenuItemId) { selectedItemId = contextMenuItemId; deleteCurrentItem(); } }
 
     function handleItemCardClick(e, id) {
       if (isSelectMode) {
@@ -794,7 +850,7 @@
       }
     }
 
-    // --- EDYCJA DANYCH POZYCJI (MODAL EDYCJI) ---
+    // --- MODAL EDYCJI ---
     function openEditModal(id) {
       const item = inventory.find(i => i.id === id);
       if (!item) return;
@@ -803,6 +859,7 @@
       document.getElementById('editItemId').value = item.id;
       document.getElementById('editItemBarcode').value = item.barcode;
       document.getElementById('editItemName').value = item.name;
+      document.getElementById('editItemPrice').value = Number(item.price || 0).toFixed(2);
       document.getElementById('editItemCategory').value = item.category || 'Ogólne';
       document.getElementById('editItemLocation').value = item.location || '-';
       document.getElementById('editItemUnit').value = item.unit || 'szt.';
@@ -827,6 +884,7 @@
 
       item.barcode = document.getElementById('editItemBarcode').value.trim();
       item.name = document.getElementById('editItemName').value.trim();
+      item.price = parseFloat(document.getElementById('editItemPrice').value) || 0.00;
       item.category = document.getElementById('editItemCategory').value.trim() || 'Ogólne';
       item.location = document.getElementById('editItemLocation').value.trim() || '-';
       item.unit = document.getElementById('editItemUnit').value.trim() || 'szt.';
@@ -842,6 +900,7 @@
           await apiRequest(`/inventory?id=eq.${item.id}`, 'PATCH', {
             barcode: item.barcode,
             name: item.name,
+            price: item.price,
             category: item.category,
             location: item.location,
             unit: item.unit,
@@ -881,7 +940,7 @@
               <span class="text-[9px] text-slate-500 block uppercase font-bold">Pozycje:</span>
               ${items.map(it => `
                 <div class="flex justify-between text-slate-300 text-[11px]">
-                  <span>• ${it.name}${it.netPrice ? `<span class="text-slate-500">(${it.netPrice} zł)</span>` : ''}</span>
+                  <span>• ${it.name}${it.netPrice ? `<span class="text-slate-500">(${Number(it.netPrice).toFixed(2)} zł)</span>` : ''}</span>
                   <span class="font-bold text-emerald-400">+${it.qty}${it.unit || 'szt.'}</span>
                 </div>
               `).join('')}
@@ -895,8 +954,7 @@
       return new Promise((resolve, reject) => {
         const img = new Image();
         img.onload = () => {
-          let width = img.width;
-          let height = img.height;
+          let width = img.width, height = img.height;
           if (width > maxWidth) {
             height = Math.round((height * maxWidth) / width);
             width = maxWidth;
@@ -917,7 +975,7 @@
       document.getElementById('invoiceInput').click();
     }
 
-    // --- GEMINI OCR Z AUTOMATYCZNYM PRZELICZANIEM ZGRZEWEK NA SZTUKI ---
+    // --- GEMINI OCR: WYCIĄGANIE CEN I ILOŚCI ZE ZDJĘCIA ---
     async function processInvoiceImage(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -937,11 +995,12 @@
         document.getElementById('aiImagePreview').src = compressedDataUrl;
 
         const promptText = `Jesteś systemem magazynowym WMS. Przeanalizuj to zdjęcie faktury lub dokumentu WZ.
-BARDZO WAŻNA ZASADA DOTYCZĄCA JEDNOSTEK:
-Wszystkie pozycje w magazynie muszą być ewidencjonowane w SZTUKACH (szt.).
-Jeśli jednostką na fakturze jest zgrzewka (ZGRZ, zgrz, op.) lub w nazwie widnieje informacja o pakowaniu np. "(12)", "(6)", "(24)":
-- PRZEMNÓŻ ilość zgrzewek przez liczbę butelek/puszek w opakowaniu (np. 4 zgrzewki po 12 szt. = 48 szt.).
-- Jako jednostkę "unit" wpisz zawsze "szt.".
+BARDZO WAŻNA ZASADA DOTYCZĄCA JEDNOSTEK I CEN:
+Wszystkie pozycje w magazynie muszą być w SZTUKACH (szt.).
+Jeśli jednostką na fakturze jest zgrzewka (ZGRZ, zgrz, op.) lub w nazwie widnieje "(12)", "(6)", "(24)":
+- PRZEMNÓŻ ilość zgrzewek przez liczbę butelek/puszek (np. 4 zgrzewki po 12 = 48 szt.).
+- Jako netPrice podaj cenę JEDNEJ SZTUKI (np. cena zgrzewki podzielona przez liczbę sztuk w zgrzewce).
+- Jednostka unit = "szt.".
 
 Zwróć wynik jako czysty JSON:
 {
@@ -964,30 +1023,15 @@ Zwróć wynik jako czysty JSON:
 
             const response = await fetch(endpoint, {
               method: 'POST',
-              headers: { 
-                'Content-Type': 'application/json',
-                'x-goog-api-key': GEMINI_API_KEY
-              },
+              headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
               body: JSON.stringify({
-                contents: [{
-                  parts: [
-                    { text: promptText },
-                    { inline_data: { mime_type: 'image/jpeg', data: base64Data } }
-                  ]
-                }],
-                generationConfig: {
-                  response_mime_type: "application/json",
-                  temperature: 0.1
-                }
+                contents: [{ parts: [{ text: promptText }, { inline_data: { mime_type: 'image/jpeg', data: base64Data } }] }],
+                generationConfig: { response_mime_type: "application/json", temperature: 0.1 }
               })
             });
 
             const result = await response.json();
-            if (result.error) {
-              lastErrorMsg = result.error.message;
-              continue;
-            }
-
+            if (result.error) { lastErrorMsg = result.error.message; continue; }
             if (result.candidates && result.candidates[0]) {
               const rawText = result.candidates[0].content.parts[0].text.trim();
               parsed = JSON.parse(rawText);
@@ -1019,12 +1063,13 @@ Zwróć wynik jako czysty JSON:
       event.target.value = '';
     }
 
+    // --- WERYFIKACJA Z OZNACZENIEM PODWYŻEK I OBNIŻEK CEN ---
     function displayExtractedItems(delivery) {
       document.getElementById('aiLoadingState').classList.add('hidden');
       document.getElementById('aiItemsContainer').classList.remove('hidden');
       document.getElementById('aiModalActions').classList.remove('hidden');
       document.getElementById('aiImagePreviewContainer').classList.remove('hidden');
-      document.getElementById('aiDocInfo').innerText = "Weryfikacja pozycji i scalanie z magazynem:";
+      document.getElementById('aiDocInfo').innerText = "Weryfikacja pozycji, cen i scalanie:";
 
       document.getElementById('aiSupplierName').innerText = delivery.supplier;
       document.getElementById('aiDocNum').innerText = delivery.docNumber;
@@ -1032,7 +1077,7 @@ Zwróć wynik jako czysty JSON:
 
       const container = document.getElementById('aiItemsList');
       if (!delivery.items || delivery.items.length === 0) {
-        container.innerHTML = `<p class="text-xs text-rose-400">Nie wykryto tabeli towarów na zdjęciu. Upewnij się, że dokument jest dobrze doświetlony.</p>`;
+        container.innerHTML = `<p class="text-xs text-rose-400">Nie wykryto tabeli towarów na zdjęciu.</p>`;
         return;
       }
 
@@ -1040,12 +1085,33 @@ Zwróć wynik jako czysty JSON:
         const match = findBestInventoryMatch(item.name);
         const matchedId = match ? match.id : '';
 
+        // Obliczanie różnicy cenowej
+        const currentPrice = match ? Number(match.price || 0) : 0;
+        const incomingPrice = Number(item.netPrice || 0);
+        let priceDiffBadge = '';
+
+        if (match && currentPrice > 0 && incomingPrice > 0) {
+          const diff = incomingPrice - currentPrice;
+          const diffPct = ((diff / currentPrice) * 100).toFixed(1);
+
+          if (diff > 0.01) {
+            priceDiffBadge = `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-700/50">🔺 Podwyżka: ${currentPrice.toFixed(2)} ➔ ${incomingPrice.toFixed(2)} zł (+${diffPct}%)</span>`;
+          } else if (diff < -0.01) {
+            priceDiffBadge = `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-700/50">🔻 Obniżka: ${currentPrice.toFixed(2)} ➔ ${incomingPrice.toFixed(2)} zł (${diffPct}%)</span>`;
+          } else {
+            priceDiffBadge = `<span class="text-[9px] font-medium px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">Cena bez zmian (${incomingPrice.toFixed(2)} zł)</span>`;
+          }
+        } else if (incomingPrice > 0) {
+          priceDiffBadge = `<span class="text-[9px] font-medium px-1.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50">Nowa cena: ${incomingPrice.toFixed(2)} zł netto</span>`;
+        }
+
         return `
           <div class="bg-slate-900 border ${match ? 'border-emerald-600/70' : 'border-amber-600/70'} rounded-xl p-3 space-y-2">
-            <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center justify-between gap-2 flex-wrap">
               <span id="aiBadge_${index}" class="text-[9px] font-bold px-2 py-0.5 rounded ${match ? 'bg-emerald-950 text-emerald-300 border border-emerald-700/50' : 'bg-amber-950 text-amber-300 border border-amber-700/50'}">
-                ${match ? `✓ Scal z: ${match.name} (Obecnie: ${match.qty}${match.unit})` : '+ Nowa kartoteka magazynowa'}
+                ${match ? `✓ Scal z: ${match.name} (Stan: ${match.qty}${match.unit})` : '+ Nowa kartoteka'}
               </span>
+              ${priceDiffBadge}
               <button type="button" onclick="multiplyToPieces(${index}, 12)" class="text-[9px] bg-slate-800 hover:bg-slate-700 border border-slate-600 text-indigo-300 px-2 py-0.5 rounded transition">
                 📦 x12 na szt.
               </button>
@@ -1055,10 +1121,19 @@ Zwróć wynik jako czysty JSON:
               <div class="flex-1">
                 <input type="text" id="aiItemName_${index}" value="${item.name}" class="bg-transparent font-bold text-xs text-white w-full focus:outline-none focus:border-b border-indigo-500">
               </div>
-              <div class="flex items-center gap-1">
-                <span class="text-xs text-slate-400">+</span>
-                <input type="number" id="aiItemQty_${index}" value="${item.qty || 1}" min="1" class="w-14 bg-slate-800 border border-slate-700 rounded-lg p-1 text-center font-bold text-emerald-400 text-xs">
-                <input type="text" id="aiItemUnit_${index}" value="${item.unit || 'szt.'}" class="w-12 bg-slate-800 border border-slate-700 rounded-lg p-1 text-center text-[11px] text-slate-300">
+              <div class="flex items-center gap-1.5">
+                <div>
+                  <span class="text-[9px] text-slate-400 block text-center">Cena netto</span>
+                  <input type="number" step="0.01" id="aiItemPrice_${index}" value="${incomingPrice.toFixed(2)}" class="w-16 bg-slate-800 border border-slate-700 rounded-lg p-1 text-center font-bold text-emerald-400 text-xs">
+                </div>
+                <div>
+                  <span class="text-[9px] text-slate-400 block text-center">Ilość</span>
+                  <input type="number" id="aiItemQty_${index}" value="${item.qty || 1}" min="1" class="w-14 bg-slate-800 border border-slate-700 rounded-lg p-1 text-center font-bold text-emerald-400 text-xs">
+                </div>
+                <div>
+                  <span class="text-[9px] text-slate-400 block text-center">J.m.</span>
+                  <input type="text" id="aiItemUnit_${index}" value="${item.unit || 'szt.'}" class="w-12 bg-slate-800 border border-slate-700 rounded-lg p-1 text-center text-[11px] text-slate-300">
+                </div>
               </div>
             </div>
 
@@ -1068,7 +1143,7 @@ Zwróć wynik jako czysty JSON:
                 <option value="">+ Utwórz jako nową kartotekę</option>
                 ${inventory.map(inv => `
                   <option value="${inv.id}" ${matchedId === inv.id ? 'selected' : ''}>
-                    ${inv.name} (Stan: ${inv.qty}${inv.unit})
+                    ${inv.name} (Obecna cena:${Number(inv.price || 0).toFixed(2)} zł)
                   </option>
                 `).join('')}
               </select>
@@ -1087,7 +1162,7 @@ Zwróć wynik jako czysty JSON:
         const item = inventory.find(i => i.id === selectedId);
         if (item) {
           badge.className = "text-[9px] font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-700/50";
-          badge.innerText = `✓ Scal z: ${item.name} (Obecnie: ${item.qty} ${item.unit})`;
+          badge.innerText = `✓ Scal z: ${item.name} (Stan: ${item.qty} ${item.unit})`;
         }
       } else {
         badge.className = "text-[9px] font-bold px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-700/50";
@@ -1099,9 +1174,16 @@ Zwróć wynik jako czysty JSON:
     function multiplyToPieces(index, multiplier = 12) {
       const qtyInput = document.getElementById(`aiItemQty_${index}`);
       const unitInput = document.getElementById(`aiItemUnit_${index}`);
+      const priceInput = document.getElementById(`aiItemPrice_${index}`);
+      
       const currentVal = parseInt(qtyInput.value) || 1;
+      const currentPrice = parseFloat(priceInput.value) || 0;
+
       qtyInput.value = currentVal * multiplier;
       unitInput.value = 'szt.';
+      if (currentPrice > 0) {
+        priceInput.value = (currentPrice / multiplier).toFixed(2);
+      }
       triggerScanFeedback();
     }
 
@@ -1115,6 +1197,7 @@ Zwróć wynik jako czysty JSON:
       currentExtractedDelivery = null;
     }
 
+    // --- ZAPIS PRZYJĘCIA I REJESTRACJA ALERTÓW CENOWYCH ---
     async function confirmAndApplyDelivery() {
       if (!currentExtractedDelivery || !currentExtractedDelivery.items) return;
 
@@ -1125,22 +1208,48 @@ Zwróć wynik jako czysty JSON:
         const chosenMatchId = document.getElementById(`aiSelectMatch_${i}`).value;
         const qty = parseInt(document.getElementById(`aiItemQty_${i}`).value) || 0;
         const unit = document.getElementById(`aiItemUnit_${i}`).value.trim() || 'szt.';
+        const incomingPrice = parseFloat(document.getElementById(`aiItemPrice_${i}`).value) || 0.00;
 
         if (qty <= 0) continue;
-        finalItems.push({ name, qty, unit, netPrice: currentExtractedDelivery.items[i]?.netPrice });
+        finalItems.push({ name, qty, unit, netPrice: incomingPrice });
 
         let match = null;
-        if (chosenMatchId) {
-          match = inventory.find(inv => inv.id === chosenMatchId);
-        } else {
-          match = inventory.find(inv => inv.name.toLowerCase() === name.toLowerCase());
-        }
+        if (chosenMatchId) match = inventory.find(inv => inv.id === chosenMatchId);
+        else match = inventory.find(inv => inv.name.toLowerCase() === name.toLowerCase());
 
         if (match) {
+          const oldPrice = Number(match.price || 0);
+
+          // Jeśli cena uległa zmianie o więcej niż 1 grosz, rejestrujemy alert
+          if (oldPrice > 0 && incomingPrice > 0 && Math.abs(incomingPrice - oldPrice) > 0.01) {
+            const diffPct = (((incomingPrice - oldPrice) / oldPrice) * 100).toFixed(1);
+            const alertEntry = {
+              id: Date.now().toString() + '_' + i,
+              item_name: match.name,
+              supplier: currentExtractedDelivery.supplier,
+              old_price: oldPrice,
+              new_price: incomingPrice,
+              diff_percent: parseFloat(diffPct),
+              doc_number: currentExtractedDelivery.docNumber,
+              created_at: new Date()
+            };
+            priceAlerts.unshift(alertEntry);
+
+            if (isCloudOnline) {
+              try { await apiRequest('/price_alerts', 'POST', alertEntry); } catch (e) {}
+            }
+          }
+
           match.qty += qty;
+          match.price = incomingPrice > 0 ? incomingPrice : match.price; // aktualizacja do najnowszej ceny
+
           if (isCloudOnline) {
             try {
-              await apiRequest(`/inventory?id=eq.${match.id}`, 'PATCH', { qty: match.qty, updated_at: new Date() });
+              await apiRequest(`/inventory?id=eq.${match.id}`, 'PATCH', { 
+                qty: match.qty, 
+                price: match.price,
+                updated_at: new Date() 
+              });
             } catch (e) {}
           }
         } else {
@@ -1153,13 +1262,12 @@ Zwróć wynik jako czysty JSON:
             qty: qty,
             in_field: 0,
             unit: unit,
-            min_qty: 3
+            min_qty: 3,
+            price: incomingPrice
           };
           inventory.unshift(newItem);
           if (isCloudOnline) {
-            try {
-              await apiRequest('/inventory', 'POST', newItem);
-            } catch (e) {}
+            try { await apiRequest('/inventory', 'POST', newItem); } catch (e) {}
           }
         }
       }
@@ -1177,18 +1285,18 @@ Zwróć wynik jako czysty JSON:
       deliveries.unshift(deliveryEntry);
       localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
       localStorage.setItem('magazyn_offline_deliveries', JSON.stringify(deliveries));
+      localStorage.setItem('magazyn_offline_price_alerts', JSON.stringify(priceAlerts));
 
       if (isCloudOnline) {
-        try {
-          await apiRequest('/deliveries', 'POST', deliveryEntry);
-        } catch (e) {}
+        try { await apiRequest('/deliveries', 'POST', deliveryEntry); } catch (e) {}
       }
 
       triggerScanFeedback();
       closeAiModal();
       renderInventory();
       renderDeliveries();
-      alert("Dostawa przyjęta – stany magazynowe zaktualizowane!");
+      renderPriceAlerts();
+      alert("Dostawa przyjęta – stany i ceny zaktualizowane!");
     }
 
     // --- SKANOWANIE I AKCJE RĘCZNE ---
@@ -1218,9 +1326,7 @@ Zwróć wynik jako czysty JSON:
       switchMainTab('stock');
       const section = document.getElementById('scannerSection');
       section.scrollIntoView({ behavior: 'smooth' });
-      if (!isCameraRunning) {
-        toggleCamera();
-      }
+      if (!isCameraRunning) toggleCamera();
     }
 
     function toggleCamera() {
@@ -1273,6 +1379,7 @@ Zwróć wynik jako czysty JSON:
       document.getElementById('modalItemCategory').innerText = `${item.category || 'Ogólne'} • ${item.location || 'Brak lok.'}`;
       document.getElementById('modalItemName').innerText = item.name;
       document.getElementById('modalItemBarcode').innerText = `KOD: ${item.barcode}`;
+      document.getElementById('modalItemPrice').innerText = `${Number(item.price || 0).toFixed(2)} zł`;
       document.getElementById('modalItemQty').innerText = item.qty;
       document.getElementById('modalItemUnit').innerText = item.unit || 'szt.';
       document.getElementById('modalItemInField').innerText = item.inField || 0;
@@ -1292,12 +1399,12 @@ Zwróć wynik jako czysty JSON:
     function adjustStepQty(delta) {
       const input = document.getElementById('modalStepQty');
       input.value = Math.max(1, (parseInt(input.value) || 1) + delta);
-      if (navigator.vibrate) navigator.vibrate(20);
+      triggerScanFeedback();
     }
 
     function setStepQty(val) {
       document.getElementById('modalStepQty').value = val;
-      if (navigator.vibrate) navigator.vibrate(25);
+      triggerScanFeedback();
     }
 
     async function executeStockAction(type) {
@@ -1306,17 +1413,10 @@ Zwróć wynik jako czysty JSON:
 
       const amount = Math.max(1, parseInt(document.getElementById('modalStepQty').value) || 1);
 
-      if (type === 'ADD') {
-        item.qty += amount;
-      } else if (type === 'REMOVE') {
-        item.qty = Math.max(0, item.qty - amount);
-      } else if (type === 'TO_FIELD') {
-        item.qty = Math.max(0, item.qty - amount);
-        item.inField = (item.inField || 0) + amount;
-      } else if (type === 'FROM_FIELD') {
-        item.inField = Math.max(0, (item.inField || 0) - amount);
-        item.qty += amount;
-      }
+      if (type === 'ADD') item.qty += amount;
+      else if (type === 'REMOVE') item.qty = Math.max(0, item.qty - amount);
+      else if (type === 'TO_FIELD') { item.qty = Math.max(0, item.qty - amount); item.inField = (item.inField || 0) + amount; }
+      else if (type === 'FROM_FIELD') { item.inField = Math.max(0, (item.inField || 0) - amount); item.qty += amount; }
 
       triggerScanFeedback();
       localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
@@ -1342,20 +1442,19 @@ Zwróć wynik jako czysty JSON:
       closeActionModal();
 
       if (isCloudOnline) {
-        try {
-          await apiRequest(`/inventory?id=eq.${selectedItemId}`, 'DELETE');
-        } catch (e) {}
+        try { await apiRequest(`/inventory?id=eq.${selectedItemId}`, 'DELETE'); } catch (e) {}
       }
     }
 
     function generateRandomCode() {
       document.getElementById('newBarcode').value = 'RC-' + Math.floor(100000 + Math.random() * 900000);
-      if (navigator.vibrate) navigator.vibrate(30);
+      triggerScanFeedback();
     }
 
     function openNewItemModal(prefillBarcode) {
       document.getElementById('newBarcode').value = prefillBarcode || ('RC-' + Math.floor(100000 + Math.random() * 900000));
       document.getElementById('newName').value = '';
+      document.getElementById('newPrice').value = '0.00';
       document.getElementById('newCategory').value = '';
       document.getElementById('newLocation').value = '';
       document.getElementById('newQty').value = 1;
@@ -1376,6 +1475,7 @@ Zwróć wynik jako czysty JSON:
         id: Date.now().toString(),
         barcode: document.getElementById('newBarcode').value.trim(),
         name: document.getElementById('newName').value.trim(),
+        price: parseFloat(document.getElementById('newPrice').value) || 0.00,
         category: document.getElementById('newCategory').value.trim() || 'Ogólne',
         location: document.getElementById('newLocation').value.trim() || '-',
         qty: parseInt(document.getElementById('newQty').value) || 0,
@@ -1391,9 +1491,7 @@ Zwróć wynik jako czysty JSON:
       triggerScanFeedback();
 
       if (isCloudOnline) {
-        try {
-          await apiRequest('/inventory', 'POST', newItem);
-        } catch (e) {}
+        try { await apiRequest('/inventory', 'POST', newItem); } catch (e) {}
       }
     }
 
@@ -1421,29 +1519,54 @@ Zwróć wynik jako czysty JSON:
 
     function switchMainTab(tab) {
       const viewStock = document.getElementById('viewStock');
+      const viewAlerts = document.getElementById('viewAlerts');
       const viewDeliveries = document.getElementById('viewDeliveries');
+
+      const tabStockH = document.getElementById('tabStockHeaderBtn');
+      const tabAlertsH = document.getElementById('tabAlertsHeaderBtn');
+      const tabDeliveriesH = document.getElementById('tabDeliveriesHeaderBtn');
+
       const navBtnStock = document.getElementById('navBtnStock');
+      const navBtnAlerts = document.getElementById('navBtnAlerts');
       const navBtnDeliveries = document.getElementById('navBtnDeliveries');
+
+      // Ukryj wszystkie widoki
+      viewStock.classList.add('hidden');
+      viewAlerts.classList.add('hidden');
+      viewDeliveries.classList.add('hidden');
+
+      // Reset styli nagłówków i paska
+      tabStockH.className = 'pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200';
+      tabAlertsH.className = 'pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1';
+      tabDeliveriesH.className = 'pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200';
+
+      navBtnStock.className = 'flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 py-1 px-2.5 transition active:scale-95';
+      navBtnAlerts.className = 'flex flex-col items-center gap-1 text-slate-400 hover:text-amber-400 py-1 px-2.5 transition active:scale-95';
+      navBtnDeliveries.className = 'flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 py-1 px-2.5 transition active:scale-95';
 
       if (tab === 'stock') {
         viewStock.classList.remove('hidden');
-        viewDeliveries.classList.add('hidden');
+        tabStockH.className = 'pb-2 border-b-2 border-emerald-500 text-emerald-400 font-bold';
         navBtnStock.className = 'flex flex-col items-center gap-1 text-emerald-400 py-1 px-2.5 transition active:scale-95';
-        navBtnDeliveries.className = 'flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 py-1 px-2.5 transition active:scale-95';
-      } else {
-        viewStock.classList.add('hidden');
+      } else if (tab === 'alerts') {
+        viewAlerts.classList.remove('hidden');
+        tabAlertsH.className = 'pb-2 border-b-2 border-amber-500 text-amber-400 font-bold flex items-center gap-1';
+        navBtnAlerts.className = 'flex flex-col items-center gap-1 text-amber-400 py-1 px-2.5 transition active:scale-95';
+        renderPriceAlerts();
+      } else if (tab === 'deliveries') {
         viewDeliveries.classList.remove('hidden');
-        navBtnDeliveries.className = 'flex flex-col items-center gap-1 text-emerald-400 py-1 px-2.5 transition active:scale-95';
-        navBtnStock.className = 'flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 py-1 px-2.5 transition active:scale-95';
+        tabDeliveriesH.className = 'pb-2 border-b-2 border-indigo-500 text-indigo-400 font-bold';
+        navBtnDeliveries.className = 'flex flex-col items-center gap-1 text-indigo-400 py-1 px-2.5 transition active:scale-95';
       }
-      if (navigator.vibrate) navigator.vibrate(25);
+      triggerScanFeedback();
     }
 
     function exportCSV() {
-      const headers = ['Kod', 'Nazwa', 'Kategoria', 'Lokalizacja', 'Magazyn', 'W terenie', 'Jednostka', 'Min'];
+      const headers = ['Kod', 'Nazwa', 'Cena Netto', 'Kategoria', 'Lokalizacja', 'Magazyn', 'W terenie', 'Jednostka', 'Min'];
       const rows = inventory.map(i => [
         `"${i.barcode}"`,
         `"${i.name.replace(/"/g, '""')}"`,
+        Number(i.price || 0).toFixed(2),
         `"${i.category}"`,
         `"${i.location}"`,
         i.qty,
@@ -1462,6 +1585,7 @@ Zwróć wynik jako czysty JSON:
 
     fetchInventory();
     fetchDeliveries();
+    fetchPriceAlerts();
   </script>
 </body>
 </html>
