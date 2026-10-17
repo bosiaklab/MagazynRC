@@ -27,14 +27,14 @@
     }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen pb-32 font-sans select-none">
+<body class="bg-slate-900 text-slate-100 min-h-screen pb-32 font-sans select-none" onclick="hideContextMenu()">
 
   <!-- NAGŁÓWEK GÓRNY -->
   <header class="bg-slate-800/90 backdrop-blur border-b border-slate-700/80 sticky top-0 z-30 px-4 py-2.5 flex items-center justify-between shadow-md">
     <div class="flex items-center space-x-2.5">
       <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-base shadow">M</div>
       <div>
-        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-sky-400 bg-sky-950/70 border border-sky-700/50 px-1 py-0.5 rounded ml-1">v1.6 SMART MERGE</span></h1>
+        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-sky-400 bg-sky-950/70 border border-sky-700/50 px-1 py-0.5 rounded ml-1">v1.7 PRO</span></h1>
         <p id="syncStatus" class="text-[10px] text-amber-400 font-medium leading-none mt-0.5">Inicjalizacja...</p>
       </div>
     </div>
@@ -74,7 +74,7 @@
           <h2 class="font-bold text-xs text-white flex items-center gap-1.5">
             <span>📷</span> Skaner Kodów (Kamera / BT)
           </h2>
-          <p class="text-[11px] text-slate-400">Wibracja haptyczna aktywna po odczycie</p>
+          <p class="text-[11px] text-slate-400">Prawy przycisk myszy na pozycji = Edycja</p>
         </div>
         <button id="btnToggleCamera" onclick="toggleCamera()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-1.5 rounded-xl transition shadow">
           Włącz kamerę
@@ -100,19 +100,38 @@
 
     <!-- WIDOK 1: STANY MAGAZYNOWE -->
     <section id="viewStock" class="space-y-3">
-      <div class="flex gap-2">
-        <input 
-          type="text" 
-          id="searchFilter" 
-          oninput="renderInventory()" 
-          placeholder="Szukaj po nazwie, kategorii, regale..." 
-          class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500"
-        />
-        <select id="categoryFilter" onchange="renderInventory()" class="bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
-          <option value="ALL">Wszystko</option>
-          <option value="LOW">⚠️ Braki</option>
-          <option value="FIELD">🚚 Teren</option>
-        </select>
+      <div class="flex flex-wrap gap-2 items-center justify-between">
+        <div class="flex-1 flex gap-2 min-w-[240px]">
+          <input 
+            type="text" 
+            id="searchFilter" 
+            oninput="renderInventory()" 
+            placeholder="Szukaj po nazwie, kategorii, regale..." 
+            class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500"
+          />
+          <select id="categoryFilter" onchange="renderInventory()" class="bg-slate-800 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+            <option value="ALL">Wszystko</option>
+            <option value="LOW">⚠️ Braki</option>
+            <option value="FIELD">🚚 Teren</option>
+          </select>
+        </div>
+        <!-- PRZYCISK TRYBU ZAZNACZANIA KILKU POZYCJI -->
+        <button id="btnToggleSelectMode" onclick="toggleSelectMode()" class="bg-slate-800 hover:bg-slate-700 border border-slate-600/70 text-slate-300 text-xs px-3 py-2 rounded-xl font-bold flex items-center gap-1.5 transition">
+          <span>☑️</span> Zaznacz
+        </button>
+      </div>
+
+      <!-- PASEK MASOWYCH AKCJI (POJAWIA SIĘ GDY WŁĄCZONO TRYB ZAZNACZANIA) -->
+      <div id="bulkActionBar" class="hidden bg-slate-800 border border-indigo-700/60 rounded-xl p-2.5 flex items-center justify-between shadow-lg">
+        <div class="flex items-center gap-2">
+          <button onclick="toggleSelectAll()" id="btnSelectAll" class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 px-2.5 py-1 rounded-lg">
+            Zaznacz wszystkie
+          </button>
+          <span id="bulkSelectedCount" class="text-xs font-bold text-indigo-400">Wybrano: 0</span>
+        </div>
+        <button onclick="deleteSelectedItems()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs px-3 py-1.5 rounded-lg flex items-center gap-1 shadow transition">
+          <span>🗑️</span> Usuń zaznaczone
+        </button>
       </div>
 
       <div id="inventoryList" class="space-y-2">
@@ -129,6 +148,23 @@
     </section>
 
   </main>
+
+  <!-- PŁYWAJĄCE MENU KONTEKSTOWE (PRAWY PRZYCISK MYSZY) -->
+  <div id="customContextMenu" class="fixed hidden z-50 bg-slate-800/95 border border-slate-700 rounded-xl shadow-2xl py-1.5 w-48 backdrop-blur-md">
+    <button onclick="contextActionEdit()" class="w-full text-left px-3.5 py-2 text-xs text-slate-200 hover:bg-slate-700/80 flex items-center gap-2">
+      <span>✏️</span> Edytuj dane kartoteki
+    </button>
+    <button onclick="contextActionOpenStock()" class="w-full text-left px-3.5 py-2 text-xs text-slate-200 hover:bg-slate-700/80 flex items-center gap-2">
+      <span>⚡</span> Operacja stanu (+ / - / Teren)
+    </button>
+    <button onclick="contextActionPrintQR()" class="w-full text-left px-3.5 py-2 text-xs text-slate-200 hover:bg-slate-700/80 flex items-center gap-2">
+      <span>🏷️</span> Drukuj etykietę QR
+    </button>
+    <div class="border-t border-slate-700/80 my-1"></div>
+    <button onclick="contextActionDelete()" class="w-full text-left px-3.5 py-2 text-xs text-rose-400 hover:bg-rose-950/40 flex items-center gap-2 font-bold">
+      <span>🗑️</span> Usuń tę pozycję
+    </button>
+  </div>
 
   <!-- DOLNY PASEK NAWIGACJI -->
   <nav class="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 border-t border-slate-800 backdrop-blur-md px-3 py-2 flex items-center justify-around shadow-2xl">
@@ -158,57 +194,55 @@
     </button>
   </nav>
 
-  <!-- MODAL AI OCR: WERYFIKACJA I INTELIGENTNE SCALANIE DOSTAWY -->
-  <div id="aiModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
-    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 shadow-2xl my-4 max-h-[94vh] flex flex-col">
-      <div class="flex justify-between items-start border-b border-slate-700 pb-2.5">
+  <!-- MODAL: EDYCJA DANYCH POZYCJI (OTWIERANY Z MENU PRAWYM PRZYCISKIEM) -->
+  <div id="editItemModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <form onsubmit="saveEditedItem(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+        <h3 class="text-sm font-bold text-white flex items-center gap-1.5">
+          <span>✏️</span> Edycja kartoteki towarowej
+        </h3>
+        <button type="button" onclick="closeEditModal()" class="text-slate-400 hover:text-white p-1">✕</button>
+      </div>
+
+      <input type="hidden" id="editItemId">
+
+      <div>
+        <label class="text-[11px] text-slate-300 block mb-1">Kod kreskowy / Identyfikator:</label>
+        <input type="text" id="editItemBarcode" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white font-mono">
+      </div>
+
+      <div>
+        <label class="text-[11px] text-slate-300 block mb-1">Nazwa towaru *:</label>
+        <input type="text" id="editItemName" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white">
+      </div>
+
+      <div class="grid grid-cols-2 gap-2">
         <div>
-          <span class="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50">Smart Merge OCR</span>
-          <h3 class="text-sm font-bold text-white mt-1">Przyjęcie Dostawy z Faktury / WZ</h3>
-          <p id="aiDocInfo" class="text-[11px] text-slate-400 mt-0.5">Analiza obrazu...</p>
+          <label class="text-[11px] text-slate-300 block mb-1">Kategoria:</label>
+          <input type="text" id="editItemCategory" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white">
         </div>
-        <button onclick="closeAiModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
-      </div>
-
-      <div id="aiLoadingState" class="py-12 flex flex-col items-center justify-center space-y-3">
-        <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-        <p class="text-sm text-slate-200 font-medium">Odczytywanie pozycji...</p>
-        <p class="text-xs text-slate-500">Przeliczanie zgrzewek na sztuki i wyszukiwanie w bazie</p>
-      </div>
-
-      <div id="aiItemsContainer" class="hidden flex-1 overflow-y-auto space-y-3 pr-1">
-        <div id="aiSummaryBanner" class="bg-slate-900 border border-indigo-800/50 p-2.5 rounded-xl flex justify-between text-xs">
-          <div>
-            <span class="text-slate-400 block text-[10px]">Dostawca:</span>
-            <strong id="aiSupplierName" class="text-white text-xs">---</strong>
-          </div>
-          <div>
-            <span class="text-slate-400 block text-[10px]">Dokument:</span>
-            <strong id="aiDocNum" class="text-indigo-400 text-xs font-mono">---</strong>
-          </div>
-          <div class="text-right">
-            <span class="text-slate-400 block text-[10px]">Suma Brutto:</span>
-            <strong id="aiTotalGross" class="text-emerald-400 text-xs">---</strong>
-          </div>
+        <div>
+          <label class="text-[11px] text-slate-300 block mb-1">Lokalizacja / Regał:</label>
+          <input type="text" id="editItemLocation" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white">
         </div>
-
-        <p class="text-[11px] text-slate-300">Sprawdź dopasowanie do magazynu (pozycje zostaną zsumowane z istniejącymi):</p>
-        <div id="aiItemsList" class="space-y-2.5"></div>
       </div>
 
-      <div id="aiImagePreviewContainer" class="hidden border-t border-slate-700 pt-2 flex items-center justify-between">
-        <span class="text-xs text-slate-400">Załącznik skanu dokumentu</span>
-        <button onclick="toggleImagePreview()" class="text-xs text-indigo-400 hover:underline">Pokaż/Ukryj skan</button>
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="text-[11px] text-slate-300 block mb-1">Jednostka:</label>
+          <input type="text" id="editItemUnit" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2 py-1.5 text-xs text-white text-center">
+        </div>
+        <div>
+          <label class="text-[11px] text-slate-300 block mb-1">Alarm stanu minimalnego:</label>
+          <input type="number" id="editItemMinQty" value="3" min="0" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2 py-1.5 text-xs text-white text-center">
+        </div>
       </div>
-      <img id="aiImagePreview" class="hidden max-h-36 rounded-xl object-contain border border-slate-700 bg-black" />
 
-      <div id="aiModalActions" class="hidden pt-2.5 border-t border-slate-700 flex justify-end gap-2">
-        <button onclick="closeAiModal()" class="px-4 py-2 rounded-xl text-xs text-slate-400 hover:bg-slate-700">Anuluj</button>
-        <button onclick="confirmAndApplyDelivery()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow">
-          <span>✓</span> Zastosuj przyjęcie
-        </button>
+      <div class="flex justify-end gap-2 pt-2 border-t border-slate-700">
+        <button type="button" onclick="closeEditModal()" class="px-3 py-1.5 rounded-xl text-xs text-slate-300 hover:bg-slate-700">Anuluj</button>
+        <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-1.5 rounded-xl text-xs shadow">Zapisz zmiany</button>
       </div>
-    </div>
+    </form>
   </div>
 
   <!-- MODAL: SZYBKA AKCJA DLA TOWARU -->
@@ -261,12 +295,17 @@
         </button>
       </div>
 
-      <button onclick="openPrintLabelModal()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow transition">
-        <span>🏷️</span> Drukuj Etykietę QR
-      </button>
+      <div class="flex gap-2">
+        <button onclick="openEditModal(selectedItemId)" class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow">
+          <span>✏️</span> Edytuj dane
+        </button>
+        <button onclick="openPrintLabelModal()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow">
+          <span>🏷️</span> Drukuj QR
+        </button>
+      </div>
 
       <div class="flex justify-between items-center pt-2 border-t border-slate-700 text-xs">
-        <button onclick="deleteCurrentItem()" class="text-rose-400 hover:underline">Usuń pozycję</button>
+        <button onclick="deleteCurrentItem()" class="text-rose-400 hover:underline">Usuń tę pozycję</button>
         <button onclick="closeActionModal()" class="text-slate-400 hover:text-white">Zamknij</button>
       </div>
     </div>
@@ -326,6 +365,59 @@
     </form>
   </div>
 
+  <!-- MODAL AI OCR: WERYFIKACJA I INTELIGENTNE SCALANIE DOSTAWY -->
+  <div id="aiModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 shadow-2xl my-4 max-h-[94vh] flex flex-col">
+      <div class="flex justify-between items-start border-b border-slate-700 pb-2.5">
+        <div>
+          <span class="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50">Smart Merge OCR</span>
+          <h3 class="text-sm font-bold text-white mt-1">Przyjęcie Dostawy z Faktury / WZ</h3>
+          <p id="aiDocInfo" class="text-[11px] text-slate-400 mt-0.5">Analiza obrazu...</p>
+        </div>
+        <button onclick="closeAiModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
+      </div>
+
+      <div id="aiLoadingState" class="py-12 flex flex-col items-center justify-center space-y-3">
+        <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+        <p class="text-sm text-slate-200 font-medium">Odczytywanie pozycji...</p>
+        <p class="text-xs text-slate-500">Przeliczanie zgrzewek na sztuki i wyszukiwanie w bazie</p>
+      </div>
+
+      <div id="aiItemsContainer" class="hidden flex-1 overflow-y-auto space-y-3 pr-1">
+        <div id="aiSummaryBanner" class="bg-slate-900 border border-indigo-800/50 p-2.5 rounded-xl flex justify-between text-xs">
+          <div>
+            <span class="text-slate-400 block text-[10px]">Dostawca:</span>
+            <strong id="aiSupplierName" class="text-white text-xs">---</strong>
+          </div>
+          <div>
+            <span class="text-slate-400 block text-[10px]">Dokument:</span>
+            <strong id="aiDocNum" class="text-indigo-400 text-xs font-mono">---</strong>
+          </div>
+          <div class="text-right">
+            <span class="text-slate-400 block text-[10px]">Suma Brutto:</span>
+            <strong id="aiTotalGross" class="text-emerald-400 text-xs">---</strong>
+          </div>
+        </div>
+
+        <p class="text-[11px] text-slate-300">Sprawdź dopasowanie do magazynu (pozycje zostaną zsumowane z istniejącymi):</p>
+        <div id="aiItemsList" class="space-y-2.5"></div>
+      </div>
+
+      <div id="aiImagePreviewContainer" class="hidden border-t border-slate-700 pt-2 flex items-center justify-between">
+        <span class="text-xs text-slate-400">Załącznik skanu dokumentu</span>
+        <button onclick="toggleImagePreview()" class="text-xs text-indigo-400 hover:underline">Pokaż/Ukryj skan</button>
+      </div>
+      <img id="aiImagePreview" class="hidden max-h-36 rounded-xl object-contain border border-slate-700 bg-black" />
+
+      <div id="aiModalActions" class="hidden pt-2.5 border-t border-slate-700 flex justify-end gap-2">
+        <button onclick="closeAiModal()" class="px-4 py-2 rounded-xl text-xs text-slate-400 hover:bg-slate-700">Anuluj</button>
+        <button onclick="confirmAndApplyDelivery()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow">
+          <span>✓</span> Zastosuj przyjęcie
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- OBSZAR DRUKU -->
   <div id="printArea" class="hidden">
     <div style="border: 2px dashed #333; padding: 15px; border-radius: 8px; display: inline-block; width: 320px; font-family: Arial, sans-serif;">
@@ -351,12 +443,16 @@
     let inventory = JSON.parse(localStorage.getItem('magazyn_offline_items')) || DEFAULT_LOCAL_ITEMS;
     let deliveries = JSON.parse(localStorage.getItem('magazyn_offline_deliveries')) || [];
     let selectedItemId = null;
+    let contextMenuItemId = null;
     let html5QrCode = null;
     let isCameraRunning = false;
     let isCloudOnline = false;
     let currentExtractedDelivery = null;
 
-    // --- SYNTEZA DŹWIĘKU I WIBRACJA HAPTYCZNA ---
+    // Zmienne masowego zaznaczania
+    let isSelectMode = false;
+    let selectedItemIds = new Set();
+
     function triggerScanFeedback() {
       if (navigator.vibrate) {
         try { navigator.vibrate(60); } catch (e) {}
@@ -375,7 +471,6 @@
       } catch (e) {}
     }
 
-    // --- ROZPOZNAWANIE I NORMALIZACJA NAZW (FUZZY MATCHING) ---
     function normalizeText(text) {
       return (text || '').toLowerCase()
         .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()\[\]]/g, ' ')
@@ -388,7 +483,6 @@
       const cleanTarget = normalizeText(invoiceName);
       const targetWords = cleanTarget.split(' ').filter(w => w.length > 2);
 
-      // 1. Sprawdzenie dokładnego dopasowania lub zawierania całej frazy
       for (const item of inventory) {
         const cleanItem = normalizeText(item.name);
         if (cleanTarget === cleanItem || cleanTarget.includes(cleanItem) || cleanItem.includes(cleanTarget)) {
@@ -396,7 +490,6 @@
         }
       }
 
-      // 2. Dopasowanie słów kluczowych (np. "białko" + "pasteryzowane")
       let bestItem = null;
       let maxOverlap = 0;
 
@@ -487,6 +580,7 @@
       }
     }
 
+    // --- RENDEROWANIE Z OBSŁUGĄ CHECKBOXÓW I PRAWYM PRZYCISKIEM ---
     function renderInventory() {
       const search = document.getElementById('searchFilter').value.toLowerCase();
       const filter = document.getElementById('categoryFilter').value;
@@ -514,9 +608,27 @@
 
       list.innerHTML = filtered.map(item => {
         const isLow = item.qty <= item.minQty;
+        const isChecked = selectedItemIds.has(item.id);
+
         return `
-          <div onclick="openActionModal('${item.id}')" class="bg-slate-800 hover:bg-slate-750 border ${isLow ? 'border-rose-500/60' : 'border-slate-700/80'} rounded-xl p-3 flex items-center justify-between cursor-pointer transition shadow-sm active:scale-[0.99]">
-            <div class="space-y-1 pr-2">
+          <div 
+            oncontextmenu="handleItemContextMenu(event, '${item.id}')"
+            onclick="handleItemCardClick(event, '${item.id}')" 
+            class="bg-slate-800 hover:bg-slate-750 border ${isLow ? 'border-rose-500/60' : 'border-slate-700/80'} rounded-xl p-3 flex items-center justify-between cursor-pointer transition shadow-sm active:scale-[0.99] relative"
+          >
+            <!-- Checkbox do masowego zaznaczania -->
+            ${isSelectMode ? `
+              <div class="pr-2.5 flex items-center" onclick="event.stopPropagation()">
+                <input 
+                  type="checkbox" 
+                  ${isChecked ? 'checked' : ''} 
+                  onchange="toggleSelectItem('${item.id}', this.checked)"
+                  class="w-4 h-4 rounded text-indigo-600 focus:ring-0 focus:ring-offset-0 bg-slate-900 border-slate-600 cursor-pointer"
+                >
+              </div>
+            ` : ''}
+
+            <div class="space-y-1 pr-2 flex-1">
               <div class="flex items-center gap-1.5 flex-wrap">
                 <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-slate-700 text-slate-300">${item.category || 'Ogólne'}</span>
                 <span class="text-[11px] text-slate-400">📍 ${item.location || 'Brak lok.'}</span>
@@ -525,6 +637,7 @@
               <h4 class="font-bold text-xs text-white">${item.name}</h4>
               ${isLow ? `<span class="inline-block text-[10px] text-rose-400 font-medium">⚠️ Niski stan (min: ${item.minQty})</span>` : ''}
             </div>
+
             <div class="text-right flex items-center gap-2">
               ${item.inField > 0 ? `
                 <div class="bg-amber-950/60 border border-amber-700/50 px-2 py-0.5 rounded-lg text-center">
@@ -541,6 +654,212 @@
           </div>
         `;
       }).join('');
+    }
+
+    // --- OBSŁUGA MASOWEGO ZAZNACZANIA (MULTI-SELECT) ---
+    function toggleSelectMode() {
+      isSelectMode = !isSelectMode;
+      const btn = document.getElementById('btnToggleSelectMode');
+      const bulkBar = document.getElementById('bulkActionBar');
+
+      if (isSelectMode) {
+        btn.className = "bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-2 rounded-xl font-bold flex items-center gap-1.5 transition shadow";
+        btn.innerHTML = "<span>✕</span> Anuluj";
+        bulkBar.classList.remove('hidden');
+      } else {
+        btn.className = "bg-slate-800 hover:bg-slate-700 border border-slate-600/70 text-slate-300 text-xs px-3 py-2 rounded-xl font-bold flex items-center gap-1.5 transition";
+        btn.innerHTML = "<span>☑️</span> Zaznacz";
+        bulkBar.classList.add('hidden');
+        selectedItemIds.clear();
+      }
+      updateBulkSelectedCount();
+      renderInventory();
+      triggerScanFeedback();
+    }
+
+    function toggleSelectItem(id, isChecked) {
+      if (isChecked) {
+        selectedItemIds.add(id);
+      } else {
+        selectedItemIds.delete(id);
+      }
+      updateBulkSelectedCount();
+      triggerScanFeedback();
+    }
+
+    function toggleSelectAll() {
+      const search = document.getElementById('searchFilter').value.toLowerCase();
+      const filter = document.getElementById('categoryFilter').value;
+      const currentFiltered = inventory.filter(item => {
+        const matchesText = item.name.toLowerCase().includes(search) || item.barcode.toLowerCase().includes(search);
+        if (!matchesText) return false;
+        if (filter === 'LOW') return item.qty <= item.minQty;
+        if (filter === 'FIELD') return (item.inField || 0) > 0;
+        return true;
+      });
+
+      if (selectedItemIds.size === currentFiltered.length) {
+        selectedItemIds.clear();
+      } else {
+        currentFiltered.forEach(i => selectedItemIds.add(i.id));
+      }
+      updateBulkSelectedCount();
+      renderInventory();
+      triggerScanFeedback();
+    }
+
+    function updateBulkSelectedCount() {
+      const countLabel = document.getElementById('bulkSelectedCount');
+      if (countLabel) {
+        countLabel.innerText = `Wybrano: ${selectedItemIds.size}`;
+      }
+    }
+
+    async function deleteSelectedItems() {
+      if (selectedItemIds.size === 0) {
+        alert("Zaznacz przynajmniej jedną pozycję do usunięcia.");
+        return;
+      }
+
+      if (!confirm(`Czy na pewno chcesz usunąć ${selectedItemIds.size} zaznaczonych pozycji?`)) {
+        return;
+      }
+
+      const idsToDelete = Array.from(selectedItemIds);
+      inventory = inventory.filter(i => !selectedItemIds.has(i.id));
+      localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
+      
+      toggleSelectMode(); // wyłącz tryb zaznaczania
+      renderInventory();
+      triggerScanFeedback();
+
+      if (isCloudOnline) {
+        for (const id of idsToDelete) {
+          try {
+            await apiRequest(`/inventory?id=eq.${id}`, 'DELETE');
+          } catch (e) {}
+        }
+      }
+    }
+
+    // --- OBSŁUGA MENU KONTEKSTOWEGO (PRAWY PRZYCISK MYSZY) ---
+    function handleItemContextMenu(e, id) {
+      e.preventDefault();
+      contextMenuItemId = id;
+      selectedItemId = id;
+
+      const menu = document.getElementById('customContextMenu');
+      menu.classList.remove('hidden');
+
+      // Dopasowanie pozycji menu do kursora lub dotknięcia
+      let x = e.clientX;
+      let y = e.clientY;
+
+      if (x + 200 > window.innerWidth) x = window.innerWidth - 210;
+      if (y + 180 > window.innerHeight) y = window.innerHeight - 190;
+
+      menu.style.left = `${x}px`;
+      menu.style.top = `${y}px`;
+      triggerScanFeedback();
+    }
+
+    function hideContextMenu() {
+      const menu = document.getElementById('customContextMenu');
+      if (menu) menu.classList.add('hidden');
+    }
+
+    function contextActionEdit() {
+      hideContextMenu();
+      if (contextMenuItemId) openEditModal(contextMenuItemId);
+    }
+
+    function contextActionOpenStock() {
+      hideContextMenu();
+      if (contextMenuItemId) openActionModal(contextMenuItemId);
+    }
+
+    function contextActionPrintQR() {
+      hideContextMenu();
+      if (contextMenuItemId) {
+        selectedItemId = contextMenuItemId;
+        openPrintLabelModal();
+      }
+    }
+
+    function contextActionDelete() {
+      hideContextMenu();
+      if (contextMenuItemId) {
+        selectedItemId = contextMenuItemId;
+        deleteCurrentItem();
+      }
+    }
+
+    function handleItemCardClick(e, id) {
+      if (isSelectMode) {
+        const isChecked = selectedItemIds.has(id);
+        toggleSelectItem(id, !isChecked);
+        renderInventory();
+      } else {
+        openActionModal(id);
+      }
+    }
+
+    // --- EDYCJA DANYCH POZYCJI (MODAL EDYCJI) ---
+    function openEditModal(id) {
+      const item = inventory.find(i => i.id === id);
+      if (!item) return;
+
+      closeActionModal();
+      document.getElementById('editItemId').value = item.id;
+      document.getElementById('editItemBarcode').value = item.barcode;
+      document.getElementById('editItemName').value = item.name;
+      document.getElementById('editItemCategory').value = item.category || 'Ogólne';
+      document.getElementById('editItemLocation').value = item.location || '-';
+      document.getElementById('editItemUnit').value = item.unit || 'szt.';
+      document.getElementById('editItemMinQty').value = item.minQty || 0;
+
+      const modal = document.getElementById('editItemModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeEditModal() {
+      const modal = document.getElementById('editItemModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    async function saveEditedItem(e) {
+      e.preventDefault();
+      const id = document.getElementById('editItemId').value;
+      const item = inventory.find(i => i.id === id);
+      if (!item) return;
+
+      item.barcode = document.getElementById('editItemBarcode').value.trim();
+      item.name = document.getElementById('editItemName').value.trim();
+      item.category = document.getElementById('editItemCategory').value.trim() || 'Ogólne';
+      item.location = document.getElementById('editItemLocation').value.trim() || '-';
+      item.unit = document.getElementById('editItemUnit').value.trim() || 'szt.';
+      item.minQty = parseInt(document.getElementById('editItemMinQty').value) || 0;
+
+      localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
+      renderInventory();
+      closeEditModal();
+      triggerScanFeedback();
+
+      if (isCloudOnline) {
+        try {
+          await apiRequest(`/inventory?id=eq.${item.id}`, 'PATCH', {
+            barcode: item.barcode,
+            name: item.name,
+            category: item.category,
+            location: item.location,
+            unit: item.unit,
+            min_qty: item.minQty,
+            updated_at: new Date()
+          });
+        } catch (err) {}
+      }
     }
 
     function renderDeliveries() {
@@ -710,7 +1029,6 @@ Zwróć wynik jako czysty JSON:
       event.target.value = '';
     }
 
-    // --- RENDEROWANIE POZYCJI Z AUTOMATYCZNYM SCALANIEM I ROZWIJANĄ LISTĄ ---
     function displayExtractedItems(delivery) {
       document.getElementById('aiLoadingState').classList.add('hidden');
       document.getElementById('aiItemsContainer').classList.remove('hidden');
@@ -729,14 +1047,11 @@ Zwróć wynik jako czysty JSON:
       }
 
       container.innerHTML = delivery.items.map((item, index) => {
-        // Automatyczne znalezienie najlepszego dopasowania w bazie
         const match = findBestInventoryMatch(item.name);
         const matchedId = match ? match.id : '';
 
         return `
           <div class="bg-slate-900 border ${match ? 'border-emerald-600/70' : 'border-amber-600/70'} rounded-xl p-3 space-y-2">
-            
-            <!-- Górny pasek statusu: Scalenie czy Nowy -->
             <div class="flex items-center justify-between gap-2">
               <span id="aiBadge_${index}" class="text-[9px] font-bold px-2 py-0.5 rounded ${match ? 'bg-emerald-950 text-emerald-300 border border-emerald-700/50' : 'bg-amber-950 text-amber-300 border border-amber-700/50'}">
                 ${match ? `✓ Scal z: ${match.name} (Obecnie: ${match.qty}${match.unit})` : '+ Nowa kartoteka magazynowa'}
@@ -746,7 +1061,6 @@ Zwróć wynik jako czysty JSON:
               </button>
             </div>
 
-            <!-- Pole nazwy z faktury -->
             <div class="flex items-center justify-between gap-2">
               <div class="flex-1">
                 <input type="text" id="aiItemName_${index}" value="${item.name}" class="bg-transparent font-bold text-xs text-white w-full focus:outline-none focus:border-b border-indigo-500">
@@ -758,7 +1072,6 @@ Zwróć wynik jako czysty JSON:
               </div>
             </div>
 
-            <!-- Rozwijana lista: Przypisanie do istniejącego towaru -->
             <div class="pt-1 border-t border-slate-800/80 flex items-center gap-2">
               <span class="text-[10px] text-slate-400 whitespace-nowrap">Przypisz do:</span>
               <select id="aiSelectMatch_${index}" onchange="handleManualMatchChange(${index})" class="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-[11px] text-white w-full focus:outline-none focus:border-emerald-500">
@@ -770,7 +1083,6 @@ Zwróć wynik jako czysty JSON:
                 `).join('')}
               </select>
             </div>
-
           </div>
         `;
       }).join('');
@@ -813,7 +1125,6 @@ Zwróć wynik jako czysty JSON:
       currentExtractedDelivery = null;
     }
 
-    // --- ZAPIS PRZYJĘCIA: SUMOWANIE ISTNIEJĄCYCH I TWORZENIE TYLKO BRAKUJĄCYCH ---
     async function confirmAndApplyDelivery() {
       if (!currentExtractedDelivery || !currentExtractedDelivery.items) return;
 
@@ -828,17 +1139,14 @@ Zwróć wynik jako czysty JSON:
         if (qty <= 0) continue;
         finalItems.push({ name, qty, unit, netPrice: currentExtractedDelivery.items[i]?.netPrice });
 
-        // Jeśli wybrano połączenie z istniejącym towarem:
         let match = null;
         if (chosenMatchId) {
           match = inventory.find(inv => inv.id === chosenMatchId);
         } else {
-          // Dodatkowa asekuracja: czy towar o identycznej nazwie już nie istnieje
           match = inventory.find(inv => inv.name.toLowerCase() === name.toLowerCase());
         }
 
         if (match) {
-          // SUMUJEMY STAN DO ISTNIEJĄCEJ POZYCJI
           match.qty += qty;
           if (isCloudOnline) {
             try {
@@ -846,7 +1154,6 @@ Zwróć wynik jako czysty JSON:
             } catch (e) {}
           }
         } else {
-          // TWORZYMY NOWĄ KARTOTEKĘ (TYLKO DLA RZECZYWIŚCIE NOWEGO TOWARU)
           const newItem = {
             id: Date.now().toString() + '_' + i,
             barcode: 'RC-' + Math.floor(100000 + Math.random() * 900000),
