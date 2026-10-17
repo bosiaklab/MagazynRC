@@ -34,13 +34,13 @@
     <div class="flex items-center space-x-2">
       <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-lg">M</div>
       <div>
-        <h1 class="font-bold text-base leading-tight">MagazynRC <span class="text-xs font-normal text-sky-400 bg-sky-950/60 border border-sky-700/50 px-1.5 py-0.5 rounded ml-1">Ultra-Fast AI</span></h1>
+        <h1 class="font-bold text-base leading-tight">MagazynRC <span class="text-xs font-normal text-sky-400 bg-sky-950/60 border border-sky-700/50 px-1.5 py-0.5 rounded ml-1">3.8 Flash</span></h1>
         <p id="syncStatus" class="text-[10px] text-amber-400 font-medium">Inicjalizacja...</p>
       </div>
     </div>
     <div class="flex gap-2">
       <button onclick="triggerInvoiceUpload()" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white text-xs px-3.5 py-2 rounded-lg font-bold flex items-center gap-1.5 transition shadow">
-        <span>⚡</span> Szybki Skan Faktury
+        <span>⚡</span> Odczytaj Fakturę AI
       </button>
       <button onclick="openNewItemModal('')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs px-3 py-2 rounded-lg font-bold flex items-center gap-1 transition">
         <span>+</span> Dodaj
@@ -69,14 +69,14 @@
       </div>
     </div>
 
-    <!-- SEKCJA SKANERA KODÓW -->
+    <!-- SEKCJA SKANERA -->
     <section class="bg-slate-800 border border-slate-700 rounded-2xl p-4 shadow-lg space-y-3">
       <div class="flex flex-wrap items-center justify-between gap-2">
         <div>
           <h2 class="font-bold text-sm text-white flex items-center gap-2">
             <span>📷</span> Skaner Kodów (Kamera / Bluetooth)
           </h2>
-          <p class="text-xs text-slate-400">Skanuj kod QR lub kreskowy, aby wydać lub przyjąć sprzęt</p>
+          <p class="text-xs text-slate-400">Skanuj kod QR lub kreskowy, aby wydać lub przyjąć towar</p>
         </div>
         <button id="btnToggleCamera" onclick="toggleCamera()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition shadow">
           Uruchom kamerę
@@ -150,8 +150,8 @@
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-5 space-y-4 shadow-2xl my-6 max-h-[92vh] flex flex-col">
       <div class="flex justify-between items-start border-b border-slate-700 pb-3">
         <div>
-          <span class="text-[11px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50">Gemini 3.5 Flash-Lite</span>
-          <h3 class="text-lg font-bold text-white mt-1">Przyjęcie Dostawy z Faktury / WZ</h3>
+          <span class="text-[11px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50">Gemini 3.8 Flash (Fast OCR)</span>
+          <h3 class="text-lg font-bold text-white mt-1">Przyjęcie Dostawy z Dokumentu</h3>
           <p id="aiDocInfo" class="text-xs text-slate-400 mt-0.5">Analiza obrazu...</p>
         </div>
         <button onclick="closeAiModal()" class="text-slate-400 hover:text-white text-xl font-bold">✕</button>
@@ -159,8 +159,8 @@
 
       <div id="aiLoadingState" class="py-12 flex flex-col items-center justify-center space-y-3">
         <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-        <p class="text-sm text-slate-200 font-medium">Błyskawiczne odczytywanie pozycji...</p>
-        <p class="text-xs text-slate-500">Model Flash-Lite wyciąga tabelę produktów</p>
+        <p class="text-sm text-slate-200 font-medium">Model 3.8 Flash odczytuje fakturę...</p>
+        <p class="text-xs text-slate-500">Brak zbędnego namysłu – bezpośrednie wyciąganie danych</p>
       </div>
 
       <div id="aiItemsContainer" class="hidden flex-1 overflow-y-auto space-y-3 pr-1">
@@ -486,7 +486,7 @@
     function renderDeliveries() {
       const list = document.getElementById('deliveriesList');
       if (deliveries.length === 0) {
-        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-sm">Brak zarchiwizowanych faktur. Kliknij u góry "Szybki Skan Faktury".</div>`;
+        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-sm">Brak zarchiwizowanych faktur. Kliknij u góry "Odczytaj Fakturę AI".</div>`;
         return;
       }
       list.innerHTML = deliveries.map(d => {
@@ -522,7 +522,7 @@
       }).join('');
     }
 
-    // --- LEKKA, SZYBKA KOMPRESJA DO 1024px ---
+    // --- SZYBKA KOMPRESJA DO 1024px ---
     function compressImage(file, maxWidth = 1024, quality = 0.75) {
       return new Promise((resolve, reject) => {
         const img = new Image();
@@ -549,7 +549,7 @@
       document.getElementById('invoiceInput').click();
     }
 
-    // --- BŁYSKAWICZNY ODCZYT: JEDEN MODEL (3.5 FLASH-LITE / 3.8 FLASH) BEZ MYŚLENIA ---
+    // --- GEMINI 3.8 FLASH Z WYŁĄCZONYM THINKING BUDGET (ODCZYT W KILKA SEKUND) ---
     async function processInvoiceImage(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -575,11 +575,9 @@ Zwróć wynik jako JSON z polami:
 - totalGross: string (łączna kwota brutto jeśli widoczna)
 - items: tablica obiektów { "name": string, "qty": number, "unit": string, "netPrice": number lub null }`;
 
-        // Używamy dedykowanego, najszybszego modelu
-        const modelTarget = 'gemini-3.5-flash-lite';
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelTarget}:generateContent?key=${GEMINI_API_KEY}`;
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${GEMINI_API_KEY}`;
 
-        let response = await fetch(endpoint, {
+        const response = await fetch(endpoint, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
@@ -594,23 +592,13 @@ Zwróć wynik jako JSON z polami:
             }],
             generationConfig: {
               response_mime_type: "application/json",
-              temperature: 0.1
+              temperature: 0.1,
+              thinking_config: {
+                thinking_budget: 0
+              }
             }
           })
         });
-
-        // W razie potrzeby bezpieczny fallback na 3.8 Flash
-        if (!response.ok) {
-          const fallbackEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${GEMINI_API_KEY}`;
-          response = await fetch(fallbackEndpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: promptText }, { inline_data: { mime_type: 'image/jpeg', data: base64Data } }] }],
-              generationConfig: { response_mime_type: "application/json", temperature: 0.1 }
-            })
-          });
-        }
 
         const result = await response.json();
         if (result.error) throw new Error(result.error.message);
@@ -637,7 +625,7 @@ Zwróć wynik jako JSON z polami:
       event.target.value = '';
     }
 
-    // --- NATYCHMIASTOWE DOPASOWYWANIE DO BAZY BEZPOŚREDNIO W PRZEGLĄDARCE ---
+    // --- AUTOMATYCZNE PRZYPISANIE DO KATALOGU MAGAZYNOWEGO W TELEFONIE ---
     function displayExtractedItems(delivery) {
       document.getElementById('aiLoadingState').classList.add('hidden');
       document.getElementById('aiItemsContainer').classList.remove('hidden');
@@ -656,7 +644,6 @@ Zwróć wynik jako JSON z polami:
       }
 
       container.innerHTML = delivery.items.map((item, index) => {
-        // Telefon sam błyskawicznie szuka czy towar pasuje do katalogu
         const cleanName = item.name.toLowerCase();
         const match = inventory.find(i => 
           cleanName.includes(i.name.toLowerCase()) || 
@@ -1019,7 +1006,6 @@ Zwróć wynik jako JSON z polami:
       link.click();
     }
 
-    // Inicjalizacja startowa
     fetchInventory();
     fetchDeliveries();
   </script>
