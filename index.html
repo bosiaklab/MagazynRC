@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>MagazynRC - WMS & Price Intelligence</title>
+  <title>MagazynRC - WMS & Event Logistics</title>
   
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -34,7 +34,7 @@
     <div class="flex items-center space-x-2.5">
       <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-base shadow">M</div>
       <div>
-        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-amber-400 bg-amber-950/70 border border-amber-700/50 px-1 py-0.5 rounded ml-1">v2.0 PRICE WATCH</span></h1>
+        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-amber-400 bg-amber-950/70 border border-amber-700/50 px-1 py-0.5 rounded ml-1">EVENT WMS</span></h1>
         <p id="syncStatus" class="text-[10px] text-amber-400 font-medium leading-none mt-0.5">Inicjalizacja...</p>
       </div>
     </div>
@@ -45,13 +45,15 @@
     </div>
   </header>
 
-  <!-- UKRYTY INPUT DLA APARATU / ZDJĘCIA FAKTURY -->
+  <!-- UKRYTE INPUTY DLA APARATU -->
   <input type="file" id="invoiceInput" accept="image/*" capture="environment" class="hidden" onchange="processInvoiceImage(event)">
+  <input type="file" id="eventDispatchInput" accept="image/*" capture="environment" class="hidden" onchange="processEventDispatchImage(event)">
+  <input type="file" id="eventReturnInput" accept="image/*" capture="environment" class="hidden" onchange="processEventReturnImage(event)">
 
   <!-- GŁÓWNY KONTENER TREŚCI -->
   <main class="max-w-4xl mx-auto p-3.5 space-y-4">
 
-    <!-- KARTY PODSUMOWANIA (4 WSKAŹNIKI Z ŁĄCZNĄ WARTOŚCIĄ BAZY) -->
+    <!-- KARTY PODSUMOWANIA -->
     <div class="grid grid-cols-4 gap-2">
       <div class="bg-slate-800/80 border border-slate-700/70 p-2 rounded-xl text-center">
         <p class="text-[10px] text-slate-400">Pozycji</p>
@@ -66,57 +68,60 @@
         <p id="statInField" class="text-base font-bold text-amber-400 mt-0.5">0</p>
       </div>
       <div class="bg-slate-800/80 border border-slate-700/70 p-2 rounded-xl text-center">
-        <p class="text-[10px] text-slate-400">Braki</p>
-        <p id="statLowStock" class="text-base font-bold text-rose-400 mt-0.5">0</p>
+        <p class="text-[10px] text-slate-400">Aktywne eventy</p>
+        <p id="statActiveEvents" class="text-base font-bold text-indigo-400 mt-0.5">0</p>
       </div>
     </div>
 
-    <!-- SEKCJA SKANERA KAMERY I WYSZUKIWARKI BLUETOOTH -->
-    <section id="scannerSection" class="bg-slate-800/90 border border-slate-700 rounded-2xl p-3.5 shadow-lg space-y-3">
-      <div class="flex items-center justify-between">
-        <div>
-          <h2 class="font-bold text-xs text-white flex items-center gap-1.5">
-            <span>📷</span> Skaner Kodów (Kamera / BT)
-          </h2>
-          <p class="text-[11px] text-slate-400">Prawy przycisk myszy na pozycji = Edycja ceny i danych</p>
-        </div>
-        <button id="btnToggleCamera" onclick="toggleCamera()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-1.5 rounded-xl transition shadow">
-          Włącz kamerę
-        </button>
-      </div>
-
-      <div id="cameraContainer" class="hidden overflow-hidden rounded-xl bg-black border border-slate-700">
-        <div id="reader" class="w-full"></div>
-      </div>
-
-      <form onsubmit="handleManualBarcodeSubmit(event)" class="flex gap-2">
-        <input 
-          type="text" 
-          id="barcodeInput" 
-          placeholder="Kliknij pod czytnik lub wpisz kod ręcznie..." 
-          class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
-        />
-        <button type="submit" class="bg-slate-700 hover:bg-slate-600 px-3.5 py-2 rounded-xl text-xs font-semibold transition">
-          Szukaj
-        </button>
-      </form>
-    </section>
-
     <!-- ZAKŁADKI GŁÓWNE -->
-    <div class="flex border-b border-slate-800 gap-4 text-xs font-medium">
-      <button onclick="switchMainTab('stock')" id="tabStockHeaderBtn" class="pb-2 border-b-2 border-emerald-500 text-emerald-400 font-bold">
+    <div class="flex border-b border-slate-800 gap-3 text-xs font-medium overflow-x-auto pb-1">
+      <button onclick="switchMainTab('stock')" id="tabStockHeaderBtn" class="pb-2 border-b-2 border-emerald-500 text-emerald-400 font-bold whitespace-nowrap">
         📦 Stany Magazynowe
       </button>
-      <button onclick="switchMainTab('alerts')" id="tabAlertsHeaderBtn" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1">
-        <span>⚠️</span> Alerty Cenowe <span id="alertsCountBadge" class="bg-rose-950 text-rose-300 border border-rose-700/50 text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
+      <button onclick="switchMainTab('events')" id="tabEventsHeaderBtn" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 whitespace-nowrap font-bold">
+        <span>🎉</span> Realizacje / Eventy <span id="activeEventsBadge" class="bg-amber-950 text-amber-300 border border-amber-700/50 text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
       </button>
-      <button onclick="switchMainTab('deliveries')" id="tabDeliveriesHeaderBtn" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200">
-        📑 Archiwum Faktur & WZ
+      <button onclick="switchMainTab('alerts')" id="tabAlertsHeaderBtn" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1 whitespace-nowrap">
+        <span>⚠️</span> Alerty Cen <span id="alertsCountBadge" class="bg-rose-950 text-rose-300 border border-rose-700/50 text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
+      </button>
+      <button onclick="switchMainTab('deliveries')" id="tabDeliveriesHeaderBtn" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 whitespace-nowrap">
+        📑 Faktury Zakupu
       </button>
     </div>
 
     <!-- WIDOK 1: STANY MAGAZYNOWE -->
     <section id="viewStock" class="space-y-3">
+      <!-- Skaner kodów -->
+      <section id="scannerSection" class="bg-slate-800/90 border border-slate-700 rounded-2xl p-3.5 shadow-lg space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="font-bold text-xs text-white flex items-center gap-1.5">
+              <span>📷</span> Skaner Kodów (Kamera / BT)
+            </h2>
+            <p class="text-[11px] text-slate-400">Prawy przycisk myszy na pozycji = Edycja ceny i danych</p>
+          </div>
+          <button id="btnToggleCamera" onclick="toggleCamera()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-1.5 rounded-xl transition shadow">
+            Włącz kamerę
+          </button>
+        </div>
+
+        <div id="cameraContainer" class="hidden overflow-hidden rounded-xl bg-black border border-slate-700">
+          <div id="reader" class="w-full"></div>
+        </div>
+
+        <form onsubmit="handleManualBarcodeSubmit(event)" class="flex gap-2">
+          <input 
+            type="text" 
+            id="barcodeInput" 
+            placeholder="Kliknij pod czytnik lub wpisz kod ręcznie..." 
+            class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+          />
+          <button type="submit" class="bg-slate-700 hover:bg-slate-600 px-3.5 py-2 rounded-xl text-xs font-semibold transition">
+            Szukaj
+          </button>
+        </form>
+      </section>
+
       <div class="flex flex-wrap gap-2 items-center justify-between">
         <div class="flex-1 flex gap-2 min-w-[240px]">
           <input 
@@ -155,7 +160,26 @@
       </div>
     </section>
 
-    <!-- WIDOK 2: ALERTY CENOWE (HISTORIA PODWYŻEK I OBNIŻEK) -->
+    <!-- WIDOK 2: REALIZACJE / EVENTY (NOWOŚĆ) -->
+    <section id="viewEvents" class="hidden space-y-3">
+      <div class="bg-gradient-to-r from-slate-800 to-indigo-950/60 border border-indigo-700/50 rounded-2xl p-3.5 shadow-md flex items-center justify-between">
+        <div>
+          <h3 class="font-bold text-xs text-white flex items-center gap-1.5">
+            <span>📋</span> Wydania i Zwroty Napojów / Alkoholu
+          </h3>
+          <p class="text-[11px] text-slate-300 mt-0.5">Skanuj arkusze wydań, konsumpcji i rozliczaj straty</p>
+        </div>
+        <button onclick="triggerDispatchUpload()" class="bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-black text-xs px-3 py-2 rounded-xl shadow transition active:scale-95 flex items-center gap-1.5">
+          <span>📸</span> Nowe Wydanie
+        </button>
+      </div>
+
+      <div id="eventsList" class="space-y-3">
+        <div class="text-center py-8 text-slate-500 text-xs">Brak zarejestrowanych realizacji. Kliknij "Nowe Wydanie", aby zeskanować pierwszą kartę.</div>
+      </div>
+    </section>
+
+    <!-- WIDOK 3: ALERTY CENOWE -->
     <section id="viewAlerts" class="hidden space-y-3">
       <div class="flex items-center justify-between">
         <div>
@@ -167,7 +191,7 @@
       <div id="alertsList" class="space-y-2.5"></div>
     </section>
 
-    <!-- WIDOK 3: ARCHIWUM FAKTUR I DOSTAW -->
+    <!-- WIDOK 4: ARCHIWUM FAKTUR I DOSTAW -->
     <section id="viewDeliveries" class="hidden space-y-3">
       <div class="flex items-center justify-between">
         <p class="text-xs text-slate-400">Zarejestrowane dokumenty dostaw i odczyty AI</p>
@@ -177,7 +201,7 @@
 
   </main>
 
-  <!-- PŁYWAJĄCE MENU KONTEKSTOWE (PRAWY PRZYCISK MYSZY) -->
+  <!-- PŁYWAJĄCE MENU KONTEKSTOWE -->
   <div id="customContextMenu" class="fixed hidden z-50 bg-slate-800/95 border border-slate-700 rounded-xl shadow-2xl py-1.5 w-48 backdrop-blur-md">
     <button onclick="contextActionEdit()" class="w-full text-left px-3.5 py-2 text-xs text-slate-200 hover:bg-slate-700/80 flex items-center gap-2">
       <span>✏️</span> Edytuj dane i cenę
@@ -201,9 +225,9 @@
       <span class="text-[10px] font-bold">Magazyn</span>
     </button>
 
-    <button onclick="switchMainTab('alerts')" id="navBtnAlerts" class="flex flex-col items-center gap-1 text-slate-400 hover:text-amber-400 py-1 px-2.5 transition active:scale-95">
-      <span class="text-lg">⚠️</span>
-      <span class="text-[10px] font-bold">Alerty Cen</span>
+    <button onclick="switchMainTab('events')" id="navBtnEvents" class="flex flex-col items-center gap-1 text-slate-400 hover:text-amber-400 py-1 px-2.5 transition active:scale-95">
+      <span class="text-lg">🎉</span>
+      <span class="text-[10px] font-bold">Eventy</span>
     </button>
 
     <button onclick="triggerInvoiceUpload()" class="flex flex-col items-center justify-center -mt-5 bg-gradient-to-tr from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white w-14 h-14 rounded-full shadow-lg border-2 border-slate-900 active:scale-90 transition">
@@ -211,9 +235,9 @@
       <span class="text-[9px] font-black uppercase tracking-tighter">AI FAKT</span>
     </button>
 
-    <button onclick="switchMainTab('deliveries')" id="navBtnDeliveries" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 py-1 px-2.5 transition active:scale-95">
-      <span class="text-lg">📑</span>
-      <span class="text-[10px] font-bold">Dokumenty</span>
+    <button onclick="switchMainTab('alerts')" id="navBtnAlerts" class="flex flex-col items-center gap-1 text-slate-400 hover:text-rose-400 py-1 px-2.5 transition active:scale-95">
+      <span class="text-lg">⚠️</span>
+      <span class="text-[10px] font-bold">Alerty</span>
     </button>
 
     <button onclick="openNewItemModal('')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 py-1 px-2.5 transition active:scale-95">
@@ -221,6 +245,98 @@
       <span class="text-[10px] font-bold">Nowy</span>
     </button>
   </nav>
+
+  <!-- MODAL: KARTA WYDANIA EVENTU (WYJŚCIE) -->
+  <div id="eventDispatchModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 shadow-2xl my-4 max-h-[94vh] flex flex-col">
+      <div class="flex justify-between items-start border-b border-slate-700 pb-2.5">
+        <div>
+          <span class="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-700/50">Wydanie Napojów & Alkoholu</span>
+          <h3 class="text-sm font-bold text-white mt-1">Rejestracja Wyjazdu na Realizację</h3>
+          <p id="eventDispatchDocInfo" class="text-[11px] text-slate-400 mt-0.5">Analiza karty wydania...</p>
+        </div>
+        <button onclick="closeEventDispatchModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
+      </div>
+
+      <div id="eventDispatchLoading" class="py-12 flex flex-col items-center justify-center space-y-3">
+        <div class="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div>
+        <p class="text-sm text-slate-200 font-medium">Odczytywanie karty wydania...</p>
+        <p class="text-xs text-slate-500">Wyciąganie numeru imprezy, daty i ilości wydanych</p>
+      </div>
+
+      <div id="eventDispatchContent" class="hidden flex-1 overflow-y-auto space-y-3 pr-1">
+        <div class="bg-slate-900 border border-amber-800/50 p-2.5 rounded-xl space-y-2 text-xs">
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <span class="text-[10px] text-slate-400 block">Numer imprezy:</span>
+              <input type="text" id="evDispNum" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1 font-mono font-bold text-amber-400 text-xs">
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400 block">Data wydania:</span>
+              <input type="text" id="evDispDate" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1 text-slate-200 text-xs">
+            </div>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-400 block">Nazwa realizacji / Klient:</span>
+            <input type="text" id="evDispName" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1 font-bold text-white text-xs">
+          </div>
+        </div>
+
+        <p class="text-[11px] text-slate-300">Pozycje do wydania w teren (zmniejszą stan magazynowy):</p>
+        <div id="evDispItemsList" class="space-y-2"></div>
+      </div>
+
+      <div id="eventDispatchActions" class="hidden pt-2.5 border-t border-slate-700 flex justify-end gap-2">
+        <button onclick="closeEventDispatchModal()" class="px-4 py-2 rounded-xl text-xs text-slate-400 hover:bg-slate-700">Anuluj</button>
+        <button onclick="confirmAndApplyEventDispatch()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow">
+          <span>🚚</span> Zatwierdź wydanie w teren
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ROZLICZENIE POWROTU / ZWROTU ZE ZDJĘCIA KARTY Z EXCELA -->
+  <div id="eventReturnModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 shadow-2xl my-4 max-h-[94vh] flex flex-col">
+      <div class="flex justify-between items-start border-b border-slate-700 pb-2.5">
+        <div>
+          <span class="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-700/50">Rozliczenie Powrotu z Eventu</span>
+          <h3 id="evReturnModalTitle" class="text-sm font-bold text-white mt-1">Rozliczenie Realizacji</h3>
+          <p id="evReturnDocInfo" class="text-[11px] text-slate-400 mt-0.5">Analiza karty ze zwrotami i konsumpcją...</p>
+        </div>
+        <button onclick="closeEventReturnModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
+      </div>
+
+      <div id="evReturnLoading" class="py-12 flex flex-col items-center justify-center space-y-3">
+        <div class="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+        <p class="text-sm text-slate-200 font-medium">Odczytywanie odręcznych wpisów...</p>
+        <p class="text-xs text-slate-500">Zliczanie konsumpcji, zwrotów i kalkulacja strat</p>
+      </div>
+
+      <div id="evReturnContent" class="hidden flex-1 overflow-y-auto space-y-3 pr-1">
+        <div class="bg-slate-900 border border-slate-700 p-2.5 rounded-xl flex justify-between text-xs items-center">
+          <div>
+            <span class="text-[10px] text-slate-400 block">Realizacja:</span>
+            <strong id="evReturnEventLabel" class="text-white text-xs">---</strong>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-400 block">Data zwrotu:</span>
+            <input type="text" id="evReturnDateInput" class="bg-slate-800 border border-slate-700 rounded px-2 py-0.5 text-xs text-emerald-400 font-mono">
+          </div>
+        </div>
+
+        <p class="text-[11px] text-slate-300">Weryfikacja: Zwroty wrócą na magazyn, a Konsumpcja zostanie rozliczona:</p>
+        <div id="evReturnItemsList" class="space-y-2.5"></div>
+      </div>
+
+      <div id="evReturnActions" class="hidden pt-2.5 border-t border-slate-700 flex justify-end gap-2">
+        <button onclick="closeEventReturnModal()" class="px-4 py-2 rounded-xl text-xs text-slate-400 hover:bg-slate-700">Anuluj</button>
+        <button onclick="confirmAndApplyEventReturn()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow">
+          <span>✓</span> Zakończ i Rozlicz Magazyn
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- MODAL: EDYCJA DANYCH POZYCJI I CENY -->
   <div id="editItemModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
@@ -334,7 +450,7 @@
 
       <div class="flex gap-2">
         <button onclick="openEditModal(selectedItemId)" class="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow">
-          <span>✏️</span> Edytuj dane i cenę
+          <span>✏️</span> Edytuj dane
         </button>
         <button onclick="openPrintLabelModal()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-3 rounded-xl text-xs flex items-center justify-center gap-1.5 shadow">
           <span>🏷️</span> Drukuj QR
@@ -409,13 +525,13 @@
     </form>
   </div>
 
-  <!-- MODAL AI OCR: WERYFIKACJA, SCALANIE I WYKRYWANIE ZMIAN CEN -->
+  <!-- MODAL AI OCR: WERYFIKACJA FAKTURY ZAKUPU -->
   <div id="aiModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 shadow-2xl my-4 max-h-[94vh] flex flex-col">
       <div class="flex justify-between items-start border-b border-slate-700 pb-2.5">
         <div>
           <span class="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50">Price Intelligence OCR</span>
-          <h3 class="text-sm font-bold text-white mt-1">Przyjęcie Dostawy z Faktury / WZ</h3>
+          <h3 class="text-sm font-bold text-white mt-1">Przyjęcie Faktury Zakupu</h3>
           <p id="aiDocInfo" class="text-[11px] text-slate-400 mt-0.5">Analiza obrazu i cen...</p>
         </div>
         <button onclick="closeAiModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
@@ -443,20 +559,14 @@
           </div>
         </div>
 
-        <p class="text-[11px] text-slate-300">Wykryte pozycje i weryfikacja różnic cenowych:</p>
+        <p class="text-[11px] text-slate-300">Wykryte pozycje i weryfikacja cen:</p>
         <div id="aiItemsList" class="space-y-2.5"></div>
       </div>
-
-      <div id="aiImagePreviewContainer" class="hidden border-t border-slate-700 pt-2 flex items-center justify-between">
-        <span class="text-xs text-slate-400">Załącznik skanu dokumentu</span>
-        <button onclick="toggleImagePreview()" class="text-xs text-indigo-400 hover:underline">Pokaż/Ukryj skan</button>
-      </div>
-      <img id="aiImagePreview" class="hidden max-h-36 rounded-xl object-contain border border-slate-700 bg-black" />
 
       <div id="aiModalActions" class="hidden pt-2.5 border-t border-slate-700 flex justify-end gap-2">
         <button onclick="closeAiModal()" class="px-4 py-2 rounded-xl text-xs text-slate-400 hover:bg-slate-700">Anuluj</button>
         <button onclick="confirmAndApplyDelivery()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow">
-          <span>✓</span> Zastosuj przyjęcie i aktualizuj ceny
+          <span>✓</span> Zastosuj przyjęcie
         </button>
       </div>
     </div>
@@ -478,26 +588,24 @@
     const SUPABASE_KEY = 'sb_publishable_EuUrE98PR8SAVwnrIMP60g_RUAL0KSp';
     const GEMINI_API_KEY = 'AQ.Ab8RN6JQHVTxqmEE-mAigOjJGt4ghfMGxGYDTjNUt0MGeq2f5Q';
 
-    const DEFAULT_LOCAL_ITEMS = [
-      { id: '1', barcode: 'RC-590001', name: 'Kawa ziarnista 1kg', category: 'Catering', location: 'Magazyn - Regał A1', qty: 20, inField: 0, minQty: 5, unit: 'opak.', price: 54.00 },
-      { id: '2', barcode: 'RC-590002', name: 'Warnik do wody 15L', category: 'Sprzęt', location: 'Strefa B - Regał B2', qty: 6, inField: 2, minQty: 2, unit: 'szt.', price: 320.00 },
-      { id: '3', barcode: 'RC-590003', name: 'Skrzynia transportowa Euro', category: 'Logistyka', location: 'Sektor C', qty: 25, inField: 10, minQty: 8, unit: 'szt.', price: 65.00 }
-    ];
-
-    let inventory = JSON.parse(localStorage.getItem('magazyn_offline_items')) || DEFAULT_LOCAL_ITEMS;
+    let inventory = JSON.parse(localStorage.getItem('magazyn_offline_items')) || [];
     let deliveries = JSON.parse(localStorage.getItem('magazyn_offline_deliveries')) || [];
     let priceAlerts = JSON.parse(localStorage.getItem('magazyn_offline_price_alerts')) || [];
+    let events = JSON.parse(localStorage.getItem('magazyn_offline_events')) || [];
+
     let selectedItemId = null;
     let contextMenuItemId = null;
     let html5QrCode = null;
     let isCameraRunning = false;
     let isCloudOnline = false;
+
     let currentExtractedDelivery = null;
+    let currentExtractedEventDispatch = null;
+    let currentActiveReturnEventId = null;
 
     let isSelectMode = false;
     let selectedItemIds = new Set();
 
-    // Dyskretna wibracja haptyczna
     function triggerScanFeedback() {
       if (navigator.vibrate) {
         try { navigator.vibrate(60); } catch (e) {}
@@ -511,9 +619,9 @@
         .trim();
     }
 
-    function findBestInventoryMatch(invoiceName) {
-      if (!invoiceName) return null;
-      const cleanTarget = normalizeText(invoiceName);
+    function findBestInventoryMatch(targetName) {
+      if (!targetName) return null;
+      const cleanTarget = normalizeText(targetName);
       const targetWords = cleanTarget.split(' ').filter(w => w.length > 2);
 
       for (const item of inventory) {
@@ -531,9 +639,7 @@
         const itemWords = cleanItem.split(' ').filter(w => w.length > 2);
         let overlap = 0;
         for (const word of targetWords) {
-          if (itemWords.some(iw => iw.includes(word) || word.includes(iw))) {
-            overlap++;
-          }
+          if (itemWords.some(iw => iw.includes(word) || word.includes(iw))) overlap++;
         }
         if (overlap >= 2 && overlap > maxOverlap) {
           maxOverlap = overlap;
@@ -568,67 +674,47 @@
       }
     }
 
-    async function fetchInventory() {
+    async function fetchAllData() {
       try {
         document.getElementById('syncStatus').innerText = 'Łączenie z bazą...';
-        const data = await apiRequest('/inventory?select=*&order=name.asc');
+        const [invData, evData, alertData] = await Promise.all([
+          apiRequest('/inventory?select=*&order=name.asc'),
+          apiRequest('/events?select=*&order=created_at.desc'),
+          apiRequest('/price_alerts?select=*&order=created_at.desc')
+        ]);
         
         isCloudOnline = true;
-        inventory = data.map(i => ({
-          id: i.id,
-          barcode: i.barcode,
-          name: i.name,
-          category: i.category || 'Ogólne',
-          location: i.location || '-',
-          qty: Number(i.qty) || 0,
-          inField: Number(i.in_field) || 0,
-          minQty: Number(i.min_qty) || 0,
-          unit: i.unit || 'szt.',
-          price: Number(i.price) || 0.00
+        inventory = invData.map(i => ({
+          id: i.id, barcode: i.barcode, name: i.name, category: i.category || 'Ogólne',
+          location: i.location || '-', qty: Number(i.qty) || 0, inField: Number(i.in_field) || 0,
+          minQty: Number(i.min_qty) || 0, unit: i.unit || 'szt.', price: Number(i.price) || 0.00
         }));
 
+        events = evData || [];
+        priceAlerts = alertData || [];
+
         localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
+        localStorage.setItem('magazyn_offline_events', JSON.stringify(events));
+        localStorage.setItem('magazyn_offline_price_alerts', JSON.stringify(priceAlerts));
+
         document.getElementById('syncStatus').innerText = '🟢 Chmura aktywna na żywo';
         document.getElementById('syncStatus').className = 'text-[10px] text-emerald-400 font-bold';
-        renderInventory();
-
       } catch (err) {
         isCloudOnline = false;
         document.getElementById('syncStatus').innerText = '🟡 Tryb lokalny (pełna gotowość)';
         document.getElementById('syncStatus').className = 'text-[10px] text-amber-400 font-bold';
-        renderInventory();
       }
+      renderInventory();
+      renderEvents();
+      renderPriceAlerts();
     }
 
-    async function fetchDeliveries() {
-      try {
-        const data = await apiRequest('/deliveries?select=*&order=created_at.desc');
-        deliveries = data;
-        localStorage.setItem('magazyn_offline_deliveries', JSON.stringify(deliveries));
-        renderDeliveries();
-      } catch (e) {
-        renderDeliveries();
-      }
-    }
-
-    async function fetchPriceAlerts() {
-      try {
-        const data = await apiRequest('/price_alerts?select=*&order=created_at.desc');
-        priceAlerts = data;
-        localStorage.setItem('magazyn_offline_price_alerts', JSON.stringify(priceAlerts));
-        renderPriceAlerts();
-      } catch (e) {
-        renderPriceAlerts();
-      }
-    }
-
-    // --- RENDEROWANIE STANU Z CENAMI I WARTOŚCIĄ ---
+    // --- RENDEROWANIE STANU MAGAZYNOWEGO ---
     function renderInventory() {
       const search = document.getElementById('searchFilter').value.toLowerCase();
       const filter = document.getElementById('categoryFilter').value;
       const list = document.getElementById('inventoryList');
 
-      // Statystyki
       document.getElementById('statTotalItems').innerText = inventory.length;
       document.getElementById('statInField').innerText = inventory.reduce((sum, i) => sum + (Number(i.inField) || 0), 0);
       document.getElementById('statLowStock').innerText = inventory.filter(i => i.qty <= i.minQty).length;
@@ -637,10 +723,7 @@
       document.getElementById('statTotalValue').innerText = `${totalVal.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} zł`;
 
       const filtered = inventory.filter(item => {
-        const matchesText = item.name.toLowerCase().includes(search) ||
-                            item.barcode.toLowerCase().includes(search) ||
-                            (item.category && item.category.toLowerCase().includes(search)) ||
-                            (item.location && item.location.toLowerCase().includes(search));
+        const matchesText = item.name.toLowerCase().includes(search) || item.barcode.toLowerCase().includes(search);
         if (!matchesText) return false;
         if (filter === 'LOW') return item.qty <= item.minQty;
         if (filter === 'FIELD') return (item.inField || 0) > 0;
@@ -665,12 +748,7 @@
           >
             ${isSelectMode ? `
               <div class="pr-2.5 flex items-center" onclick="event.stopPropagation()">
-                <input 
-                  type="checkbox" 
-                  ${isChecked ? 'checked' : ''} 
-                  onchange="toggleSelectItem('${item.id}', this.checked)"
-                  class="w-4 h-4 rounded text-indigo-600 focus:ring-0 focus:ring-offset-0 bg-slate-900 border-slate-600 cursor-pointer"
-                >
+                <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSelectItem('${item.id}', this.checked)" class="w-4 h-4 rounded text-indigo-600 bg-slate-900 border-slate-600 cursor-pointer">
               </div>
             ` : ''}
 
@@ -706,59 +784,489 @@
       }).join('');
     }
 
-    // --- RENDEROWANIE ALERTÓW CENOWYCH ---
-    function renderPriceAlerts() {
-      const list = document.getElementById('alertsList');
-      const badge = document.getElementById('alertsCountBadge');
-      
-      if (priceAlerts.length > 0) {
-        badge.innerText = priceAlerts.length;
+    // --- RENDEROWANIE MODUŁU REALIZACJI / EVENTÓW ---
+    function renderEvents() {
+      const list = document.getElementById('eventsList');
+      const activeCount = events.filter(e => e.status === 'W trakcie').length;
+      document.getElementById('statActiveEvents').innerText = activeCount;
+
+      const badge = document.getElementById('activeEventsBadge');
+      if (activeCount > 0) {
+        badge.innerText = activeCount;
         badge.classList.remove('hidden');
       } else {
         badge.classList.add('hidden');
       }
 
-      if (priceAlerts.length === 0) {
-        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak zarejestrowanych zmian cen. System wykaże różnice automatycznie po skanowaniu kolejnych faktur.</div>`;
+      if (events.length === 0) {
+        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak zarejestrowanych realizacji. Kliknij "Nowe Wydanie" u góry.</div>`;
         return;
       }
 
-      list.innerHTML = priceAlerts.map(alert => {
-        const isIncrease = alert.diff_percent > 0;
+      list.innerHTML = events.map(ev => {
+        const isPending = ev.status === 'W trakcie';
+        const items = ev.items_json || [];
+
         return `
-          <div class="bg-slate-800 border ${isIncrease ? 'border-rose-600/60' : 'border-emerald-600/60'} rounded-xl p-3 flex items-center justify-between shadow-sm">
-            <div class="space-y-0.5">
-              <div class="flex items-center gap-1.5">
-                <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${isIncrease ? 'bg-rose-950 text-rose-300 border border-rose-700/50' : 'bg-emerald-950 text-emerald-300 border border-emerald-700/50'}">
-                  ${isIncrease ? `🔺 PODWYŻKA +${alert.diff_percent}%` : `🔻 OBNIŻKA ${alert.diff_percent}%`}
-                </span>
-                <span class="text-[10px] text-slate-400 font-mono">${alert.doc_number || ''}</span>
+          <div class="bg-slate-800 border ${isPending ? 'border-amber-600/70' : 'border-slate-700/80'} rounded-2xl p-3.5 space-y-2.5 shadow-md">
+            <div class="flex justify-between items-start">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="font-mono text-xs font-black text-amber-400">${ev.event_number || '#EVENT'}</span>
+                  <span class="text-[9px] font-bold px-2 py-0.5 rounded ${isPending ? 'bg-amber-950 text-amber-300 border border-amber-700/50' : 'bg-emerald-950 text-emerald-300 border border-emerald-700/50'}">
+                    ${isPending ? '🚚 W TRAKCIE IMPREZY' : '✓ ROZLICZONA'}
+                  </span>
+                </div>
+                <h4 class="font-bold text-sm text-white mt-1">${ev.event_name}</h4>
+                <p class="text-[10px] text-slate-400 mt-0.5">Wydano: ${ev.dispatch_date || '-'} ${ev.return_date ? `• Zwrot: ${ev.return_date}` : ''}</p>
               </div>
-              <h4 class="font-bold text-xs text-white">${alert.item_name}</h4>
-              <p class="text-[10px] text-slate-400">Dostawca: ${alert.supplier || 'Nieznany'} • ${new Date(alert.created_at || Date.now()).toLocaleDateString('pl-PL')}</p>
+
+              ${isPending ? `
+                <button onclick="triggerReturnUpload('${ev.id}')" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs px-3 py-1.5 rounded-xl shadow transition active:scale-95 flex items-center gap-1">
+                  <span>📸</span> Rozlicz Zwrot
+                </button>
+              ` : `
+                <span class="text-xs text-emerald-400 font-bold">Zamknięta</span>
+              `}
             </div>
-            <div class="text-right">
-              <span class="text-xs text-slate-400 line-through block">${Number(alert.old_price).toFixed(2)} zł</span>
-              <span class="text-sm font-black ${isIncrease ? 'text-rose-400' : 'text-emerald-400'}">${Number(alert.new_price).toFixed(2)} zł</span>
+
+            <!-- Tabela pozycji imprezy -->
+            <div class="bg-slate-900/90 rounded-xl p-2.5 text-xs space-y-1.5 border border-slate-800">
+              <div class="grid grid-cols-12 text-[10px] text-slate-400 font-bold border-b border-slate-800 pb-1">
+                <span class="col-span-6">Nazwa asortymentu</span>
+                <span class="col-span-2 text-center">Wydano</span>
+                <span class="col-span-2 text-center">Zwrót</span>
+                <span class="col-span-2 text-right">Zeszło</span>
+              </div>
+              ${items.map(it => {
+                const hasLoss = (it.loss || 0) > 0;
+                return `
+                  <div class="grid grid-cols-12 text-[11px] items-center text-slate-200">
+                    <span class="col-span-6 truncate font-medium">
+                      ${it.name}${hasLoss ? `<span class="block text-[9px] text-rose-400 font-bold">⚠️ Strata: -${it.loss} ${it.unit}</span>` : ''}
+                    </span>
+                    <span class="col-span-2 text-center font-bold text-amber-400">${it.dispatched}</span>
+                    <span class="col-span-2 text-center font-bold ${it.returned !== undefined ? 'text-emerald-400' : 'text-slate-500'}">${it.returned !== undefined ? it.returned : '-'}</span>
+                    <span class="col-span-2 text-right font-bold text-indigo-300">${it.consumed !== undefined ? it.consumed : '-'}</span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+
+            <div class="flex justify-between items-center pt-1 text-[11px]">
+              <div class="flex gap-2">
+                ${ev.dispatch_image ? `<a href="${ev.dispatch_image}" target="_blank" class="text-slate-400 hover:text-indigo-300 underline">Karta wydania ↗</a>` : ''}
+                ${ev.return_image ? `<a href="${ev.return_image}" target="_blank" class="text-slate-400 hover:text-indigo-300 underline">Karta zwrotu ↗</a>` : ''}
+              </div>
+              <button onclick="deleteEvent('${ev.id}')" class="text-rose-400 hover:underline text-[10px]">Usuń realizację</button>
             </div>
           </div>
         `;
       }).join('');
     }
 
-    function clearPriceAlerts() {
-      if (!confirm("Wyczyścić historię alertów cenowych?")) return;
-      priceAlerts = [];
-      localStorage.setItem('magazyn_offline_price_alerts', JSON.stringify(priceAlerts));
-      renderPriceAlerts();
+    // --- TRIGGERY APARATU DLA EVENTÓW ---
+    function triggerDispatchUpload() {
+      document.getElementById('eventDispatchInput').click();
     }
 
-    // --- MULTI-SELECT ---
+    function triggerReturnUpload(eventId) {
+      currentActiveReturnEventId = eventId;
+      document.getElementById('eventReturnInput').click();
+    }
+
+    // --- ODDAWANIE / WYJŚCIE: SKAN KARTY WYDANIA ---
+    async function processEventDispatchImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const modal = document.getElementById('eventDispatchModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.getElementById('eventDispatchLoading').classList.remove('hidden');
+      document.getElementById('eventDispatchContent').classList.add('hidden');
+      document.getElementById('eventDispatchActions').classList.add('hidden');
+
+      try {
+        const compressedDataUrl = await compressImage(file, 1200, 0.8);
+        const base64Data = compressedDataUrl.split(',')[1];
+
+        const promptText = `Przeanalizuj to zdjęcie arkusza "WYDANIE NAPOJÓW I ALKOHOLU NA REALIZACJĘ".
+Wyciągnij:
+1. eventNumber: numer imprezy z pola IMPREZA, #NUMER (np. "#403" lub "#359")
+2. eventName: nazwa imprezy / klienta (np. "AVIAREPS SKYWORKS" lub "Commercial Audio Bankiet")
+3. dispatchDate: data wydania (np. "02.10.26" lub "28/09/2026")
+4. items: tablica pozycji z tabeli z kolumny NAZWA oraz WYDANE:
+   { "name": string, "dispatched": number, "unit": string }
+
+Zwróć wynik wyłącznie jako czysty JSON:
+{
+  "eventNumber": "#403",
+  "eventName": "Nazwa Imprezy",
+  "dispatchDate": "02.10.26",
+  "items": [
+    { "name": "KAWA FILCORI", "dispatched": 2, "unit": "KG" }
+  ]
+}`;
+
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: promptText }, { inline_data: { mime_type: 'image/jpeg', data: base64Data } }] }],
+            generationConfig: { response_mime_type: "application/json", temperature: 0.1 }
+          })
+        });
+
+        const result = await response.json();
+        const parsed = JSON.parse(result.candidates[0].content.parts[0].text);
+
+        currentExtractedEventDispatch = {
+          eventNumber: parsed.eventNumber || '#EVENT-' + Date.now().toString().slice(-4),
+          eventName: parsed.eventName || 'Realizacja Cateringowa',
+          dispatchDate: parsed.dispatchDate || new Date().toLocaleDateString('pl-PL'),
+          items: parsed.items || [],
+          image: compressedDataUrl
+        };
+
+        displayEventDispatchModal(currentExtractedEventDispatch);
+        triggerScanFeedback();
+      } catch (err) {
+        alert("Błąd odczytu karty wydania: " + err.message);
+        closeEventDispatchModal();
+      }
+      event.target.value = '';
+    }
+
+    function displayEventDispatchModal(data) {
+      document.getElementById('eventDispatchLoading').classList.add('hidden');
+      document.getElementById('eventDispatchContent').classList.remove('hidden');
+      document.getElementById('eventDispatchActions').classList.remove('hidden');
+
+      document.getElementById('evDispNum').value = data.eventNumber;
+      document.getElementById('evDispName').value = data.eventName;
+      document.getElementById('evDispDate').value = data.dispatchDate;
+
+      const list = document.getElementById('evDispItemsList');
+      list.innerHTML = data.items.map((it, idx) => `
+        <div class="bg-slate-900 border border-slate-700/80 rounded-xl p-2.5 flex items-center justify-between text-xs">
+          <input type="text" id="evDispItemName_${idx}" value="${it.name}" class="font-bold text-white bg-transparent flex-1 focus:outline-none focus:border-b border-amber-500 mr-2">
+          <div class="flex items-center gap-1.5">
+            <span class="text-slate-400">Wydane:</span>
+            <input type="number" id="evDispItemQty_${idx}" value="${it.dispatched}" min="1" class="w-14 bg-slate-800 border border-slate-700 rounded-lg p-1 text-center font-black text-amber-400">
+            <input type="text" id="evDispItemUnit_${idx}" value="${it.unit || 'szt.'}" class="w-12 bg-slate-800 border border-slate-700 rounded-lg p-1 text-center text-slate-300 text-[11px]">
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function closeEventDispatchModal() {
+      document.getElementById('eventDispatchModal').classList.add('hidden');
+      document.getElementById('eventDispatchModal').classList.remove('flex');
+      currentExtractedEventDispatch = null;
+    }
+
+    async function confirmAndApplyEventDispatch() {
+      if (!currentExtractedEventDispatch) return;
+
+      const evNum = document.getElementById('evDispNum').value.trim();
+      const evName = document.getElementById('evDispName').value.trim();
+      const evDate = document.getElementById('evDispDate').value.trim();
+
+      const finalItems = [];
+
+      for (let i = 0; i < currentExtractedEventDispatch.items.length; i++) {
+        const name = document.getElementById(`evDispItemName_${i}`).value.trim();
+        const qty = parseInt(document.getElementById(`evDispItemQty_${i}`).value) || 0;
+        const unit = document.getElementById(`evDispItemUnit_${i}`).value.trim() || 'szt.';
+
+        finalItems.push({ name, dispatched: qty, unit });
+
+        // Automatyczne przesunięcie z Magazyn -> W terenie
+        const match = findBestInventoryMatch(name);
+        if (match) {
+          match.qty = Math.max(0, match.qty - qty);
+          match.inField = (match.inField || 0) + qty;
+
+          if (isCloudOnline) {
+            try {
+              await apiRequest(`/inventory?id=eq.${match.id}`, 'PATCH', { qty: match.qty, in_field: match.inField, updated_at: new Date() });
+            } catch (e) {}
+          }
+        }
+      }
+
+      const newEvent = {
+        id: Date.now().toString(),
+        event_number: evNum,
+        event_name: evName,
+        dispatch_date: evDate,
+        return_date: '',
+        status: 'W trakcie',
+        items_json: finalItems,
+        dispatch_image: currentExtractedEventDispatch.image,
+        return_image: '',
+        created_at: new Date()
+      };
+
+      events.unshift(newEvent);
+      localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
+      localStorage.setItem('magazyn_offline_events', JSON.stringify(events));
+
+      if (isCloudOnline) {
+        try { await apiRequest('/events', 'POST', newEvent); } catch (e) {}
+      }
+
+      triggerScanFeedback();
+      closeEventDispatchModal();
+      renderInventory();
+      renderEvents();
+      switchMainTab('events');
+      alert(`Wydanie na event ${evNum} zapisane! Butelki przesunięte w teren.`);
+    }
+
+    // --- ROZLICZENIE POWROTU / ZWROTU ZE ZDJĘCIA KARTY ---
+    async function processEventReturnImage(event) {
+      const file = event.target.files[0];
+      if (!file || !currentActiveReturnEventId) return;
+
+      const ev = events.find(e => e.id === currentActiveReturnEventId);
+      if (!ev) return;
+
+      const modal = document.getElementById('eventReturnModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.getElementById('evReturnLoading').classList.remove('hidden');
+      document.getElementById('evReturnContent').classList.add('hidden');
+      document.getElementById('evReturnActions').classList.add('hidden');
+
+      try {
+        const compressedDataUrl = await compressImage(file, 1200, 0.8);
+        const base64Data = compressedDataUrl.split(',')[1];
+
+        const promptText = `Przeanalizuj to zdjęcie uzupełnionego odręcznie arkusza zwrotu napojów/alkoholu.
+Odczytaj kolumny tabeli:
+- NAZWA
+- Konsumpcja (ilość zużyta)
+- Zwrot (ilość zwrócona na magazyn)
+- Data zwrotu (z pola DATA ZWROTU jeśli wpisana)
+
+Zwróć wynik jako JSON:
+{
+  "returnDate": "29/09/2026",
+  "items": [
+    { "name": "Whisky Grants", "consumed": 8, "returned": 0 }
+  ]
+}`;
+
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: promptText }, { inline_data: { mime_type: 'image/jpeg', data: base64Data } }] }],
+            generationConfig: { response_mime_type: "application/json", temperature: 0.1 }
+          })
+        });
+
+        const result = await response.json();
+        const parsed = JSON.parse(result.candidates[0].content.parts[0].text);
+
+        displayEventReturnModal(ev, parsed, compressedDataUrl);
+        triggerScanFeedback();
+      } catch (err) {
+        alert("Błąd odczytu karty zwrotu: " + err.message);
+        closeEventReturnModal();
+      }
+      event.target.value = '';
+    }
+
+    function displayEventReturnModal(ev, parsedReturn, image) {
+      document.getElementById('evReturnLoading').classList.add('hidden');
+      document.getElementById('evReturnContent').classList.remove('hidden');
+      document.getElementById('evReturnActions').classList.remove('hidden');
+
+      document.getElementById('evReturnModalTitle').innerText = `${ev.event_number} - ${ev.event_name}`;
+      document.getElementById('evReturnEventLabel').innerText = `${ev.event_name} (${ev.event_number})`;
+      document.getElementById('evReturnDateInput').value = parsedReturn.returnDate || new Date().toLocaleDateString('pl-PL');
+
+      // Łączenie odczytanych zwrotów z pozycjami wydanymi
+      const list = document.getElementById('evReturnItemsList');
+      list.innerHTML = ev.items_json.map((dispItem, idx) => {
+        // Dopasowanie do odczytanej pozycji ze zwrotu
+        const matchedReturn = (parsedReturn.items || []).find(it => 
+          normalizeText(it.name).includes(normalizeText(dispItem.name)) ||
+          normalizeText(dispItem.name).includes(normalizeText(it.name))
+        );
+
+        const retQty = matchedReturn ? (matchedReturn.returned || 0) : 0;
+        const consQty = matchedReturn ? (matchedReturn.consumed || 0) : 0;
+        const diff = dispItem.dispatched - (retQty + consQty);
+
+        return `
+          <div class="bg-slate-900 border ${diff > 0 ? 'border-rose-600/70' : 'border-slate-700/80'} rounded-xl p-3 space-y-2">
+            <div class="flex justify-between items-start">
+              <div>
+                <h5 class="font-bold text-xs text-white">${dispItem.name}</h5>
+                <span class="text-[10px] text-amber-400">Wydano na imprezę: <strong>${dispItem.dispatched} ${dispItem.unit || 'szt.'}</strong></span>
+              </div>
+              ${diff > 0 ? `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-700/50">⚠️ Strata/Brak: ${diff}</span>` : ''}
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800">
+              <div>
+                <span class="text-[10px] text-slate-400 block">Zwrócono (na magazyn):</span>
+                <input type="number" id="evRetQty_${idx}" value="${retQty}" min="0" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1.5 text-center font-bold text-emerald-400 text-xs">
+              </div>
+              <div>
+                <span class="text-[10px] text-slate-400 block">Konsumpcja (zeszło):</span>
+                <input type="number" id="evConsQty_${idx}" value="${consQty}" min="0" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1.5 text-center font-bold text-indigo-300 text-xs">
+              </div>
+            </div>
+            <input type="hidden" id="evRetImageHolder" value="${image}">
+          </div>
+        `;
+      }).join('');
+    }
+
+    function closeEventReturnModal() {
+      document.getElementById('eventReturnModal').classList.add('hidden');
+      document.getElementById('eventReturnModal').classList.remove('flex');
+      currentActiveReturnEventId = null;
+    }
+
+    async function confirmAndApplyEventReturn() {
+      const ev = events.find(e => e.id === currentActiveReturnEventId);
+      if (!ev) return;
+
+      const retDate = document.getElementById('evReturnDateInput').value.trim();
+      const returnImage = document.getElementById('evRetImageHolder').value;
+
+      ev.return_date = retDate;
+      ev.status = 'Rozliczona';
+      ev.return_image = returnImage;
+
+      for (let i = 0; i < ev.items_json.length; i++) {
+        const item = ev.items_json[i];
+        const retQty = parseInt(document.getElementById(`evRetQty_${i}`).value) || 0;
+        const consQty = parseInt(document.getElementById(`evConsQty_${i}`).value) || 0;
+        const loss = Math.max(0, item.dispatched - (retQty + consQty));
+
+        item.returned = retQty;
+        item.consumed = consQty;
+        item.loss = loss;
+
+        // Bilans magazynu:
+        const match = findBestInventoryMatch(item.name);
+        if (match) {
+          // Zwrócone sztuki wracają do magazynu
+          match.qty += retQty;
+          // Zdejmujemy cały nakład wydany z pola "w terenie"
+          match.inField = Math.max(0, (match.inField || 0) - item.dispatched);
+
+          if (isCloudOnline) {
+            try {
+              await apiRequest(`/inventory?id=eq.${match.id}`, 'PATCH', { qty: match.qty, in_field: match.inField, updated_at: new Date() });
+            } catch (e) {}
+          }
+        }
+      }
+
+      localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
+      localStorage.setItem('magazyn_offline_events', JSON.stringify(events));
+
+      if (isCloudOnline) {
+        try {
+          await apiRequest(`/events?id=eq.${ev.id}`, 'PATCH', {
+            status: 'Rozliczona',
+            return_date: retDate,
+            items_json: ev.items_json,
+            return_image: returnImage
+          });
+        } catch (e) {}
+      }
+
+      triggerScanFeedback();
+      closeEventReturnModal();
+      renderInventory();
+      renderEvents();
+      alert(`Impreza ${ev.event_number} rozliczona! Butelki ze zwrotu wróciły na stan.`);
+    }
+
+    async function deleteEvent(id) {
+      if (!confirm("Czy na pewno usunąć tę realizację z archiwum?")) return;
+      events = events.filter(e => e.id !== id);
+      localStorage.setItem('magazyn_offline_events', JSON.stringify(events));
+      renderEvents();
+      if (isCloudOnline) {
+        try { await apiRequest(`/events?id=eq.${id}`, 'DELETE'); } catch (e) {}
+      }
+    }
+
+    // --- NAWIGACJA GŁÓWNA ---
+    function switchMainTab(tab) {
+      document.getElementById('viewStock').classList.add('hidden');
+      document.getElementById('viewEvents').classList.add('hidden');
+      document.getElementById('viewAlerts').classList.add('hidden');
+      document.getElementById('viewDeliveries').classList.add('hidden');
+
+      const tabs = ['Stock', 'Events', 'Alerts', 'Deliveries'];
+      tabs.forEach(t => {
+        const hBtn = document.getElementById(`tab${t}HeaderBtn`);
+        const nBtn = document.getElementById(`navBtn${t}`);
+        if (hBtn) hBtn.className = 'pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 whitespace-nowrap';
+        if (nBtn) nBtn.className = 'flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 py-1 px-2.5 transition active:scale-95';
+      });
+
+      if (tab === 'stock') {
+        document.getElementById('viewStock').classList.remove('hidden');
+        document.getElementById('tabStockHeaderBtn').className = 'pb-2 border-b-2 border-emerald-500 text-emerald-400 font-bold whitespace-nowrap';
+        document.getElementById('navBtnStock').className = 'flex flex-col items-center gap-1 text-emerald-400 py-1 px-2.5 transition active:scale-95';
+      } else if (tab === 'events') {
+        document.getElementById('viewEvents').classList.remove('hidden');
+        document.getElementById('tabEventsHeaderBtn').className = 'pb-2 border-b-2 border-amber-500 text-amber-400 font-bold whitespace-nowrap';
+        document.getElementById('navBtnEvents').className = 'flex flex-col items-center gap-1 text-amber-400 py-1 px-2.5 transition active:scale-95';
+        renderEvents();
+      } else if (tab === 'alerts') {
+        document.getElementById('viewAlerts').classList.remove('hidden');
+        document.getElementById('tabAlertsHeaderBtn').className = 'pb-2 border-b-2 border-rose-500 text-rose-400 font-bold whitespace-nowrap';
+        document.getElementById('navBtnAlerts').className = 'flex flex-col items-center gap-1 text-rose-400 py-1 px-2.5 transition active:scale-95';
+        renderPriceAlerts();
+      } else if (tab === 'deliveries') {
+        document.getElementById('viewDeliveries').classList.remove('hidden');
+        document.getElementById('tabDeliveriesHeaderBtn').className = 'pb-2 border-b-2 border-indigo-500 text-indigo-400 font-bold whitespace-nowrap';
+        renderDeliveries();
+      }
+      triggerScanFeedback();
+    }
+
+    // --- STANDARDOWE FUNKCJE SKANERA, EDYCJI I AKCJI MAGAZYNOWYCH ---
+    function handleItemContextMenu(e, id) {
+      e.preventDefault(); contextMenuItemId = id; selectedItemId = id;
+      const menu = document.getElementById('customContextMenu');
+      menu.classList.remove('hidden');
+      let x = e.clientX, y = e.clientY;
+      if (x + 200 > window.innerWidth) x = window.innerWidth - 210;
+      if (y + 180 > window.innerHeight) y = window.innerHeight - 190;
+      menu.style.left = `${x}px`; menu.style.top = `${y}px`;
+      triggerScanFeedback();
+    }
+    function hideContextMenu() { const m = document.getElementById('customContextMenu'); if (m) m.classList.add('hidden'); }
+    function contextActionEdit() { hideContextMenu(); if (contextMenuItemId) openEditModal(contextMenuItemId); }
+    function contextActionOpenStock() { hideContextMenu(); if (contextMenuItemId) openActionModal(contextMenuItemId); }
+    function contextActionPrintQR() { hideContextMenu(); if (contextMenuItemId) { selectedItemId = contextMenuItemId; openPrintLabelModal(); } }
+    function contextActionDelete() { hideContextMenu(); if (contextMenuItemId) { selectedItemId = contextMenuItemId; deleteCurrentItem(); } }
+
+    function handleItemCardClick(e, id) {
+      if (isSelectMode) { toggleSelectItem(id, !selectedItemIds.has(id)); renderInventory(); }
+      else { openActionModal(id); }
+    }
+
     function toggleSelectMode() {
       isSelectMode = !isSelectMode;
       const btn = document.getElementById('btnToggleSelectMode');
       const bulkBar = document.getElementById('bulkActionBar');
-
       if (isSelectMode) {
         btn.className = "bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-2 rounded-xl font-bold flex items-center gap-1.5 transition shadow";
         btn.innerHTML = "<span>✕</span> Anuluj";
@@ -769,92 +1277,32 @@
         bulkBar.classList.add('hidden');
         selectedItemIds.clear();
       }
-      updateBulkSelectedCount();
-      renderInventory();
-      triggerScanFeedback();
+      updateBulkSelectedCount(); renderInventory(); triggerScanFeedback();
     }
-
     function toggleSelectItem(id, isChecked) {
-      if (isChecked) selectedItemIds.add(id);
-      else selectedItemIds.delete(id);
-      updateBulkSelectedCount();
-      triggerScanFeedback();
+      if (isChecked) selectedItemIds.add(id); else selectedItemIds.delete(id);
+      updateBulkSelectedCount(); triggerScanFeedback();
     }
-
     function toggleSelectAll() {
-      const search = document.getElementById('searchFilter').value.toLowerCase();
-      const currentFiltered = inventory.filter(item => item.name.toLowerCase().includes(search) || item.barcode.toLowerCase().includes(search));
-      if (selectedItemIds.size === currentFiltered.length) selectedItemIds.clear();
-      else currentFiltered.forEach(i => selectedItemIds.add(i.id));
-      updateBulkSelectedCount();
-      renderInventory();
-      triggerScanFeedback();
+      if (selectedItemIds.size === inventory.length) selectedItemIds.clear();
+      else inventory.forEach(i => selectedItemIds.add(i.id));
+      updateBulkSelectedCount(); renderInventory(); triggerScanFeedback();
     }
-
     function updateBulkSelectedCount() {
-      const countLabel = document.getElementById('bulkSelectedCount');
-      if (countLabel) countLabel.innerText = `Wybrano: ${selectedItemIds.size}`;
+      const c = document.getElementById('bulkSelectedCount'); if (c) c.innerText = `Wybrano: ${selectedItemIds.size}`;
     }
-
     async function deleteSelectedItems() {
-      if (selectedItemIds.size === 0) return alert("Zaznacz przynajmniej jedną pozycję do usunięcia.");
-      if (!confirm(`Czy na pewno chcesz usunąć ${selectedItemIds.size} zaznaczonych pozycji?`)) return;
-
-      const idsToDelete = Array.from(selectedItemIds);
+      if (selectedItemIds.size === 0) return alert("Zaznacz pozycje.");
+      if (!confirm(`Usunąć ${selectedItemIds.size} pozycji?`)) return;
+      const ids = Array.from(selectedItemIds);
       inventory = inventory.filter(i => !selectedItemIds.has(i.id));
       localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
-      
-      toggleSelectMode();
-      renderInventory();
-      triggerScanFeedback();
-
-      if (isCloudOnline) {
-        for (const id of idsToDelete) {
-          try { await apiRequest(`/inventory?id=eq.${id}`, 'DELETE'); } catch (e) {}
-        }
-      }
+      toggleSelectMode(); renderInventory(); triggerScanFeedback();
+      if (isCloudOnline) { for (const id of ids) { try { await apiRequest(`/inventory?id=eq.${id}`, 'DELETE'); } catch (e) {} } }
     }
 
-    // --- MENU KONTEKSTOWE ---
-    function handleItemContextMenu(e, id) {
-      e.preventDefault();
-      contextMenuItemId = id;
-      selectedItemId = id;
-      const menu = document.getElementById('customContextMenu');
-      menu.classList.remove('hidden');
-      let x = e.clientX, y = e.clientY;
-      if (x + 200 > window.innerWidth) x = window.innerWidth - 210;
-      if (y + 180 > window.innerHeight) y = window.innerHeight - 190;
-      menu.style.left = `${x}px`;
-      menu.style.top = `${y}px`;
-      triggerScanFeedback();
-    }
-
-    function hideContextMenu() {
-      const menu = document.getElementById('customContextMenu');
-      if (menu) menu.classList.add('hidden');
-    }
-
-    function contextActionEdit() { hideContextMenu(); if (contextMenuItemId) openEditModal(contextMenuItemId); }
-    function contextActionOpenStock() { hideContextMenu(); if (contextMenuItemId) openActionModal(contextMenuItemId); }
-    function contextActionPrintQR() { hideContextMenu(); if (contextMenuItemId) { selectedItemId = contextMenuItemId; openPrintLabelModal(); } }
-    function contextActionDelete() { hideContextMenu(); if (contextMenuItemId) { selectedItemId = contextMenuItemId; deleteCurrentItem(); } }
-
-    function handleItemCardClick(e, id) {
-      if (isSelectMode) {
-        const isChecked = selectedItemIds.has(id);
-        toggleSelectItem(id, !isChecked);
-        renderInventory();
-      } else {
-        openActionModal(id);
-      }
-    }
-
-    // --- MODAL EDYCJI ---
     function openEditModal(id) {
-      const item = inventory.find(i => i.id === id);
-      if (!item) return;
-
+      const item = inventory.find(i => i.id === id); if (!item) return;
       closeActionModal();
       document.getElementById('editItemId').value = item.id;
       document.getElementById('editItemBarcode').value = item.barcode;
@@ -864,24 +1312,14 @@
       document.getElementById('editItemLocation').value = item.location || '-';
       document.getElementById('editItemUnit').value = item.unit || 'szt.';
       document.getElementById('editItemMinQty').value = item.minQty || 0;
-
-      const modal = document.getElementById('editItemModal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      document.getElementById('editItemModal').classList.remove('hidden');
+      document.getElementById('editItemModal').classList.add('flex');
     }
-
-    function closeEditModal() {
-      const modal = document.getElementById('editItemModal');
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-
+    function closeEditModal() { document.getElementById('editItemModal').classList.add('hidden'); document.getElementById('editItemModal').classList.remove('flex'); }
     async function saveEditedItem(e) {
       e.preventDefault();
       const id = document.getElementById('editItemId').value;
-      const item = inventory.find(i => i.id === id);
-      if (!item) return;
-
+      const item = inventory.find(i => i.id === id); if (!item) return;
       item.barcode = document.getElementById('editItemBarcode').value.trim();
       item.name = document.getElementById('editItemName').value.trim();
       item.price = parseFloat(document.getElementById('editItemPrice').value) || 0.00;
@@ -889,493 +1327,14 @@
       item.location = document.getElementById('editItemLocation').value.trim() || '-';
       item.unit = document.getElementById('editItemUnit').value.trim() || 'szt.';
       item.minQty = parseInt(document.getElementById('editItemMinQty').value) || 0;
-
       localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
-      renderInventory();
-      closeEditModal();
-      triggerScanFeedback();
-
-      if (isCloudOnline) {
-        try {
-          await apiRequest(`/inventory?id=eq.${item.id}`, 'PATCH', {
-            barcode: item.barcode,
-            name: item.name,
-            price: item.price,
-            category: item.category,
-            location: item.location,
-            unit: item.unit,
-            min_qty: item.minQty,
-            updated_at: new Date()
-          });
-        } catch (err) {}
-      }
-    }
-
-    function renderDeliveries() {
-      const list = document.getElementById('deliveriesList');
-      if (deliveries.length === 0) {
-        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak zarchiwizowanych faktur. Kliknij środkowy przycisk "⚡ AI FAKT".</div>`;
-        return;
-      }
-      list.innerHTML = deliveries.map(d => {
-        const items = d.items_json || [];
-        return `
-          <div class="bg-slate-800 border border-slate-700 rounded-xl p-3 space-y-2">
-            <div class="flex justify-between items-start">
-              <div>
-                <span class="text-[11px] font-mono font-bold text-indigo-400">DOKUMENT: ${d.doc_number || 'Brak numeru'}</span>
-                <h4 class="font-bold text-xs text-white mt-0.5">Dostawca: ${d.supplier || 'Nieznany'}</h4>
-                <p class="text-[10px] text-slate-400">${new Date(d.created_at || Date.now()).toLocaleString('pl-PL')}</p>
-              </div>
-              <div class="text-right">
-                ${d.total_gross ? `<span class="text-xs font-bold text-emerald-400 block">${d.total_gross} PLN</span>` : ''}
-                ${d.image_url ? `
-                  <a href="${d.image_url}" target="_blank" class="text-[10px] bg-slate-700 hover:bg-slate-600 px-2 py-0.5 rounded text-indigo-300 inline-block mt-1">
-                    Skan ↗
-                  </a>
-                ` : ''}
-              </div>
-            </div>
-            <div class="bg-slate-900/80 rounded-lg p-2 text-xs space-y-1">
-              <span class="text-[9px] text-slate-500 block uppercase font-bold">Pozycje:</span>
-              ${items.map(it => `
-                <div class="flex justify-between text-slate-300 text-[11px]">
-                  <span>• ${it.name}${it.netPrice ? `<span class="text-slate-500">(${Number(it.netPrice).toFixed(2)} zł)</span>` : ''}</span>
-                  <span class="font-bold text-emerald-400">+${it.qty}${it.unit || 'szt.'}</span>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function compressImage(file, maxWidth = 1024, quality = 0.75) {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => {
-          let width = img.width, height = img.height;
-          if (width > maxWidth) {
-            height = Math.round((height * maxWidth) / width);
-            width = maxWidth;
-          }
-          const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL('image/jpeg', quality));
-        };
-        img.onerror = reject;
-        img.src = URL.createObjectURL(file);
-      });
-    }
-
-    function triggerInvoiceUpload() {
-      document.getElementById('invoiceInput').click();
-    }
-
-    // --- GEMINI OCR: WYCIĄGANIE CEN I ILOŚCI ZE ZDJĘCIA ---
-    async function processInvoiceImage(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const aiModal = document.getElementById('aiModal');
-      aiModal.classList.remove('hidden');
-      aiModal.classList.add('flex');
-      document.getElementById('aiLoadingState').classList.remove('hidden');
-      document.getElementById('aiItemsContainer').classList.add('hidden');
-      document.getElementById('aiModalActions').classList.add('hidden');
-      document.getElementById('aiImagePreviewContainer').classList.add('hidden');
-      document.getElementById('aiDocInfo').innerText = "Przetwarzanie dokumentu...";
-
-      try {
-        const compressedDataUrl = await compressImage(file, 1024, 0.75);
-        const base64Data = compressedDataUrl.split(',')[1];
-        document.getElementById('aiImagePreview').src = compressedDataUrl;
-
-        const promptText = `Jesteś systemem magazynowym WMS. Przeanalizuj to zdjęcie faktury lub dokumentu WZ.
-BARDZO WAŻNA ZASADA DOTYCZĄCA JEDNOSTEK I CEN:
-Wszystkie pozycje w magazynie muszą być w SZTUKACH (szt.).
-Jeśli jednostką na fakturze jest zgrzewka (ZGRZ, zgrz, op.) lub w nazwie widnieje "(12)", "(6)", "(24)":
-- PRZEMNÓŻ ilość zgrzewek przez liczbę butelek/puszek (np. 4 zgrzewki po 12 = 48 szt.).
-- Jako netPrice podaj cenę JEDNEJ SZTUKI (np. cena zgrzewki podzielona przez liczbę sztuk w zgrzewce).
-- Jednostka unit = "szt.".
-
-Zwróć wynik jako czysty JSON:
-{
-  "docNumber": "numer faktury",
-  "supplier": "nazwa sprzedawcy",
-  "totalGross": "suma brutto",
-  "items": [
-    { "name": "nazwa towaru", "qty": 48, "unit": "szt.", "netPrice": 5.35 }
-  ]
-}`;
-
-        const models = ['gemini-3.5-flash-lite', 'gemini-1.5-flash', 'gemini-3.8-flash'];
-        let parsed = null;
-        let lastErrorMsg = '';
-
-        for (const model of models) {
-          try {
-            document.getElementById('aiDocInfo').innerText = `Odczyt dokumentu (${model})...`;
-            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
-
-            const response = await fetch(endpoint, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
-              body: JSON.stringify({
-                contents: [{ parts: [{ text: promptText }, { inline_data: { mime_type: 'image/jpeg', data: base64Data } }] }],
-                generationConfig: { response_mime_type: "application/json", temperature: 0.1 }
-              })
-            });
-
-            const result = await response.json();
-            if (result.error) { lastErrorMsg = result.error.message; continue; }
-            if (result.candidates && result.candidates[0]) {
-              const rawText = result.candidates[0].content.parts[0].text.trim();
-              parsed = JSON.parse(rawText);
-              break;
-            }
-          } catch (e) {
-            lastErrorMsg = e.message;
-          }
-        }
-
-        if (!parsed) throw new Error(lastErrorMsg || "Nie udało się odczytać dokumentu.");
-
-        currentExtractedDelivery = {
-          docNumber: parsed.docNumber || 'FA/' + Date.now().toString().slice(-6),
-          supplier: parsed.supplier || 'Dostawca',
-          totalGross: parsed.totalGross || '',
-          items: parsed.items || [],
-          imagePreview: compressedDataUrl
-        };
-
-        displayExtractedItems(currentExtractedDelivery);
-        triggerScanFeedback();
-
-      } catch (err) {
-        alert("Błąd podczas odczytu: " + err.message);
-        closeAiModal();
-      }
-
-      event.target.value = '';
-    }
-
-    // --- WERYFIKACJA Z OZNACZENIEM PODWYŻEK I OBNIŻEK CEN ---
-    function displayExtractedItems(delivery) {
-      document.getElementById('aiLoadingState').classList.add('hidden');
-      document.getElementById('aiItemsContainer').classList.remove('hidden');
-      document.getElementById('aiModalActions').classList.remove('hidden');
-      document.getElementById('aiImagePreviewContainer').classList.remove('hidden');
-      document.getElementById('aiDocInfo').innerText = "Weryfikacja pozycji, cen i scalanie:";
-
-      document.getElementById('aiSupplierName').innerText = delivery.supplier;
-      document.getElementById('aiDocNum').innerText = delivery.docNumber;
-      document.getElementById('aiTotalGross').innerText = delivery.totalGross ? `${delivery.totalGross} zł` : '---';
-
-      const container = document.getElementById('aiItemsList');
-      if (!delivery.items || delivery.items.length === 0) {
-        container.innerHTML = `<p class="text-xs text-rose-400">Nie wykryto tabeli towarów na zdjęciu.</p>`;
-        return;
-      }
-
-      container.innerHTML = delivery.items.map((item, index) => {
-        const match = findBestInventoryMatch(item.name);
-        const matchedId = match ? match.id : '';
-
-        // Obliczanie różnicy cenowej
-        const currentPrice = match ? Number(match.price || 0) : 0;
-        const incomingPrice = Number(item.netPrice || 0);
-        let priceDiffBadge = '';
-
-        if (match && currentPrice > 0 && incomingPrice > 0) {
-          const diff = incomingPrice - currentPrice;
-          const diffPct = ((diff / currentPrice) * 100).toFixed(1);
-
-          if (diff > 0.01) {
-            priceDiffBadge = `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-700/50">🔺 Podwyżka: ${currentPrice.toFixed(2)} ➔ ${incomingPrice.toFixed(2)} zł (+${diffPct}%)</span>`;
-          } else if (diff < -0.01) {
-            priceDiffBadge = `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-700/50">🔻 Obniżka: ${currentPrice.toFixed(2)} ➔ ${incomingPrice.toFixed(2)} zł (${diffPct}%)</span>`;
-          } else {
-            priceDiffBadge = `<span class="text-[9px] font-medium px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">Cena bez zmian (${incomingPrice.toFixed(2)} zł)</span>`;
-          }
-        } else if (incomingPrice > 0) {
-          priceDiffBadge = `<span class="text-[9px] font-medium px-1.5 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50">Nowa cena: ${incomingPrice.toFixed(2)} zł netto</span>`;
-        }
-
-        return `
-          <div class="bg-slate-900 border ${match ? 'border-emerald-600/70' : 'border-amber-600/70'} rounded-xl p-3 space-y-2">
-            <div class="flex items-center justify-between gap-2 flex-wrap">
-              <span id="aiBadge_${index}" class="text-[9px] font-bold px-2 py-0.5 rounded ${match ? 'bg-emerald-950 text-emerald-300 border border-emerald-700/50' : 'bg-amber-950 text-amber-300 border border-amber-700/50'}">
-                ${match ? `✓ Scal z: ${match.name} (Stan: ${match.qty}${match.unit})` : '+ Nowa kartoteka'}
-              </span>
-              ${priceDiffBadge}
-              <button type="button" onclick="multiplyToPieces(${index}, 12)" class="text-[9px] bg-slate-800 hover:bg-slate-700 border border-slate-600 text-indigo-300 px-2 py-0.5 rounded transition">
-                📦 x12 na szt.
-              </button>
-            </div>
-
-            <div class="flex items-center justify-between gap-2">
-              <div class="flex-1">
-                <input type="text" id="aiItemName_${index}" value="${item.name}" class="bg-transparent font-bold text-xs text-white w-full focus:outline-none focus:border-b border-indigo-500">
-              </div>
-              <div class="flex items-center gap-1.5">
-                <div>
-                  <span class="text-[9px] text-slate-400 block text-center">Cena netto</span>
-                  <input type="number" step="0.01" id="aiItemPrice_${index}" value="${incomingPrice.toFixed(2)}" class="w-16 bg-slate-800 border border-slate-700 rounded-lg p-1 text-center font-bold text-emerald-400 text-xs">
-                </div>
-                <div>
-                  <span class="text-[9px] text-slate-400 block text-center">Ilość</span>
-                  <input type="number" id="aiItemQty_${index}" value="${item.qty || 1}" min="1" class="w-14 bg-slate-800 border border-slate-700 rounded-lg p-1 text-center font-bold text-emerald-400 text-xs">
-                </div>
-                <div>
-                  <span class="text-[9px] text-slate-400 block text-center">J.m.</span>
-                  <input type="text" id="aiItemUnit_${index}" value="${item.unit || 'szt.'}" class="w-12 bg-slate-800 border border-slate-700 rounded-lg p-1 text-center text-[11px] text-slate-300">
-                </div>
-              </div>
-            </div>
-
-            <div class="pt-1 border-t border-slate-800/80 flex items-center gap-2">
-              <span class="text-[10px] text-slate-400 whitespace-nowrap">Przypisz do:</span>
-              <select id="aiSelectMatch_${index}" onchange="handleManualMatchChange(${index})" class="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-[11px] text-white w-full focus:outline-none focus:border-emerald-500">
-                <option value="">+ Utwórz jako nową kartotekę</option>
-                ${inventory.map(inv => `
-                  <option value="${inv.id}" ${matchedId === inv.id ? 'selected' : ''}>
-                    ${inv.name} (Obecna cena:${Number(inv.price || 0).toFixed(2)} zł)
-                  </option>
-                `).join('')}
-              </select>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function handleManualMatchChange(index) {
-      const select = document.getElementById(`aiSelectMatch_${index}`);
-      const badge = document.getElementById(`aiBadge_${index}`);
-      const selectedId = select.value;
-
-      if (selectedId) {
-        const item = inventory.find(i => i.id === selectedId);
-        if (item) {
-          badge.className = "text-[9px] font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-700/50";
-          badge.innerText = `✓ Scal z: ${item.name} (Stan: ${item.qty} ${item.unit})`;
-        }
-      } else {
-        badge.className = "text-[9px] font-bold px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-700/50";
-        badge.innerText = "+ Nowa kartoteka magazynowa";
-      }
-      triggerScanFeedback();
-    }
-
-    function multiplyToPieces(index, multiplier = 12) {
-      const qtyInput = document.getElementById(`aiItemQty_${index}`);
-      const unitInput = document.getElementById(`aiItemUnit_${index}`);
-      const priceInput = document.getElementById(`aiItemPrice_${index}`);
-      
-      const currentVal = parseInt(qtyInput.value) || 1;
-      const currentPrice = parseFloat(priceInput.value) || 0;
-
-      qtyInput.value = currentVal * multiplier;
-      unitInput.value = 'szt.';
-      if (currentPrice > 0) {
-        priceInput.value = (currentPrice / multiplier).toFixed(2);
-      }
-      triggerScanFeedback();
-    }
-
-    function toggleImagePreview() {
-      document.getElementById('aiImagePreview').classList.toggle('hidden');
-    }
-
-    function closeAiModal() {
-      document.getElementById('aiModal').classList.add('hidden');
-      document.getElementById('aiModal').classList.remove('flex');
-      currentExtractedDelivery = null;
-    }
-
-    // --- ZAPIS PRZYJĘCIA I REJESTRACJA ALERTÓW CENOWYCH ---
-    async function confirmAndApplyDelivery() {
-      if (!currentExtractedDelivery || !currentExtractedDelivery.items) return;
-
-      const finalItems = [];
-
-      for (let i = 0; i < currentExtractedDelivery.items.length; i++) {
-        const name = document.getElementById(`aiItemName_${i}`).value.trim();
-        const chosenMatchId = document.getElementById(`aiSelectMatch_${i}`).value;
-        const qty = parseInt(document.getElementById(`aiItemQty_${i}`).value) || 0;
-        const unit = document.getElementById(`aiItemUnit_${i}`).value.trim() || 'szt.';
-        const incomingPrice = parseFloat(document.getElementById(`aiItemPrice_${i}`).value) || 0.00;
-
-        if (qty <= 0) continue;
-        finalItems.push({ name, qty, unit, netPrice: incomingPrice });
-
-        let match = null;
-        if (chosenMatchId) match = inventory.find(inv => inv.id === chosenMatchId);
-        else match = inventory.find(inv => inv.name.toLowerCase() === name.toLowerCase());
-
-        if (match) {
-          const oldPrice = Number(match.price || 0);
-
-          // Jeśli cena uległa zmianie o więcej niż 1 grosz, rejestrujemy alert
-          if (oldPrice > 0 && incomingPrice > 0 && Math.abs(incomingPrice - oldPrice) > 0.01) {
-            const diffPct = (((incomingPrice - oldPrice) / oldPrice) * 100).toFixed(1);
-            const alertEntry = {
-              id: Date.now().toString() + '_' + i,
-              item_name: match.name,
-              supplier: currentExtractedDelivery.supplier,
-              old_price: oldPrice,
-              new_price: incomingPrice,
-              diff_percent: parseFloat(diffPct),
-              doc_number: currentExtractedDelivery.docNumber,
-              created_at: new Date()
-            };
-            priceAlerts.unshift(alertEntry);
-
-            if (isCloudOnline) {
-              try { await apiRequest('/price_alerts', 'POST', alertEntry); } catch (e) {}
-            }
-          }
-
-          match.qty += qty;
-          match.price = incomingPrice > 0 ? incomingPrice : match.price; // aktualizacja do najnowszej ceny
-
-          if (isCloudOnline) {
-            try {
-              await apiRequest(`/inventory?id=eq.${match.id}`, 'PATCH', { 
-                qty: match.qty, 
-                price: match.price,
-                updated_at: new Date() 
-              });
-            } catch (e) {}
-          }
-        } else {
-          const newItem = {
-            id: Date.now().toString() + '_' + i,
-            barcode: 'RC-' + Math.floor(100000 + Math.random() * 900000),
-            name: name,
-            category: 'Dostawa',
-            location: 'Magazyn Główny',
-            qty: qty,
-            in_field: 0,
-            unit: unit,
-            min_qty: 3,
-            price: incomingPrice
-          };
-          inventory.unshift(newItem);
-          if (isCloudOnline) {
-            try { await apiRequest('/inventory', 'POST', newItem); } catch (e) {}
-          }
-        }
-      }
-
-      const deliveryEntry = {
-        id: Date.now().toString(),
-        doc_number: currentExtractedDelivery.docNumber,
-        supplier: currentExtractedDelivery.supplier,
-        total_gross: currentExtractedDelivery.totalGross,
-        items_json: finalItems,
-        image_url: currentExtractedDelivery.imagePreview,
-        created_at: new Date()
-      };
-
-      deliveries.unshift(deliveryEntry);
-      localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
-      localStorage.setItem('magazyn_offline_deliveries', JSON.stringify(deliveries));
-      localStorage.setItem('magazyn_offline_price_alerts', JSON.stringify(priceAlerts));
-
-      if (isCloudOnline) {
-        try { await apiRequest('/deliveries', 'POST', deliveryEntry); } catch (e) {}
-      }
-
-      triggerScanFeedback();
-      closeAiModal();
-      renderInventory();
-      renderDeliveries();
-      renderPriceAlerts();
-      alert("Dostawa przyjęta – stany i ceny zaktualizowane!");
-    }
-
-    // --- SKANOWANIE I AKCJE RĘCZNE ---
-    function handleScannedCode(code) {
-      if (!code) return;
-      const cleanCode = code.trim();
-      triggerScanFeedback();
-
-      const found = inventory.find(i => i.barcode.toLowerCase() === cleanCode.toLowerCase());
-      if (found) {
-        openActionModal(found.id);
-      } else {
-        if (confirm(`Kod "${cleanCode}" nie istnieje w bazie.\nCzy dodać nową pozycję?`)) {
-          openNewItemModal(cleanCode);
-        }
-      }
-    }
-
-    function handleManualBarcodeSubmit(e) {
-      e.preventDefault();
-      const input = document.getElementById('barcodeInput');
-      handleScannedCode(input.value);
-      input.value = '';
-    }
-
-    function toggleCameraFocus() {
-      switchMainTab('stock');
-      const section = document.getElementById('scannerSection');
-      section.scrollIntoView({ behavior: 'smooth' });
-      if (!isCameraRunning) toggleCamera();
-    }
-
-    function toggleCamera() {
-      const container = document.getElementById('cameraContainer');
-      const btn = document.getElementById('btnToggleCamera');
-
-      if (isCameraRunning && html5QrCode) {
-        html5QrCode.stop().then(() => {
-          container.classList.add('hidden');
-          btn.innerText = 'Włącz kamerę';
-          btn.classList.replace('bg-rose-600', 'bg-indigo-600');
-          isCameraRunning = false;
-        });
-        return;
-      }
-
-      container.classList.remove('hidden');
-      btn.innerText = 'Zatrzymaj kamerę';
-      btn.classList.replace('bg-indigo-600', 'bg-rose-600');
-
-      html5QrCode = new Html5Qrcode("reader");
-      html5QrCode.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 250, height: 140 } },
-        (decodedText) => {
-          html5QrCode.stop().then(() => {
-            container.classList.add('hidden');
-            btn.innerText = 'Włącz kamerę';
-            btn.classList.replace('bg-rose-600', 'bg-indigo-600');
-            isCameraRunning = false;
-            handleScannedCode(decodedText);
-          });
-        },
-        () => {}
-      ).then(() => {
-        isCameraRunning = true;
-      }).catch(err => {
-        alert("Błąd dostępu do aparatu.");
-        container.classList.add('hidden');
-        btn.innerText = 'Włącz kamerę';
-        btn.classList.replace('bg-rose-600', 'bg-indigo-600');
-      });
+      renderInventory(); closeEditModal(); triggerScanFeedback();
+      if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${item.id}`, 'PATCH', { barcode: item.barcode, name: item.name, price: item.price, category: item.category, location: item.location, unit: item.unit, min_qty: item.minQty, updated_at: new Date() }); } catch (err) {} }
     }
 
     function openActionModal(id) {
-      const item = inventory.find(i => i.id === id);
-      if (!item) return;
+      const item = inventory.find(i => i.id === id); if (!item) return;
       selectedItemId = id;
-
       document.getElementById('modalItemCategory').innerText = `${item.category || 'Ogólne'} • ${item.location || 'Brak lok.'}`;
       document.getElementById('modalItemName').innerText = item.name;
       document.getElementById('modalItemBarcode').innerText = `KOD: ${item.barcode}`;
@@ -1384,208 +1343,108 @@ Zwróć wynik jako czysty JSON:
       document.getElementById('modalItemUnit').innerText = item.unit || 'szt.';
       document.getElementById('modalItemInField').innerText = item.inField || 0;
       document.getElementById('modalStepQty').value = 1;
-
-      const modal = document.getElementById('actionModal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      document.getElementById('actionModal').classList.remove('hidden');
+      document.getElementById('actionModal').classList.add('flex');
     }
-
-    function closeActionModal() {
-      document.getElementById('actionModal').classList.add('hidden');
-      document.getElementById('actionModal').classList.remove('flex');
-      selectedItemId = null;
-    }
-
-    function adjustStepQty(delta) {
-      const input = document.getElementById('modalStepQty');
-      input.value = Math.max(1, (parseInt(input.value) || 1) + delta);
-      triggerScanFeedback();
-    }
-
-    function setStepQty(val) {
-      document.getElementById('modalStepQty').value = val;
-      triggerScanFeedback();
-    }
-
+    function closeActionModal() { document.getElementById('actionModal').classList.add('hidden'); document.getElementById('actionModal').classList.remove('flex'); selectedItemId = null; }
+    function adjustStepQty(delta) { const inp = document.getElementById('modalStepQty'); inp.value = Math.max(1, (parseInt(inp.value) || 1) + delta); triggerScanFeedback(); }
+    function setStepQty(val) { document.getElementById('modalStepQty').value = val; triggerScanFeedback(); }
     async function executeStockAction(type) {
-      const item = inventory.find(i => i.id === selectedItemId);
-      if (!item) return;
-
+      const item = inventory.find(i => i.id === selectedItemId); if (!item) return;
       const amount = Math.max(1, parseInt(document.getElementById('modalStepQty').value) || 1);
-
       if (type === 'ADD') item.qty += amount;
       else if (type === 'REMOVE') item.qty = Math.max(0, item.qty - amount);
       else if (type === 'TO_FIELD') { item.qty = Math.max(0, item.qty - amount); item.inField = (item.inField || 0) + amount; }
       else if (type === 'FROM_FIELD') { item.inField = Math.max(0, (item.inField || 0) - amount); item.qty += amount; }
-
-      triggerScanFeedback();
-      localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
-      renderInventory();
-      closeActionModal();
-
-      if (isCloudOnline) {
-        try {
-          await apiRequest(`/inventory?id=eq.${item.id}`, 'PATCH', {
-            qty: item.qty,
-            in_field: item.inField,
-            updated_at: new Date()
-          });
-        } catch (e) {}
-      }
+      triggerScanFeedback(); localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
+      renderInventory(); closeActionModal();
+      if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${item.id}`, 'PATCH', { qty: item.qty, in_field: item.inField, updated_at: new Date() }); } catch (e) {} }
     }
-
     async function deleteCurrentItem() {
-      if (!confirm('Usunąć tę pozycję z bazy?')) return;
+      if (!confirm('Usunąć pozycję?')) return;
       inventory = inventory.filter(i => i.id !== selectedItemId);
       localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
-      renderInventory();
-      closeActionModal();
-
-      if (isCloudOnline) {
-        try { await apiRequest(`/inventory?id=eq.${selectedItemId}`, 'DELETE'); } catch (e) {}
-      }
+      renderInventory(); closeActionModal();
+      if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${selectedItemId}`, 'DELETE'); } catch (e) {} }
     }
 
-    function generateRandomCode() {
-      document.getElementById('newBarcode').value = 'RC-' + Math.floor(100000 + Math.random() * 900000);
-      triggerScanFeedback();
-    }
-
-    function openNewItemModal(prefillBarcode) {
-      document.getElementById('newBarcode').value = prefillBarcode || ('RC-' + Math.floor(100000 + Math.random() * 900000));
-      document.getElementById('newName').value = '';
-      document.getElementById('newPrice').value = '0.00';
-      document.getElementById('newCategory').value = '';
-      document.getElementById('newLocation').value = '';
+    function generateRandomCode() { document.getElementById('newBarcode').value = 'RC-' + Math.floor(100000 + Math.random() * 900000); triggerScanFeedback(); }
+    function openNewItemModal(p) {
+      document.getElementById('newBarcode').value = p || ('RC-' + Math.floor(100000 + Math.random() * 900000));
+      document.getElementById('newName').value = ''; document.getElementById('newPrice').value = '0.00';
+      document.getElementById('newCategory').value = ''; document.getElementById('newLocation').value = '';
       document.getElementById('newQty').value = 1;
-
-      const modal = document.getElementById('newItemModal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
+      document.getElementById('newItemModal').classList.remove('hidden'); document.getElementById('newItemModal').classList.add('flex');
     }
-
-    function closeNewItemModal() {
-      document.getElementById('newItemModal').classList.add('hidden');
-      document.getElementById('newItemModal').classList.remove('flex');
-    }
-
+    function closeNewItemModal() { document.getElementById('newItemModal').classList.add('hidden'); document.getElementById('newItemModal').classList.remove('flex'); }
     async function saveNewItem(e) {
       e.preventDefault();
       const newItem = {
-        id: Date.now().toString(),
-        barcode: document.getElementById('newBarcode').value.trim(),
-        name: document.getElementById('newName').value.trim(),
-        price: parseFloat(document.getElementById('newPrice').value) || 0.00,
-        category: document.getElementById('newCategory').value.trim() || 'Ogólne',
-        location: document.getElementById('newLocation').value.trim() || '-',
-        qty: parseInt(document.getElementById('newQty').value) || 0,
-        in_field: 0,
-        unit: document.getElementById('newUnit').value.trim() || 'szt.',
-        min_qty: parseInt(document.getElementById('newMinQty').value) || 0
+        id: Date.now().toString(), barcode: document.getElementById('newBarcode').value.trim(),
+        name: document.getElementById('newName').value.trim(), price: parseFloat(document.getElementById('newPrice').value) || 0.00,
+        category: document.getElementById('newCategory').value.trim() || 'Ogólne', location: document.getElementById('newLocation').value.trim() || '-',
+        qty: parseInt(document.getElementById('newQty').value) || 0, in_field: 0, unit: document.getElementById('newUnit').value.trim() || 'szt.', min_qty: parseInt(document.getElementById('newMinQty').value) || 0
       };
+      inventory.unshift(newItem); localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
+      renderInventory(); closeNewItemModal(); triggerScanFeedback();
+      if (isCloudOnline) { try { await apiRequest('/inventory', 'POST', newItem); } catch (e) {} }
+    }
 
-      inventory.unshift(newItem);
-      localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
-      renderInventory();
-      closeNewItemModal();
-      triggerScanFeedback();
-
-      if (isCloudOnline) {
-        try { await apiRequest('/inventory', 'POST', newItem); } catch (e) {}
+    function handleScannedCode(code) {
+      if (!code) return; const clean = code.trim(); triggerScanFeedback();
+      const f = inventory.find(i => i.barcode.toLowerCase() === clean.toLowerCase());
+      if (f) openActionModal(f.id);
+      else if (confirm(`Kod "${clean}" nie istnieje. Dodać?`)) openNewItemModal(clean);
+    }
+    function handleManualBarcodeSubmit(e) { e.preventDefault(); const inp = document.getElementById('barcodeInput'); handleScannedCode(inp.value); inp.value = ''; }
+    function toggleCameraFocus() { switchMainTab('stock'); document.getElementById('scannerSection').scrollIntoView({ behavior: 'smooth' }); if (!isCameraRunning) toggleCamera(); }
+    function toggleCamera() {
+      const container = document.getElementById('cameraContainer'); const btn = document.getElementById('btnToggleCamera');
+      if (isCameraRunning && html5QrCode) {
+        html5QrCode.stop().then(() => { container.classList.add('hidden'); btn.innerText = 'Włącz kamerę'; btn.classList.replace('bg-rose-600', 'bg-indigo-600'); isCameraRunning = false; });
+        return;
       }
+      container.classList.remove('hidden'); btn.innerText = 'Zatrzymaj kamerę'; btn.classList.replace('bg-indigo-600', 'bg-rose-600');
+      html5QrCode = new Html5Qrcode("reader");
+      html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 140 } }, (d) => {
+        html5QrCode.stop().then(() => { container.classList.add('hidden'); btn.innerText = 'Włącz kamerę'; btn.classList.replace('bg-rose-600', 'bg-indigo-600'); isCameraRunning = false; handleScannedCode(d); });
+      }, () => {}).then(() => { isCameraRunning = true; }).catch(err => { alert("Błąd kamery."); container.classList.add('hidden'); btn.innerText = 'Włącz kamerę'; btn.classList.replace('bg-rose-600', 'bg-indigo-600'); });
     }
 
     function openPrintLabelModal() {
-      const item = inventory.find(i => i.id === selectedItemId);
-      if (!item) return;
-
+      const item = inventory.find(i => i.id === selectedItemId); if (!item) return;
       document.getElementById('printItemName').innerText = item.name;
       document.getElementById('printItemCategory').innerText = `${item.category} • ${item.location}`;
       document.getElementById('printItemBarcode').innerText = item.barcode;
-
-      const qrContainer = document.getElementById('printQRCode');
-      qrContainer.innerHTML = '';
-      new QRCode(qrContainer, {
-        text: item.barcode,
-        width: 140,
-        height: 140,
-        colorDark: "#000000",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H
-      });
-
+      const c = document.getElementById('printQRCode'); c.innerHTML = '';
+      new QRCode(c, { text: item.barcode, width: 140, height: 140, colorDark: "#000000", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H });
       setTimeout(() => { window.print(); }, 300);
     }
 
-    function switchMainTab(tab) {
-      const viewStock = document.getElementById('viewStock');
-      const viewAlerts = document.getElementById('viewAlerts');
-      const viewDeliveries = document.getElementById('viewDeliveries');
-
-      const tabStockH = document.getElementById('tabStockHeaderBtn');
-      const tabAlertsH = document.getElementById('tabAlertsHeaderBtn');
-      const tabDeliveriesH = document.getElementById('tabDeliveriesHeaderBtn');
-
-      const navBtnStock = document.getElementById('navBtnStock');
-      const navBtnAlerts = document.getElementById('navBtnAlerts');
-      const navBtnDeliveries = document.getElementById('navBtnDeliveries');
-
-      // Ukryj wszystkie widoki
-      viewStock.classList.add('hidden');
-      viewAlerts.classList.add('hidden');
-      viewDeliveries.classList.add('hidden');
-
-      // Reset styli nagłówków i paska
-      tabStockH.className = 'pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200';
-      tabAlertsH.className = 'pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1';
-      tabDeliveriesH.className = 'pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200';
-
-      navBtnStock.className = 'flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 py-1 px-2.5 transition active:scale-95';
-      navBtnAlerts.className = 'flex flex-col items-center gap-1 text-slate-400 hover:text-amber-400 py-1 px-2.5 transition active:scale-95';
-      navBtnDeliveries.className = 'flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 py-1 px-2.5 transition active:scale-95';
-
-      if (tab === 'stock') {
-        viewStock.classList.remove('hidden');
-        tabStockH.className = 'pb-2 border-b-2 border-emerald-500 text-emerald-400 font-bold';
-        navBtnStock.className = 'flex flex-col items-center gap-1 text-emerald-400 py-1 px-2.5 transition active:scale-95';
-      } else if (tab === 'alerts') {
-        viewAlerts.classList.remove('hidden');
-        tabAlertsH.className = 'pb-2 border-b-2 border-amber-500 text-amber-400 font-bold flex items-center gap-1';
-        navBtnAlerts.className = 'flex flex-col items-center gap-1 text-amber-400 py-1 px-2.5 transition active:scale-95';
-        renderPriceAlerts();
-      } else if (tab === 'deliveries') {
-        viewDeliveries.classList.remove('hidden');
-        tabDeliveriesH.className = 'pb-2 border-b-2 border-indigo-500 text-indigo-400 font-bold';
-        navBtnDeliveries.className = 'flex flex-col items-center gap-1 text-indigo-400 py-1 px-2.5 transition active:scale-95';
-      }
-      triggerScanFeedback();
+    function compressImage(file, maxWidth = 1024, quality = 0.75) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          let width = img.width, height = img.height;
+          if (width > maxWidth) { height = Math.round((height * maxWidth) / width); width = maxWidth; }
+          const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height;
+          const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.onerror = reject; img.src = URL.createObjectURL(file);
+      });
     }
 
     function exportCSV() {
       const headers = ['Kod', 'Nazwa', 'Cena Netto', 'Kategoria', 'Lokalizacja', 'Magazyn', 'W terenie', 'Jednostka', 'Min'];
-      const rows = inventory.map(i => [
-        `"${i.barcode}"`,
-        `"${i.name.replace(/"/g, '""')}"`,
-        Number(i.price || 0).toFixed(2),
-        `"${i.category}"`,
-        `"${i.location}"`,
-        i.qty,
-        i.inField || 0,
-        `"${i.unit}"`,
-        i.minQty
-      ]);
+      const rows = inventory.map(i => [`"${i.barcode}"`, `"${i.name.replace(/"/g, '""')}"`, Number(i.price || 0).toFixed(2), `"${i.category}"`, `"${i.location}"`, i.qty, i.inField || 0, `"${i.unit}"`, i.minQty]);
       const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n');
       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `magazyn_${new Date().toISOString().slice(0,10)}.csv`;
-      link.click();
+      const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = `magazyn_${new Date().toISOString().slice(0,10)}.csv`; link.click();
     }
 
-    fetchInventory();
-    fetchDeliveries();
-    fetchPriceAlerts();
+    // Inicjalizacja startowa
+    fetchAllData();
   </script>
 </body>
 </html>
