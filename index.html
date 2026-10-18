@@ -160,7 +160,7 @@
       </div>
     </section>
 
-    <!-- WIDOK 2: REALIZACJE / EVENTY (NOWOŚĆ) -->
+    <!-- WIDOK 2: REALIZACJE / EVENTY -->
     <section id="viewEvents" class="hidden space-y-3">
       <div class="bg-gradient-to-r from-slate-800 to-indigo-950/60 border border-indigo-700/50 rounded-2xl p-3.5 shadow-md flex items-center justify-between">
         <div>
@@ -830,12 +830,11 @@
               `}
             </div>
 
-            <!-- Tabela pozycji imprezy -->
             <div class="bg-slate-900/90 rounded-xl p-2.5 text-xs space-y-1.5 border border-slate-800">
               <div class="grid grid-cols-12 text-[10px] text-slate-400 font-bold border-b border-slate-800 pb-1">
                 <span class="col-span-6">Nazwa asortymentu</span>
                 <span class="col-span-2 text-center">Wydano</span>
-                <span class="col-span-2 text-center">Zwrót</span>
+                <span class="col-span-2 text-center">Zwrot</span>
                 <span class="col-span-2 text-right">Zeszło</span>
               </div>
               ${items.map(it => {
@@ -875,6 +874,41 @@
       document.getElementById('eventReturnInput').click();
     }
 
+    // --- PANCERNA PĘTLA WYWOŁAŃ GEMINI (ZAPOBIEGA BŁĘDOM UNDEFINED) ---
+    async function queryGeminiAPI(promptText, base64Data) {
+      const models = ['gemini-3.5-flash-lite', 'gemini-1.5-flash', 'gemini-3.8-flash'];
+      let lastErrorMsg = '';
+
+      for (const model of models) {
+        try {
+          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: promptText }, { inline_data: { mime_type: 'image/jpeg', data: base64Data } }] }],
+              generationConfig: { response_mime_type: "application/json", temperature: 0.1 }
+            })
+          });
+
+          const result = await response.json();
+          if (result.error) {
+            lastErrorMsg = result.error.message;
+            continue;
+          }
+
+          if (result.candidates && result.candidates[0] && result.candidates[0].content) {
+            let rawText = result.candidates[0].content.parts[0].text.trim();
+            rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+            return JSON.parse(rawText);
+          }
+        } catch (e) {
+          lastErrorMsg = e.message;
+        }
+      }
+      throw new Error(lastErrorMsg || "Wszystkie serwery AI były chwilowo zajęte.");
+    }
+
     // --- ODDAWANIE / WYJŚCIE: SKAN KARTY WYDANIA ---
     async function processEventDispatchImage(event) {
       const file = event.target.files[0];
@@ -909,18 +943,7 @@ Zwróć wynik wyłącznie jako czysty JSON:
   ]
 }`;
 
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: promptText }, { inline_data: { mime_type: 'image/jpeg', data: base64Data } }] }],
-            generationConfig: { response_mime_type: "application/json", temperature: 0.1 }
-          })
-        });
-
-        const result = await response.json();
-        const parsed = JSON.parse(result.candidates[0].content.parts[0].text);
+        const parsed = await queryGeminiAPI(promptText, base64Data);
 
         currentExtractedEventDispatch = {
           eventNumber: parsed.eventNumber || '#EVENT-' + Date.now().toString().slice(-4),
@@ -983,7 +1006,6 @@ Zwróć wynik wyłącznie jako czysty JSON:
 
         finalItems.push({ name, dispatched: qty, unit });
 
-        // Automatyczne przesunięcie z Magazyn -> W terenie
         const match = findBestInventoryMatch(name);
         if (match) {
           match.qty = Math.max(0, match.qty - qty);
@@ -1060,20 +1082,9 @@ Zwróć wynik jako JSON:
   ]
 }`;
 
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: promptText }, { inline_data: { mime_type: 'image/jpeg', data: base64Data } }] }],
-            generationConfig: { response_mime_type: "application/json", temperature: 0.1 }
-          })
-        });
+        const parsedReturn = await queryGeminiAPI(promptText, base64Data);
 
-        const result = await response.json();
-        const parsed = JSON.parse(result.candidates[0].content.parts[0].text);
-
-        displayEventReturnModal(ev, parsed, compressedDataUrl);
+        displayEventReturnModal(ev, parsedReturn, compressedDataUrl);
         triggerScanFeedback();
       } catch (err) {
         alert("Błąd odczytu karty zwrotu: " + err.message);
@@ -1091,10 +1102,8 @@ Zwróć wynik jako JSON:
       document.getElementById('evReturnEventLabel').innerText = `${ev.event_name} (${ev.event_number})`;
       document.getElementById('evReturnDateInput').value = parsedReturn.returnDate || new Date().toLocaleDateString('pl-PL');
 
-      // Łączenie odczytanych zwrotów z pozycjami wydanymi
       const list = document.getElementById('evReturnItemsList');
       list.innerHTML = ev.items_json.map((dispItem, idx) => {
-        // Dopasowanie do odczytanej pozycji ze zwrotu
         const matchedReturn = (parsedReturn.items || []).find(it => 
           normalizeText(it.name).includes(normalizeText(dispItem.name)) ||
           normalizeText(dispItem.name).includes(normalizeText(it.name))
@@ -1157,12 +1166,9 @@ Zwróć wynik jako JSON:
         item.consumed = consQty;
         item.loss = loss;
 
-        // Bilans magazynu:
         const match = findBestInventoryMatch(item.name);
         if (match) {
-          // Zwrócone sztuki wracają do magazynu
           match.qty += retQty;
-          // Zdejmujemy cały nakład wydany z pola "w terenie"
           match.inField = Math.max(0, (match.inField || 0) - item.dispatched);
 
           if (isCloudOnline) {
@@ -1197,7 +1203,7 @@ Zwróć wynik jako JSON:
     async function deleteEvent(id) {
       if (!confirm("Czy na pewno usunąć tę realizację z archiwum?")) return;
       events = events.filter(e => e.id !== id);
-      localStorage.setItem('magazyn_offline_events', JSON.stringify(events));
+      localStorage.setItem('magazyn_offline_events', JSON.stringify(inventory));
       renderEvents();
       if (isCloudOnline) {
         try { await apiRequest(`/events?id=eq.${id}`, 'DELETE'); } catch (e) {}
@@ -1443,7 +1449,6 @@ Zwróć wynik jako JSON:
       const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.download = `magazyn_${new Date().toISOString().slice(0,10)}.csv`; link.click();
     }
 
-    // Inicjalizacja startowa
     fetchAllData();
   </script>
 </body>
