@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>MagazynRC - WMS & Event Logistics</title>
+  <title>MagazynRC - WMS, Eventy & Kaucje</title>
   
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -54,11 +54,14 @@
     <div class="flex items-center space-x-2.5">
       <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-base shadow">M</div>
       <div>
-        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v3.2 PRO</span></h1>
+        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v3.3 KAUCJE</span></h1>
         <p id="syncStatus" class="text-[10px] text-amber-400 font-medium leading-none mt-0.5">Inicjalizacja...</p>
       </div>
     </div>
     <div class="flex items-center gap-1.5">
+      <button onclick="copyLowStockWhatsApp()" class="bg-slate-700/80 hover:bg-slate-700 text-amber-300 text-xs px-2.5 py-1.5 rounded-lg font-medium flex items-center gap-1 border border-slate-600/50" title="Skopiuj listę braków na WhatsApp">
+        <span>📲</span> Braki
+      </button>
       <button onclick="fetchAllData()" class="bg-slate-700/80 hover:bg-slate-700 text-slate-200 text-xs px-2.5 py-1.5 rounded-lg font-medium border border-slate-600/50" title="Synchronizuj">
         🔄
       </button>
@@ -85,12 +88,12 @@
         <p id="statTotalItems" class="text-base font-bold text-white mt-0.5">0</p>
       </div>
       <div class="bg-slate-800/80 border border-slate-700/70 p-2 rounded-xl text-center">
-        <p class="text-[10px] text-slate-400">Wartość netto</p>
+        <p class="text-[10px] text-slate-400">Wartość towaru</p>
         <p id="statTotalValue" class="text-xs font-black text-emerald-400 mt-1">0 zł</p>
       </div>
-      <div class="bg-slate-800/80 border border-slate-700/70 p-2 rounded-xl text-center">
-        <p class="text-[10px] text-slate-400">Do zapłaty</p>
-        <p id="statUnpaidInvoices" class="text-xs font-black text-rose-400 mt-1">0 zł</p>
+      <div onclick="switchMainTab('deposits')" class="bg-slate-800/80 border border-cyan-800/60 p-2 rounded-xl text-center cursor-pointer hover:bg-slate-800 transition">
+        <p class="text-[10px] text-cyan-300 font-semibold">♻️ Kaucje</p>
+        <p id="statTotalDeposits" class="text-xs font-black text-cyan-400 mt-1">0.00 zł</p>
       </div>
       <div class="bg-slate-800/80 border border-slate-700/70 p-2 rounded-xl text-center">
         <p class="text-[10px] text-slate-400">W terenie</p>
@@ -100,14 +103,17 @@
 
     <!-- ZAKŁADKI GŁÓWNE -->
     <div class="flex border-b border-slate-800 gap-3 text-xs font-medium overflow-x-auto pb-1">
-      <button onclick="switchMainTab('stock')" id="tabStockHeaderBtn" class="pb-2 border-b-2 border-emerald-500 text-emerald-400 font-bold whitespace-nowrap flex items-center gap-1.5">
-        📦 Stany Magazynowe
+      <button onclick="switchMainTab('stock')" id="tabStockHeaderBtn" class="pb-2 border-b-2 border-emerald-500 text-emerald-400 font-bold whitespace-nowrap flex items-center gap-1">
+        📦 Magazyn
       </button>
-      <button onclick="switchMainTab('deliveries')" id="tabDeliveriesHeaderBtn" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 whitespace-nowrap font-bold flex items-center gap-1.5">
-        <span>📑</span> Faktury & Płatności <span id="unpaidCountBadge" class="bg-rose-950 text-rose-300 border border-rose-700/50 text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
+      <button onclick="switchMainTab('deliveries')" id="tabDeliveriesHeaderBtn" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 whitespace-nowrap font-bold flex items-center gap-1">
+        <span>📑</span> Przyjęte Faktury
       </button>
-      <button onclick="switchMainTab('events')" id="tabEventsHeaderBtn" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 whitespace-nowrap font-bold">
-        <span>🎉</span> Realizacje / Eventy <span id="activeEventsBadge" class="bg-amber-950 text-amber-300 border border-amber-700/50 text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
+      <button onclick="switchMainTab('deposits')" id="tabDepositsHeaderBtn" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 whitespace-nowrap font-bold flex items-center gap-1">
+        <span>♻️</span> Kaucje <span id="depositsCountBadge" class="bg-cyan-950 text-cyan-300 border border-cyan-700/50 text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
+      </button>
+      <button onclick="switchMainTab('events')" id="tabEventsHeaderBtn" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1 whitespace-nowrap font-bold">
+        <span>🎉</span> Eventy <span id="activeEventsBadge" class="bg-amber-950 text-amber-300 border border-amber-700/50 text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
       </button>
       <button onclick="switchMainTab('alerts')" id="tabAlertsHeaderBtn" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1 whitespace-nowrap font-bold">
         <span>⚠️</span> Alerty Cen <span id="alertsCountBadge" class="bg-rose-950 text-rose-300 border border-rose-700/50 text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
@@ -191,21 +197,75 @@
       <div id="inventoryList" class="space-y-2"></div>
     </section>
 
-    <!-- WIDOK 2: FAKTURY ZAKUPU -->
+    <!-- WIDOK 2: PRZYJĘTE FAKTURY / DOSTAWY (ZE ZDJĘCIAMI POD PRODUKTAMI I OSOBĄ PRZYJMUJĄCĄ) -->
     <section id="viewDeliveries" class="hidden space-y-3">
       <div class="flex items-center justify-between">
         <div>
-          <h3 class="font-bold text-xs text-white">Rejestr Faktur i Zobowiązań</h3>
-          <p class="text-[10px] text-slate-400">Terminy płatności, dane bankowe i odczytane pozycje</p>
+          <h3 class="font-bold text-xs text-white">Archiwum Przyjętych Dostaw i Faktur</h3>
+          <p class="text-[10px] text-slate-400">Spis produktów, osoba przyjmująca oraz podpięte zdjęcia</p>
         </div>
         <button onclick="openInvoiceUploadModal()" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs px-3 py-2 rounded-xl shadow transition active:scale-95 flex items-center gap-1">
-          <span>⚡</span> Nowa Faktura (1 lub 2 zdj.)
+          <span>⚡</span> Nowa Dostawa (1-2 zdj.)
         </button>
       </div>
-      <div id="deliveriesList" class="space-y-3"></div>
+      <div id="deliveriesList" class="space-y-3.5"></div>
     </section>
 
-    <!-- WIDOK 3: REALIZACJE / EVENTY -->
+    <!-- WIDOK 3: KAUCJE I OPAKOWANIA ZWROTNE (NOWA KARTA) -->
+    <section id="viewDeposits" class="hidden space-y-3.5">
+      <div class="bg-gradient-to-r from-slate-800 to-cyan-950/60 border border-cyan-700/50 rounded-2xl p-3.5 shadow-md space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="font-bold text-xs text-white flex items-center gap-1.5">
+              <span>♻️</span> Bilans Kaucji i Opakowań Zwrotnych
+            </h3>
+            <p class="text-[11px] text-slate-300 mt-0.5">Butelki PET/CAN (0,50 zł), szkło (1,00 zł), skrzynki i palety</p>
+          </div>
+          <button onclick="openNewDepositModal()" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs px-3 py-2 rounded-xl shadow transition active:scale-95">
+            + Dodaj kaucję
+          </button>
+        </div>
+
+        <!-- Podsumowanie podziału kaucji -->
+        <div class="grid grid-cols-3 gap-2 pt-1">
+          <div class="bg-slate-900/90 border border-slate-700/80 p-2 rounded-xl text-center">
+            <span class="text-[9px] text-slate-400 block">PET / Puszka (0,50 zł)</span>
+            <span id="depStatPetQty" class="text-sm font-black text-cyan-400">0 szt.</span>
+            <span id="depStatPetVal" class="text-[10px] text-slate-400 block">0.00 zł</span>
+          </div>
+          <div class="bg-slate-900/90 border border-slate-700/80 p-2 rounded-xl text-center">
+            <span class="text-[9px] text-slate-400 block">Butelki Szklane (1,00 zł)</span>
+            <span id="depStatGlassQty" class="text-sm font-black text-emerald-400">0 szt.</span>
+            <span id="depStatGlassVal" class="text-[10px] text-slate-400 block">0.00 zł</span>
+          </div>
+          <div class="bg-slate-900/90 border border-slate-700/80 p-2 rounded-xl text-center">
+            <span class="text-[9px] text-slate-400 block">Skrzynki / Palety / Inne</span>
+            <span id="depStatCratesQty" class="text-sm font-black text-amber-400">0 szt.</span>
+            <span id="depStatCratesVal" class="text-[10px] text-slate-400 block">0.00 zł</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Szybkie kafelki dodawania standardowych kaucji -->
+      <div class="flex gap-1.5 overflow-x-auto pb-1 text-[11px]">
+        <button onclick="quickAddPresetDeposit('Kaucja PET / Puszka 0,50 zł', 'PET_CAN_050', 0.50)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-cyan-300 px-2.5 py-1.5 rounded-xl whitespace-nowrap font-medium">
+          ⚡ + PET/Puszka (0,50 zł)
+        </button>
+        <button onclick="quickAddPresetDeposit('Butelka Szklana Zwrotna 1,00 zł', 'BUTELKA_SZKLO', 1.00)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-emerald-300 px-2.5 py-1.5 rounded-xl whitespace-nowrap font-medium">
+          ⚡ + Butelka Szkło (1,00 zł)
+        </button>
+        <button onclick="quickAddPresetDeposit('Skrzynka plastikowa (Transporter)', 'SKRZYNKA', 14.40)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-amber-300 px-2.5 py-1.5 rounded-xl whitespace-nowrap font-medium">
+          ⚡ + Skrzynka CC (14,40 zł)
+        </button>
+        <button onclick="quickAddPresetDeposit('Paleta EURO', 'PALETA_INNE', 50.00)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-purple-300 px-2.5 py-1.5 rounded-xl whitespace-nowrap font-medium">
+          ⚡ + Paleta EURO
+        </button>
+      </div>
+
+      <div id="depositsList" class="space-y-2.5"></div>
+    </section>
+
+    <!-- WIDOK 4: REALIZACJE / EVENTY -->
     <section id="viewEvents" class="hidden space-y-3">
       <div class="bg-gradient-to-r from-slate-800 to-indigo-950/60 border border-indigo-700/50 rounded-2xl p-3.5 shadow-md flex items-center justify-between gap-2">
         <div>
@@ -221,7 +281,7 @@
       <div id="eventsList" class="space-y-3"></div>
     </section>
 
-    <!-- WIDOK 4: ALERTY CENOWE -->
+    <!-- WIDOK 5: ALERTY CENOWE -->
     <section id="viewAlerts" class="hidden space-y-3">
       <div class="flex items-center justify-between">
         <div>
@@ -240,30 +300,28 @@
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-700 pb-2">
         <h3 class="text-sm font-bold text-white flex items-center gap-1.5">
-          <span>⚡</span> Dodaj Fakturę (1 lub 2 zdjęcia)
+          <span>⚡</span> Nowa Dostawa z Faktury (1 lub 2 zdjęcia)
         </h3>
         <button onclick="closeInvoiceUploadModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
       </div>
-      <p class="text-xs text-slate-300">Dla długich faktur (np. Coca-Cola) zrób dwa zbliżenia. System połączy pozycje w całość[cite: 14, 15]:</p>
+      <p class="text-xs text-slate-300">Dla długich faktur zrób zdjęcie góry i dołu (z tabelą kaucji i podpisem). Zdjęcia zostaną trwale podpięte pod dostawę:</p>
       
       <div class="grid grid-cols-2 gap-2.5 pt-1">
-        <!-- ZDJĘCIE 1 -->
         <div onclick="document.getElementById('invoicePhotoInput1').click()" class="border-2 border-dashed border-indigo-500/70 hover:border-indigo-400 bg-slate-900/90 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer min-h-[120px] text-center transition">
           <div id="invoiceSlot1Empty">
             <span class="text-2xl block mb-1">📸</span>
-            <span class="text-[11px] font-bold text-indigo-300 block">Strona 1 / Góra</span>
+            <span class="text-[11px] font-bold text-indigo-300 block">Zdjęcie 1 (Góra)</span>
             <span class="text-[9px] text-slate-500 block">(wymagane)</span>
           </div>
           <img id="invoiceSlot1Preview" src="" class="hidden max-h-24 w-auto rounded object-contain mb-1">
           <span id="invoiceSlot1Done" class="hidden text-[10px] text-emerald-400 font-bold">✓ Zdjęcie 1 gotowe</span>
         </div>
 
-        <!-- ZDJĘCIE 2 -->
         <div onclick="document.getElementById('invoicePhotoInput2').click()" class="border-2 border-dashed border-slate-600 hover:border-indigo-400 bg-slate-900/90 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer min-h-[120px] text-center transition">
           <div id="invoiceSlot2Empty">
             <span class="text-2xl block mb-1">➕</span>
-            <span class="text-[11px] font-bold text-slate-300 block">Strona 2 / Dół</span>
-            <span class="text-[9px] text-slate-500 block">(dla długich faktur)[cite: 14, 15]</span>
+            <span class="text-[11px] font-bold text-slate-300 block">Zdjęcie 2 (Dół/Kaucje)</span>
+            <span class="text-[9px] text-slate-500 block">(opcjonalnie)</span>
           </div>
           <img id="invoiceSlot2Preview" src="" class="hidden max-h-24 w-auto rounded object-contain mb-1">
           <span id="invoiceSlot2Done" class="hidden text-[10px] text-emerald-400 font-bold">✓ Zdjęcie 2 gotowe</span>
@@ -273,84 +331,129 @@
       <div class="flex justify-between items-center pt-2 border-t border-slate-700">
         <button onclick="resetInvoicePhotos()" class="text-xs text-slate-400 hover:text-white">Wyczyść zdjęcia</button>
         <button id="btnProcessInvoice" onclick="startMultiInvoiceProcessing()" disabled class="bg-indigo-600 disabled:bg-slate-700 disabled:text-slate-500 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow transition">
-          <span>🚀</span> Skanuj i Połącz
+          <span>🚀</span> Odczytaj Towar i Kaucje
         </button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL AI OCR: WERYFIKACJA FAKTURY, PŁATNOŚCI I POZYCJI -->
+  <!-- MODAL AI OCR: WERYFIKACJA FAKTURY, OSOBY PRZYJMUJĄCEJ I KAUCJI -->
   <div id="aiModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 shadow-2xl my-4 max-h-[94vh] flex flex-col">
       <div class="flex justify-between items-start border-b border-slate-700 pb-2">
         <div>
-          <span class="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50">Finance & Pack Intelligence</span>
-          <h3 class="text-sm font-bold text-white mt-1">Weryfikacja Pozycji Faktury</h3>
-          <p id="aiDocInfo" class="text-[11px] text-slate-400 mt-0.5">Automatyczne przeliczanie zgrzewek na sztuki...</p>
+          <span class="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50">Smart WMS & Deposit OCR</span>
+          <h3 class="text-sm font-bold text-white mt-1">Weryfikacja Dostawy i Kaucji</h3>
+          <p id="aiDocInfo" class="text-[11px] text-slate-400 mt-0.5">Przeliczanie zgrzewek na sztuki oraz wyodrębnianie kaucji...</p>
         </div>
         <button onclick="closeAiModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
       </div>
 
       <div id="aiLoadingState" class="py-12 flex flex-col items-center justify-center space-y-3">
         <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-        <p class="text-sm text-slate-200 font-medium">Model Gemini analizuje dokument...</p>
-        <p class="text-xs text-slate-500">Wykrywanie NIP, terminu, konta i przeliczanie zgrzewek</p>
+        <p class="text-sm text-slate-200 font-medium">Model Gemini analizuje zdjęcia faktury...</p>
+        <p class="text-xs text-slate-500">Odczytywanie produktów, przeliczanie zgrzewek i sekcji kaucji</p>
       </div>
 
       <div id="aiItemsContainer" class="hidden flex-1 overflow-y-auto space-y-3 pr-1">
-        <div class="bg-slate-900 border border-indigo-800/60 p-3 rounded-xl space-y-2 text-xs">
+        <!-- NAGŁÓWEK DOSTAWY Z OSOBĄ PRZYJMUJĄCĄ (BEZ TERMINÓW I KONT) -->
+        <div class="bg-slate-900 border border-indigo-800/60 p-3 rounded-xl space-y-2.5 text-xs">
           <div class="grid grid-cols-2 gap-2">
             <div>
-              <span class="text-[10px] text-slate-400 block">Dostawca:</span>
-              <input type="text" id="aiSupplierInput" class="w-full bg-slate-800 border border-slate-700 rounded p-1 font-bold text-white text-xs">
+              <span class="text-[10px] text-slate-400 block">Dostawca / Hurtownia:</span>
+              <input type="text" id="aiSupplierInput" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-white text-xs">
             </div>
             <div>
-              <span class="text-[10px] text-slate-400 block">NIP Dostawcy:</span>
-              <input type="text" id="aiNipInput" class="w-full bg-slate-800 border border-slate-700 rounded p-1 font-mono text-indigo-300 text-xs">
+              <span class="text-[10px] text-slate-400 block">Nr Dokumentu / Faktury:</span>
+              <input type="text" id="aiDocNumInput" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-mono text-amber-400 text-xs">
             </div>
           </div>
 
-          <div class="grid grid-cols-3 gap-2 pt-1 border-t border-slate-800">
+          <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800">
             <div>
-              <span class="text-[10px] text-slate-400 block">Nr Faktury:</span>
-              <input type="text" id="aiDocNumInput" class="w-full bg-slate-800 border border-slate-700 rounded p-1 font-mono text-amber-400 text-xs">
+              <span class="text-[10px] text-emerald-300 font-bold block">👤 Kto przyjmował dostawę:</span>
+              <input type="text" id="aiReceiverInput" placeholder="Np. Bartek / Kana" class="w-full bg-slate-800 border border-emerald-700/60 rounded p-1.5 font-bold text-emerald-400 text-xs">
             </div>
             <div>
-              <span class="text-[10px] text-slate-400 block">Kwota Brutto:</span>
-              <input type="text" id="aiTotalGrossInput" class="w-full bg-slate-800 border border-slate-700 rounded p-1 font-bold text-emerald-400 text-xs">
+              <span class="text-[10px] text-slate-400 block">Suma Brutto (informacyjnie):</span>
+              <input type="text" id="aiTotalGrossInput" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-slate-200 text-xs">
             </div>
-            <div>
-              <span class="text-[10px] text-rose-300 block font-bold">Termin Płatności:</span>
-              <input type="text" id="aiDueDateInput" class="w-full bg-slate-800 border border-rose-900/60 rounded p-1 font-bold text-rose-400 text-xs">
-            </div>
-          </div>
-
-          <div>
-            <span class="text-[10px] text-slate-400 block">Numer konta bankowego (IBAN):</span>
-            <input type="text" id="aiBankAccountInput" class="w-full bg-slate-800 border border-slate-700 rounded p-1 font-mono text-slate-300 text-[11px]">
           </div>
         </div>
 
-        <p class="text-[11px] text-slate-300 font-medium">Pozycje przeliczone na pojedyncze sztuki:</p>
-        <div id="aiItemsList" class="space-y-2.5"></div>
+        <!-- SEKCJA 1: PRODUKTY SPOŻYWCZE / NAPOJE -->
+        <div class="space-y-2">
+          <p class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">📦 1. Towar i Napoje (wchodzą na Magazyn):</p>
+          <div id="aiItemsList" class="space-y-2"></div>
+        </div>
+
+        <!-- SEKCJA 2: KAUCJE I OPAKOWANIA ZWROTNE Z FAKTURY -->
+        <div class="space-y-2 pt-2 border-t border-slate-700">
+          <div class="flex items-center justify-between">
+            <p class="text-[11px] font-bold text-cyan-400 uppercase tracking-wider">♻️ 2. Kaucje i Opakowania Zwrotne (wchodzą w Kaucje):</p>
+            <button type="button" onclick="addManualDepositRowToModal()" class="text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-700/60 px-2 py-0.5 rounded-lg font-bold">
+              + Dodaj kaucję
+            </button>
+          </div>
+          <div id="aiDepositsList" class="space-y-2"></div>
+        </div>
       </div>
 
       <div id="aiModalActions" class="hidden pt-2.5 border-t border-slate-700 flex justify-end gap-2">
         <button onclick="closeAiModal()" class="px-4 py-2 rounded-xl text-xs text-slate-400 hover:bg-slate-700">Anuluj</button>
-        <button onclick="confirmAndApplyDelivery()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow">
-          <span>✓</span> Zastosuj przyjęcie i zapisz płatność
+        <button onclick="confirmAndApplyDelivery()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow">
+          <span>✓</span> Zatwierdź Towar, Kaucje i Zdjęcia
         </button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: PODGLĄD SKANÓW / ZDJĘĆ W LIGHTBOXIE -->
+  <!-- MODAL: RĘCZNE DODAWANIE / EDYCJA POZYCJI KAUCJI -->
+  <div id="depositModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <form onsubmit="saveDepositModal(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+        <h3 class="text-sm font-bold text-white flex items-center gap-1.5"><span>♻️</span> Pozycja Kaucyjna / Opakowanie</h3>
+        <button type="button" onclick="closeDepositModal()" class="text-slate-400 hover:text-white p-1">✕</button>
+      </div>
+      <input type="hidden" id="depModalId">
+      <div>
+        <label class="text-[11px] text-slate-300 block mb-1">Nazwa opakowania / kaucji *:</label>
+        <input type="text" id="depModalName" required placeholder="Np. Kaucja PET 0.85L / Skrzynka CC" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold">
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="text-[11px] text-slate-300 block mb-1">Rodzaj kaucji:</label>
+          <select id="depModalCategory" onchange="handleDepCategoryPreset()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white">
+            <option value="PET_CAN_050">PET / Puszka (0,50 zł)</option>
+            <option value="BUTELKA_SZKLO">Butelka Szklana (1,00 zł)</option>
+            <option value="SKRZYNKA">Skrzynka / Transporter</option>
+            <option value="PALETA_INNE">Paleta / Keg / Inne</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-[11px] text-slate-300 block mb-1">Cena kaucji za 1 szt. (PLN):</label>
+          <input type="number" step="0.01" id="depModalPrice" value="0.50" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-cyan-400 font-bold text-center">
+        </div>
+      </div>
+      <div>
+        <label class="text-[11px] text-slate-300 block mb-1">Aktualna ilość na stanie (szt.):</label>
+        <input type="number" id="depModalQty" value="1" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold text-center">
+      </div>
+      <div class="flex justify-end gap-2 pt-2 border-t border-slate-700">
+        <button type="button" onclick="closeDepositModal()" class="px-3 py-1.5 rounded-xl text-xs text-slate-300 hover:bg-slate-700">Anuluj</button>
+        <button type="submit" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black px-4 py-1.5 rounded-xl text-xs shadow">Zapisz kaucję</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- MODAL: LIGHTBOX DO PODGLĄDU ZDJĘĆ FAKTUR (Z PRZEŁĄCZANIEM STRONA 1 / STRONA 2) -->
   <div id="imagePreviewModal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="relative max-w-xl w-full bg-slate-900 border border-slate-700 rounded-2xl p-3 flex flex-col items-center shadow-2xl">
       <div class="w-full flex justify-between items-center border-b border-slate-800 pb-2 mb-2">
-        <h4 id="imagePreviewTitle" class="text-xs font-bold text-white truncate pr-2">Podgląd skanu</h4>
+        <h4 id="imagePreviewTitle" class="text-xs font-bold text-white truncate pr-2">Podgląd dokumentu</h4>
         <button onclick="closeImagePreviewModal()" class="text-slate-400 hover:text-white text-xl font-black p-1">✕</button>
       </div>
+      <div id="imagePreviewTabs" class="w-full flex gap-2 mb-2 hidden"></div>
       <div class="w-full flex items-center justify-center max-h-[75vh] overflow-auto bg-black/60 rounded-xl p-1" style="touch-action: pinch-zoom;">
         <img id="imagePreviewElement" src="" alt="Skan dokumentu" class="max-w-full max-h-[72vh] object-contain rounded-lg">
       </div>
@@ -378,13 +481,13 @@
   </div>
 
   <!-- DOLNY PASEK NAWIGACJI -->
-  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 border-t border-slate-800 backdrop-blur-md px-3 py-2 flex items-center justify-around shadow-2xl">
-    <button onclick="switchMainTab('stock')" id="navBtnStock" class="flex flex-col items-center gap-1 text-emerald-400 py-1 px-2.5 transition active:scale-95">
+  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 border-t border-slate-800 backdrop-blur-md px-2 py-2 flex items-center justify-around shadow-2xl">
+    <button onclick="switchMainTab('stock')" id="navBtnStock" class="flex flex-col items-center gap-1 text-emerald-400 py-1 px-2 transition active:scale-95">
       <span class="text-lg">📦</span>
       <span class="text-[10px] font-bold">Magazyn</span>
     </button>
 
-    <button onclick="switchMainTab('deliveries')" id="navBtnDeliveries" class="flex flex-col items-center gap-1 text-slate-400 hover:text-indigo-400 py-1 px-2.5 transition active:scale-95">
+    <button onclick="switchMainTab('deliveries')" id="navBtnDeliveries" class="flex flex-col items-center gap-1 text-slate-400 hover:text-indigo-400 py-1 px-2 transition active:scale-95">
       <span class="text-lg">📑</span>
       <span class="text-[10px] font-bold">Faktury</span>
     </button>
@@ -394,18 +497,23 @@
       <span class="text-[9px] font-black uppercase tracking-tighter">AI FAKT</span>
     </button>
 
-    <button onclick="switchMainTab('events')" id="navBtnEvents" class="flex flex-col items-center gap-1 text-slate-400 hover:text-amber-400 py-1 px-2.5 transition active:scale-95">
+    <button onclick="switchMainTab('deposits')" id="navBtnDeposits" class="flex flex-col items-center gap-1 text-slate-400 hover:text-cyan-400 py-1 px-2 transition active:scale-95">
+      <span class="text-lg">♻️</span>
+      <span class="text-[10px] font-bold">Kaucje</span>
+    </button>
+
+    <button onclick="switchMainTab('events')" id="navBtnEvents" class="flex flex-col items-center gap-1 text-slate-400 hover:text-amber-400 py-1 px-2 transition active:scale-95">
       <span class="text-lg">🎉</span>
       <span class="text-[10px] font-bold">Eventy</span>
     </button>
 
-    <button onclick="openNewItemModal('')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 py-1 px-2.5 transition active:scale-95">
+    <button onclick="openNewItemModal('')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 py-1 px-2 transition active:scale-95">
       <span class="text-lg">➕</span>
       <span class="text-[10px] font-bold">Nowy</span>
     </button>
   </nav>
 
-  <!-- JEDYNY I SPÓJNY SZABLON DRUKU DLA KART WYDANIA / ROZLICZENIA -->
+  <!-- SZABLON DRUKU DLA KART WYDANIA / ROZLICZENIA -->
   <div id="printableSheet">
     <div style="border: 2px solid #000; width: 100%; box-sizing: border-box; background: white; color: black; font-family: Arial, sans-serif;">
       <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 11px;">
@@ -689,7 +797,7 @@
       } catch (e) {
         try {
           const slimData = data.map((entry, idx) => {
-            if (idx > 4) {
+            if (idx > 6) {
               const copy = { ...entry };
               delete copy.image_url;
               delete copy.dispatch_image;
@@ -730,6 +838,7 @@
 
     let inventory = safeGetLocal('magazyn_offline_items').map(normalizeItem).filter(Boolean);
     let deliveries = safeGetLocal('magazyn_offline_deliveries');
+    let deposits = safeGetLocal('magazyn_offline_deposits');
     let priceAlerts = safeGetLocal('magazyn_offline_price_alerts');
     let events = safeGetLocal('magazyn_offline_events');
     let stockLogs = safeGetLocal('magazyn_offline_stock_logs');
@@ -793,7 +902,23 @@
       return bestItem;
     }
 
-    // --- AUTOMATYCZNY SILNIK WYKRYWANIA I ROZBIJANIA ZGRZEWEK NA SZTUKI ---
+    function findBestDepositMatch(targetName, unitPrice) {
+      if (!targetName) return null;
+      const cleanTarget = normalizeText(targetName);
+      for (const dep of deposits) {
+        const cleanDep = normalizeText(dep.name);
+        if (cleanTarget === cleanDep) return dep;
+        if (Math.abs(Number(dep.unit_price) - Number(unitPrice)) < 0.02) {
+          if ((cleanTarget.includes('pet') && cleanDep.includes('pet')) ||
+              (cleanTarget.includes('can') && cleanDep.includes('can')) ||
+              (cleanTarget.includes('skrzynk') && cleanDep.includes('skrzynk'))) {
+            return dep;
+          }
+        }
+      }
+      return null;
+    }
+
     function detectPackMultiplier(name) {
       if (!name) return 1;
       const m = name.match(/\bX\s*(\d+)\b/i) ||
@@ -805,6 +930,18 @@
         if (val > 1 && val <= 100) return val;
       }
       return 1;
+    }
+
+    // Parsowanie podpiętych zdjęć (obsługuje 1 lub 2 zdjęcia w JSON oraz pojedynczy string base64)
+    function parseDeliveryImages(imageUrlField) {
+      if (!imageUrlField) return [];
+      if (Array.isArray(imageUrlField)) return imageUrlField.filter(Boolean);
+      const str = String(imageUrlField).trim();
+      if (str.startsWith('[')) {
+        try { return JSON.parse(str).filter(Boolean); } catch (e) { return []; }
+      }
+      if (str.startsWith('data:image') || str.startsWith('http')) return [str];
+      return [];
     }
 
     async function recordStockLog(itemId, itemName, actionType, qtyChange, note = '') {
@@ -897,17 +1034,25 @@
         } catch (e) {}
 
         try {
+          const cloudDeposits = await apiRequest('/deposits?select=*&order=name.asc');
+          if (cloudDeposits && cloudDeposits.length >= deposits.length) {
+            deposits = cloudDeposits;
+            safeSetLocal('magazyn_offline_deposits', deposits);
+          } else if (deposits.length > 0) {
+            const cloudIds = new Set((cloudDeposits || []).map(d => String(d.id)));
+            for (const localDep of deposits) {
+              if (!cloudIds.has(String(localDep.id))) {
+                try { await apiRequest('/deposits', 'POST', localDep); } catch (err) {}
+              }
+            }
+          }
+        } catch (e) {}
+
+        try {
           const cloudEvents = await apiRequest('/events?select=*&order=created_at.desc');
           if (cloudEvents && cloudEvents.length >= events.length) {
             events = cloudEvents;
             safeSetLocal('magazyn_offline_events', events);
-          } else if (events.length > 0) {
-            const cloudIds = new Set((cloudEvents || []).map(ev => String(ev.id)));
-            for (const localEv of events) {
-              if (!cloudIds.has(String(localEv.id))) {
-                try { await apiRequest('/events', 'POST', localEv); } catch (err) {}
-              }
-            }
           }
         } catch (e) {}
 
@@ -923,9 +1068,28 @@
       }
 
       renderInventory();
+      renderDeposits();
       renderEvents();
       renderPriceAlerts();
       renderDeliveries();
+    }
+
+    // --- KOPIOWANIE LISTY BRAKÓW NA WHATSAPP ---
+    function copyLowStockWhatsApp() {
+      const lowItems = inventory.filter(i => (Number(i.qty) || 0) <= (Number(i.minQty) || 0));
+      if (lowItems.length === 0) {
+        return alert("Świetnie! Wszystkie towary na magazynie są powyżej stanu minimalnego.");
+      }
+      const dateStr = new Date().toLocaleDateString('pl-PL');
+      let msg = `📦 *ZAMÓWIENIE / BRAKI MAGAZYNOWE (${dateStr}):*\n\n`;
+      lowItems.forEach((it, idx) => {
+        const need = Math.max(1, (it.minQty * 2) - it.qty);
+        msg += `${idx + 1}. *${it.name}* — na stanie: ${it.qty} ${it.unit} (min: ${it.minQty}, zamówić ok. ${need} ${it.unit})\n`;
+      });
+      navigator.clipboard.writeText(msg).then(() => {
+        alert(`Skopiowano listę ${lowItems.length} brakujących pozycji! Możesz ją od razu wkleić na WhatsApp lub w SMS.`);
+        triggerScanFeedback();
+      });
     }
 
     function renderInventory() {
@@ -1011,98 +1175,90 @@
       }).join('');
     }
 
-    function renderDeliveries() {
-      const list = document.getElementById('deliveriesList');
+    // --- RENDEROWANIE ZAKŁADKI KAUCJE I OPAKOWANIA ZWROTNE ---
+    function renderDeposits() {
+      const list = document.getElementById('depositsList');
       if (!list) return;
 
-      const unpaidList = deliveries.filter(d => (d.payment_status || 'Do zapłaty') === 'Do zapłaty');
-      const unpaidCountBadge = document.getElementById('unpaidCountBadge');
-      if (unpaidCountBadge) {
-        if (unpaidList.length > 0) {
-          unpaidCountBadge.innerText = unpaidList.length;
-          unpaidCountBadge.classList.remove('hidden');
-        } else {
-          unpaidCountBadge.classList.add('hidden');
-        }
+      let petQty = 0, petVal = 0;
+      let glassQty = 0, glassVal = 0;
+      let cratesQty = 0, cratesVal = 0;
+
+      deposits.forEach(d => {
+        const q = Number(d.qty) || 0;
+        const p = Number(d.unit_price) || 0;
+        const v = q * p;
+        if (d.category === 'PET_CAN_050') { petQty += q; petVal += v; }
+        else if (d.category === 'BUTELKA_SZKLO') { glassQty += q; glassVal += v; }
+        else { cratesQty += q; cratesVal += v; }
+      });
+
+      const totalDepositVal = petVal + glassVal + cratesVal;
+      const statDep = document.getElementById('statTotalDeposits');
+      if (statDep) statDep.innerText = `${totalDepositVal.toFixed(2)} zł`;
+
+      const badge = document.getElementById('depositsCountBadge');
+      if (badge) {
+        if (deposits.length > 0) { badge.innerText = deposits.length; badge.classList.remove('hidden'); }
+        else badge.classList.add('hidden');
       }
 
-      const unpaidSum = unpaidList.reduce((sum, d) => sum + (parseFloat(String(d.total_gross).replace(',', '.')) || 0), 0);
-      const statUnpaid = document.getElementById('statUnpaidInvoices');
-      if (statUnpaid) statUnpaid.innerText = `${unpaidSum.toLocaleString('pl-PL', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} zł`;
+      const elPetQ = document.getElementById('depStatPetQty');
+      const elPetV = document.getElementById('depStatPetVal');
+      const elGlassQ = document.getElementById('depStatGlassQty');
+      const elGlassV = document.getElementById('depStatGlassVal');
+      const elCratesQ = document.getElementById('depStatCratesQty');
+      const elCratesV = document.getElementById('depStatCratesVal');
 
-      if (deliveries.length === 0) {
-        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak zarejestrowanych faktur. Kliknij "Nowa Faktura" u góry.</div>`;
+      if (elPetQ) elPetQ.innerText = `${petQty} szt.`;
+      if (elPetV) elPetV.innerText = `${petVal.toFixed(2)} zł`;
+      if (elGlassQ) elGlassQ.innerText = `${glassQty} szt.`;
+      if (elGlassV) elGlassV.innerText = `${glassVal.toFixed(2)} zł`;
+      if (elCratesQ) elCratesQ.innerText = `${cratesQty} szt.`;
+      if (elCratesV) elCratesV.innerText = `${cratesVal.toFixed(2)} zł`;
+
+      if (deposits.length === 0) {
+        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak zarejestrowanych kaucji. Zeskanuj fakturę z kaucjami lub użyj szybkich przycisków powyżej.</div>`;
         return;
       }
 
-      list.innerHTML = deliveries.map(d => {
-        let items = [];
-        try {
-          items = typeof d.items_json === 'string' ? JSON.parse(d.items_json) : (d.items_json || []);
-        } catch (e) { items = []; }
+      const catLabels = {
+        'PET_CAN_050': { label: 'PET / Puszka 0,50 zł', cls: 'bg-cyan-950 text-cyan-300 border-cyan-700/50' },
+        'BUTELKA_SZKLO': { label: 'Butelka Szklana', cls: 'bg-emerald-950 text-emerald-300 border-emerald-700/50' },
+        'SKRZYNKA': { label: 'Skrzynka / Transporter', cls: 'bg-amber-950 text-amber-300 border-amber-700/50' },
+        'PALETA_INNE': { label: 'Paleta / Inne', cls: 'bg-purple-950 text-purple-300 border-purple-700/50' }
+      };
 
-        const isPaid = (d.payment_status || 'Do zapłaty') === 'Opłacona';
+      list.innerHTML = deposits.map(dep => {
+        const cInfo = catLabels[dep.category] || catLabels['PALETA_INNE'];
+        const val = ((Number(dep.qty) || 0) * (Number(dep.unit_price) || 0)).toFixed(2);
 
         return `
-          <div class="bg-slate-800 border ${isPaid ? 'border-slate-700' : 'border-rose-900/60'} rounded-2xl p-3.5 space-y-2.5 shadow-md">
+          <div class="bg-slate-800 border border-slate-700/90 rounded-2xl p-3.5 flex flex-col gap-2.5 shadow-sm">
             <div class="flex justify-between items-start">
               <div>
-                <div class="flex items-center gap-2">
-                  <span class="text-[11px] font-mono font-bold text-indigo-400">FAKTURA: ${d.doc_number || '-'}</span>
-                  <span class="text-[9px] font-bold px-1.5 py-0.2 rounded ${isPaid ? 'bg-emerald-950 text-emerald-300 border border-emerald-700/50' : 'bg-rose-950 text-rose-300 border border-rose-700/50'}">
-                    ${isPaid ? '✓ OPŁACONA' : '⏳ DO ZAPŁATY'}
-                  </span>
-                </div>
-                <h4 class="font-bold text-sm text-white mt-1">${d.supplier || 'Dostawca'}</h4>
-                ${d.nip ? `<span class="text-[10px] text-slate-400 block font-mono">NIP: ${d.nip}</span>` : ''}
-                <p class="text-[10px] text-slate-400 mt-0.5">Wystawiono: ${new Date(d.created_at || Date.now()).toLocaleDateString('pl-PL')}</p>
+                <span class="text-[9px] font-bold px-2 py-0.5 rounded border ${cInfo.cls}">${cInfo.label}</span>
+                <h4 class="font-bold text-xs text-white mt-1.5">${dep.name}</h4>
+                <p class="text-[11px] text-slate-400 mt-0.5">Stawka kaucji: <strong class="text-cyan-400">${Number(dep.unit_price).toFixed(2)} zł / szt.</strong> • Wartość razem: <strong class="text-white">${val} zł</strong></p>
               </div>
-              <div class="text-right">
-                <span class="text-xs font-black text-emerald-400 block">${d.total_gross ? d.total_gross + ' PLN' : ''}</span>
-                <span class="text-[10px] font-bold text-rose-400 block mt-0.5">Termin: ${d.payment_due_date || 'Brak'}</span>
+              <div class="bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-xl text-center min-w-[68px]">
+                <span class="text-[9px] text-slate-400 block">Na stanie</span>
+                <span class="text-base font-black text-cyan-400">${dep.qty}</span>
+                <span class="text-[9px] text-slate-400">szt.</span>
               </div>
             </div>
 
-            ${d.bank_account ? `
-              <div class="bg-slate-900/90 rounded-lg p-2 flex items-center justify-between text-[11px] border border-slate-800">
-                <div class="truncate mr-2">
-                  <span class="text-[9px] text-slate-400 block">Konto do przelewu:</span>
-                  <span class="font-mono text-slate-200 select-all">${d.bank_account}</span>
-                </div>
-                <button onclick="copyToClipboard('${d.bank_account}')" class="bg-slate-800 hover:bg-slate-700 text-indigo-300 px-2 py-1 rounded text-[10px] whitespace-nowrap">
-                  Kopiuj
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-700/70 text-xs">
+              <div class="flex items-center gap-1.5">
+                <button onclick="adjustDepositQty('${dep.id}', 1)" class="bg-slate-700 hover:bg-slate-600 text-emerald-400 font-bold px-2.5 py-1 rounded-lg">+1</button>
+                <button onclick="adjustDepositQty('${dep.id}', 10)" class="bg-slate-700 hover:bg-slate-600 text-emerald-400 font-bold px-2.5 py-1 rounded-lg">+10</button>
+                <button onclick="returnDepositToDriver('${dep.id}')" class="bg-amber-600/90 hover:bg-amber-500 text-slate-950 font-black px-2.5 py-1 rounded-lg flex items-center gap-1 shadow">
+                  <span>🚚</span> Oddaj kierowcy
                 </button>
               </div>
-            ` : ''}
-
-            <div class="bg-slate-900/80 rounded-xl p-2.5 border border-slate-800 space-y-1">
-              <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">Produkty na tej fakturze (${items.length}):</span>
-              <div class="space-y-1 max-h-36 overflow-y-auto pr-1">
-                ${items.map(it => `
-                  <div class="flex justify-between items-center text-xs text-slate-200 border-b border-slate-800/60 pb-0.5">
-                    <span class="truncate pr-2 font-medium text-[11px]">• ${it.name}</span>
-                    <div class="flex items-center gap-2 whitespace-nowrap">
-                      ${it.netPrice ? `<span class="text-slate-400 text-[10px]">${Number(it.netPrice).toFixed(2)} zł</span>` : ''}
-                      <span class="font-bold text-emerald-400 text-[11px]">+${it.qty} ${it.unit || 'szt.'}</span>
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-
-            <div class="flex flex-wrap justify-between items-center gap-2 pt-1 border-t border-slate-700/80 text-xs">
-              <button onclick="togglePaymentStatus('${d.id}')" class="text-[11px] font-bold ${isPaid ? 'text-amber-400 hover:underline' : 'text-emerald-400 hover:underline'}">
-                ${isPaid ? 'Cofnij status (Nieopłacona)' : '✓ Oznacz jako opłacona'}
-              </button>
               <div class="flex items-center gap-2">
-                ${d.image_url ? `
-                  <button type="button" onclick="openMediaPreview('${d.id}', 'DELIVERY')" class="text-xs font-bold text-indigo-300 bg-slate-900 border border-indigo-700/50 px-2.5 py-1 rounded-lg hover:bg-slate-700 flex items-center gap-1">
-                    <span>📸</span> Podgląd skanu
-                  </button>
-                ` : ''}
-                <button type="button" onclick="deleteDelivery('${d.id}')" class="text-[11px] text-rose-400 hover:underline px-1">
-                  🗑️ Usuń
-                </button>
+                <button onclick="openEditDepositModal('${dep.id}')" class="text-[11px] text-slate-300 hover:underline">✏️ Edytuj</button>
+                <button onclick="deleteDepositItem('${dep.id}')" class="text-[11px] text-rose-400 hover:underline">🗑️ Usuń</button>
               </div>
             </div>
           </div>
@@ -1110,20 +1266,240 @@
       }).join('');
     }
 
-    async function togglePaymentStatus(deliveryId) {
-      const d = deliveries.find(x => String(x.id) === String(deliveryId));
-      if (!d) return;
-
-      d.payment_status = (d.payment_status === 'Opłacona') ? 'Do zapłaty' : 'Opłacona';
-      safeSetLocal('magazyn_offline_deliveries', deliveries);
-      renderDeliveries();
+    async function adjustDepositQty(depId, delta) {
+      const dep = deposits.find(d => String(d.id) === String(depId));
+      if (!dep) return;
+      dep.qty = Math.max(0, (Number(dep.qty) || 0) + delta);
+      safeSetLocal('magazyn_offline_deposits', deposits);
+      renderDeposits();
       triggerScanFeedback();
 
       if (isCloudOnline) {
-        try {
-          await apiRequest(`/deliveries?id=eq.${deliveryId}`, 'PATCH', { payment_status: d.payment_status });
-        } catch (e) {}
+        try { await apiRequest(`/deposits?id=eq.${dep.id}`, 'PATCH', { qty: dep.qty, updated_at: new Date() }); } catch (e) {}
       }
+    }
+
+    async function returnDepositToDriver(depId) {
+      const dep = deposits.find(d => String(d.id) === String(depId));
+      if (!dep) return;
+      const amountStr = prompt(`Ile sztuk opakowania "${dep.name}" oddajesz kierowcy / hurtowni? (Na stanie: ${dep.qty} szt.)`, dep.qty);
+      if (amountStr === null) return;
+      const amount = parseInt(amountStr, 10);
+      if (isNaN(amount) || amount <= 0) return;
+
+      dep.qty = Math.max(0, (Number(dep.qty) || 0) - amount);
+      safeSetLocal('magazyn_offline_deposits', deposits);
+      renderDeposits();
+      triggerScanFeedback();
+
+      if (isCloudOnline) {
+        try { await apiRequest(`/deposits?id=eq.${dep.id}`, 'PATCH', { qty: dep.qty, updated_at: new Date() }); } catch (e) {}
+      }
+    }
+
+    async function quickAddPresetDeposit(name, category, price) {
+      const qtyStr = prompt(`Podaj ilość sztuk dla "${name}" (${price.toFixed(2)} zł/szt.):`, "12");
+      if (qtyStr === null) return;
+      const qty = parseInt(qtyStr, 10);
+      if (isNaN(qty) || qty <= 0) return;
+
+      await upsertDepositEntry(name, category, price, qty);
+      renderDeposits();
+      triggerScanFeedback();
+    }
+
+    async function upsertDepositEntry(name, category, unitPrice, qtyDelta) {
+      let existing = findBestDepositMatch(name, unitPrice);
+      if (existing) {
+        existing.qty = Math.max(0, (Number(existing.qty) || 0) + qtyDelta);
+        if (isCloudOnline) {
+          try { await apiRequest(`/deposits?id=eq.${existing.id}`, 'PATCH', { qty: existing.qty, updated_at: new Date() }); } catch (e) {}
+        }
+      } else {
+        const newDep = {
+          id: Date.now().toString() + '_' + Math.floor(Math.random() * 1000),
+          name: name,
+          category: category || 'BUTELKA_SZKLO',
+          unit_price: Number(unitPrice) || 0.50,
+          qty: Math.max(0, qtyDelta),
+          updated_at: new Date()
+        };
+        deposits.unshift(newDep);
+        if (isCloudOnline) {
+          try { await apiRequest('/deposits', 'POST', newDep); } catch (e) {}
+        }
+      }
+      safeSetLocal('magazyn_offline_deposits', deposits);
+    }
+
+    function openNewDepositModal() {
+      document.getElementById('depModalId').value = '';
+      document.getElementById('depModalName').value = '';
+      document.getElementById('depModalCategory').value = 'PET_CAN_050';
+      document.getElementById('depModalPrice').value = '0.50';
+      document.getElementById('depModalQty').value = '10';
+      document.getElementById('depositModal').classList.remove('hidden');
+      document.getElementById('depositModal').classList.add('flex');
+    }
+
+    function openEditDepositModal(depId) {
+      const dep = deposits.find(d => String(d.id) === String(depId));
+      if (!dep) return;
+      document.getElementById('depModalId').value = dep.id;
+      document.getElementById('depModalName').value = dep.name;
+      document.getElementById('depModalCategory').value = dep.category || 'BUTELKA_SZKLO';
+      document.getElementById('depModalPrice').value = Number(dep.unit_price).toFixed(2);
+      document.getElementById('depModalQty').value = dep.qty;
+      document.getElementById('depositModal').classList.remove('hidden');
+      document.getElementById('depositModal').classList.add('flex');
+    }
+
+    function handleDepCategoryPreset() {
+      const cat = document.getElementById('depModalCategory').value;
+      const priceInp = document.getElementById('depModalPrice');
+      if (cat === 'PET_CAN_050') priceInp.value = '0.50';
+      else if (cat === 'BUTELKA_SZKLO') priceInp.value = '1.00';
+      else if (cat === 'SKRZYNKA') priceInp.value = '14.40';
+    }
+
+    function closeDepositModal() {
+      document.getElementById('depositModal').classList.add('hidden');
+      document.getElementById('depositModal').classList.remove('flex');
+    }
+
+    async function saveDepositModal(e) {
+      e.preventDefault();
+      const id = document.getElementById('depModalId').value;
+      const name = document.getElementById('depModalName').value.trim();
+      const category = document.getElementById('depModalCategory').value;
+      const price = parseFloat(document.getElementById('depModalPrice').value) || 0.50;
+      const qty = parseInt(document.getElementById('depModalQty').value, 10) || 0;
+
+      if (id) {
+        const dep = deposits.find(d => String(d.id) === String(id));
+        if (dep) {
+          dep.name = name;
+          dep.category = category;
+          dep.unit_price = price;
+          dep.qty = qty;
+          if (isCloudOnline) {
+            try { await apiRequest(`/deposits?id=eq.${dep.id}`, 'PATCH', { name, category, unit_price: price, qty, updated_at: new Date() }); } catch (err) {}
+          }
+        }
+      } else {
+        const newDep = { id: Date.now().toString(), name, category, unit_price: price, qty, updated_at: new Date() };
+        deposits.unshift(newDep);
+        if (isCloudOnline) {
+          try { await apiRequest('/deposits', 'POST', newDep); } catch (err) {}
+        }
+      }
+
+      safeSetLocal('magazyn_offline_deposits', deposits);
+      renderDeposits();
+      closeDepositModal();
+      triggerScanFeedback();
+    }
+
+    async function deleteDepositItem(depId) {
+      if (!confirm("Usunąć tę pozycję kaucyjną?")) return;
+      deposits = deposits.filter(d => String(d.id) !== String(depId));
+      safeSetLocal('magazyn_offline_deposits', deposits);
+      renderDeposits();
+      if (isCloudOnline) {
+        try { await apiRequest(`/deposits?id=eq.${depId}`, 'DELETE'); } catch (e) {}
+      }
+    }
+
+    // --- RENDEROWANIE PRZYJĘTYCH FAKTUR (Z PODPIĘTYMI ZDJĘCIAMI I OSOBĄ PRZYJMUJĄCĄ) ---
+    function renderDeliveries() {
+      const list = document.getElementById('deliveriesList');
+      if (!list) return;
+
+      if (deliveries.length === 0) {
+        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak zarejestrowanych dostaw. Kliknij "Nowa Dostawa" u góry.</div>`;
+        return;
+      }
+
+      list.innerHTML = deliveries.map(d => {
+        let items = [];
+        let depItems = [];
+        try { items = typeof d.items_json === 'string' ? JSON.parse(d.items_json) : (d.items_json || []); } catch (e) { items = []; }
+        try { depItems = typeof d.deposits_json === 'string' ? JSON.parse(d.deposits_json) : (d.deposits_json || []); } catch (e) { depItems = []; }
+
+        const photos = parseDeliveryImages(d.image_url);
+        const receiver = d.receiver_name || 'Magazyn';
+
+        return `
+          <div class="bg-slate-800 border border-slate-700 rounded-2xl p-3.5 space-y-3 shadow-md">
+            <div class="flex justify-between items-start gap-2">
+              <div>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-[11px] font-mono font-bold text-indigo-400">DOKUMENT: ${d.doc_number || '-'}</span>
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700/60">
+                    👤 Przyjął: ${receiver}
+                  </span>
+                </div>
+                <h4 class="font-bold text-sm text-white mt-1">${d.supplier || 'Dostawca'}</h4>
+                <p class="text-[10px] text-slate-400 mt-0.5">Data przyjęcia: ${new Date(d.created_at || Date.now()).toLocaleDateString('pl-PL')}</p>
+              </div>
+              <div class="text-right">
+                <span class="text-xs font-black text-emerald-400 block">${d.total_gross ? d.total_gross + ' PLN' : ''}</span>
+                <button type="button" onclick="deleteDelivery('${d.id}')" class="text-[10px] text-rose-400 hover:underline mt-1 inline-block">
+                  🗑️ Usuń wpis
+                </button>
+              </div>
+            </div>
+
+            <!-- SPIS PRZETWORZONYCH PRODUKTÓW -->
+            <div class="bg-slate-900/90 rounded-xl p-2.5 border border-slate-800 space-y-1">
+              <span class="text-[10px] text-emerald-400 uppercase font-bold tracking-wider block">📦 Przyjęte produkty na stan (${items.length}):</span>
+              <div class="space-y-1 max-h-44 overflow-y-auto pr-1">
+                ${items.map(it => `
+                  <div class="flex justify-between items-center text-xs text-slate-200 border-b border-slate-800/60 pb-0.5">
+                    <span class="truncate pr-2 font-medium text-[11px]">• ${it.name}</span>
+                    <div class="flex items-center gap-2 whitespace-nowrap">
+                      ${it.netPrice ? `<span class="text-slate-400 text-[10px]">${Number(it.netPrice).toFixed(2)} zł/szt.</span>` : ''}
+                      <span class="font-bold text-emerald-400 text-[11px]">+${it.qty} ${it.unit || 'szt.'}</span>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+
+            <!-- SPIS KAUCJI Z TEJ FAKTURY (JEŚLI BYŁY) -->
+            ${depItems.length > 0 ? `
+              <div class="bg-cyan-950/30 rounded-xl p-2.5 border border-cyan-900/50 space-y-1">
+                <span class="text-[10px] text-cyan-300 uppercase font-bold tracking-wider block">♻️ Rozliczone kaucje i opakowania (${depItems.length}):</span>
+                <div class="space-y-1">
+                  ${depItems.map(dp => `
+                    <div class="flex justify-between items-center text-[11px] text-cyan-100">
+                      <span>• ${dp.name} (${Number(dp.unitPrice).toFixed(2)} zł/szt.)</span>
+                      <span class="font-bold ${dp.netQty >= 0 ? 'text-cyan-400' : 'text-amber-400'}">${dp.netQty >= 0 ? '+' : ''}${dp.netQty} szt.</span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+
+            <!-- PODPIĘTE ZDJĘCIA FAKTURY BEZPOŚREDNIO POD SPISEM PRODUKTÓW -->
+            ${photos.length > 0 ? `
+              <div class="pt-1 border-t border-slate-700/80 space-y-1.5">
+                <span class="text-[10px] text-slate-400 font-bold block">📎 Podpięte zdjęcia faktury (${photos.length}) — kliknij, aby powiększyć:</span>
+                <div class="flex gap-2.5 overflow-x-auto pb-1">
+                  ${photos.map((imgSrc, idx) => `
+                    <div onclick="openMediaPreview('${d.id}', 'DELIVERY', ${idx})" class="relative group cursor-pointer border border-indigo-500/50 rounded-xl overflow-hidden bg-black w-24 h-24 flex-shrink-0 shadow">
+                      <img src="${imgSrc}" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition">
+                      <span class="absolute bottom-0 inset-x-0 bg-black/80 text-[9px] text-center text-indigo-300 font-bold py-0.5">
+                        🔍 Strona ${idx + 1}
+                      </span>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
     }
 
     async function deleteDelivery(deliveryId) {
@@ -1138,14 +1514,7 @@
       }
     }
 
-    function copyToClipboard(text) {
-      navigator.clipboard.writeText(text).then(() => {
-        alert("Numer konta skopiowany: " + text);
-        triggerScanFeedback();
-      });
-    }
-
-    // --- RENDEROWANIE EVENTÓW Z PEŁNĄ OBSŁUGĄ DRUKU I ROZLICZENIA ---
+    // --- RENDEROWANIE EVENTÓW ---
     function renderEvents() {
       const list = document.getElementById('eventsList');
       if (!list) return;
@@ -1227,8 +1596,8 @@
               </div>
 
               <div class="flex items-center gap-2">
-                ${ev.dispatch_image ? `<button type="button" onclick="openMediaPreview('${ev.id}', 'EVENT_DISPATCH')" class="text-[11px] font-bold text-indigo-300 bg-slate-900 border border-indigo-700/50 px-2 py-1 rounded-lg">📸 Skan wydania</button>` : ''}
-                ${ev.return_image ? `<button type="button" onclick="openMediaPreview('${ev.id}', 'EVENT_RETURN')" class="text-[11px] font-bold text-indigo-300 bg-slate-900 border border-indigo-700/50 px-2 py-1 rounded-lg">📸 Skan zwrotu</button>` : ''}
+                ${ev.dispatch_image ? `<button type="button" onclick="openMediaPreview('${ev.id}', 'EVENT_DISPATCH', 0)" class="text-[11px] font-bold text-indigo-300 bg-slate-900 border border-indigo-700/50 px-2 py-1 rounded-lg">📸 Skan wydania</button>` : ''}
+                ${ev.return_image ? `<button type="button" onclick="openMediaPreview('${ev.id}', 'EVENT_RETURN', 0)" class="text-[11px] font-bold text-indigo-300 bg-slate-900 border border-indigo-700/50 px-2 py-1 rounded-lg">📸 Skan zwrotu</button>` : ''}
                 <button type="button" onclick="deleteEvent('${ev.id}')" class="text-rose-400 hover:underline text-[11px] ml-1">🗑️ Usuń</button>
               </div>
             </div>
@@ -1237,28 +1606,42 @@
       }).join('');
     }
 
-    function openMediaPreview(itemId, type) {
-      let imgData = '';
+    // --- PODGLĄD ZDJĘĆ (LIGHTBOX Z PRZEŁĄCZNIKIEM STRONA 1 / STRONA 2) ---
+    function openMediaPreview(itemId, type, photoIdx = 0) {
+      let photos = [];
       let title = 'Podgląd dokumentu';
 
       if (type === 'DELIVERY') {
         const d = deliveries.find(x => String(x.id) === String(itemId));
-        imgData = d?.image_url;
-        title = `Faktura: ${d?.doc_number || ''} (${d?.supplier || ''})`;
+        photos = parseDeliveryImages(d?.image_url);
+        title = `Faktura: ${d?.doc_number || ''} (${d?.supplier || ''}) • Przyjął: ${d?.receiver_name || '-'}`;
       } else if (type === 'EVENT_DISPATCH') {
         const ev = events.find(x => String(x.id) === String(itemId));
-        imgData = ev?.dispatch_image;
+        if (ev?.dispatch_image) photos = [ev.dispatch_image];
         title = `Karta Wydania: ${ev?.event_number || ''} - ${ev?.event_name || ''}`;
       } else if (type === 'EVENT_RETURN') {
         const ev = events.find(x => String(x.id) === String(itemId));
-        imgData = ev?.return_image;
+        if (ev?.return_image) photos = [ev.return_image];
         title = `Karta Zwrotu: ${ev?.event_number || ''} - ${ev?.event_name || ''}`;
       }
 
-      if (!imgData) return alert("Brak zapisanego zdjęcia dla tego dokumentu.");
+      if (photos.length === 0) return alert("Brak zapisanego zdjęcia dla tego dokumentu.");
 
       document.getElementById('imagePreviewTitle').innerText = title;
-      document.getElementById('imagePreviewElement').src = imgData;
+      document.getElementById('imagePreviewElement').src = photos[photoIdx] || photos[0];
+
+      const tabsContainer = document.getElementById('imagePreviewTabs');
+      if (photos.length > 1) {
+        tabsContainer.classList.remove('hidden');
+        tabsContainer.innerHTML = photos.map((src, idx) => `
+          <button onclick="document.getElementById('imagePreviewElement').src='${src}'" class="bg-slate-800 hover:bg-indigo-600 text-xs text-white font-bold px-3 py-1 rounded-lg border border-slate-700">
+            📄 Zdjęcie ${idx + 1}
+          </button>
+        `).join('');
+      } else {
+        tabsContainer.classList.add('hidden');
+        tabsContainer.innerHTML = '';
+      }
       
       const modal = document.getElementById('imagePreviewModal');
       modal.classList.remove('hidden');
@@ -1272,7 +1655,6 @@
       document.getElementById('imagePreviewElement').src = '';
     }
 
-    // --- BEZAWARYJNY WYDRUK KART WYDANIA / ZWROTÓW (NAPRAWIONY DLA ANDROIDA) ---
     function printEventSheet(eventId, type) {
       const ev = events.find(e => String(e.id) === String(eventId));
       if (!ev) return;
@@ -1362,36 +1744,42 @@
 
     function switchMainTab(tab) {
       document.getElementById('viewStock').classList.add('hidden');
+      document.getElementById('viewDeliveries').classList.add('hidden');
+      document.getElementById('viewDeposits').classList.add('hidden');
       document.getElementById('viewEvents').classList.add('hidden');
       document.getElementById('viewAlerts').classList.add('hidden');
-      document.getElementById('viewDeliveries').classList.add('hidden');
 
-      const tabs = ['Stock', 'Events', 'Alerts', 'Deliveries'];
+      const tabs = ['Stock', 'Deliveries', 'Deposits', 'Events', 'Alerts'];
       tabs.forEach(t => {
         const hBtn = document.getElementById(`tab${t}HeaderBtn`);
         const nBtn = document.getElementById(`navBtn${t}`);
-        if (hBtn) hBtn.className = 'pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 whitespace-nowrap font-bold flex items-center gap-1.5';
-        if (nBtn) nBtn.className = 'flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 py-1 px-2.5 transition active:scale-95';
+        if (hBtn) hBtn.className = 'pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 whitespace-nowrap font-bold flex items-center gap-1';
+        if (nBtn) nBtn.className = 'flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 py-1 px-2 transition active:scale-95';
       });
 
       if (tab === 'stock') {
         document.getElementById('viewStock').classList.remove('hidden');
-        document.getElementById('tabStockHeaderBtn').className = 'pb-2 border-b-2 border-emerald-500 text-emerald-400 font-bold whitespace-nowrap flex items-center gap-1.5';
-        document.getElementById('navBtnStock').className = 'flex flex-col items-center gap-1 text-emerald-400 py-1 px-2.5 transition active:scale-95';
+        document.getElementById('tabStockHeaderBtn').className = 'pb-2 border-b-2 border-emerald-500 text-emerald-400 font-bold whitespace-nowrap flex items-center gap-1';
+        document.getElementById('navBtnStock').className = 'flex flex-col items-center gap-1 text-emerald-400 py-1 px-2 transition active:scale-95';
         renderInventory();
       } else if (tab === 'deliveries') {
         document.getElementById('viewDeliveries').classList.remove('hidden');
-        document.getElementById('tabDeliveriesHeaderBtn').className = 'pb-2 border-b-2 border-indigo-500 text-indigo-400 font-bold whitespace-nowrap flex items-center gap-1.5';
-        document.getElementById('navBtnDeliveries').className = 'flex flex-col items-center gap-1 text-indigo-400 py-1 px-2.5 transition active:scale-95';
+        document.getElementById('tabDeliveriesHeaderBtn').className = 'pb-2 border-b-2 border-indigo-500 text-indigo-400 font-bold whitespace-nowrap flex items-center gap-1';
+        document.getElementById('navBtnDeliveries').className = 'flex flex-col items-center gap-1 text-indigo-400 py-1 px-2 transition active:scale-95';
         renderDeliveries();
+      } else if (tab === 'deposits') {
+        document.getElementById('viewDeposits').classList.remove('hidden');
+        document.getElementById('tabDepositsHeaderBtn').className = 'pb-2 border-b-2 border-cyan-500 text-cyan-400 font-bold whitespace-nowrap flex items-center gap-1';
+        document.getElementById('navBtnDeposits').className = 'flex flex-col items-center gap-1 text-cyan-400 py-1 px-2 transition active:scale-95';
+        renderDeposits();
       } else if (tab === 'events') {
         document.getElementById('viewEvents').classList.remove('hidden');
-        document.getElementById('tabEventsHeaderBtn').className = 'pb-2 border-b-2 border-amber-500 text-amber-400 font-bold whitespace-nowrap flex items-center gap-1.5';
-        document.getElementById('navBtnEvents').className = 'flex flex-col items-center gap-1 text-amber-400 py-1 px-2.5 transition active:scale-95';
+        document.getElementById('tabEventsHeaderBtn').className = 'pb-2 border-b-2 border-amber-500 text-amber-400 font-bold whitespace-nowrap flex items-center gap-1';
+        document.getElementById('navBtnEvents').className = 'flex flex-col items-center gap-1 text-amber-400 py-1 px-2 transition active:scale-95';
         renderEvents();
       } else if (tab === 'alerts') {
         document.getElementById('viewAlerts').classList.remove('hidden');
-        document.getElementById('tabAlertsHeaderBtn').className = 'pb-2 border-b-2 border-rose-500 text-rose-400 font-bold whitespace-nowrap flex items-center gap-1.5';
+        document.getElementById('tabAlertsHeaderBtn').className = 'pb-2 border-b-2 border-rose-500 text-rose-400 font-bold whitespace-nowrap flex items-center gap-1';
         renderPriceAlerts();
       }
       triggerScanFeedback();
@@ -1544,7 +1932,7 @@ Zwróć wynik jako czysty JSON:
       alert("Towary zliczone ze zdjęcia zostały zaktualizowane w magazynie!");
     }
 
-    // --- OBSŁUGA FAKTUR NA 1 LUB 2 ZDJĘCIA (DŁUGIE DOKUMENTY) ---
+    // --- OBSŁUGA FAKTUR NA 1 LUB 2 ZDJĘCIA + AUTOMATYCZNY ODCZYT KAUCJI I PODPISU ---
     function openInvoiceUploadModal() {
       resetInvoicePhotos();
       const modal = document.getElementById('invoiceCaptureModal');
@@ -1608,8 +1996,12 @@ Zwróć wynik jako czysty JSON:
     async function startMultiInvoiceProcessing() {
       if (!invoicePhoto1) return alert("Zrób najpierw zdjęcie strony 1.");
       
-      const photos = [invoicePhoto1.split(',')[1]];
-      if (invoicePhoto2) photos.push(invoicePhoto2.split(',')[1]);
+      const savedPhotosDataUrls = [invoicePhoto1];
+      const photosBase64 = [invoicePhoto1.split(',')[1]];
+      if (invoicePhoto2) {
+        savedPhotosDataUrls.push(invoicePhoto2);
+        photosBase64.push(invoicePhoto2.split(',')[1]);
+      }
 
       closeInvoiceUploadModal();
 
@@ -1621,37 +2013,36 @@ Zwróć wynik jako czysty JSON:
       document.getElementById('aiModalActions').classList.add('hidden');
 
       try {
-        const promptText = `Jesteś ekspertem księgowo-magazynowym. Otrzymujesz zdjęcie (lub 2 zdjęcia stanowiące górę i dół tej samej długiej faktury/WZ)[cite: 14, 15].
-Przeanalizuj cały dokument i połącz wszystkie pozycje.
-ZASADA: Przepisz DOKŁADNIE to co widzisz na fakturze, nie wykonuj samemu skomplikowanej matematyki:
-- docNumber: numer faktury/dostawy
-- supplier: sprzedawca
-- nip: NIP sprzedawcy
-- totalGross: łączna kwota brutto z podsumowania
-- paymentDueDate: termin płatności
-- bankAccount: numer konta IBAN
-- items: tablica pozycji z kolumn tabeli:
-  * name: pełna nazwa produktu (np. '0.25 CAN X12 BURN ZERO', '0.25 RGB X24 COCA-COLA')[cite: 14]
-  * rawQty: liczba z kolumny ILOŚĆ (np. 2, 6, 4, 1)[cite: 14]
-  * rawPrice: cena netto z kolumny CENA JEDNOSTKOWA (np. 39.96, 78.96)[cite: 14]
-  * unitPriceHint: jeśli pod pozycją jest dopisek 'Cena zaokrąglona za sztu', podaj tę liczbę (np. 3.48, 3.51)[cite: 14], w przeciwnym razie null
+        const promptText = `Jesteś ekspertem magazynowym. Otrzymujesz 1 lub 2 zdjęcia tej samej faktury/WZ (góra i dół).
+Przeanalizuj cały dokument i wyodrębnij OSOBNO produkty spożywcze/napoje oraz OSOBNO kaucje/opakowania zwrotne:
 
-Zwróć czysty JSON o strukturze:
+1. docNumber: numer faktury lub dokumentu dostawy
+2. supplier: nazwa sprzedawcy
+3. totalGross: łączna kwota brutto
+4. receiverName: imię/nazwisko osoby odbierającej z uwag lub odręcznego podpisu na dole (np. "KANA", "BARTEK"), jeśli brak to ""
+5. items: TYLKO produkty spożywcze/napoje/alkohole (NIE wpisuj tu skrzynek, palet ani kaucji!):
+   - name: pełna nazwa z mnożnikiem np. "0.25 CAN X12 BURN ZERO", "0.25 RGB X24 COCA-COLA"
+   - rawQty: liczba z kolumny ILOŚĆ (np. 2, 6, 4)
+   - rawPrice: cena netto z kolumny CENA JEDNOSTKOWA (np. 39.96, 78.96)
+   - unitPriceHint: jeśli pod pozycją jest dopisek "Cena zaokrąglona za sztu", podaj tę liczbę (np. 3.48, 3.51), inaczej null
+6. deposits: pozycje z "SEKCJA OPAKOWAŃ ZWROTNYCH" oraz tabeli "System kaucyjny" (skrzynki, butelki zwrotne, kaucje CAN/PET 0.50 zł, butelki 1.00 zł, palety):
+   - name: nazwa kaucji/opakowania (np. "Kaucja Puszka CAN 0.25L", "Kaucja Butelka PET 0.85L", "Skrzynka 0.25L X24 CC")
+   - category: wybierz jedno z: "PET_CAN_050" (dla kaucji 0.50 zł za PET/CAN), "BUTELKA_SZKLO" (dla butelek szklanych np. 1.00 zł), "SKRZYNKA" (dla skrzynek/transporterów np. 14.40 zł), "PALETA_INNE"
+   - netQty: bilans sztuk (ilość wydana/dostarczona minus ewentualny zwrot, np. 24, 69, 10, -3)
+   - unitPrice: cena kaucji za 1 sztukę (np. 0.50, 1.00, 14.40)
+
+Zwróć czysty JSON:
 {
   "docNumber": string,
   "supplier": string,
-  "nip": string,
   "totalGross": string,
-  "paymentDueDate": string,
-  "bankAccount": string,
-  "items": [
-    { "name": string, "rawQty": number, "rawPrice": number, "unitPriceHint": number }
-  ]
+  "receiverName": string,
+  "items": [ { "name": string, "rawQty": number, "rawPrice": number, "unitPriceHint": number } ],
+  "deposits": [ { "name": string, "category": string, "netQty": number, "unitPrice": number } ]
 }`;
 
-        const parsed = await queryGeminiAPI(promptText, photos);
+        const parsed = await queryGeminiAPI(promptText, photosBase64);
         
-        // Zastosowanie lokalnego silnika przeliczania zgrzewek w JavaScript
         const calculatedItems = (parsed.items || []).map(it => {
           const mult = detectPackMultiplier(it.name);
           const rawQ = Number(it.rawQty) || 1;
@@ -1661,7 +2052,7 @@ Zwróć czysty JSON o strukturze:
           let finalPrice = rawP;
 
           if (mult > 1) {
-            finalQty = rawQ * mult; // 2 zgrzewki X12 = 24 sztuki[cite: 14]
+            finalQty = rawQ * mult;
             finalPrice = it.unitPriceHint ? Number(it.unitPriceHint) : parseFloat((rawP / mult).toFixed(2));
           }
 
@@ -1671,20 +2062,20 @@ Zwróć czysty JSON o strukturze:
             netPrice: finalPrice,
             unit: 'szt.',
             packMultiplier: mult,
-            rawQty: rawQ,
-            rawPrice: rawP
+            rawQty: rawQ
           };
         });
+
+        const defaultReceiver = localStorage.getItem('magazyn_default_receiver') || 'Bartek';
 
         currentExtractedDelivery = {
           docNumber: parsed.docNumber || 'FA/' + Date.now().toString().slice(-6),
           supplier: parsed.supplier || 'Dostawca',
-          nip: parsed.nip || '',
           totalGross: parsed.totalGross || '',
-          paymentDueDate: parsed.paymentDueDate || '',
-          bankAccount: parsed.bankAccount || '',
+          receiverName: parsed.receiverName || defaultReceiver,
           items: calculatedItems,
-          imagePreview: invoicePhoto1 // zachowujemy miniaturę strony 1 do podglądu
+          deposits: parsed.deposits || [],
+          photos: savedPhotosDataUrls
         };
 
         displayExtractedItems(currentExtractedDelivery);
@@ -1699,68 +2090,112 @@ Zwróć czysty JSON o strukturze:
       document.getElementById('aiLoadingState').classList.add('hidden');
       document.getElementById('aiItemsContainer').classList.remove('hidden');
       document.getElementById('aiModalActions').classList.remove('hidden');
-      document.getElementById('aiDocInfo').innerText = "Weryfikacja pozycji i przeliczeń na sztuki:";
+      document.getElementById('aiDocInfo').innerText = `Załączono zdjęć: ${delivery.photos.length} • Zweryfikuj produkty i kaucje:`;
 
       document.getElementById('aiSupplierInput').value = delivery.supplier || 'Dostawca';
-      document.getElementById('aiNipInput').value = delivery.nip || '';
       document.getElementById('aiDocNumInput').value = delivery.docNumber || '';
+      document.getElementById('aiReceiverInput').value = delivery.receiverName || 'Bartek';
       document.getElementById('aiTotalGrossInput').value = delivery.totalGross || '';
-      document.getElementById('aiDueDateInput').value = delivery.paymentDueDate || '';
-      document.getElementById('aiBankAccountInput').value = delivery.bankAccount || '';
 
       const container = document.getElementById('aiItemsList');
       if (!delivery.items || delivery.items.length === 0) {
-        container.innerHTML = `<p class="text-xs text-rose-400">Nie wykryto tabeli towarów na zdjęciu.</p>`;
+        container.innerHTML = `<p class="text-xs text-slate-400 italic">Brak pozycji towarowych.</p>`;
+      } else {
+        container.innerHTML = delivery.items.map((item, index) => {
+          const match = findBestInventoryMatch(item.name);
+          const matchedId = match ? match.id : '';
+          const incomingPrice = Number(item.netPrice || 0);
+          const hasMultiplier = item.packMultiplier && item.packMultiplier > 1;
+
+          return `
+            <div class="bg-slate-900 border ${match ? 'border-emerald-600/70' : 'border-indigo-600/70'} rounded-xl p-3 space-y-2">
+              <div class="flex items-center justify-between gap-2 flex-wrap">
+                <span id="aiBadge_${index}" class="text-[9px] font-bold px-2 py-0.5 rounded ${match ? 'bg-emerald-950 text-emerald-300 border border-emerald-700/50' : 'bg-indigo-950 text-indigo-300 border border-indigo-700/50'}">
+                  ${match ? `✓ Scal z: ${match.name} (Stan: ${match.qty})` : '⭐ NOWY TOWAR'}
+                </span>
+                ${hasMultiplier ? `
+                  <span class="text-[9px] font-bold bg-amber-950 text-amber-300 border border-amber-700/50 px-2 py-0.5 rounded">
+                    📦 Zgrzewka ×${item.packMultiplier}: ${item.rawQty} op. ➔ ${item.qty} szt.
+                  </span>
+                ` : ''}
+              </div>
+
+              <div class="flex items-center justify-between gap-2">
+                <input type="text" id="aiItemName_${index}" value="${item.name}" class="bg-transparent font-bold text-xs text-white flex-1 focus:outline-none focus:border-b border-indigo-500">
+                <div class="flex items-center gap-1.5">
+                  <div>
+                    <span class="text-[9px] text-slate-400 block text-center">Cena/szt.</span>
+                    <input type="number" step="0.01" id="aiItemPrice_${index}" value="${incomingPrice.toFixed(2)}" class="w-16 bg-slate-800 border border-slate-700 rounded-lg p-1 text-center font-bold text-emerald-400 text-xs">
+                  </div>
+                  <div>
+                    <span class="text-[9px] text-slate-400 block text-center">Sztuk</span>
+                    <input type="number" id="aiItemQty_${index}" value="${item.qty || 1}" min="0" class="w-14 bg-slate-800 border border-slate-700 rounded-lg p-1 text-center font-bold text-emerald-400 text-xs">
+                  </div>
+                  <div>
+                    <span class="text-[9px] text-slate-400 block text-center">J.m.</span>
+                    <input type="text" id="aiItemUnit_${index}" value="${item.unit || 'szt.'}" class="w-11 bg-slate-800 border border-slate-700 rounded-lg p-1 text-center text-[11px] text-slate-300">
+                  </div>
+                </div>
+              </div>
+
+              <div class="pt-1 border-t border-slate-800 flex items-center gap-2">
+                <select id="aiSelectMatch_${index}" onchange="handleManualMatchChange(${index})" class="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-[11px] text-white w-full">
+                  <option value="" ${!matchedId ? 'selected' : ''}>⭐ DODAJ JAKO NOWĄ POZYCJĘ DO MAGAZYNU</option>
+                  ${inventory.map(inv => `<option value="${inv.id}" ${matchedId === inv.id ? 'selected' : ''}>🔗 Połącz ze stanem: ${inv.name} (Obecnie: ${inv.qty} ${inv.unit})</option>`).join('')}
+                </select>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      renderExtractedDepositsInModal();
+    }
+
+    function renderExtractedDepositsInModal() {
+      const depContainer = document.getElementById('aiDepositsList');
+      if (!currentExtractedDelivery) return;
+      const deps = currentExtractedDelivery.deposits || [];
+
+      if (deps.length === 0) {
+        depContainer.innerHTML = `<p class="text-[11px] text-slate-500 italic">Nie wykryto kaucji na zdjęciu. Kliknij "+ Dodaj kaucję", jeśli chcesz dopisać ręcznie.</p>`;
         return;
       }
 
-      container.innerHTML = delivery.items.map((item, index) => {
-        const match = findBestInventoryMatch(item.name);
-        const matchedId = match ? match.id : '';
-        const incomingPrice = Number(item.netPrice || 0);
-        const hasMultiplier = item.packMultiplier && item.packMultiplier > 1;
-
-        return `
-          <div class="bg-slate-900 border ${match ? 'border-emerald-600/70' : 'border-indigo-600/70'} rounded-xl p-3 space-y-2">
-            <div class="flex items-center justify-between gap-2 flex-wrap">
-              <span id="aiBadge_${index}" class="text-[9px] font-bold px-2 py-0.5 rounded ${match ? 'bg-emerald-950 text-emerald-300 border border-emerald-700/50' : 'bg-indigo-950 text-indigo-300 border border-indigo-700/50'}">
-                ${match ? `✓ Scal z: ${match.name} (Obecnie: ${match.qty} ${match.unit})` : '⭐ NOWY TOWAR W BAZIE'}
-              </span>
-              ${hasMultiplier ? `
-                <span class="text-[9px] font-bold bg-amber-950 text-amber-300 border border-amber-700/50 px-2 py-0.5 rounded">
-                  📦 Zgrzewka ×${item.packMultiplier}: ${item.rawQty} zgrz. ➔ ${item.qty} szt.[cite: 13, 14]
-                </span>
-              ` : ''}
-            </div>
-
-            <div class="flex items-center justify-between gap-2">
-              <input type="text" id="aiItemName_${index}" value="${item.name}" class="bg-transparent font-bold text-xs text-white flex-1 focus:outline-none focus:border-b border-indigo-500">
-              <div class="flex items-center gap-1.5">
-                <div>
-                  <span class="text-[9px] text-slate-400 block text-center">Cena/szt.</span>
-                  <input type="number" step="0.01" id="aiItemPrice_${index}" value="${incomingPrice.toFixed(2)}" class="w-16 bg-slate-800 border border-slate-700 rounded-lg p-1 text-center font-bold text-emerald-400 text-xs">
-                </div>
-                <div>
-                  <span class="text-[9px] text-slate-400 block text-center">Sztuk</span>
-                  <input type="number" id="aiItemQty_${index}" value="${item.qty || 1}" min="1" class="w-14 bg-slate-800 border border-slate-700 rounded-lg p-1 text-center font-bold text-emerald-400 text-xs">
-                </div>
-                <div>
-                  <span class="text-[9px] text-slate-400 block text-center">J.m.</span>
-                  <input type="text" id="aiItemUnit_${index}" value="${item.unit || 'szt.'}" class="w-12 bg-slate-800 border border-slate-700 rounded-lg p-1 text-center text-[11px] text-slate-300">
-                </div>
-              </div>
-            </div>
-
-            <div class="pt-1 border-t border-slate-800 flex items-center gap-2">
-              <span class="text-[10px] text-slate-400 whitespace-nowrap">Decyzja:</span>
-              <select id="aiSelectMatch_${index}" onchange="handleManualMatchChange(${index})" class="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-[11px] text-white w-full">
-                <option value="" ${!matchedId ? 'selected' : ''}>⭐ DODAJ JAKO NOWĄ POZYCJĘ DO BAZY</option>
-                ${inventory.map(inv => `<option value="${inv.id}" ${matchedId === inv.id ? 'selected' : ''}>🔗 Połącz ze stanem: ${inv.name} (Obecnie: ${inv.qty} ${inv.unit})</option>`).join('')}
-              </select>
+      depContainer.innerHTML = deps.map((dp, idx) => `
+        <div class="bg-cyan-950/30 border border-cyan-800/60 rounded-xl p-2.5 space-y-1.5 text-xs">
+          <div class="flex items-center justify-between gap-2">
+            <input type="text" id="aiDepName_${idx}" value="${dp.name || 'Kaucja'}" class="bg-transparent font-bold text-cyan-200 flex-1 focus:outline-none border-b border-cyan-800">
+            <select id="aiDepCat_${idx}" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-1 text-[10px] text-cyan-300">
+              <option value="PET_CAN_050" ${dp.category === 'PET_CAN_050' ? 'selected' : ''}>PET/CAN 0,50zł</option>
+              <option value="BUTELKA_SZKLO" ${dp.category === 'BUTELKA_SZKLO' ? 'selected' : ''}>Szkło 1,00zł</option>
+              <option value="SKRZYNKA" ${dp.category === 'SKRZYNKA' ? 'selected' : ''}>Skrzynka</option>
+              <option value="PALETA_INNE" ${dp.category === 'PALETA_INNE' ? 'selected' : ''}>Paleta/Inne</option>
+            </select>
+          </div>
+          <div class="flex items-center justify-between gap-2 pt-1">
+            <span class="text-[10px] text-slate-400">Bilans sztuk (+/-) oraz stawka:</span>
+            <div class="flex items-center gap-1.5">
+              <input type="number" id="aiDepQty_${idx}" value="${dp.netQty !== undefined ? dp.netQty : 1}" class="w-16 bg-slate-800 border border-slate-700 rounded p-1 text-center font-bold text-cyan-400 text-xs">
+              <span class="text-[10px] text-slate-400">szt. ×</span>
+              <input type="number" step="0.01" id="aiDepPrice_${idx}" value="${Number(dp.unitPrice || 0.50).toFixed(2)}" class="w-16 bg-slate-800 border border-slate-700 rounded p-1 text-center font-bold text-white text-xs">
+              <span class="text-[10px] text-slate-400">zł</span>
             </div>
           </div>
-        `;
-      }).join('');
+        </div>
+      `).join('');
+    }
+
+    function addManualDepositRowToModal() {
+      if (!currentExtractedDelivery) return;
+      currentExtractedDelivery.deposits = currentExtractedDelivery.deposits || [];
+      currentExtractedDelivery.deposits.push({
+        name: 'Butelka zwrotna / Kaucja',
+        category: 'BUTELKA_SZKLO',
+        netQty: 12,
+        unitPrice: 1.00
+      });
+      renderExtractedDepositsInModal();
     }
 
     function handleManualMatchChange(index) {
@@ -1776,22 +2211,29 @@ Zwróć czysty JSON o strukturze:
         }
       } else {
         badge.className = "text-[9px] font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50";
-        badge.innerText = "⭐ NOWY TOWAR W BAZIE";
+        badge.innerText = "⭐ NOWY TOWAR";
       }
       triggerScanFeedback();
     }
 
     async function confirmAndApplyDelivery() {
-      if (!currentExtractedDelivery || !currentExtractedDelivery.items) return;
+      if (!currentExtractedDelivery) return;
       const finalItems = [];
+      const finalDeposits = [];
 
-      for (let i = 0; i < currentExtractedDelivery.items.length; i++) {
-        const name = document.getElementById(`aiItemName_${i}`).value.trim();
-        const chosenMatchId = document.getElementById(`aiSelectMatch_${i}`).value;
-        const qty = parseInt(document.getElementById(`aiItemQty_${i}`).value) || 0;
-        const unit = document.getElementById(`aiItemUnit_${i}`).value.trim() || 'szt.';
-        const incomingPrice = parseFloat(document.getElementById(`aiItemPrice_${i}`).value) || 0.00;
-        if (qty <= 0) continue;
+      const receiverName = document.getElementById('aiReceiverInput').value.trim() || 'Magazyn';
+      localStorage.setItem('magazyn_default_receiver', receiverName);
+      const docNum = document.getElementById('aiDocNumInput').value.trim();
+      const supplierName = document.getElementById('aiSupplierInput').value.trim();
+
+      // 1. Zapis produktów spożywczych
+      for (let i = 0; i < (currentExtractedDelivery.items || []).length; i++) {
+        const name = document.getElementById(`aiItemName_${i}`)?.value.trim();
+        const chosenMatchId = document.getElementById(`aiSelectMatch_${i}`)?.value;
+        const qty = parseInt(document.getElementById(`aiItemQty_${i}`)?.value) || 0;
+        const unit = document.getElementById(`aiItemUnit_${i}`)?.value.trim() || 'szt.';
+        const incomingPrice = parseFloat(document.getElementById(`aiItemPrice_${i}`)?.value) || 0.00;
+        if (qty <= 0 || !name) continue;
 
         finalItems.push({ name, qty, unit, netPrice: incomingPrice });
 
@@ -1804,11 +2246,11 @@ Zwróć czysty JSON o strukturze:
               const alertEntry = {
                 id: Date.now().toString() + '_' + i,
                 item_name: match.name,
-                supplier: document.getElementById('aiSupplierInput').value,
+                supplier: supplierName,
                 old_price: oldPrice,
                 new_price: incomingPrice,
                 diff_percent: parseFloat(diffPct),
-                doc_number: document.getElementById('aiDocNumInput').value,
+                doc_number: docNum,
                 created_at: new Date()
               };
               priceAlerts.unshift(alertEntry);
@@ -1816,7 +2258,7 @@ Zwróć czysty JSON o strukturze:
             }
             match.qty += qty;
             match.price = incomingPrice > 0 ? incomingPrice : match.price;
-            recordStockLog(match.id, match.name, 'Przyjęcie Faktura', qty, `Faktura ${document.getElementById('aiDocNumInput').value}`);
+            recordStockLog(match.id, match.name, 'Przyjęcie Faktura', qty, `${docNum} • Przyjął: ${receiverName}`);
             if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${match.id}`, 'PATCH', { qty: match.qty, price: match.price, updated_at: new Date() }); } catch (e) {} }
           }
         } else {
@@ -1833,22 +2275,34 @@ Zwróć czysty JSON o strukturze:
             price: incomingPrice
           });
           inventory.unshift(newItem);
-          recordStockLog(newItem.id, newItem.name, 'Nowy towar z Faktury', qty, `Faktura ${document.getElementById('aiDocNumInput').value}`);
+          recordStockLog(newItem.id, newItem.name, 'Nowy z Faktury', qty, `${docNum} • Przyjął: ${receiverName}`);
           if (isCloudOnline) { try { await apiRequest('/inventory', 'POST', toDbItem(newItem)); } catch (e) {} }
         }
       }
 
+      // 2. Zapis kaucji i opakowań zwrotnych do karty Kaucje
+      for (let j = 0; j < (currentExtractedDelivery.deposits || []).length; j++) {
+        const dName = document.getElementById(`aiDepName_${j}`)?.value.trim();
+        const dCat = document.getElementById(`aiDepCat_${j}`)?.value || 'BUTELKA_SZKLO';
+        const dQty = parseInt(document.getElementById(`aiDepQty_${j}`)?.value, 10) || 0;
+        const dPrice = parseFloat(document.getElementById(`aiDepPrice_${j}`)?.value) || 0.50;
+        if (dQty === 0 || !dName) continue;
+
+        finalDeposits.push({ name: dName, category: dCat, netQty: dQty, unitPrice: dPrice });
+        await upsertDepositEntry(dName, dCat, dPrice, dQty);
+      }
+
+      // 3. Zapis dostawy z podpiętymi WSZYSTKIMI zdjęciami (1 lub 2) oraz osobą przyjmującą
+      const serializedPhotos = JSON.stringify(currentExtractedDelivery.photos || []);
       const deliveryEntry = {
         id: Date.now().toString(),
-        doc_number: document.getElementById('aiDocNumInput').value.trim(),
-        supplier: document.getElementById('aiSupplierInput').value.trim(),
-        nip: document.getElementById('aiNipInput').value.trim(),
+        doc_number: docNum,
+        supplier: supplierName,
+        receiver_name: receiverName,
         total_gross: document.getElementById('aiTotalGrossInput').value.trim(),
-        payment_due_date: document.getElementById('aiDueDateInput').value.trim(),
-        bank_account: document.getElementById('aiBankAccountInput').value.trim(),
-        payment_status: 'Do zapłaty',
         items_json: finalItems,
-        image_url: currentExtractedDelivery.imagePreview || '',
+        deposits_json: finalDeposits,
+        image_url: serializedPhotos,
         created_at: new Date()
       };
 
@@ -1861,9 +2315,18 @@ Zwróć czysty JSON o strukturze:
         try {
           await apiRequest('/deliveries', 'POST', deliveryEntry);
         } catch (e) {
+          // Fallback gdyby w Supabase nie było jeszcze kolumn receiver_name / deposits_json
           try {
-            const slimEntry = { ...deliveryEntry, image_url: '' };
-            await apiRequest('/deliveries', 'POST', slimEntry);
+            const compatEntry = {
+              id: deliveryEntry.id,
+              doc_number: deliveryEntry.doc_number,
+              supplier: `${deliveryEntry.supplier} (Przyjął: ${receiverName})`,
+              total_gross: deliveryEntry.total_gross,
+              items_json: deliveryEntry.items_json,
+              image_url: serializedPhotos,
+              created_at: deliveryEntry.created_at
+            };
+            await apiRequest('/deliveries', 'POST', compatEntry);
           } catch (err) {}
         }
       }
@@ -1871,9 +2334,10 @@ Zwróć czysty JSON o strukturze:
       triggerScanFeedback();
       closeAiModal();
       renderInventory();
+      renderDeposits();
       renderDeliveries();
       renderPriceAlerts();
-      alert("Faktura przyjęta, stany magazynowe i rejestr płatności zaktualizowane!");
+      alert(`Dostawa przyjęta przez: ${receiverName}! Produkty dodane na stan, kaucje doliczone, a zdjęcia podpięte.`);
     }
 
     function closeAiModal() {
