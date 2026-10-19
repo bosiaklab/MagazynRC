@@ -37,7 +37,7 @@
     <div class="flex items-center space-x-2.5">
       <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-base shadow">M</div>
       <div>
-        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-amber-400 bg-amber-950/70 border border-amber-700/50 px-1 py-0.5 rounded ml-1">v2.6 REPAIR</span></h1>
+        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-amber-400 bg-amber-950/70 border border-amber-700/50 px-1 py-0.5 rounded ml-1">v2.7 SYNC-SAFE</span></h1>
         <p id="syncStatus" class="text-[10px] text-amber-400 font-medium leading-none mt-0.5">Inicjalizacja...</p>
       </div>
     </div>
@@ -672,7 +672,7 @@
 
     async function apiRequest(endpoint, method = 'GET', body = null) {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3500);
+      const timeoutId = setTimeout(() => controller.abort(), 4000);
 
       const headers = {
         'apikey': SUPABASE_KEY,
@@ -687,7 +687,10 @@
       try {
         const res = await fetch(`${SUPABASE_BASE_URL}${endpoint}`, options);
         clearTimeout(timeoutId);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (!res.ok) {
+          const errBody = await res.text();
+          throw new Error(`HTTP ${res.status}: ${errBody}`);
+        }
         return await res.json();
       } catch (err) {
         clearTimeout(timeoutId);
@@ -695,6 +698,7 @@
       }
     }
 
+    // --- BEZPIECZNE POBIERANIE BEZ KASOWANIA LOKALNYCH FAKTUR ---
     async function fetchAllData() {
       const syncEl = document.getElementById('syncStatus');
       if (syncEl) syncEl.innerText = 'Łączenie z bazą...';
@@ -727,7 +731,27 @@
         }
       }
 
-      try { deliveries = await apiRequest('/deliveries?select=*&order=created_at.desc'); localStorage.setItem('magazyn_offline_deliveries', JSON.stringify(deliveries)); } catch (e) {}
+      // Bezpieczna synchronizacja faktur
+      try {
+        const cloudDeliveries = await apiRequest('/deliveries?select=*&order=created_at.desc');
+        if (cloudDeliveries && cloudDeliveries.length > 0) {
+          deliveries = cloudDeliveries;
+          localStorage.setItem('magazyn_offline_deliveries', JSON.stringify(deliveries));
+        } else {
+          // Jeśli chmura jest pusta, ale mamy faktury w pamięci telefonu, dosłuchajmy je do Supabase
+          const localDeliv = JSON.parse(localStorage.getItem('magazyn_offline_deliveries')) || [];
+          if (localDeliv.length > 0) {
+            deliveries = localDeliv;
+            for (const d of deliveries) {
+              try { await apiRequest('/deliveries', 'POST', d); } catch(err) {}
+            }
+          }
+        }
+      } catch (e) {
+        // W razie błędu sieci/bazy, trzymamy lokalne faktury
+        deliveries = JSON.parse(localStorage.getItem('magazyn_offline_deliveries')) || [];
+      }
+
       try { events = await apiRequest('/events?select=*&order=created_at.desc'); localStorage.setItem('magazyn_offline_events', JSON.stringify(events)); } catch (e) {}
       try { priceAlerts = await apiRequest('/price_alerts?select=*&order=created_at.desc'); localStorage.setItem('magazyn_offline_price_alerts', JSON.stringify(priceAlerts)); } catch (e) {}
       try { stockLogs = await apiRequest('/stock_logs?select=*&order=created_at.desc&limit=100'); localStorage.setItem('magazyn_offline_stock_logs', JSON.stringify(stockLogs)); } catch (e) {}
@@ -1151,7 +1175,7 @@ Zwróć wynik jako czysty JSON o strukturze:
           <div class="bg-slate-900 border ${match ? 'border-emerald-600/70' : 'border-purple-600/70'} rounded-xl p-3 space-y-2">
             <div class="flex items-center justify-between">
               <span class="text-[9px] font-bold px-2 py-0.5 rounded ${match ? 'bg-emerald-950 text-emerald-300 border border-emerald-700/50' : 'bg-purple-950 text-purple-300 border border-purple-700/50'}">
-                ${match ? `✓ Rozpoznano w bazie: ${match.name} (Obecnie: ${match.qty}${match.unit})` : '⭐ NOWY TOWAR'}
+                ${match ? `✓ Rozpoznano w bazie: ${match.name} (Obecnie: ${match.qty} ${match.unit})` : '⭐ NOWY TOWAR'}
               </span>
             </div>
 
@@ -1166,7 +1190,7 @@ Zwróć wynik jako czysty JSON o strukturze:
 
             <select id="shelfCountMatch_${idx}" class="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-[11px] text-white w-full">
               <option value="" ${!matchedId ? 'selected' : ''}>⭐ DODAJ JAKO NOWY TOWAR</option>
-              ${inventory.map(inv => `<option value="${inv.id}" ${matchedId === inv.id ? 'selected' : ''}>🔗 Przypisz do: ${inv.name} (Stan: ${inv.qty}${inv.unit})</option>`).join('')}
+              ${inventory.map(inv => `<option value="${inv.id}" ${matchedId === inv.id ? 'selected' : ''}>🔗 Przypisz do: ${inv.name} (Stan: ${inv.qty} ${inv.unit})</option>`).join('')}
             </select>
           </div>
         `;
@@ -1286,7 +1310,7 @@ Zwróć czysty JSON:
           paymentDueDate: parsed.paymentDueDate || '',
           bankAccount: parsed.bankAccount || '',
           items: parsed.items || [],
-          imagePreview: compressedDataUrl
+          imagePreview: '' // nie przesyłamy ciężkich zdjęć do bazy, aby zapobiec błędom payloadu
         };
         displayExtractedItems(currentExtractedDelivery);
         triggerScanFeedback();
@@ -1438,17 +1462,22 @@ Zwróć czysty JSON:
         bank_account: document.getElementById('aiBankAccountInput').value.trim(),
         payment_status: 'Do zapłaty',
         items_json: finalItems,
-        image_url: currentExtractedDelivery.imagePreview,
+        image_url: '',
         created_at: new Date()
       };
 
+      // Zapisujemy od razu lokalnie
       deliveries.unshift(deliveryEntry);
       localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
       localStorage.setItem('magazyn_offline_deliveries', JSON.stringify(deliveries));
       localStorage.setItem('magazyn_offline_price_alerts', JSON.stringify(priceAlerts));
 
       if (isCloudOnline) {
-        try { await apiRequest('/deliveries', 'POST', deliveryEntry); } catch (e) {}
+        try {
+          await apiRequest('/deliveries', 'POST', deliveryEntry);
+        } catch (e) {
+          console.error("Błąd zapisu faktury do bazy Supabase:", e);
+        }
       }
 
       triggerScanFeedback();
@@ -1456,7 +1485,7 @@ Zwróć czysty JSON:
       renderInventory();
       renderDeliveries();
       renderPriceAlerts();
-      alert("Faktura przyjęta, stany zaktualizowane, płatność zarejestrowana!");
+      alert("Faktura przyjęta, stany magazynowe i rejestr płatności zaktualizowane!");
     }
 
     function closeAiModal() {
