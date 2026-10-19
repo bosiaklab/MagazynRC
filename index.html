@@ -18,14 +18,12 @@
     body { -webkit-tap-highlight-color: transparent; }
     #reader__scan_region video { border-radius: 0.75rem; object-fit: cover; }
 
-    /* Na ekranie sekcje wydruku są zawsze ukryte */
     @media screen {
       #printableSheet, #printArea { display: none !important; }
     }
 
-    /* Podczas drukowania pokazujemy wyłącznie aktywny szablon (Karta Wydania lub Kod QR) */
     @media print {
-      @page { margin: 8mm; }
+      @page { margin: 6mm; size: auto; }
       body { background: #ffffff !important; color: #000000 !important; margin: 0 !important; padding: 0 !important; }
       body > *:not(#printableSheet):not(#printArea) { display: none !important; }
       
@@ -41,7 +39,7 @@
         display: block !important;
         width: 100% !important;
         text-align: center !important;
-        padding-top: 20px !important;
+        padding-top: 15px !important;
         background: #ffffff !important;
         color: #000000 !important;
       }
@@ -56,12 +54,12 @@
     <div class="flex items-center space-x-2.5">
       <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-base shadow">M</div>
       <div>
-        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v3.1 MASTER</span></h1>
+        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v3.2 PRO</span></h1>
         <p id="syncStatus" class="text-[10px] text-amber-400 font-medium leading-none mt-0.5">Inicjalizacja...</p>
       </div>
     </div>
     <div class="flex items-center gap-1.5">
-      <button onclick="fetchAllData()" class="bg-slate-700/80 hover:bg-slate-700 text-slate-200 text-xs px-2.5 py-1.5 rounded-lg font-medium border border-slate-600/50" title="Odśwież synchronizację">
+      <button onclick="fetchAllData()" class="bg-slate-700/80 hover:bg-slate-700 text-slate-200 text-xs px-2.5 py-1.5 rounded-lg font-medium border border-slate-600/50" title="Synchronizuj">
         🔄
       </button>
       <button onclick="exportCSV()" class="bg-slate-700/80 hover:bg-slate-700 text-slate-200 text-xs px-2.5 py-1.5 rounded-lg font-medium flex items-center gap-1 border border-slate-600/50">
@@ -70,11 +68,12 @@
     </div>
   </header>
 
-  <!-- UKRYTE INPUTY DLA APARATU -->
-  <input type="file" id="invoiceInput" accept="image/*" capture="environment" class="hidden" onchange="processInvoiceImage(event)">
+  <!-- UKRYTE INPUTY APARATU -->
   <input type="file" id="shelfCountInput" accept="image/*" capture="environment" class="hidden" onchange="processShelfCountImage(event)">
   <input type="file" id="eventDispatchInput" accept="image/*" capture="environment" class="hidden" onchange="processEventDispatchImage(event)">
   <input type="file" id="eventReturnInput" accept="image/*" capture="environment" class="hidden" onchange="processEventReturnImage(event)">
+  <input type="file" id="invoicePhotoInput1" accept="image/*" capture="environment" class="hidden" onchange="handleInvoicePhotoSelected(event, 1)">
+  <input type="file" id="invoicePhotoInput2" accept="image/*" capture="environment" class="hidden" onchange="handleInvoicePhotoSelected(event, 2)">
 
   <!-- GŁÓWNY KONTENER TREŚCI -->
   <main class="max-w-4xl mx-auto p-3.5 space-y-4">
@@ -199,8 +198,8 @@
           <h3 class="font-bold text-xs text-white">Rejestr Faktur i Zobowiązań</h3>
           <p class="text-[10px] text-slate-400">Terminy płatności, dane bankowe i odczytane pozycje</p>
         </div>
-        <button onclick="triggerInvoiceUpload()" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs px-3 py-2 rounded-xl shadow transition active:scale-95 flex items-center gap-1">
-          <span>⚡</span> Nowa Faktura
+        <button onclick="openInvoiceUploadModal()" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs px-3 py-2 rounded-xl shadow transition active:scale-95 flex items-center gap-1">
+          <span>⚡</span> Nowa Faktura (1 lub 2 zdj.)
         </button>
       </div>
       <div id="deliveriesList" class="space-y-3"></div>
@@ -236,7 +235,116 @@
 
   </main>
 
-  <!-- MODAL: LIGHTBOX DO PODGLĄDU ZDJĘĆ / SKANÓW -->
+  <!-- MODAL: KROK 1 - WYBÓR 1 LUB 2 ZDJĘĆ DO FAKTURY -->
+  <div id="invoiceCaptureModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+        <h3 class="text-sm font-bold text-white flex items-center gap-1.5">
+          <span>⚡</span> Dodaj Fakturę (1 lub 2 zdjęcia)
+        </h3>
+        <button onclick="closeInvoiceUploadModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
+      </div>
+      <p class="text-xs text-slate-300">Dla długich faktur (np. Coca-Cola) zrób dwa zbliżenia. System połączy pozycje w całość[cite: 14, 15]:</p>
+      
+      <div class="grid grid-cols-2 gap-2.5 pt-1">
+        <!-- ZDJĘCIE 1 -->
+        <div onclick="document.getElementById('invoicePhotoInput1').click()" class="border-2 border-dashed border-indigo-500/70 hover:border-indigo-400 bg-slate-900/90 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer min-h-[120px] text-center transition">
+          <div id="invoiceSlot1Empty">
+            <span class="text-2xl block mb-1">📸</span>
+            <span class="text-[11px] font-bold text-indigo-300 block">Strona 1 / Góra</span>
+            <span class="text-[9px] text-slate-500 block">(wymagane)</span>
+          </div>
+          <img id="invoiceSlot1Preview" src="" class="hidden max-h-24 w-auto rounded object-contain mb-1">
+          <span id="invoiceSlot1Done" class="hidden text-[10px] text-emerald-400 font-bold">✓ Zdjęcie 1 gotowe</span>
+        </div>
+
+        <!-- ZDJĘCIE 2 -->
+        <div onclick="document.getElementById('invoicePhotoInput2').click()" class="border-2 border-dashed border-slate-600 hover:border-indigo-400 bg-slate-900/90 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer min-h-[120px] text-center transition">
+          <div id="invoiceSlot2Empty">
+            <span class="text-2xl block mb-1">➕</span>
+            <span class="text-[11px] font-bold text-slate-300 block">Strona 2 / Dół</span>
+            <span class="text-[9px] text-slate-500 block">(dla długich faktur)[cite: 14, 15]</span>
+          </div>
+          <img id="invoiceSlot2Preview" src="" class="hidden max-h-24 w-auto rounded object-contain mb-1">
+          <span id="invoiceSlot2Done" class="hidden text-[10px] text-emerald-400 font-bold">✓ Zdjęcie 2 gotowe</span>
+        </div>
+      </div>
+
+      <div class="flex justify-between items-center pt-2 border-t border-slate-700">
+        <button onclick="resetInvoicePhotos()" class="text-xs text-slate-400 hover:text-white">Wyczyść zdjęcia</button>
+        <button id="btnProcessInvoice" onclick="startMultiInvoiceProcessing()" disabled class="bg-indigo-600 disabled:bg-slate-700 disabled:text-slate-500 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow transition">
+          <span>🚀</span> Skanuj i Połącz
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL AI OCR: WERYFIKACJA FAKTURY, PŁATNOŚCI I POZYCJI -->
+  <div id="aiModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 shadow-2xl my-4 max-h-[94vh] flex flex-col">
+      <div class="flex justify-between items-start border-b border-slate-700 pb-2">
+        <div>
+          <span class="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50">Finance & Pack Intelligence</span>
+          <h3 class="text-sm font-bold text-white mt-1">Weryfikacja Pozycji Faktury</h3>
+          <p id="aiDocInfo" class="text-[11px] text-slate-400 mt-0.5">Automatyczne przeliczanie zgrzewek na sztuki...</p>
+        </div>
+        <button onclick="closeAiModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
+      </div>
+
+      <div id="aiLoadingState" class="py-12 flex flex-col items-center justify-center space-y-3">
+        <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+        <p class="text-sm text-slate-200 font-medium">Model Gemini analizuje dokument...</p>
+        <p class="text-xs text-slate-500">Wykrywanie NIP, terminu, konta i przeliczanie zgrzewek</p>
+      </div>
+
+      <div id="aiItemsContainer" class="hidden flex-1 overflow-y-auto space-y-3 pr-1">
+        <div class="bg-slate-900 border border-indigo-800/60 p-3 rounded-xl space-y-2 text-xs">
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <span class="text-[10px] text-slate-400 block">Dostawca:</span>
+              <input type="text" id="aiSupplierInput" class="w-full bg-slate-800 border border-slate-700 rounded p-1 font-bold text-white text-xs">
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400 block">NIP Dostawcy:</span>
+              <input type="text" id="aiNipInput" class="w-full bg-slate-800 border border-slate-700 rounded p-1 font-mono text-indigo-300 text-xs">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3 gap-2 pt-1 border-t border-slate-800">
+            <div>
+              <span class="text-[10px] text-slate-400 block">Nr Faktury:</span>
+              <input type="text" id="aiDocNumInput" class="w-full bg-slate-800 border border-slate-700 rounded p-1 font-mono text-amber-400 text-xs">
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400 block">Kwota Brutto:</span>
+              <input type="text" id="aiTotalGrossInput" class="w-full bg-slate-800 border border-slate-700 rounded p-1 font-bold text-emerald-400 text-xs">
+            </div>
+            <div>
+              <span class="text-[10px] text-rose-300 block font-bold">Termin Płatności:</span>
+              <input type="text" id="aiDueDateInput" class="w-full bg-slate-800 border border-rose-900/60 rounded p-1 font-bold text-rose-400 text-xs">
+            </div>
+          </div>
+
+          <div>
+            <span class="text-[10px] text-slate-400 block">Numer konta bankowego (IBAN):</span>
+            <input type="text" id="aiBankAccountInput" class="w-full bg-slate-800 border border-slate-700 rounded p-1 font-mono text-slate-300 text-[11px]">
+          </div>
+        </div>
+
+        <p class="text-[11px] text-slate-300 font-medium">Pozycje przeliczone na pojedyncze sztuki:</p>
+        <div id="aiItemsList" class="space-y-2.5"></div>
+      </div>
+
+      <div id="aiModalActions" class="hidden pt-2.5 border-t border-slate-700 flex justify-end gap-2">
+        <button onclick="closeAiModal()" class="px-4 py-2 rounded-xl text-xs text-slate-400 hover:bg-slate-700">Anuluj</button>
+        <button onclick="confirmAndApplyDelivery()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow">
+          <span>✓</span> Zastosuj przyjęcie i zapisz płatność
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PODGLĄD SKANÓW / ZDJĘĆ W LIGHTBOXIE -->
   <div id="imagePreviewModal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="relative max-w-xl w-full bg-slate-900 border border-slate-700 rounded-2xl p-3 flex flex-col items-center shadow-2xl">
       <div class="w-full flex justify-between items-center border-b border-slate-800 pb-2 mb-2">
@@ -281,7 +389,7 @@
       <span class="text-[10px] font-bold">Faktury</span>
     </button>
 
-    <button onclick="triggerInvoiceUpload()" class="flex flex-col items-center justify-center -mt-5 bg-gradient-to-tr from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white w-14 h-14 rounded-full shadow-lg border-2 border-slate-900 active:scale-90 transition">
+    <button onclick="openInvoiceUploadModal()" class="flex flex-col items-center justify-center -mt-5 bg-gradient-to-tr from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white w-14 h-14 rounded-full shadow-lg border-2 border-slate-900 active:scale-90 transition">
       <span class="text-xl">⚡</span>
       <span class="text-[9px] font-black uppercase tracking-tighter">AI FAKT</span>
     </button>
@@ -297,7 +405,7 @@
     </button>
   </nav>
 
-  <!-- SZABLON DO DRUKU KARTY WYDANIA / ROZLICZENIA (ZARZĄDZANY PRZEZ CSS @MEDIA PRINT) -->
+  <!-- JEDYNY I SPÓJNY SZABLON DRUKU DLA KART WYDANIA / ROZLICZENIA -->
   <div id="printableSheet">
     <div style="border: 2px solid #000; width: 100%; box-sizing: border-box; background: white; color: black; font-family: Arial, sans-serif;">
       <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 11px;">
@@ -350,7 +458,7 @@
     </div>
   </div>
 
-  <!-- MODAL: GENEROWANIE KARTY WYDANIA Z ZAZNACZONYCH -->
+  <!-- MODAL: GENEROWANIE KARTY WYDANIA Z ZAZNACZONYCH POZYCJI -->
   <div id="generateSheetModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-4 space-y-3.5 shadow-2xl my-4 flex flex-col">
       <div class="flex justify-between items-center border-b border-slate-700 pb-2">
@@ -406,71 +514,6 @@
         </button>
         <button onclick="confirmAndApplyShelfCount('SET')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-1.5 rounded-xl text-xs shadow">
           📝 Ustaw jako stan
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL AI OCR: WERYFIKACJA FAKTURY, PŁATNOŚCI I KONTRAHENTA -->
-  <div id="aiModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
-    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 shadow-2xl my-4 max-h-[94vh] flex flex-col">
-      <div class="flex justify-between items-start border-b border-slate-700 pb-2">
-        <div>
-          <span class="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50">Finance & Price Intelligence</span>
-          <h3 class="text-sm font-bold text-white mt-1">Przyjęcie Faktury Zakupu</h3>
-          <p id="aiDocInfo" class="text-[11px] text-slate-400 mt-0.5">Odczytywanie danych firmy i płatności...</p>
-        </div>
-        <button onclick="closeAiModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
-      </div>
-
-      <div id="aiLoadingState" class="py-12 flex flex-col items-center justify-center space-y-3">
-        <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-        <p class="text-sm text-slate-200 font-medium">Odczytywanie pozycji, NIP i terminu płatności...</p>
-        <p class="text-xs text-slate-500">Automatyczne przeliczanie zgrzewek na sztuki</p>
-      </div>
-
-      <div id="aiItemsContainer" class="hidden flex-1 overflow-y-auto space-y-3 pr-1">
-        <div class="bg-slate-900 border border-indigo-800/60 p-3 rounded-xl space-y-2 text-xs">
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <span class="text-[10px] text-slate-400 block">Dostawca:</span>
-              <input type="text" id="aiSupplierInput" class="w-full bg-slate-800 border border-slate-700 rounded p-1 font-bold text-white text-xs">
-            </div>
-            <div>
-              <span class="text-[10px] text-slate-400 block">NIP Dostawcy:</span>
-              <input type="text" id="aiNipInput" class="w-full bg-slate-800 border border-slate-700 rounded p-1 font-mono text-indigo-300 text-xs">
-            </div>
-          </div>
-
-          <div class="grid grid-cols-3 gap-2 pt-1 border-t border-slate-800">
-            <div>
-              <span class="text-[10px] text-slate-400 block">Nr Faktury:</span>
-              <input type="text" id="aiDocNumInput" class="w-full bg-slate-800 border border-slate-700 rounded p-1 font-mono text-amber-400 text-xs">
-            </div>
-            <div>
-              <span class="text-[10px] text-slate-400 block">Kwota Brutto:</span>
-              <input type="text" id="aiTotalGrossInput" class="w-full bg-slate-800 border border-slate-700 rounded p-1 font-bold text-emerald-400 text-xs">
-            </div>
-            <div>
-              <span class="text-[10px] text-rose-300 block font-bold">Termin Płatności:</span>
-              <input type="text" id="aiDueDateInput" class="w-full bg-slate-800 border border-rose-900/60 rounded p-1 font-bold text-rose-400 text-xs">
-            </div>
-          </div>
-
-          <div>
-            <span class="text-[10px] text-slate-400 block">Numer konta bankowego (IBAN):</span>
-            <input type="text" id="aiBankAccountInput" class="w-full bg-slate-800 border border-slate-700 rounded p-1 font-mono text-slate-300 text-[11px]">
-          </div>
-        </div>
-
-        <p class="text-[11px] text-slate-300">Wykryte towary (jeśli faktura ma zgrzewki, kliknij przycisk rozbicia ×6 / ×12 / ×24):</p>
-        <div id="aiItemsList" class="space-y-2.5"></div>
-      </div>
-
-      <div id="aiModalActions" class="hidden pt-2.5 border-t border-slate-700 flex justify-end gap-2">
-        <button onclick="closeAiModal()" class="px-4 py-2 rounded-xl text-xs text-slate-400 hover:bg-slate-700">Anuluj</button>
-        <button onclick="confirmAndApplyDelivery()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow">
-          <span>✓</span> Zastosuj przyjęcie i zapisz płatność
         </button>
       </div>
     </div>
@@ -636,23 +679,17 @@
     const SUPABASE_KEY = 'sb_publishable_EuUrE98PR8SAVwnrIMP60g_RUAL0KSp';
     const GEMINI_API_KEY = 'AQ.Ab8RN6JQHVTxqmEE-mAigOjJGt4ghfMGxGYDTjNUt0MGeq2f5Q';
 
-    // --- BEZPIECZNY ODCZYT I ZAPIS DO LOCALSTORAGE (CHRONI PRZED PRZEPEŁNIENIEM 5MB) ---
     function safeGetLocal(key) {
-      try {
-        return JSON.parse(localStorage.getItem(key)) || [];
-      } catch (e) {
-        return [];
-      }
+      try { return JSON.parse(localStorage.getItem(key)) || []; } catch (e) { return []; }
     }
 
     function safeSetLocal(key, data) {
       try {
         localStorage.setItem(key, JSON.stringify(data));
       } catch (e) {
-        // Jeśli pamięć przeglądarki jest pełna przez duże zdjęcia base64, odchudzamy najstarsze skany lokalnie
         try {
           const slimData = data.map((entry, idx) => {
-            if (idx > 5) {
+            if (idx > 4) {
               const copy = { ...entry };
               delete copy.image_url;
               delete copy.dispatch_image;
@@ -666,7 +703,6 @@
       }
     }
 
-    // --- MAPERY DANYCH (100% SPÓJNOŚCI MIĘDZY JS A SUPABASE) ---
     function normalizeItem(raw) {
       if (!raw) return null;
       return {
@@ -686,17 +722,9 @@
     function toDbItem(item) {
       const n = normalizeItem(item);
       return {
-        id: n.id,
-        barcode: n.barcode,
-        name: n.name,
-        category: n.category,
-        location: n.location,
-        qty: n.qty,
-        in_field: n.inField,
-        min_qty: n.minQty,
-        unit: n.unit,
-        price: n.price,
-        updated_at: new Date()
+        id: n.id, barcode: n.barcode, name: n.name, category: n.category,
+        location: n.location, qty: n.qty, in_field: n.inField, min_qty: n.minQty,
+        unit: n.unit, price: n.price, updated_at: new Date()
       };
     }
 
@@ -716,6 +744,9 @@
     let currentExtractedEventDispatch = null;
     let currentActiveReturnEventId = null;
     let currentShelfCountItems = [];
+
+    let invoicePhoto1 = null;
+    let invoicePhoto2 = null;
 
     let isSelectMode = false;
     let selectedItemIds = new Set();
@@ -760,6 +791,20 @@
         }
       }
       return bestItem;
+    }
+
+    // --- AUTOMATYCZNY SILNIK WYKRYWANIA I ROZBIJANIA ZGRZEWEK NA SZTUKI ---
+    function detectPackMultiplier(name) {
+      if (!name) return 1;
+      const m = name.match(/\bX\s*(\d+)\b/i) ||
+                name.match(/[\s(]X\s*(\d+)/i) ||
+                name.match(/\b(\d+)\s*X\b/i) ||
+                name.match(/\((\d+)\s*(?:szt|can|rgb|pet|pusz|but)?\)/i);
+      if (m && m[1]) {
+        const val = parseInt(m[1], 10);
+        if (val > 1 && val <= 100) return val;
+      }
+      return 1;
     }
 
     async function recordStockLog(itemId, itemName, actionType, qtyChange, note = '') {
@@ -808,7 +853,6 @@
       }
     }
 
-    // --- BEZSTRATNA SYNCHRONIZACJA Z CHMURĄ SUPABASE ---
     async function fetchAllData() {
       const syncEl = document.getElementById('syncStatus');
       if (syncEl) syncEl.innerText = 'Synchronizacja z bazą...';
@@ -967,7 +1011,6 @@
       }).join('');
     }
 
-    // --- RENDEROWANIE FAKTUR Z PODGLĄDEM W MODALU I OPCJĄ USUNIĘCIA ---
     function renderDeliveries() {
       const list = document.getElementById('deliveriesList');
       if (!list) return;
@@ -1102,7 +1145,7 @@
       });
     }
 
-    // --- RENDEROWANIE EVENTÓW Z DRUKIEM I ROZLICZANIEM (RĘCZNYM ORAZ ZE ZDJĘCIA) ---
+    // --- RENDEROWANIE EVENTÓW Z PEŁNĄ OBSŁUGĄ DRUKU I ROZLICZENIA ---
     function renderEvents() {
       const list = document.getElementById('eventsList');
       if (!list) return;
@@ -1115,7 +1158,7 @@
       }
 
       if (events.length === 0) {
-        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak zarejestrowanych wydań na eventy. Kliknij "Skanuj Wydanie" u góry lub wygeneruj kartę z zaznaczonych towarów w Magazynie.</div>`;
+        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak zarejestrowanych wydań na eventy.</div>`;
         return;
       }
 
@@ -1194,7 +1237,6 @@
       }).join('');
     }
 
-    // --- BEZPIECZNE OTWIERANIE PODGLĄDU SKANÓW W LIGHTBOXIE ---
     function openMediaPreview(itemId, type) {
       let imgData = '';
       let title = 'Podgląd dokumentu';
@@ -1230,7 +1272,7 @@
       document.getElementById('imagePreviewElement').src = '';
     }
 
-    // --- NIEZAWODNY WYDRUK KARTY WYDANIA LUB ROZLICZENIA (BEZ ZNIKANIA W ANDROIDZIE) ---
+    // --- BEZAWARYJNY WYDRUK KART WYDANIA / ZWROTÓW (NAPRAWIONY DLA ANDROIDA) ---
     function printEventSheet(eventId, type) {
       const ev = events.find(e => String(e.id) === String(eventId));
       if (!ev) return;
@@ -1282,7 +1324,7 @@
 
       document.body.classList.remove('print-mode-qr');
       document.body.classList.add('print-mode-sheet');
-      setTimeout(() => { window.print(); }, 150);
+      window.print();
     }
 
     function renderPriceAlerts() {
@@ -1318,7 +1360,6 @@
       renderPriceAlerts();
     }
 
-    // --- PRZEŁĄCZANIE ZAKŁADEK ---
     function switchMainTab(tab) {
       document.getElementById('viewStock').classList.add('hidden');
       document.getElementById('viewEvents').classList.add('hidden');
@@ -1389,7 +1430,7 @@ Zwróć wynik jako czysty JSON:
   ]
 }`;
 
-        const parsed = await queryGeminiAPI(promptText, base64Data);
+        const parsed = await queryGeminiAPI(promptText, [base64Data]);
         currentShelfCountItems = parsed.items || [];
         displayShelfCountModal(currentShelfCountItems);
         triggerScanFeedback();
@@ -1503,14 +1544,74 @@ Zwróć wynik jako czysty JSON:
       alert("Towary zliczone ze zdjęcia zostały zaktualizowane w magazynie!");
     }
 
-    // --- FAKTURY ZAKUPU (AI OCR + KALKULATOR ZGRZEWEK) ---
-    function triggerInvoiceUpload() {
-      document.getElementById('invoiceInput').click();
+    // --- OBSŁUGA FAKTUR NA 1 LUB 2 ZDJĘCIA (DŁUGIE DOKUMENTY) ---
+    function openInvoiceUploadModal() {
+      resetInvoicePhotos();
+      const modal = document.getElementById('invoiceCaptureModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
     }
 
-    async function processInvoiceImage(event) {
+    function closeInvoiceUploadModal() {
+      const modal = document.getElementById('invoiceCaptureModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      resetInvoicePhotos();
+    }
+
+    function resetInvoicePhotos() {
+      invoicePhoto1 = null;
+      invoicePhoto2 = null;
+      document.getElementById('invoiceSlot1Empty').classList.remove('hidden');
+      document.getElementById('invoiceSlot1Preview').classList.add('hidden');
+      document.getElementById('invoiceSlot1Preview').src = '';
+      document.getElementById('invoiceSlot1Done').classList.add('hidden');
+
+      document.getElementById('invoiceSlot2Empty').classList.remove('hidden');
+      document.getElementById('invoiceSlot2Preview').classList.add('hidden');
+      document.getElementById('invoiceSlot2Preview').src = '';
+      document.getElementById('invoiceSlot2Done').classList.add('hidden');
+
+      const btn = document.getElementById('btnProcessInvoice');
+      if (btn) btn.disabled = true;
+    }
+
+    async function handleInvoicePhotoSelected(event, slot) {
       const file = event.target.files[0];
       if (!file) return;
+
+      try {
+        const compressedDataUrl = await compressImage(file, 950, 0.7);
+        if (slot === 1) {
+          invoicePhoto1 = compressedDataUrl;
+          document.getElementById('invoiceSlot1Empty').classList.add('hidden');
+          document.getElementById('invoiceSlot1Preview').src = compressedDataUrl;
+          document.getElementById('invoiceSlot1Preview').classList.remove('hidden');
+          document.getElementById('invoiceSlot1Done').classList.remove('hidden');
+        } else {
+          invoicePhoto2 = compressedDataUrl;
+          document.getElementById('invoiceSlot2Empty').classList.add('hidden');
+          document.getElementById('invoiceSlot2Preview').src = compressedDataUrl;
+          document.getElementById('invoiceSlot2Preview').classList.remove('hidden');
+          document.getElementById('invoiceSlot2Done').classList.remove('hidden');
+        }
+
+        const btn = document.getElementById('btnProcessInvoice');
+        if (btn) btn.disabled = !invoicePhoto1;
+        triggerScanFeedback();
+      } catch (err) {
+        alert("Błąd kompresji zdjęcia: " + err.message);
+      }
+      event.target.value = '';
+    }
+
+    async function startMultiInvoiceProcessing() {
+      if (!invoicePhoto1) return alert("Zrób najpierw zdjęcie strony 1.");
+      
+      const photos = [invoicePhoto1.split(',')[1]];
+      if (invoicePhoto2) photos.push(invoicePhoto2.split(',')[1]);
+
+      closeInvoiceUploadModal();
 
       const aiModal = document.getElementById('aiModal');
       aiModal.classList.remove('hidden');
@@ -1520,26 +1621,61 @@ Zwróć wynik jako czysty JSON:
       document.getElementById('aiModalActions').classList.add('hidden');
 
       try {
-        const compressedDataUrl = await compressImage(file, 900, 0.65);
-        const base64Data = compressedDataUrl.split(',')[1];
-        const promptText = `Jesteś ekspertem księgowo-magazynowym. Przeanalizuj to zdjęcie faktury vat / rachunku.
-WAŻNA ZASADA DOTYCZĄCA ZGRZEWEK I OPAKOWAŃ ZBIORCZYCH:
-Jeśli w nazwie pozycji występuje mnożnik np. "X12", "X24", "X6", "(12)", "(6)" lub jednostką jest ZGRZ / KARTON / OP:
-1. Przemnoż ilość opakowań przez liczbę sztuk w opakowaniu (np. 6 zgrzewek X24 = 144 szt.).
-2. Podziel cenę netto opakowania przez liczbę sztuk w opakowaniu (np. 78.96 zł / 24 = 3.29 zł za 1 szt.).
+        const promptText = `Jesteś ekspertem księgowo-magazynowym. Otrzymujesz zdjęcie (lub 2 zdjęcia stanowiące górę i dół tej samej długiej faktury/WZ)[cite: 14, 15].
+Przeanalizuj cały dokument i połącz wszystkie pozycje.
+ZASADA: Przepisz DOKŁADNIE to co widzisz na fakturze, nie wykonuj samemu skomplikowanej matematyki:
+- docNumber: numer faktury/dostawy
+- supplier: sprzedawca
+- nip: NIP sprzedawcy
+- totalGross: łączna kwota brutto z podsumowania
+- paymentDueDate: termin płatności
+- bankAccount: numer konta IBAN
+- items: tablica pozycji z kolumn tabeli:
+  * name: pełna nazwa produktu (np. '0.25 CAN X12 BURN ZERO', '0.25 RGB X24 COCA-COLA')[cite: 14]
+  * rawQty: liczba z kolumny ILOŚĆ (np. 2, 6, 4, 1)[cite: 14]
+  * rawPrice: cena netto z kolumny CENA JEDNOSTKOWA (np. 39.96, 78.96)[cite: 14]
+  * unitPriceHint: jeśli pod pozycją jest dopisek 'Cena zaokrąglona za sztu', podaj tę liczbę (np. 3.48, 3.51)[cite: 14], w przeciwnym razie null
 
-Wyciągnij:
-1. docNumber: numer faktury
-2. supplier: pełna nazwa sprzedawcy
-3. nip: NIP sprzedawcy
-4. totalGross: łączna kwota brutto do zapłaty
-5. paymentDueDate: termin płatności (np. "02.11.2026")
-6. bankAccount: numer rachunku bankowego sprzedawcy (IBAN)
-7. items: tablica towarów { "name": string, "qty": number (w pojedynczych sztukach!), "unit": "szt.", "netPrice": number (cena 1 pojedynczej sztuki!) }
+Zwróć czysty JSON o strukturze:
+{
+  "docNumber": string,
+  "supplier": string,
+  "nip": string,
+  "totalGross": string,
+  "paymentDueDate": string,
+  "bankAccount": string,
+  "items": [
+    { "name": string, "rawQty": number, "rawPrice": number, "unitPriceHint": number }
+  ]
+}`;
 
-Zwróć czysty JSON.`;
+        const parsed = await queryGeminiAPI(promptText, photos);
+        
+        // Zastosowanie lokalnego silnika przeliczania zgrzewek w JavaScript
+        const calculatedItems = (parsed.items || []).map(it => {
+          const mult = detectPackMultiplier(it.name);
+          const rawQ = Number(it.rawQty) || 1;
+          const rawP = Number(it.rawPrice) || 0;
+          
+          let finalQty = rawQ;
+          let finalPrice = rawP;
 
-        const parsed = await queryGeminiAPI(promptText, base64Data);
+          if (mult > 1) {
+            finalQty = rawQ * mult; // 2 zgrzewki X12 = 24 sztuki[cite: 14]
+            finalPrice = it.unitPriceHint ? Number(it.unitPriceHint) : parseFloat((rawP / mult).toFixed(2));
+          }
+
+          return {
+            name: it.name,
+            qty: finalQty,
+            netPrice: finalPrice,
+            unit: 'szt.',
+            packMultiplier: mult,
+            rawQty: rawQ,
+            rawPrice: rawP
+          };
+        });
+
         currentExtractedDelivery = {
           docNumber: parsed.docNumber || 'FA/' + Date.now().toString().slice(-6),
           supplier: parsed.supplier || 'Dostawca',
@@ -1547,23 +1683,23 @@ Zwróć czysty JSON.`;
           totalGross: parsed.totalGross || '',
           paymentDueDate: parsed.paymentDueDate || '',
           bankAccount: parsed.bankAccount || '',
-          items: parsed.items || [],
-          imagePreview: compressedDataUrl
+          items: calculatedItems,
+          imagePreview: invoicePhoto1 // zachowujemy miniaturę strony 1 do podglądu
         };
+
         displayExtractedItems(currentExtractedDelivery);
         triggerScanFeedback();
       } catch (err) {
-        alert("Błąd faktury: " + err.message);
+        alert("Błąd odczytu faktury: " + err.message);
         closeAiModal();
       }
-      event.target.value = '';
     }
 
     function displayExtractedItems(delivery) {
       document.getElementById('aiLoadingState').classList.add('hidden');
       document.getElementById('aiItemsContainer').classList.remove('hidden');
       document.getElementById('aiModalActions').classList.remove('hidden');
-      document.getElementById('aiDocInfo').innerText = "Weryfikacja danych finansowych i pozycji:";
+      document.getElementById('aiDocInfo').innerText = "Weryfikacja pozycji i przeliczeń na sztuki:";
 
       document.getElementById('aiSupplierInput').value = delivery.supplier || 'Dostawca';
       document.getElementById('aiNipInput').value = delivery.nip || '';
@@ -1582,19 +1718,19 @@ Zwróć czysty JSON.`;
         const match = findBestInventoryMatch(item.name);
         const matchedId = match ? match.id : '';
         const incomingPrice = Number(item.netPrice || 0);
+        const hasMultiplier = item.packMultiplier && item.packMultiplier > 1;
 
         return `
           <div class="bg-slate-900 border ${match ? 'border-emerald-600/70' : 'border-indigo-600/70'} rounded-xl p-3 space-y-2">
             <div class="flex items-center justify-between gap-2 flex-wrap">
               <span id="aiBadge_${index}" class="text-[9px] font-bold px-2 py-0.5 rounded ${match ? 'bg-emerald-950 text-emerald-300 border border-emerald-700/50' : 'bg-indigo-950 text-indigo-300 border border-indigo-700/50'}">
-                ${match ? `✓ Scal z: ${match.name} (Stan: ${match.qty} ${match.unit})` : '⭐ NOWY TOWAR W BAZIE'}
+                ${match ? `✓ Scal z: ${match.name} (Obecnie: ${match.qty} ${match.unit})` : '⭐ NOWY TOWAR W BAZIE'}
               </span>
-              <div class="flex items-center gap-1">
-                <span class="text-[9px] text-slate-400">Rozbij zgrz.:</span>
-                <button type="button" onclick="unpackInvoiceItem(${index}, 6)" class="bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 px-1.5 py-0.5 rounded text-[9px] font-bold">×6</button>
-                <button type="button" onclick="unpackInvoiceItem(${index}, 12)" class="bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 px-1.5 py-0.5 rounded text-[9px] font-bold">×12</button>
-                <button type="button" onclick="unpackInvoiceItem(${index}, 24)" class="bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 px-1.5 py-0.5 rounded text-[9px] font-bold">×24</button>
-              </div>
+              ${hasMultiplier ? `
+                <span class="text-[9px] font-bold bg-amber-950 text-amber-300 border border-amber-700/50 px-2 py-0.5 rounded">
+                  📦 Zgrzewka ×${item.packMultiplier}: ${item.rawQty} zgrz. ➔ ${item.qty} szt.[cite: 13, 14]
+                </span>
+              ` : ''}
             </div>
 
             <div class="flex items-center justify-between gap-2">
@@ -1625,19 +1761,6 @@ Zwróć czysty JSON.`;
           </div>
         `;
       }).join('');
-    }
-
-    function unpackInvoiceItem(index, multiplier) {
-      const qtyInput = document.getElementById(`aiItemQty_${index}`);
-      const priceInput = document.getElementById(`aiItemPrice_${index}`);
-      if (!qtyInput || !priceInput) return;
-
-      const currentQty = parseFloat(qtyInput.value) || 1;
-      const currentPrice = parseFloat(priceInput.value) || 0;
-
-      qtyInput.value = Math.round(currentQty * multiplier);
-      priceInput.value = (currentPrice / multiplier).toFixed(2);
-      triggerScanFeedback();
     }
 
     function handleManualMatchChange(index) {
@@ -1738,7 +1861,6 @@ Zwróć czysty JSON.`;
         try {
           await apiRequest('/deliveries', 'POST', deliveryEntry);
         } catch (e) {
-          // Fallback: jeśli obraz base64 był za duży dla sieci, wyślij sam rekord tekstowy
           try {
             const slimEntry = { ...deliveryEntry, image_url: '' };
             await apiRequest('/deliveries', 'POST', slimEntry);
@@ -1760,10 +1882,17 @@ Zwróć czysty JSON.`;
       currentExtractedDelivery = null;
     }
 
-    // --- GEMINI MULTI-MODEL FALLBACK OCR ENGINE ---
-    async function queryGeminiAPI(promptText, base64Data) {
+    // --- GEMINI MULTI-IMAGE VISION OCR ENGINE ---
+    async function queryGeminiAPI(promptText, imagesBase64 = []) {
       const models = ['gemini-3.5-flash-lite', 'gemini-1.5-flash', 'gemini-3.8-flash'];
       let lastErrorMsg = '';
+
+      const parts = [{ text: promptText }];
+      for (const imgBase64 of imagesBase64) {
+        parts.push({
+          inline_data: { mime_type: 'image/jpeg', data: imgBase64 }
+        });
+      }
 
       for (const model of models) {
         try {
@@ -1772,7 +1901,7 @@ Zwróć czysty JSON.`;
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
             body: JSON.stringify({
-              contents: [{ parts: [{ text: promptText }, { inline_data: { mime_type: 'image/jpeg', data: base64Data } }] }],
+              contents: [{ parts: parts }],
               generationConfig: { response_mime_type: "application/json", temperature: 0.1 }
             })
           });
@@ -1810,17 +1939,17 @@ Zwróć czysty JSON.`;
       document.getElementById('eventDispatchActions').classList.add('hidden');
 
       try {
-        const compressedDataUrl = await compressImage(file, 900, 0.65);
+        const compressedDataUrl = await compressImage(file, 950, 0.7);
         const base64Data = compressedDataUrl.split(',')[1];
         const promptText = `Przeanalizuj to zdjęcie arkusza "WYDANIE NAPOJÓW I ALKOHOLU NA REALIZACJĘ".
 Wyciągnij:
 1. eventNumber: numer imprezy z pola IMPREZA, #NUMER (np. "#403" lub "#359")
-2. eventName: nazwa imprezy / klienta (np. "AVIAREPS SKYWORKS")
-3. dispatchDate: data wydania (np. "02.10.26")
+2. eventName: nazwa imprezy / klienta
+3. dispatchDate: data wydania
 4. items: tablica pozycji z tabeli z kolumn NAZWA oraz WYDANE: { "name": string, "dispatched": number, "unit": string }
 Zwróć czysty JSON: { "eventNumber": string, "eventName": string, "dispatchDate": string, "items": [] }`;
 
-        const parsed = await queryGeminiAPI(promptText, base64Data);
+        const parsed = await queryGeminiAPI(promptText, [base64Data]);
         currentExtractedEventDispatch = {
           eventNumber: parsed.eventNumber || '#EVENT-' + Date.now().toString().slice(-4),
           eventName: parsed.eventName || 'Realizacja Cateringowa',
@@ -1915,7 +2044,7 @@ Zwróć czysty JSON: { "eventNumber": string, "eventName": string, "dispatchDate
       alert(`Wydanie na event ${evNum} zapisane! Butelki przesunięte w teren.`);
     }
 
-    // --- EVENTY: ROZLICZENIE RĘCZNE LUB ZE ZDJĘCIA ---
+    // --- EVENTY: ROZLICZENIE RĘCZNE I ZE ZDJĘCIA ---
     function openManualEventReturn(eventId) {
       const ev = events.find(e => String(e.id) === String(eventId));
       if (!ev) return;
@@ -1948,7 +2077,7 @@ Zwróć czysty JSON: { "eventNumber": string, "eventName": string, "dispatchDate
       document.getElementById('evReturnActions').classList.add('hidden');
 
       try {
-        const compressedDataUrl = await compressImage(file, 900, 0.65);
+        const compressedDataUrl = await compressImage(file, 950, 0.7);
         const base64Data = compressedDataUrl.split(',')[1];
         const promptText = `Przeanalizuj to zdjęcie uzupełnionego odręcznie arkusza zwrotu napojów/alkoholu.
 Odczytaj kolumny tabeli:
@@ -1958,7 +2087,7 @@ Odczytaj kolumny tabeli:
 - Data zwrotu (z pola DATA ZWROTU)
 Zwróć JSON: { "returnDate": string, "items": [ { "name": string, "consumed": number, "returned": number } ] }`;
 
-        const parsedReturn = await queryGeminiAPI(promptText, base64Data);
+        const parsedReturn = await queryGeminiAPI(promptText, [base64Data]);
         displayEventReturnModal(ev, parsedReturn, compressedDataUrl);
         triggerScanFeedback();
       } catch (err) {
@@ -2076,7 +2205,7 @@ Zwróć JSON: { "returnDate": string, "items": [ { "name": string, "consumed": n
       if (isCloudOnline) { try { await apiRequest(`/events?id=eq.${id}`, 'DELETE'); } catch (e) {} }
     }
 
-    // --- KARTA WYDANIA DO DRUKU Z ZAZNACZONYCH POZYCJI (+ OPCJONALNE UTWORZENIE EVENTU) ---
+    // --- KARTA WYDANIA DO DRUKU Z ZAZNACZONYCH POZYCJI ---
     function openGenerateSheetModal() {
       if (selectedItemIds.size === 0) return alert("Zaznacz najpierw pozycje na liście.");
       document.getElementById('genSheetNum').value = '#' + Math.floor(100 + Math.random() * 899);
@@ -2192,7 +2321,7 @@ Zwróć JSON: { "returnDate": string, "items": [ { "name": string, "consumed": n
 
       document.body.classList.remove('print-mode-qr');
       document.body.classList.add('print-mode-sheet');
-      setTimeout(() => { window.print(); }, 200);
+      window.print();
     }
 
     // --- INTERFEJS SKANERA, EDYCJI I AKCJI MAGAZYNOWYCH ---
@@ -2527,10 +2656,10 @@ Zwróć JSON: { "returnDate": string, "items": [ { "name": string, "consumed": n
       
       document.body.classList.remove('print-mode-sheet');
       document.body.classList.add('print-mode-qr');
-      setTimeout(() => { window.print(); }, 250);
+      window.print();
     }
 
-    function compressImage(file, maxWidth = 900, quality = 0.65) {
+    function compressImage(file, maxWidth = 950, quality = 0.7) {
       return new Promise((resolve, reject) => {
         const img = new Image();
         img.onload = () => {
@@ -2560,7 +2689,6 @@ Zwróć JSON: { "returnDate": string, "items": [ { "name": string, "consumed": n
       link.click();
     }
 
-    // Inicjalizacja startowa aplikacji
     fetchAllData();
   </script>
 </body>
