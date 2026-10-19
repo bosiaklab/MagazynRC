@@ -54,7 +54,7 @@
     <div class="flex items-center space-x-2.5">
       <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-base shadow">M</div>
       <div>
-        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v3.3 KAUCJE</span></h1>
+        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v3.4 EVENT-FLOW</span></h1>
         <p id="syncStatus" class="text-[10px] text-amber-400 font-medium leading-none mt-0.5">Inicjalizacja...</p>
       </div>
     </div>
@@ -74,7 +74,8 @@
   <!-- UKRYTE INPUTY APARATU -->
   <input type="file" id="shelfCountInput" accept="image/*" capture="environment" class="hidden" onchange="processShelfCountImage(event)">
   <input type="file" id="eventDispatchInput" accept="image/*" capture="environment" class="hidden" onchange="processEventDispatchImage(event)">
-  <input type="file" id="eventReturnInput" accept="image/*" capture="environment" class="hidden" onchange="processEventReturnImage(event)">
+  <input type="file" id="eventReturnProductsInput" accept="image/*" capture="environment" class="hidden" onchange="processEventReturnProductsImage(event)">
+  <input type="file" id="eventReturnSheetInput" accept="image/*" capture="environment" class="hidden" onchange="processEventReturnSheetImage(event)">
   <input type="file" id="invoicePhotoInput1" accept="image/*" capture="environment" class="hidden" onchange="handleInvoicePhotoSelected(event, 1)">
   <input type="file" id="invoicePhotoInput2" accept="image/*" capture="environment" class="hidden" onchange="handleInvoicePhotoSelected(event, 2)">
 
@@ -95,8 +96,8 @@
         <p class="text-[10px] text-cyan-300 font-semibold">♻️ Kaucje</p>
         <p id="statTotalDeposits" class="text-xs font-black text-cyan-400 mt-1">0.00 zł</p>
       </div>
-      <div class="bg-slate-800/80 border border-slate-700/70 p-2 rounded-xl text-center">
-        <p class="text-[10px] text-slate-400">W terenie</p>
+      <div onclick="switchMainTab('events')" class="bg-slate-800/80 border border-amber-800/60 p-2 rounded-xl text-center cursor-pointer hover:bg-slate-800 transition">
+        <p class="text-[10px] text-amber-300 font-semibold">🚚 W terenie</p>
         <p id="statInField" class="text-base font-bold text-amber-400 mt-0.5">0</p>
       </div>
     </div>
@@ -106,14 +107,14 @@
       <button onclick="switchMainTab('stock')" id="tabStockHeaderBtn" class="pb-2 border-b-2 border-emerald-500 text-emerald-400 font-bold whitespace-nowrap flex items-center gap-1">
         📦 Magazyn
       </button>
+      <button onclick="switchMainTab('events')" id="tabEventsHeaderBtn" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1 whitespace-nowrap font-bold">
+        <span>🎉</span> Eventy / Wydania <span id="activeEventsBadge" class="bg-amber-950 text-amber-300 border border-amber-700/50 text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
+      </button>
       <button onclick="switchMainTab('deliveries')" id="tabDeliveriesHeaderBtn" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 whitespace-nowrap font-bold flex items-center gap-1">
         <span>📑</span> Przyjęte Faktury
       </button>
       <button onclick="switchMainTab('deposits')" id="tabDepositsHeaderBtn" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 whitespace-nowrap font-bold flex items-center gap-1">
         <span>♻️</span> Kaucje <span id="depositsCountBadge" class="bg-cyan-950 text-cyan-300 border border-cyan-700/50 text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
-      </button>
-      <button onclick="switchMainTab('events')" id="tabEventsHeaderBtn" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1 whitespace-nowrap font-bold">
-        <span>🎉</span> Eventy <span id="activeEventsBadge" class="bg-amber-950 text-amber-300 border border-amber-700/50 text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
       </button>
       <button onclick="switchMainTab('alerts')" id="tabAlertsHeaderBtn" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1 whitespace-nowrap font-bold">
         <span>⚠️</span> Alerty Cen <span id="alertsCountBadge" class="bg-rose-950 text-rose-300 border border-rose-700/50 text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
@@ -158,7 +159,7 @@
       </section>
 
       <div class="flex flex-wrap gap-2 items-center justify-between">
-        <div class="flex-1 flex gap-2 min-w-[240px]">
+        <div class="flex-1 flex gap-2 min-w-[220px]">
           <input 
             type="text" 
             id="searchFilter" 
@@ -172,24 +173,24 @@
             <option value="FIELD">🚚 Teren</option>
           </select>
         </div>
-        <button id="btnToggleSelectMode" onclick="toggleSelectMode()" class="bg-slate-800 hover:bg-slate-700 border border-slate-600/70 text-slate-300 text-xs px-3 py-2 rounded-xl font-bold flex items-center gap-1.5 transition">
-          <span>☑️</span> Zaznacz
+        <button id="btnToggleSelectMode" onclick="toggleSelectMode()" class="bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/60 text-amber-300 text-xs px-3 py-2 rounded-xl font-bold flex items-center gap-1.5 transition">
+          <span>🚚</span> Wybierz na Event
         </button>
       </div>
 
-      <div id="bulkActionBar" class="hidden bg-slate-800 border border-indigo-700/60 rounded-xl p-2.5 flex flex-wrap gap-2 items-center justify-between shadow-lg">
+      <div id="bulkActionBar" class="hidden bg-slate-800 border border-amber-500/80 rounded-xl p-2.5 flex flex-wrap gap-2 items-center justify-between shadow-lg">
         <div class="flex items-center gap-2">
           <button onclick="toggleSelectAll()" id="btnSelectAll" class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 px-2.5 py-1 rounded-lg">
-            Zaznacz wszystkie
+            Wszystkie
           </button>
-          <span id="bulkSelectedCount" class="text-xs font-bold text-indigo-400">Wybrano: 0</span>
+          <span id="bulkSelectedCount" class="text-xs font-bold text-amber-400">Wybrano: 0</span>
         </div>
         <div class="flex gap-2">
-          <button onclick="openGenerateSheetModal()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold text-xs px-3 py-1.5 rounded-lg flex items-center gap-1 shadow transition">
-            <span>📋</span> Karta Wydania / Event
+          <button onclick="openGenerateSheetModal()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs px-3.5 py-1.5 rounded-lg flex items-center gap-1 shadow transition">
+            <span>📋</span> Wydaj w teren i Generuj Kartę
           </button>
-          <button onclick="deleteSelectedItems()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs px-3 py-1.5 rounded-lg flex items-center gap-1 shadow transition">
-            <span>🗑️</span> Usuń
+          <button onclick="deleteSelectedItems()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg flex items-center gap-1 shadow transition">
+            <span>🗑️</span>
           </button>
         </div>
       </div>
@@ -197,7 +198,28 @@
       <div id="inventoryList" class="space-y-2"></div>
     </section>
 
-    <!-- WIDOK 2: PRZYJĘTE FAKTURY / DOSTAWY (ZE ZDJĘCIAMI POD PRODUKTAMI I OSOBĄ PRZYJMUJĄCĄ) -->
+    <!-- WIDOK 2: REALIZACJE / EVENTY -->
+    <section id="viewEvents" class="hidden space-y-3">
+      <div class="bg-gradient-to-r from-slate-800 to-indigo-950/60 border border-indigo-700/50 rounded-2xl p-3.5 shadow-md flex flex-wrap items-center justify-between gap-2">
+        <div>
+          <h3 class="font-bold text-xs text-white flex items-center gap-1.5">
+            <span>📋</span> Wydania w Teren i Rozliczenia Zwrotów
+          </h3>
+          <p class="text-[11px] text-slate-300 mt-0.5">Wybierz pozycje z magazynu, pobierz Kartę Wydania, a po powrocie zrób zdjęcie zwrotów</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="openCreatorFromEventsTab()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs px-3 py-2 rounded-xl shadow transition active:scale-95 flex items-center gap-1 whitespace-nowrap">
+            <span>➕</span> Utwórz Kartę Wydania
+          </button>
+          <button onclick="triggerDispatchUpload()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold text-xs px-2.5 py-2 rounded-xl shadow transition active:scale-95 flex items-center gap-1 whitespace-nowrap" title="Skanuj papierową kartę wydania">
+            <span>📸</span> Zeskanuj Kartę
+          </button>
+        </div>
+      </div>
+      <div id="eventsList" class="space-y-3"></div>
+    </section>
+
+    <!-- WIDOK 3: PRZYJĘTE FAKTURY / DOSTAWY -->
     <section id="viewDeliveries" class="hidden space-y-3">
       <div class="flex items-center justify-between">
         <div>
@@ -211,7 +233,7 @@
       <div id="deliveriesList" class="space-y-3.5"></div>
     </section>
 
-    <!-- WIDOK 3: KAUCJE I OPAKOWANIA ZWROTNE (NOWA KARTA) -->
+    <!-- WIDOK 4: KAUCJE I OPAKOWANIA ZWROTNE -->
     <section id="viewDeposits" class="hidden space-y-3.5">
       <div class="bg-gradient-to-r from-slate-800 to-cyan-950/60 border border-cyan-700/50 rounded-2xl p-3.5 shadow-md space-y-3">
         <div class="flex items-center justify-between">
@@ -226,7 +248,6 @@
           </button>
         </div>
 
-        <!-- Podsumowanie podziału kaucji -->
         <div class="grid grid-cols-3 gap-2 pt-1">
           <div class="bg-slate-900/90 border border-slate-700/80 p-2 rounded-xl text-center">
             <span class="text-[9px] text-slate-400 block">PET / Puszka (0,50 zł)</span>
@@ -246,7 +267,6 @@
         </div>
       </div>
 
-      <!-- Szybkie kafelki dodawania standardowych kaucji -->
       <div class="flex gap-1.5 overflow-x-auto pb-1 text-[11px]">
         <button onclick="quickAddPresetDeposit('Kaucja PET / Puszka 0,50 zł', 'PET_CAN_050', 0.50)" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-cyan-300 px-2.5 py-1.5 rounded-xl whitespace-nowrap font-medium">
           ⚡ + PET/Puszka (0,50 zł)
@@ -265,22 +285,6 @@
       <div id="depositsList" class="space-y-2.5"></div>
     </section>
 
-    <!-- WIDOK 4: REALIZACJE / EVENTY -->
-    <section id="viewEvents" class="hidden space-y-3">
-      <div class="bg-gradient-to-r from-slate-800 to-indigo-950/60 border border-indigo-700/50 rounded-2xl p-3.5 shadow-md flex items-center justify-between gap-2">
-        <div>
-          <h3 class="font-bold text-xs text-white flex items-center gap-1.5">
-            <span>📋</span> Wydania i Zwroty Napojów / Alkoholu
-          </h3>
-          <p class="text-[11px] text-slate-300 mt-0.5">Skanuj arkusze wydań, konsumpcji i rozliczaj straty</p>
-        </div>
-        <button onclick="triggerDispatchUpload()" class="bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-black text-xs px-3 py-2 rounded-xl shadow transition active:scale-95 flex items-center gap-1.5 whitespace-nowrap">
-          <span>📸</span> Skanuj Wydanie
-        </button>
-      </div>
-      <div id="eventsList" class="space-y-3"></div>
-    </section>
-
     <!-- WIDOK 5: ALERTY CENOWE -->
     <section id="viewAlerts" class="hidden space-y-3">
       <div class="flex items-center justify-between">
@@ -294,6 +298,88 @@
     </section>
 
   </main>
+
+  <!-- MODAL: KREATOR WYDANIA W TEREN I KARTY WYDANIA (Z DODAWANIEM POZYCJI) -->
+  <div id="generateSheetModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-3 z-50 overflow-y-auto">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-4 space-y-3 shadow-2xl my-4 flex flex-col max-h-[94vh]">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+        <div>
+          <span class="text-[9px] uppercase font-bold px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-700/50">Wydanie w teren & Generator Karty</span>
+          <h3 class="text-sm font-bold text-white mt-1">Przygotuj Kartę Wydania na Realizację</h3>
+        </div>
+        <button onclick="closeGenerateSheetModal()" class="text-slate-400 hover:text-white p-1 text-lg font-bold">✕</button>
+      </div>
+
+      <div class="space-y-2 text-xs">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-0.5">Numer imprezy:</label>
+            <input type="text" id="genSheetNum" placeholder="#405" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 font-bold text-amber-400">
+          </div>
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-0.5">Data wydania:</label>
+            <input type="text" id="genSheetDate" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-slate-200">
+          </div>
+        </div>
+        <div>
+          <label class="text-[10px] text-slate-400 block mb-0.5">Nazwa imprezy / Klient:</label>
+          <input type="text" id="genSheetName" placeholder="Np. Bankiet Firmowy Skyworks" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 font-bold text-white">
+        </div>
+      </div>
+
+      <!-- Szybkie dodawanie kolejnych pozycji z magazynu bezpośrednio w oknie -->
+      <div class="bg-slate-900/90 border border-slate-700/80 p-2.5 rounded-xl space-y-1.5">
+        <label class="text-[10px] text-amber-300 font-bold block">➕ Dodaj pozycję z magazynu do tej karty:</label>
+        <div class="flex gap-1.5">
+          <select id="genSheetAddSelect" class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white">
+            <option value="">-- Wybierz towar z listy --</option>
+          </select>
+          <button type="button" onclick="addItemToSheetCreator()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded-lg text-xs whitespace-nowrap">
+            + Dodaj
+          </button>
+        </div>
+      </div>
+
+      <div id="genSheetItemsList" class="space-y-1.5 flex-1 overflow-y-auto pr-1 min-h-[120px] max-h-60"></div>
+
+      <div class="flex flex-wrap justify-end gap-2 pt-2 border-t border-slate-700">
+        <button onclick="closeGenerateSheetModal()" class="px-3 py-2 rounded-xl text-xs text-slate-400 hover:bg-slate-700">Anuluj</button>
+        <button onclick="finalizeSheetCreator(true)" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-xl text-xs shadow flex items-center gap-1.5">
+          <span>🚚</span> Wydaj w teren i Generuj Plik Karty
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PODGLĄD GOTOWEJ KARTY WYDANIA / ROZLICZENIA + POBIERANIE PLIKU (.XLS / DRUK) -->
+  <div id="sheetPreviewModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-2.5 z-50 overflow-y-auto">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-3xl w-full p-4 space-y-3 shadow-2xl my-4 flex flex-col max-h-[95vh]">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+        <div>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-700/50">Gotowy Dokument</span>
+          <h3 id="sheetPreviewModalTitle" class="text-sm font-bold text-white mt-0.5">Karta Wydania na Realizację</h3>
+        </div>
+        <button onclick="closeSheetPreviewModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
+      </div>
+
+      <!-- Wizualny podgląd arkusza Excel wewnątrz aplikacji -->
+      <div class="flex-1 overflow-auto bg-white p-2 rounded-xl border border-slate-600 text-black">
+        <div id="sheetPreviewContainer"></div>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-700">
+        <button onclick="closeSheetPreviewModal()" class="px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-slate-700">Zamknij</button>
+        <div class="flex flex-wrap gap-2">
+          <button onclick="downloadCurrentSheetAsExcel()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow">
+            <span>📥</span> Pobierz plik Karty (.xls / Excel)
+          </button>
+          <button onclick="triggerBrowserPrintSheet()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow">
+            <span>🖨️</span> Drukuj / Zapisz PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- MODAL: KROK 1 - WYBÓR 1 LUB 2 ZDJĘĆ DO FAKTURY -->
   <div id="invoiceCaptureModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
@@ -356,7 +442,6 @@
       </div>
 
       <div id="aiItemsContainer" class="hidden flex-1 overflow-y-auto space-y-3 pr-1">
-        <!-- NAGŁÓWEK DOSTAWY Z OSOBĄ PRZYJMUJĄCĄ (BEZ TERMINÓW I KONT) -->
         <div class="bg-slate-900 border border-indigo-800/60 p-3 rounded-xl space-y-2.5 text-xs">
           <div class="grid grid-cols-2 gap-2">
             <div>
@@ -381,13 +466,11 @@
           </div>
         </div>
 
-        <!-- SEKCJA 1: PRODUKTY SPOŻYWCZE / NAPOJE -->
         <div class="space-y-2">
           <p class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">📦 1. Towar i Napoje (wchodzą na Magazyn):</p>
           <div id="aiItemsList" class="space-y-2"></div>
         </div>
 
-        <!-- SEKCJA 2: KAUCJE I OPAKOWANIA ZWROTNE Z FAKTURY -->
         <div class="space-y-2 pt-2 border-t border-slate-700">
           <div class="flex items-center justify-between">
             <p class="text-[11px] font-bold text-cyan-400 uppercase tracking-wider">♻️ 2. Kaucje i Opakowania Zwrotne (wchodzą w Kaucje):</p>
@@ -446,11 +529,11 @@
     </form>
   </div>
 
-  <!-- MODAL: LIGHTBOX DO PODGLĄDU ZDJĘĆ FAKTUR (Z PRZEŁĄCZANIEM STRONA 1 / STRONA 2) -->
+  <!-- MODAL: LIGHTBOX DO PODGLĄDU ZDJĘĆ -->
   <div id="imagePreviewModal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="relative max-w-xl w-full bg-slate-900 border border-slate-700 rounded-2xl p-3 flex flex-col items-center shadow-2xl">
       <div class="w-full flex justify-between items-center border-b border-slate-800 pb-2 mb-2">
-        <h4 id="imagePreviewTitle" class="text-xs font-bold text-white truncate pr-2">Podgląd dokumentu</h4>
+        <h4 id="imagePreviewTitle" class="text-xs font-bold text-white truncate pr-2">Podgląd skanu</h4>
         <button onclick="closeImagePreviewModal()" class="text-slate-400 hover:text-white text-xl font-black p-1">✕</button>
       </div>
       <div id="imagePreviewTabs" class="w-full flex gap-2 mb-2 hidden"></div>
@@ -487,9 +570,9 @@
       <span class="text-[10px] font-bold">Magazyn</span>
     </button>
 
-    <button onclick="switchMainTab('deliveries')" id="navBtnDeliveries" class="flex flex-col items-center gap-1 text-slate-400 hover:text-indigo-400 py-1 px-2 transition active:scale-95">
-      <span class="text-lg">📑</span>
-      <span class="text-[10px] font-bold">Faktury</span>
+    <button onclick="switchMainTab('events')" id="navBtnEvents" class="flex flex-col items-center gap-1 text-slate-400 hover:text-amber-400 py-1 px-2 transition active:scale-95">
+      <span class="text-lg">🎉</span>
+      <span class="text-[10px] font-bold">Eventy</span>
     </button>
 
     <button onclick="openInvoiceUploadModal()" class="flex flex-col items-center justify-center -mt-5 bg-gradient-to-tr from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white w-14 h-14 rounded-full shadow-lg border-2 border-slate-900 active:scale-90 transition">
@@ -502,9 +585,9 @@
       <span class="text-[10px] font-bold">Kaucje</span>
     </button>
 
-    <button onclick="switchMainTab('events')" id="navBtnEvents" class="flex flex-col items-center gap-1 text-slate-400 hover:text-amber-400 py-1 px-2 transition active:scale-95">
-      <span class="text-lg">🎉</span>
-      <span class="text-[10px] font-bold">Eventy</span>
+    <button onclick="switchMainTab('deliveries')" id="navBtnDeliveries" class="flex flex-col items-center gap-1 text-slate-400 hover:text-indigo-400 py-1 px-2 transition active:scale-95">
+      <span class="text-lg">📑</span>
+      <span class="text-[10px] font-bold">Faktury</span>
     </button>
 
     <button onclick="openNewItemModal('')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 py-1 px-2 transition active:scale-95">
@@ -514,47 +597,7 @@
   </nav>
 
   <!-- SZABLON DRUKU DLA KART WYDANIA / ROZLICZENIA -->
-  <div id="printableSheet">
-    <div style="border: 2px solid #000; width: 100%; box-sizing: border-box; background: white; color: black; font-family: Arial, sans-serif;">
-      <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 11px;">
-        <tr>
-          <td rowspan="4" style="width: 20%; border: 2px solid #000; font-size: 15px; font-weight: bold; padding: 4px;">ROYAL CATERING</td>
-          <td colspan="2" style="background: #ffff00; font-weight: bold; border: 1px solid #000; padding: 4px;">DATA WYDANIA:</td>
-          <td rowspan="4" id="printSheetTitleHeader" style="width: 25%; background: #ffff00; font-size: 13px; font-weight: 900; border: 2px solid #000; padding: 5px;">WYDANIE NAPOJÓW<br>I ALKOHOLU<br>NA REALIZACJĘ</td>
-          <td colspan="2" style="background: #ffff00; font-weight: bold; border: 1px solid #000; padding: 4px;">DATA ZWROTU:</td>
-        </tr>
-        <tr>
-          <td colspan="2" id="printHeaderDate" style="border: 1px solid #000; font-weight: bold; padding: 4px;">-</td>
-          <td colspan="2" id="printHeaderReturnDate" style="border: 1px solid #000; padding: 4px; font-weight: bold;">-</td>
-        </tr>
-        <tr>
-          <td colspan="2" style="background: #ffff00; font-weight: bold; border: 1px solid #000; padding: 4px;">IMPREZA, #NUMER:</td>
-          <td colspan="2" style="border: 1px solid #000; padding: 4px;">&nbsp;</td>
-        </tr>
-        <tr>
-          <td colspan="2" id="printHeaderEvent" style="border: 1px solid #000; font-weight: bold; padding: 4px;">-</td>
-          <td colspan="2" style="border: 1px solid #000; padding: 4px;">&nbsp;</td>
-        </tr>
-      </table>
-      <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
-        <thead>
-          <tr style="background: #ffff00; font-weight: bold; text-align: center;">
-            <th style="border: 1px solid #000; width: 4%; padding: 4px;">Nr</th>
-            <th style="border: 1px solid #000; width: 36%; padding: 4px; text-align: left;">NAZWA</th>
-            <th style="border: 1px solid #000; width: 6%; padding: 4px;">Jedn.</th>
-            <th style="border: 1px solid #000; width: 8%; padding: 4px;">Wydane</th>
-            <th style="border: 1px solid #000; width: 9%; padding: 4px;">Podpis Magazyn</th>
-            <th style="border: 1px solid #000; width: 9%; background: #d9ead3; padding: 4px;">Sprawdzenie</th>
-            <th style="border: 1px solid #000; width: 9%; background: #d9ead3; padding: 4px;">Konsumpcja</th>
-            <th style="border: 1px solid #000; width: 7%; background: #d9ead3; padding: 4px;">Zwrot</th>
-            <th style="border: 1px solid #000; width: 6%; background: #d9ead3; padding: 4px;">Podpis</th>
-            <th style="border: 1px solid #000; width: 6%; padding: 4px;">Odbiór</th>
-          </tr>
-        </thead>
-        <tbody id="printSheetTableBody"></tbody>
-      </table>
-    </div>
-  </div>
+  <div id="printableSheet"></div>
 
   <!-- OBSZAR DRUKU DLA KODÓW QR -->
   <div id="printArea">
@@ -563,29 +606,6 @@
       <p id="printItemCategory" style="font-size: 11px; margin: 0 0 10px 0; color: #555; text-transform: uppercase;"></p>
       <div id="printQRCode" style="display: flex; justify-content: center; margin: 10px 0;"></div>
       <p id="printItemBarcode" style="font-size: 14px; font-family: monospace; font-weight: bold; margin: 5px 0 0 0; color: black;"></p>
-    </div>
-  </div>
-
-  <!-- MODAL: GENEROWANIE KARTY WYDANIA Z ZAZNACZONYCH POZYCJI -->
-  <div id="generateSheetModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-3 z-50 overflow-y-auto">
-    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-4 space-y-3.5 shadow-2xl my-4 flex flex-col">
-      <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-        <h3 class="text-sm font-bold text-white flex items-center gap-1.5"><span>📋</span> Karta Wydania na Realizację</h3>
-        <button onclick="closeGenerateSheetModal()" class="text-slate-400 hover:text-white p-1">✕</button>
-      </div>
-      <div class="space-y-2.5 text-xs">
-        <div class="grid grid-cols-2 gap-2">
-          <div><label class="text-[10px] text-slate-400 block mb-0.5">Numer imprezy:</label><input type="text" id="genSheetNum" placeholder="#405" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 font-bold text-amber-400"></div>
-          <div><label class="text-[10px] text-slate-400 block mb-0.5">Data wydania:</label><input type="text" id="genSheetDate" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-slate-200"></div>
-        </div>
-        <div><label class="text-[10px] text-slate-400 block mb-0.5">Nazwa imprezy / Klient:</label><input type="text" id="genSheetName" placeholder="Bankiet Firmowy Skyworks" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 font-bold text-white"></div>
-      </div>
-      <div id="genSheetItemsList" class="space-y-1.5 max-h-56 overflow-y-auto pr-1"></div>
-      <div class="flex flex-wrap justify-end gap-2 pt-2 border-t border-slate-700">
-        <button onclick="closeGenerateSheetModal()" class="px-3 py-1.5 rounded-xl text-xs text-slate-400 hover:bg-slate-700">Anuluj</button>
-        <button onclick="printGeneratedSheet(false)" class="bg-slate-700 hover:bg-slate-600 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow">🖨️ Tylko Drukuj</button>
-        <button onclick="printGeneratedSheet(true)" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-3.5 py-1.5 rounded-xl text-xs shadow">🚚 Wydaj w teren + Drukuj</button>
-      </div>
     </div>
   </div>
 
@@ -649,15 +669,16 @@
           <button onclick="adjustStepQty(-1)" class="bg-slate-700 hover:bg-slate-600 w-10 h-10 rounded-xl font-bold text-lg">-</button>
           <input type="number" id="modalStepQty" value="1" min="1" class="w-16 text-center bg-slate-900 border border-slate-700 rounded-xl py-2 font-bold text-base text-white">
           <button onclick="adjustStepQty(1)" class="bg-slate-700 hover:bg-slate-600 w-10 h-10 rounded-xl font-bold text-lg">+</button>
-          <button onclick="setStepQty(5)" class="bg-slate-700/60 hover:bg-slate-700 px-3 py-2 rounded-xl text-xs">+5</button>
-          <button onclick="setStepQty(10)" class="bg-slate-700/60 hover:bg-slate-700 px-3 py-2 rounded-xl text-xs">+10</button>
+          <button onclick="setStepQty(6)" class="bg-slate-700/60 hover:bg-slate-700 px-3 py-2 rounded-xl text-xs">6</button>
+          <button onclick="setStepQty(12)" class="bg-slate-700/60 hover:bg-slate-700 px-3 py-2 rounded-xl text-xs">12</button>
         </div>
       </div>
       <div class="grid grid-cols-2 gap-2 pt-1">
         <button onclick="executeStockAction('ADD')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs shadow">📥 Przyjmij (+)</button>
         <button onclick="executeStockAction('REMOVE')" class="bg-rose-600 hover:bg-rose-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs shadow">📤 Wydaj (-)</button>
-        <button onclick="executeStockAction('TO_FIELD')" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold py-2.5 px-3 rounded-xl text-xs shadow">🚚 Wydaj w teren</button>
-        <button onclick="executeStockAction('FROM_FIELD')" class="bg-sky-600 hover:bg-sky-500 text-white font-bold py-2.5 px-3 rounded-xl text-xs shadow">🔄 Zwrot z terenu</button>
+        <button onclick="executeStockAction('TO_FIELD')" class="col-span-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-2.5 px-3 rounded-xl text-xs shadow flex items-center justify-center gap-1.5">
+          <span>🚚</span> Wydaj w teren (Generuj Kartę Wydania)
+        </button>
       </div>
       <div class="pt-2 border-t border-slate-700 space-y-1.5">
         <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Ostatnie operacje tego towaru:</span>
@@ -674,7 +695,7 @@
     </div>
   </div>
 
-  <!-- MODAL: KARTA WYDANIA EVENTU (WYJŚCIE) -->
+  <!-- MODAL: SKAN KARTY WYDANIA EVENTU (WYJŚCIE ZE ZDJĘCIA KARTY) -->
   <div id="eventDispatchModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 shadow-2xl my-4 max-h-[94vh] flex flex-col">
       <div class="flex justify-between items-start border-b border-slate-700 pb-2.5">
@@ -705,30 +726,32 @@
     </div>
   </div>
 
-  <!-- MODAL: ROZLICZENIE POWROTU / ZWROTU -->
+  <!-- MODAL: ROZLICZENIE POWROTU / ZWROTU (ZDJĘCIE PRODUKTÓW LUB RĘCZNIE) -->
   <div id="eventReturnModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 shadow-2xl my-4 max-h-[94vh] flex flex-col">
       <div class="flex justify-between items-start border-b border-slate-700 pb-2.5">
         <div>
-          <span class="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-700/50">Rozliczenie Powrotu</span>
+          <span id="evReturnModeBadge" class="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-700/50">Rozliczenie Powrotu z Eventu</span>
           <h3 id="evReturnModalTitle" class="text-sm font-bold text-white mt-1">Rozliczenie Realizacji</h3>
         </div>
         <button onclick="closeEventReturnModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
       </div>
       <div id="evReturnLoading" class="py-12 flex flex-col items-center justify-center space-y-3">
         <div class="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-        <p class="text-sm text-slate-200 font-medium">Odczytywanie wpisów ze zwrotu...</p>
+        <p id="evReturnLoadingText" class="text-sm text-slate-200 font-medium">Model Gemini liczy zwrócone produkty na zdjęciu...</p>
+        <p class="text-xs text-slate-400">Dopasowywanie rozpoznanych butelek do listy wydania</p>
       </div>
       <div id="evReturnContent" class="hidden flex-1 overflow-y-auto space-y-3 pr-1">
         <div class="bg-slate-900 border border-slate-700 p-2.5 rounded-xl flex justify-between text-xs items-center">
           <div><span class="text-[10px] text-slate-400 block">Realizacja:</span><strong id="evReturnEventLabel" class="text-white text-xs">---</strong></div>
           <div><span class="text-[10px] text-slate-400 block">Data zwrotu:</span><input type="text" id="evReturnDateInput" class="bg-slate-800 border border-slate-700 rounded px-2 py-0.5 text-xs text-emerald-400 font-mono"></div>
         </div>
+        <p class="text-[11px] text-slate-300">Wpisz lub zweryfikuj policzoną ilość zwrotu (Konsumpcja wylicza się automatycznie):</p>
         <div id="evReturnItemsList" class="space-y-2.5"></div>
       </div>
       <div id="evReturnActions" class="hidden pt-2.5 border-t border-slate-700 flex justify-end gap-2">
         <button onclick="closeEventReturnModal()" class="px-4 py-2 rounded-xl text-xs text-slate-400 hover:bg-slate-700">Anuluj</button>
-        <button onclick="confirmAndApplyEventReturn()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-5 py-2.5 rounded-xl text-xs shadow">✓ Zakończ i Rozlicz</button>
+        <button onclick="confirmAndApplyEventReturn()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-5 py-2.5 rounded-xl text-xs shadow">✓ Zatwierdź Zwrot na Magazyn i Generuj Kartę</button>
       </div>
     </div>
   </div>
@@ -854,6 +877,10 @@
     let currentActiveReturnEventId = null;
     let currentShelfCountItems = [];
 
+    // Przechowywanie pozycji w Kreatorze Karty Wydania: Map(itemId -> qty)
+    let sheetCreatorMap = new Map();
+    let currentPreviewSheetData = null;
+
     let invoicePhoto1 = null;
     let invoicePhoto2 = null;
 
@@ -932,7 +959,6 @@
       return 1;
     }
 
-    // Parsowanie podpiętych zdjęć (obsługuje 1 lub 2 zdjęcia w JSON oraz pojedynczy string base64)
     function parseDeliveryImages(imageUrlField) {
       if (!imageUrlField) return [];
       if (Array.isArray(imageUrlField)) return imageUrlField.filter(Boolean);
@@ -1074,7 +1100,6 @@
       renderDeliveries();
     }
 
-    // --- KOPIOWANIE LISTY BRAKÓW NA WHATSAPP ---
     function copyLowStockWhatsApp() {
       const lowItems = inventory.filter(i => (Number(i.qty) || 0) <= (Number(i.minQty) || 0));
       if (lowItems.length === 0) {
@@ -1135,11 +1160,11 @@
           <div 
             oncontextmenu="handleItemContextMenu(event, '${item.id}')"
             onclick="handleItemCardClick(event, '${item.id}')" 
-            class="bg-slate-800 hover:bg-slate-750 border ${isLow ? 'border-rose-500/60' : 'border-slate-700/80'} rounded-xl p-3 flex items-center justify-between cursor-pointer transition shadow-sm active:scale-[0.99] relative"
+            class="bg-slate-800 hover:bg-slate-750 border ${isChecked ? 'border-amber-400 bg-slate-800/95' : (isLow ? 'border-rose-500/60' : 'border-slate-700/80')} rounded-xl p-3 flex items-center justify-between cursor-pointer transition shadow-sm active:scale-[0.99] relative"
           >
             ${isSelectMode ? `
               <div class="pr-2.5 flex items-center" onclick="event.stopPropagation()">
-                <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSelectItem('${item.id}', this.checked)" class="w-4 h-4 rounded text-indigo-600 bg-slate-900 border-slate-600 cursor-pointer">
+                <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSelectItem('${item.id}', this.checked)" class="w-4 h-4 rounded text-amber-500 bg-slate-900 border-slate-600 cursor-pointer">
               </div>
             ` : ''}
 
@@ -1175,7 +1200,303 @@
       }).join('');
     }
 
-    // --- RENDEROWANIE ZAKŁADKI KAUCJE I OPAKOWANIA ZWROTNE ---
+    // --- KREATOR WYDANIA W TEREN I GENEROWANIA PLIKU KARTY WYDANIA ---
+    function openCreatorFromEventsTab() {
+      sheetCreatorMap.clear();
+      openGenerateSheetModal(true);
+    }
+
+    function openGenerateSheetModal(allowEmpty = false) {
+      if (selectedItemIds.size > 0) {
+        selectedItemIds.forEach(id => {
+          if (!sheetCreatorMap.has(id)) {
+            const it = inventory.find(x => String(x.id) === String(id));
+            sheetCreatorMap.set(String(id), Math.min(it?.qty || 12, 12) || 1);
+          }
+        });
+      }
+
+      if (!allowEmpty && sheetCreatorMap.size === 0) {
+        return alert("Wybierz pozycje z listy lub dodaj je w oknie kreatora.");
+      }
+
+      document.getElementById('genSheetNum').value = '#' + Math.floor(100 + Math.random() * 899);
+      document.getElementById('genSheetDate').value = new Date().toLocaleDateString('pl-PL');
+      document.getElementById('genSheetName').value = '';
+
+      populateSheetCreatorDropdown();
+      renderSheetCreatorItems();
+
+      document.getElementById('generateSheetModal').classList.remove('hidden');
+      document.getElementById('generateSheetModal').classList.add('flex');
+    }
+
+    function populateSheetCreatorDropdown() {
+      const sel = document.getElementById('genSheetAddSelect');
+      if (!sel) return;
+      sel.innerHTML = `<option value="">-- Wybierz towar z magazynu (${inventory.length}) --</option>` +
+        inventory.map(it => `<option value="${it.id}">${it.name} (Stan: ${it.qty} ${it.unit})</option>`).join('');
+    }
+
+    function addItemToSheetCreator() {
+      const sel = document.getElementById('genSheetAddSelect');
+      const id = sel.value;
+      if (!id) return;
+      const it = inventory.find(x => String(x.id) === String(id));
+      if (!it) return;
+
+      const currentQty = sheetCreatorMap.get(String(id)) || 0;
+      sheetCreatorMap.set(String(id), currentQty + (Math.min(it.qty, 6) || 1));
+      sel.value = '';
+      renderSheetCreatorItems();
+      triggerScanFeedback();
+    }
+
+    function removeSheetCreatorItem(id) {
+      sheetCreatorMap.delete(String(id));
+      renderSheetCreatorItems();
+    }
+
+    function updateSheetCreatorQty(id, val) {
+      const q = Math.max(1, parseInt(val, 10) || 1);
+      sheetCreatorMap.set(String(id), q);
+    }
+
+    function renderSheetCreatorItems() {
+      const list = document.getElementById('genSheetItemsList');
+      if (sheetCreatorMap.size === 0) {
+        list.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs">Lista jest pusta. Wybierz towar z rozwijanej listy powyżej i kliknij "+ Dodaj".</div>`;
+        return;
+      }
+
+      const entries = Array.from(sheetCreatorMap.entries());
+      list.innerHTML = entries.map(([id, qty]) => {
+        const it = inventory.find(x => String(x.id) === String(id));
+        if (!it) return '';
+        return `
+          <div class="bg-slate-900 border border-slate-700 rounded-xl p-2.5 flex items-center justify-between text-xs gap-2">
+            <div class="flex-1 truncate">
+              <span class="font-bold text-white block truncate">${it.name}</span>
+              <span class="text-[10px] text-slate-400">Dostępne na magazynie: <strong class="text-emerald-400">${it.qty} ${it.unit}</strong></span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <input type="number" value="${qty}" min="1" oninput="updateSheetCreatorQty('${it.id}', this.value)" class="w-16 bg-slate-800 border border-amber-500/70 rounded-lg p-1.5 text-center font-black text-amber-400 text-xs">
+              <span class="text-slate-400 text-[10px]">${it.unit}</span>
+              <button type="button" onclick="removeSheetCreatorItem('${it.id}')" class="text-rose-400 hover:text-rose-300 font-bold px-1.5 py-1">✕</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function closeGenerateSheetModal() {
+      document.getElementById('generateSheetModal').classList.add('hidden');
+      document.getElementById('generateSheetModal').classList.remove('flex');
+    }
+
+    async function finalizeSheetCreator(createEventInSystem = true) {
+      if (sheetCreatorMap.size === 0) return alert("Dodaj przynajmniej jedną pozycję do karty wydania.");
+
+      const evNum = document.getElementById('genSheetNum').value.trim() || '#EVENT';
+      const evDate = document.getElementById('genSheetDate').value.trim() || new Date().toLocaleDateString('pl-PL');
+      const evName = document.getElementById('genSheetName').value.trim() || 'Realizacja Cateringowa';
+
+      const eventItemsPayload = [];
+
+      for (const [id, qty] of sheetCreatorMap.entries()) {
+        const it = inventory.find(x => String(x.id) === String(id));
+        if (!it) continue;
+        eventItemsPayload.push({ name: it.name, dispatched: qty, unit: it.unit || 'szt.' });
+
+        if (createEventInSystem) {
+          it.qty = Math.max(0, it.qty - qty);
+          it.inField = (it.inField || 0) + qty;
+          recordStockLog(it.id, it.name, 'Event Wyjazd', -qty, `${evNum} ${evName}`);
+          if (isCloudOnline) {
+            try { await apiRequest(`/inventory?id=eq.${it.id}`, 'PATCH', { qty: it.qty, in_field: it.inField, updated_at: new Date() }); } catch (e) {}
+          }
+        }
+      }
+
+      let createdEventId = Date.now().toString();
+      if (createEventInSystem) {
+        const newEv = {
+          id: createdEventId,
+          event_number: evNum,
+          event_name: evName,
+          dispatch_date: evDate,
+          return_date: '',
+          status: 'W trakcie',
+          items_json: eventItemsPayload,
+          dispatch_image: '',
+          return_image: '',
+          created_at: new Date()
+        };
+        events.unshift(newEv);
+        safeSetLocal('magazyn_offline_items', inventory);
+        safeSetLocal('magazyn_offline_events', events);
+        if (isCloudOnline) { try { await apiRequest('/events', 'POST', newEv); } catch (e) {} }
+      }
+
+      sheetCreatorMap.clear();
+      closeGenerateSheetModal();
+      if (isSelectMode) toggleSelectMode();
+      renderInventory();
+      renderEvents();
+
+      // Od razu otwieramy wygenerowaną Kartę Wydania gotową do pobrania jako plik lub wydruku
+      openSheetPreviewModal({
+        eventNumber: evNum,
+        eventName: evName,
+        dispatchDate: evDate,
+        returnDate: '',
+        isReturn: false,
+        items: eventItemsPayload
+      });
+    }
+
+    // --- GENERATOR HTML TABELI ROYAL CATERING + POBIERANIE PLIKU (.XLS) + DRUK ---
+    function buildRoyalCateringSheetHTML(data) {
+      const titleText = data.isReturn
+        ? "ROZLICZENIE ZWROTU<br>I KONSUMPCJI<br>Z REALIZACJI"
+        : "WYDANIE NAPOJÓW<br>I ALKOHOLU<br>NA REALIZACJĘ";
+
+      const items = data.items || [];
+      let rowsHtml = items.map((it, idx) => `
+        <tr style="height: 24px; text-align: center;">
+          <td style="border: 1px solid #000; font-weight: bold;">${idx + 1}</td>
+          <td style="border: 1px solid #000; text-align: left; padding-left: 6px; font-weight: bold;">${it.name}</td>
+          <td style="border: 1px solid #000;">${it.unit || 'szt.'}</td>
+          <td style="border: 1px solid #000; font-weight: bold; font-size: 12px;">${it.dispatched !== undefined ? it.dispatched : ''}</td>
+          <td style="border: 1px solid #000;">&nbsp;</td>
+          <td style="border: 1px solid #000; background: #d9ead3;">&nbsp;</td>
+          <td style="border: 1px solid #000; background: #d9ead3; font-weight: bold;">${data.isReturn && it.consumed !== undefined ? it.consumed : ''}</td>
+          <td style="border: 1px solid #000; background: #d9ead3; font-weight: bold;">${data.isReturn && it.returned !== undefined ? it.returned : ''}</td>
+          <td style="border: 1px solid #000; background: #d9ead3;">&nbsp;</td>
+          <td style="border: 1px solid #000;">&nbsp;</td>
+        </tr>
+      `).join('');
+
+      const emptyRowsNeeded = Math.max(0, 15 - items.length);
+      for (let i = 0; i < emptyRowsNeeded; i++) {
+        rowsHtml += `
+          <tr style="height: 24px; text-align: center;">
+            <td style="border: 1px solid #000;">${items.length + i + 1}</td>
+            <td style="border: 1px solid #000;">&nbsp;</td>
+            <td style="border: 1px solid #000;">&nbsp;</td>
+            <td style="border: 1px solid #000;">&nbsp;</td>
+            <td style="border: 1px solid #000;">&nbsp;</td>
+            <td style="border: 1px solid #000; background: #d9ead3;">&nbsp;</td>
+            <td style="border: 1px solid #000; background: #d9ead3;">&nbsp;</td>
+            <td style="border: 1px solid #000; background: #d9ead3;">&nbsp;</td>
+            <td style="border: 1px solid #000; background: #d9ead3;">&nbsp;</td>
+            <td style="border: 1px solid #000;">&nbsp;</td>
+          </tr>
+        `;
+      }
+
+      return `
+        <div style="border: 2px solid #000; width: 100%; box-sizing: border-box; background: white; color: black; font-family: Arial, sans-serif;">
+          <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 11px;">
+            <tr>
+              <td rowspan="4" style="width: 20%; border: 2px solid #000; font-size: 15px; font-weight: bold; padding: 4px;">ROYAL CATERING</td>
+              <td colspan="2" style="background: #ffff00; font-weight: bold; border: 1px solid #000; padding: 4px;">DATA WYDANIA:</td>
+              <td rowspan="4" style="width: 25%; background: #ffff00; font-size: 13px; font-weight: 900; border: 2px solid #000; padding: 5px;">${titleText}</td>
+              <td colspan="2" style="background: #ffff00; font-weight: bold; border: 1px solid #000; padding: 4px;">DATA ZWROTU:</td>
+            </tr>
+            <tr>
+              <td colspan="2" style="border: 1px solid #000; font-weight: bold; padding: 4px;">${data.dispatchDate || '-'}</td>
+              <td colspan="2" style="border: 1px solid #000; padding: 4px; font-weight: bold;">${data.returnDate || '-'}</td>
+            </tr>
+            <tr>
+              <td colspan="2" style="background: #ffff00; font-weight: bold; border: 1px solid #000; padding: 4px;">IMPREZA, #NUMER:</td>
+              <td colspan="2" style="border: 1px solid #000; padding: 4px;">&nbsp;</td>
+            </tr>
+            <tr>
+              <td colspan="2" style="border: 1px solid #000; font-weight: bold; padding: 4px;">${data.eventNumber || ''} ${data.eventName || ''}</td>
+              <td colspan="2" style="border: 1px solid #000; padding: 4px;">&nbsp;</td>
+            </tr>
+          </table>
+          <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
+            <thead>
+              <tr style="background: #ffff00; font-weight: bold; text-align: center;">
+                <th style="border: 1px solid #000; width: 4%; padding: 4px;">Nr</th>
+                <th style="border: 1px solid #000; width: 36%; padding: 4px; text-align: left;">NAZWA</th>
+                <th style="border: 1px solid #000; width: 6%; padding: 4px;">Jedn.</th>
+                <th style="border: 1px solid #000; width: 8%; padding: 4px;">Wydane</th>
+                <th style="border: 1px solid #000; width: 9%; padding: 4px;">Podpis Magazyn</th>
+                <th style="border: 1px solid #000; width: 9%; background: #d9ead3; padding: 4px;">Sprawdzenie</th>
+                <th style="border: 1px solid #000; width: 9%; background: #d9ead3; padding: 4px;">Konsumpcja</th>
+                <th style="border: 1px solid #000; width: 7%; background: #d9ead3; padding: 4px;">Zwrot</th>
+                <th style="border: 1px solid #000; width: 6%; background: #d9ead3; padding: 4px;">Podpis</th>
+                <th style="border: 1px solid #000; width: 6%; padding: 4px;">Odbiór</th>
+              </tr>
+            </thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function openSheetPreviewModal(sheetData) {
+      currentPreviewSheetData = sheetData;
+      const html = buildRoyalCateringSheetHTML(sheetData);
+      document.getElementById('sheetPreviewModalTitle').innerText = `${sheetData.isReturn ? 'Karta Rozliczenia' : 'Karta Wydania'}: ${sheetData.eventNumber} ${sheetData.eventName}`;
+      document.getElementById('sheetPreviewContainer').innerHTML = html;
+      document.getElementById('printableSheet').innerHTML = html;
+
+      const modal = document.getElementById('sheetPreviewModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeSheetPreviewModal() {
+      const modal = document.getElementById('sheetPreviewModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function triggerBrowserPrintSheet() {
+      document.body.classList.remove('print-mode-qr');
+      document.body.classList.add('print-mode-sheet');
+      window.print();
+    }
+
+    function downloadCurrentSheetAsExcel() {
+      if (!currentPreviewSheetData) return;
+      const htmlContent = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+        <head><meta charset="UTF-8"><title>Karta Wydania</title></head>
+        <body>${buildRoyalCateringSheetHTML(currentPreviewSheetData)}</body>
+        </html>
+      `;
+      const blob = new Blob(['\uFEFF' + htmlContent], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const cleanName = `${currentPreviewSheetData.isReturn ? 'Rozliczenie' : 'Karta_Wydania'}_${currentPreviewSheetData.eventNumber}_${currentPreviewSheetData.eventName}`.replace(/[^a-zA-Z0-9_-]/g, '_');
+      link.href = url;
+      link.download = `${cleanName}.xls`;
+      link.click();
+      triggerScanFeedback();
+    }
+
+    function printEventSheet(eventId, type) {
+      const ev = events.find(e => String(e.id) === String(eventId));
+      if (!ev) return;
+      let items = [];
+      try { items = typeof ev.items_json === 'string' ? JSON.parse(ev.items_json) : (ev.items_json || []); } catch (e) {}
+
+      openSheetPreviewModal({
+        eventNumber: ev.event_number || '#EVENT',
+        eventName: ev.event_name || '',
+        dispatchDate: ev.dispatch_date || '-',
+        returnDate: ev.return_date || '-',
+        isReturn: (type === 'RETURN'),
+        items: items
+      });
+    }
+
+    // --- RENDEROWANIE KAUCJI ---
     function renderDeposits() {
       const list = document.getElementById('depositsList');
       if (!list) return;
@@ -1218,7 +1539,7 @@
       if (elCratesV) elCratesV.innerText = `${cratesVal.toFixed(2)} zł`;
 
       if (deposits.length === 0) {
-        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak zarejestrowanych kaucji. Zeskanuj fakturę z kaucjami lub użyj szybkich przycisków powyżej.</div>`;
+        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak zarejestrowanych kaucji.</div>`;
         return;
       }
 
@@ -1239,7 +1560,7 @@
               <div>
                 <span class="text-[9px] font-bold px-2 py-0.5 rounded border ${cInfo.cls}">${cInfo.label}</span>
                 <h4 class="font-bold text-xs text-white mt-1.5">${dep.name}</h4>
-                <p class="text-[11px] text-slate-400 mt-0.5">Stawka kaucji: <strong class="text-cyan-400">${Number(dep.unit_price).toFixed(2)} zł / szt.</strong> • Wartość razem: <strong class="text-white">${val} zł</strong></p>
+                <p class="text-[11px] text-slate-400 mt-0.5">Stawka: <strong class="text-cyan-400">${Number(dep.unit_price).toFixed(2)} zł / szt.</strong> • Wartość: <strong class="text-white">${val} zł</strong></p>
               </div>
               <div class="bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-xl text-center min-w-[68px]">
                 <span class="text-[9px] text-slate-400 block">Na stanie</span>
@@ -1273,10 +1594,7 @@
       safeSetLocal('magazyn_offline_deposits', deposits);
       renderDeposits();
       triggerScanFeedback();
-
-      if (isCloudOnline) {
-        try { await apiRequest(`/deposits?id=eq.${dep.id}`, 'PATCH', { qty: dep.qty, updated_at: new Date() }); } catch (e) {}
-      }
+      if (isCloudOnline) { try { await apiRequest(`/deposits?id=eq.${dep.id}`, 'PATCH', { qty: dep.qty, updated_at: new Date() }); } catch (e) {} }
     }
 
     async function returnDepositToDriver(depId) {
@@ -1291,10 +1609,7 @@
       safeSetLocal('magazyn_offline_deposits', deposits);
       renderDeposits();
       triggerScanFeedback();
-
-      if (isCloudOnline) {
-        try { await apiRequest(`/deposits?id=eq.${dep.id}`, 'PATCH', { qty: dep.qty, updated_at: new Date() }); } catch (e) {}
-      }
+      if (isCloudOnline) { try { await apiRequest(`/deposits?id=eq.${dep.id}`, 'PATCH', { qty: dep.qty, updated_at: new Date() }); } catch (e) {} }
     }
 
     async function quickAddPresetDeposit(name, category, price) {
@@ -1312,9 +1627,7 @@
       let existing = findBestDepositMatch(name, unitPrice);
       if (existing) {
         existing.qty = Math.max(0, (Number(existing.qty) || 0) + qtyDelta);
-        if (isCloudOnline) {
-          try { await apiRequest(`/deposits?id=eq.${existing.id}`, 'PATCH', { qty: existing.qty, updated_at: new Date() }); } catch (e) {}
-        }
+        if (isCloudOnline) { try { await apiRequest(`/deposits?id=eq.${existing.id}`, 'PATCH', { qty: existing.qty, updated_at: new Date() }); } catch (e) {} }
       } else {
         const newDep = {
           id: Date.now().toString() + '_' + Math.floor(Math.random() * 1000),
@@ -1325,9 +1638,7 @@
           updated_at: new Date()
         };
         deposits.unshift(newDep);
-        if (isCloudOnline) {
-          try { await apiRequest('/deposits', 'POST', newDep); } catch (e) {}
-        }
+        if (isCloudOnline) { try { await apiRequest('/deposits', 'POST', newDep); } catch (e) {} }
       }
       safeSetLocal('magazyn_offline_deposits', deposits);
     }
@@ -1378,20 +1689,13 @@
       if (id) {
         const dep = deposits.find(d => String(d.id) === String(id));
         if (dep) {
-          dep.name = name;
-          dep.category = category;
-          dep.unit_price = price;
-          dep.qty = qty;
-          if (isCloudOnline) {
-            try { await apiRequest(`/deposits?id=eq.${dep.id}`, 'PATCH', { name, category, unit_price: price, qty, updated_at: new Date() }); } catch (err) {}
-          }
+          dep.name = name; dep.category = category; dep.unit_price = price; dep.qty = qty;
+          if (isCloudOnline) { try { await apiRequest(`/deposits?id=eq.${dep.id}`, 'PATCH', { name, category, unit_price: price, qty, updated_at: new Date() }); } catch (err) {} }
         }
       } else {
         const newDep = { id: Date.now().toString(), name, category, unit_price: price, qty, updated_at: new Date() };
         deposits.unshift(newDep);
-        if (isCloudOnline) {
-          try { await apiRequest('/deposits', 'POST', newDep); } catch (err) {}
-        }
+        if (isCloudOnline) { try { await apiRequest('/deposits', 'POST', newDep); } catch (err) {} }
       }
 
       safeSetLocal('magazyn_offline_deposits', deposits);
@@ -1405,12 +1709,10 @@
       deposits = deposits.filter(d => String(d.id) !== String(depId));
       safeSetLocal('magazyn_offline_deposits', deposits);
       renderDeposits();
-      if (isCloudOnline) {
-        try { await apiRequest(`/deposits?id=eq.${depId}`, 'DELETE'); } catch (e) {}
-      }
+      if (isCloudOnline) { try { await apiRequest(`/deposits?id=eq.${depId}`, 'DELETE'); } catch (e) {} }
     }
 
-    // --- RENDEROWANIE PRZYJĘTYCH FAKTUR (Z PODPIĘTYMI ZDJĘCIAMI I OSOBĄ PRZYJMUJĄCĄ) ---
+    // --- RENDEROWANIE PRZYJĘTYCH FAKTUR ---
     function renderDeliveries() {
       const list = document.getElementById('deliveriesList');
       if (!list) return;
@@ -1450,7 +1752,6 @@
               </div>
             </div>
 
-            <!-- SPIS PRZETWORZONYCH PRODUKTÓW -->
             <div class="bg-slate-900/90 rounded-xl p-2.5 border border-slate-800 space-y-1">
               <span class="text-[10px] text-emerald-400 uppercase font-bold tracking-wider block">📦 Przyjęte produkty na stan (${items.length}):</span>
               <div class="space-y-1 max-h-44 overflow-y-auto pr-1">
@@ -1466,7 +1767,6 @@
               </div>
             </div>
 
-            <!-- SPIS KAUCJI Z TEJ FAKTURY (JEŚLI BYŁY) -->
             ${depItems.length > 0 ? `
               <div class="bg-cyan-950/30 rounded-xl p-2.5 border border-cyan-900/50 space-y-1">
                 <span class="text-[10px] text-cyan-300 uppercase font-bold tracking-wider block">♻️ Rozliczone kaucje i opakowania (${depItems.length}):</span>
@@ -1481,7 +1781,6 @@
               </div>
             ` : ''}
 
-            <!-- PODPIĘTE ZDJĘCIA FAKTURY BEZPOŚREDNIO POD SPISEM PRODUKTÓW -->
             ${photos.length > 0 ? `
               <div class="pt-1 border-t border-slate-700/80 space-y-1.5">
                 <span class="text-[10px] text-slate-400 font-bold block">📎 Podpięte zdjęcia faktury (${photos.length}) — kliknij, aby powiększyć:</span>
@@ -1508,13 +1807,10 @@
       safeSetLocal('magazyn_offline_deliveries', deliveries);
       renderDeliveries();
       triggerScanFeedback();
-
-      if (isCloudOnline) {
-        try { await apiRequest(`/deliveries?id=eq.${deliveryId}`, 'DELETE'); } catch (e) {}
-      }
+      if (isCloudOnline) { try { await apiRequest(`/deliveries?id=eq.${deliveryId}`, 'DELETE'); } catch (e) {} }
     }
 
-    // --- RENDEROWANIE EVENTÓW ---
+    // --- RENDEROWANIE EVENTÓW (Z OPCJĄ ZLICZANIA ZWROTU ZE ZDJĘCIA PRODUKTÓW) ---
     function renderEvents() {
       const list = document.getElementById('eventsList');
       if (!list) return;
@@ -1527,7 +1823,7 @@
       }
 
       if (events.length === 0) {
-        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak zarejestrowanych wydań na eventy.</div>`;
+        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak aktywnych wydań. Kliknij "➕ Utwórz Kartę Wydania" powyżej lub wybierz towary z Magazynu.</div>`;
         return;
       }
 
@@ -1537,28 +1833,30 @@
         try { items = typeof ev.items_json === 'string' ? JSON.parse(ev.items_json) : (ev.items_json || []); } catch (e) {}
 
         return `
-          <div class="bg-slate-800 border ${isPending ? 'border-amber-600/70' : 'border-slate-700/80'} rounded-2xl p-3.5 space-y-2.5 shadow-md">
+          <div class="bg-slate-800 border ${isPending ? 'border-amber-500/80' : 'border-slate-700/80'} rounded-2xl p-3.5 space-y-2.5 shadow-md">
             <div class="flex justify-between items-start gap-2 flex-wrap">
               <div>
                 <div class="flex items-center gap-2">
                   <span class="font-mono text-xs font-black text-amber-400">${ev.event_number || '#EVENT'}</span>
                   <span class="text-[9px] font-bold px-2 py-0.5 rounded ${isPending ? 'bg-amber-950 text-amber-300 border border-amber-700/50' : 'bg-emerald-950 text-emerald-300 border border-emerald-700/50'}">
-                    ${isPending ? '🚚 W TRAKCIE IMPREZY' : '✓ ROZLICZONA'}
+                    ${isPending ? '🚚 W TERENIE (TRWA)' : '✓ ROZLICZONA'}
                   </span>
                 </div>
                 <h4 class="font-bold text-sm text-white mt-1">${ev.event_name}</h4>
                 <p class="text-[10px] text-slate-400 mt-0.5">Wydano: ${ev.dispatch_date || '-'} ${ev.return_date ? `• Zwrot: ${ev.return_date}` : ''}</p>
               </div>
 
-              <div class="flex items-center gap-1.5">
-                <button onclick="openManualEventReturn('${ev.id}')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold text-xs px-2.5 py-1.5 rounded-xl shadow transition flex items-center gap-1">
-                  <span>✍️</span> ${isPending ? 'Rozlicz ręcznie' : 'Edytuj zwrot'}
+              <!-- PRZYCISKI ROZLICZANIA ZWROTU: ZDJĘCIE TOWARU / RĘCZNIE / SKAN KARTY -->
+              <div class="flex flex-wrap items-center gap-1.5">
+                <button onclick="triggerReturnProductsUpload('${ev.id}')" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs px-3 py-1.5 rounded-xl shadow transition active:scale-95 flex items-center gap-1">
+                  <span>🍾</span> Zdjęcie towaru (Zlicz zwrot)
                 </button>
-                ${isPending ? `
-                  <button onclick="triggerReturnUpload('${ev.id}')" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs px-3 py-1.5 rounded-xl shadow transition active:scale-95 flex items-center gap-1">
-                    <span>📸</span> Skanuj Zwrot
-                  </button>
-                ` : ''}
+                <button onclick="openManualEventReturn('${ev.id}')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold text-xs px-2.5 py-1.5 rounded-xl shadow transition flex items-center gap-1" title="Wpisz ilości zwrotu ręcznie">
+                  <span>✍️</span> Ręcznie
+                </button>
+                <button onclick="triggerReturnSheetUpload('${ev.id}')" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold text-xs px-2 py-1.5 rounded-xl shadow transition" title="Skanuj papierową kartę zwrotu">
+                  <span>📋</span>
+                </button>
               </div>
             </div>
 
@@ -1587,17 +1885,17 @@
 
             <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-700/80 text-xs">
               <div class="flex gap-2">
-                <button type="button" onclick="printEventSheet('${ev.id}', 'DISPATCH')" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-2.5 py-1.5 rounded-lg text-xs flex items-center gap-1 shadow">
-                  <span>🖨️</span> Karta Wydania
+                <button type="button" onclick="printEventSheet('${ev.id}', 'DISPATCH')" class="bg-amber-500/90 hover:bg-amber-400 text-slate-950 font-black px-2.5 py-1.5 rounded-lg text-xs flex items-center gap-1 shadow">
+                  <span>📥</span> Karta Wydania (Plik/Druk)
                 </button>
-                <button type="button" onclick="printEventSheet('${ev.id}', 'RETURN')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-2.5 py-1.5 rounded-lg text-xs flex items-center gap-1 shadow">
-                  <span>🖨️</span> Karta Rozliczenia
+                <button type="button" onclick="printEventSheet('${ev.id}', 'RETURN')" class="bg-emerald-500/90 hover:bg-emerald-400 text-slate-950 font-black px-2.5 py-1.5 rounded-lg text-xs flex items-center gap-1 shadow">
+                  <span>📥</span> Karta Rozliczenia
                 </button>
               </div>
 
               <div class="flex items-center gap-2">
-                ${ev.dispatch_image ? `<button type="button" onclick="openMediaPreview('${ev.id}', 'EVENT_DISPATCH', 0)" class="text-[11px] font-bold text-indigo-300 bg-slate-900 border border-indigo-700/50 px-2 py-1 rounded-lg">📸 Skan wydania</button>` : ''}
-                ${ev.return_image ? `<button type="button" onclick="openMediaPreview('${ev.id}', 'EVENT_RETURN', 0)" class="text-[11px] font-bold text-indigo-300 bg-slate-900 border border-indigo-700/50 px-2 py-1 rounded-lg">📸 Skan zwrotu</button>` : ''}
+                ${ev.dispatch_image ? `<button type="button" onclick="openMediaPreview('${ev.id}', 'EVENT_DISPATCH', 0)" class="text-[11px] font-bold text-indigo-300 bg-slate-900 border border-indigo-700/50 px-2 py-1 rounded-lg">📸 Zdjęcie wydania</button>` : ''}
+                ${ev.return_image ? `<button type="button" onclick="openMediaPreview('${ev.id}', 'EVENT_RETURN', 0)" class="text-[11px] font-bold text-emerald-300 bg-slate-900 border border-emerald-700/50 px-2 py-1 rounded-lg">🍾 Zdjęcie zwrotu</button>` : ''}
                 <button type="button" onclick="deleteEvent('${ev.id}')" class="text-rose-400 hover:underline text-[11px] ml-1">🗑️ Usuń</button>
               </div>
             </div>
@@ -1606,7 +1904,7 @@
       }).join('');
     }
 
-    // --- PODGLĄD ZDJĘĆ (LIGHTBOX Z PRZEŁĄCZNIKIEM STRONA 1 / STRONA 2) ---
+    // --- PODGLĄD ZDJĘĆ (LIGHTBOX) ---
     function openMediaPreview(itemId, type, photoIdx = 0) {
       let photos = [];
       let title = 'Podgląd dokumentu';
@@ -1618,14 +1916,14 @@
       } else if (type === 'EVENT_DISPATCH') {
         const ev = events.find(x => String(x.id) === String(itemId));
         if (ev?.dispatch_image) photos = [ev.dispatch_image];
-        title = `Karta Wydania: ${ev?.event_number || ''} - ${ev?.event_name || ''}`;
+        title = `Wydanie: ${ev?.event_number || ''} - ${ev?.event_name || ''}`;
       } else if (type === 'EVENT_RETURN') {
         const ev = events.find(x => String(x.id) === String(itemId));
         if (ev?.return_image) photos = [ev.return_image];
-        title = `Karta Zwrotu: ${ev?.event_number || ''} - ${ev?.event_name || ''}`;
+        title = `Zwrot produktów: ${ev?.event_number || ''} - ${ev?.event_name || ''}`;
       }
 
-      if (photos.length === 0) return alert("Brak zapisanego zdjęcia dla tego dokumentu.");
+      if (photos.length === 0) return alert("Brak zapisanego zdjęcia.");
 
       document.getElementById('imagePreviewTitle').innerText = title;
       document.getElementById('imagePreviewElement').src = photos[photoIdx] || photos[0];
@@ -1653,60 +1951,6 @@
       modal.classList.add('hidden');
       modal.classList.remove('flex');
       document.getElementById('imagePreviewElement').src = '';
-    }
-
-    function printEventSheet(eventId, type) {
-      const ev = events.find(e => String(e.id) === String(eventId));
-      if (!ev) return;
-
-      const isReturn = (type === 'RETURN');
-      document.getElementById('printHeaderDate').innerText = ev.dispatch_date || '-';
-      document.getElementById('printHeaderReturnDate').innerText = ev.return_date || '-';
-      document.getElementById('printHeaderEvent').innerText = `${ev.event_number || '#EVENT'} ${ev.event_name || ''}`;
-      document.getElementById('printSheetTitleHeader').innerHTML = isReturn 
-        ? "ROZLICZENIE ZWROTU<br>I KONSUMPCJI<br>Z REALIZACJI" 
-        : "WYDANIE NAPOJÓW<br>I ALKOHOLU<br>NA REALIZACJĘ";
-
-      const tbody = document.getElementById('printSheetTableBody');
-      let items = [];
-      try { items = typeof ev.items_json === 'string' ? JSON.parse(ev.items_json) : (ev.items_json || []); } catch (e) {}
-
-      tbody.innerHTML = items.map((it, idx) => `
-        <tr style="height: 22px; text-align: center;">
-          <td style="border: 1px solid #000; font-weight: bold;">${idx + 1}</td>
-          <td style="border: 1px solid #000; text-align: left; padding-left: 6px; font-weight: bold;">${it.name}</td>
-          <td style="border: 1px solid #000;">${it.unit || 'szt.'}</td>
-          <td style="border: 1px solid #000; font-weight: bold; font-size: 11px;">${it.dispatched !== undefined ? it.dispatched : ''}</td>
-          <td style="border: 1px solid #000;">&nbsp;</td>
-          <td style="border: 1px solid #000; background: #d9ead3;">&nbsp;</td>
-          <td style="border: 1px solid #000; background: #d9ead3; font-weight: bold;">${isReturn && it.consumed !== undefined ? it.consumed : ''}</td>
-          <td style="border: 1px solid #000; background: #d9ead3; font-weight: bold;">${isReturn && it.returned !== undefined ? it.returned : ''}</td>
-          <td style="border: 1px solid #000; background: #d9ead3;">&nbsp;</td>
-          <td style="border: 1px solid #000;">&nbsp;</td>
-        </tr>
-      `).join('');
-
-      const emptyRowsNeeded = Math.max(0, 15 - items.length);
-      for (let i = 0; i < emptyRowsNeeded; i++) {
-        tbody.innerHTML += `
-          <tr style="height: 22px; text-align: center;">
-            <td style="border: 1px solid #000;">${items.length + i + 1}</td>
-            <td style="border: 1px solid #000;">&nbsp;</td>
-            <td style="border: 1px solid #000;">&nbsp;</td>
-            <td style="border: 1px solid #000;">&nbsp;</td>
-            <td style="border: 1px solid #000;">&nbsp;</td>
-            <td style="border: 1px solid #000; background: #d9ead3;">&nbsp;</td>
-            <td style="border: 1px solid #000; background: #d9ead3;">&nbsp;</td>
-            <td style="border: 1px solid #000; background: #d9ead3;">&nbsp;</td>
-            <td style="border: 1px solid #000; background: #d9ead3;">&nbsp;</td>
-            <td style="border: 1px solid #000;">&nbsp;</td>
-          </tr>
-        `;
-      }
-
-      document.body.classList.remove('print-mode-qr');
-      document.body.classList.add('print-mode-sheet');
-      window.print();
     }
 
     function renderPriceAlerts() {
@@ -1785,7 +2029,7 @@
       triggerScanFeedback();
     }
 
-    // --- ZLICZANIE TOWARU ZE ZDJĘCIA WÓZKA / PÓŁKI ---
+    // --- ZLICZANIE TOWARU ZE ZDJĘCIA WÓZKA / PÓŁKI (NA MAGAZYNIE) ---
     function triggerShelfCountUpload() {
       document.getElementById('shelfCountInput').click();
     }
@@ -1932,7 +2176,7 @@ Zwróć wynik jako czysty JSON:
       alert("Towary zliczone ze zdjęcia zostały zaktualizowane w magazynie!");
     }
 
-    // --- OBSŁUGA FAKTUR NA 1 LUB 2 ZDJĘCIA + AUTOMATYCZNY ODCZYT KAUCJI I PODPISU ---
+    // --- OBSŁUGA FAKTUR NA 1 LUB 2 ZDJĘCIA + KAUCJE ---
     function openInvoiceUploadModal() {
       resetInvoicePhotos();
       const modal = document.getElementById('invoiceCaptureModal');
@@ -2226,7 +2470,6 @@ Zwróć czysty JSON:
       const docNum = document.getElementById('aiDocNumInput').value.trim();
       const supplierName = document.getElementById('aiSupplierInput').value.trim();
 
-      // 1. Zapis produktów spożywczych
       for (let i = 0; i < (currentExtractedDelivery.items || []).length; i++) {
         const name = document.getElementById(`aiItemName_${i}`)?.value.trim();
         const chosenMatchId = document.getElementById(`aiSelectMatch_${i}`)?.value;
@@ -2280,7 +2523,6 @@ Zwróć czysty JSON:
         }
       }
 
-      // 2. Zapis kaucji i opakowań zwrotnych do karty Kaucje
       for (let j = 0; j < (currentExtractedDelivery.deposits || []).length; j++) {
         const dName = document.getElementById(`aiDepName_${j}`)?.value.trim();
         const dCat = document.getElementById(`aiDepCat_${j}`)?.value || 'BUTELKA_SZKLO';
@@ -2292,7 +2534,6 @@ Zwróć czysty JSON:
         await upsertDepositEntry(dName, dCat, dPrice, dQty);
       }
 
-      // 3. Zapis dostawy z podpiętymi WSZYSTKIMI zdjęciami (1 lub 2) oraz osobą przyjmującą
       const serializedPhotos = JSON.stringify(currentExtractedDelivery.photos || []);
       const deliveryEntry = {
         id: Date.now().toString(),
@@ -2315,7 +2556,6 @@ Zwróć czysty JSON:
         try {
           await apiRequest('/deliveries', 'POST', deliveryEntry);
         } catch (e) {
-          // Fallback gdyby w Supabase nie było jeszcze kolumn receiver_name / deposits_json
           try {
             const compatEntry = {
               id: deliveryEntry.id,
@@ -2337,7 +2577,7 @@ Zwróć czysty JSON:
       renderDeposits();
       renderDeliveries();
       renderPriceAlerts();
-      alert(`Dostawa przyjęta przez: ${receiverName}! Produkty dodane na stan, kaucje doliczone, a zdjęcia podpięte.`);
+      alert(`Dostawa przyjęta przez: ${receiverName}!`);
     }
 
     function closeAiModal() {
@@ -2382,13 +2622,19 @@ Zwróć czysty JSON:
       throw new Error(lastErrorMsg || "Serwery AI zajęte.");
     }
 
-    // --- EVENTY: SKAN KARTY WYDANIA ---
+    // --- EVENTY: SKAN KARTY WYDANIA LUB ZLICZANIE ZWROTÓW ZE ZDJĘCIA PRODUKTÓW ---
     function triggerDispatchUpload() {
       document.getElementById('eventDispatchInput').click();
     }
-    function triggerReturnUpload(id) {
+
+    function triggerReturnProductsUpload(id) {
       currentActiveReturnEventId = id;
-      document.getElementById('eventReturnInput').click();
+      document.getElementById('eventReturnProductsInput').click();
+    }
+
+    function triggerReturnSheetUpload(id) {
+      currentActiveReturnEventId = id;
+      document.getElementById('eventReturnSheetInput').click();
     }
 
     async function processEventDispatchImage(event) {
@@ -2505,29 +2751,11 @@ Zwróć czysty JSON: { "eventNumber": string, "eventName": string, "dispatchDate
       renderInventory();
       renderEvents();
       switchMainTab('events');
-      alert(`Wydanie na event ${evNum} zapisane! Butelki przesunięte w teren.`);
+      alert(`Wydanie na event ${evNum} zapisane!`);
     }
 
-    // --- EVENTY: ROZLICZENIE RĘCZNE I ZE ZDJĘCIA ---
-    function openManualEventReturn(eventId) {
-      const ev = events.find(e => String(e.id) === String(eventId));
-      if (!ev) return;
-      currentActiveReturnEventId = ev.id;
-
-      const modal = document.getElementById('eventReturnModal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-
-      const existingItems = (ev.items_json || []).map(it => ({
-        name: it.name,
-        returned: it.returned !== undefined ? it.returned : 0,
-        consumed: it.consumed !== undefined ? it.consumed : it.dispatched
-      }));
-
-      displayEventReturnModal(ev, { returnDate: ev.return_date || new Date().toLocaleDateString('pl-PL'), items: existingItems }, ev.return_image || '');
-    }
-
-    async function processEventReturnImage(event) {
+    // --- NOWOŚĆ: ZLICZANIE ZWROTU ZE ZDJĘCIA FIZYCZNYCH PRODUKTÓW (NP. NA WÓZKU PO POWROCIE) ---
+    async function processEventReturnProductsImage(event) {
       const file = event.target.files[0];
       if (!file || !currentActiveReturnEventId) return;
       const ev = events.find(e => String(e.id) === String(currentActiveReturnEventId));
@@ -2536,6 +2764,60 @@ Zwróć czysty JSON: { "eventNumber": string, "eventName": string, "dispatchDate
       const modal = document.getElementById('eventReturnModal');
       modal.classList.remove('hidden');
       modal.classList.add('flex');
+      document.getElementById('evReturnModeBadge').innerText = "🍾 Wizyjne Zliczanie Zwróconych Produktów";
+      document.getElementById('evReturnLoadingText').innerText = "Model Gemini liczy zwrócone butelki/napoje na zdjęciu...";
+      document.getElementById('evReturnLoading').classList.remove('hidden');
+      document.getElementById('evReturnContent').classList.add('hidden');
+      document.getElementById('evReturnActions').classList.add('hidden');
+
+      try {
+        const compressedDataUrl = await compressImage(file, 1024, 0.72);
+        const base64Data = compressedDataUrl.split(',')[1];
+
+        let dispItems = [];
+        try { dispItems = typeof ev.items_json === 'string' ? JSON.parse(ev.items_json) : (ev.items_json || []); } catch (e) {}
+        const expectedListStr = dispItems.map(it => `- "${it.name}" (Wydano: ${it.dispatched} ${it.unit || 'szt.'})`).join('\n');
+
+        const promptText = `Jesteś ekspertem magazynowym computer vision. Otrzymujesz zdjęcie produktów (butelek, puszek, kartonów, zgrzewek), które WRÓCIŁY z realizacji cateringowej (na wózku, stole lub półce).
+Na tę imprezę wydano następujące pozycje:
+${expectedListStr}
+
+Zadanie:
+1. Rozpoznaj i policz dokładnie ile sztuk każdego z powyższych produktów znajduje się na zdjęciu zwrotu.
+2. Jeśli widzisz zamkniętą zgrzewkę, przelicz ją na pojedyncze sztuki.
+3. Dla każdej pozycji z listy wydania podaj policzoną liczbę zwróconych sztuk (returned). Jeśli danego produktu nie widać na zdjęciu, wpisz returned: 0.
+4. Wylicz consumed = Wydano - returned.
+
+Zwróć czysty JSON:
+{
+  "returnDate": "${new Date().toLocaleDateString('pl-PL')}",
+  "items": [
+    { "name": "dokładna nazwa z listy wydania", "returned": number, "consumed": number }
+  ]
+}`;
+
+        const parsedReturn = await queryGeminiAPI(promptText, [base64Data]);
+        displayEventReturnModal(ev, parsedReturn, compressedDataUrl);
+        triggerScanFeedback();
+      } catch (err) {
+        alert("Błąd zliczania produktów ze zdjęcia: " + err.message);
+        closeEventReturnModal();
+      }
+      event.target.value = '';
+    }
+
+    // --- ALTERNATYWA: SKANOWANIE PAPIEROWEJ KARTY ZWROTU ---
+    async function processEventReturnSheetImage(event) {
+      const file = event.target.files[0];
+      if (!file || !currentActiveReturnEventId) return;
+      const ev = events.find(e => String(e.id) === String(currentActiveReturnEventId));
+      if (!ev) return;
+
+      const modal = document.getElementById('eventReturnModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.getElementById('evReturnModeBadge').innerText = "📋 Odczyt Papierowej Karty Zwrotu";
+      document.getElementById('evReturnLoadingText').innerText = "Odczytywanie wpisów z papierowego arkusza...";
       document.getElementById('evReturnLoading').classList.remove('hidden');
       document.getElementById('evReturnContent').classList.add('hidden');
       document.getElementById('evReturnActions').classList.add('hidden');
@@ -2561,6 +2843,25 @@ Zwróć JSON: { "returnDate": string, "items": [ { "name": string, "consumed": n
       event.target.value = '';
     }
 
+    function openManualEventReturn(eventId) {
+      const ev = events.find(e => String(e.id) === String(eventId));
+      if (!ev) return;
+      currentActiveReturnEventId = ev.id;
+
+      const modal = document.getElementById('eventReturnModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.getElementById('evReturnModeBadge').innerText = "✍️ Ręczne Rozliczenie Zwrotu";
+
+      const existingItems = (ev.items_json || []).map(it => ({
+        name: it.name,
+        returned: it.returned !== undefined ? it.returned : 0,
+        consumed: it.consumed !== undefined ? it.consumed : it.dispatched
+      }));
+
+      displayEventReturnModal(ev, { returnDate: ev.return_date || new Date().toLocaleDateString('pl-PL'), items: existingItems }, ev.return_image || '');
+    }
+
     function displayEventReturnModal(ev, parsedReturn, image) {
       document.getElementById('evReturnLoading').classList.add('hidden');
       document.getElementById('evReturnContent').classList.remove('hidden');
@@ -2574,26 +2875,27 @@ Zwróć JSON: { "returnDate": string, "items": [ { "name": string, "consumed": n
         const matchedReturn = (parsedReturn.items || []).find(it => 
           normalizeText(it.name).includes(normalizeText(dispItem.name)) || normalizeText(dispItem.name).includes(normalizeText(it.name))
         );
-        const retQty = matchedReturn ? (matchedReturn.returned || 0) : 0;
-        const consQty = matchedReturn ? (matchedReturn.consumed || 0) : Math.max(0, dispItem.dispatched - retQty);
-        const diff = dispItem.dispatched - (retQty + consQty);
+        const retQty = matchedReturn && matchedReturn.returned !== undefined ? Number(matchedReturn.returned) : 0;
+        const consQty = Math.max(0, dispItem.dispatched - retQty);
 
         return `
-          <div class="bg-slate-900 border ${diff > 0 ? 'border-rose-600/70' : 'border-slate-700/80'} rounded-xl p-3 space-y-2">
+          <div class="bg-slate-900 border border-slate-700/80 rounded-xl p-3 space-y-2">
             <div class="flex justify-between items-start">
               <div>
                 <h5 class="font-bold text-xs text-white">${dispItem.name}</h5>
-                <span class="text-[10px] text-amber-400">Wydano: <strong>${dispItem.dispatched} ${dispItem.unit || 'szt.'}</strong></span>
+                <span class="text-[10px] text-amber-400">Wydano w teren: <strong>${dispItem.dispatched} ${dispItem.unit || 'szt.'}</strong></span>
               </div>
-              ${diff > 0 ? `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-700/50">⚠️ Strata: -${diff}</span>` : ''}
+              <span class="text-[10px] text-emerald-300 font-bold bg-emerald-950/80 border border-emerald-700/50 px-2 py-0.5 rounded">
+                Policzono zwrot: ${retQty} ${dispItem.unit || 'szt.'}
+              </span>
             </div>
             <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800">
               <div>
-                <span class="text-[10px] text-slate-400 block">Zwrócono (na magazyn):</span>
-                <input type="number" id="evRetQty_${idx}" value="${retQty}" min="0" oninput="autoCalcConsumption(${idx}, ${dispItem.dispatched})" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1.5 text-center font-bold text-emerald-400 text-xs">
+                <span class="text-[10px] text-emerald-400 font-bold block">🍾 Zwrócono (wraca na stan):</span>
+                <input type="number" id="evRetQty_${idx}" value="${retQty}" min="0" oninput="autoCalcConsumption(${idx}, ${dispItem.dispatched})" class="w-full bg-slate-800 border border-emerald-600/70 rounded-lg p-1.5 text-center font-black text-emerald-400 text-xs">
               </div>
               <div>
-                <span class="text-[10px] text-slate-400 block">Konsumpcja (zeszło):</span>
+                <span class="text-[10px] text-slate-400 block">Konsumpcja (zużyto na imprezie):</span>
                 <input type="number" id="evConsQty_${idx}" value="${consQty}" min="0" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1.5 text-center font-bold text-indigo-300 text-xs">
               </div>
             </div>
@@ -2654,11 +2956,14 @@ Zwróć JSON: { "returnDate": string, "items": [ { "name": string, "consumed": n
         try { await apiRequest(`/events?id=eq.${ev.id}`, 'PATCH', { status: 'Rozliczona', return_date: retDate, items_json: ev.items_json, return_image: ev.return_image || '' }); } catch (e) {}
       }
 
+      const settledEventId = ev.id;
       triggerScanFeedback();
       closeEventReturnModal();
       renderInventory();
       renderEvents();
-      alert(`Impreza ${ev.event_number} rozliczona!`);
+
+      // Od razu otwieramy wygenerowaną Kartę Rozliczenia gotową do pobrania lub wydruku
+      printEventSheet(settledEventId, 'RETURN');
     }
 
     async function deleteEvent(id) {
@@ -2667,125 +2972,6 @@ Zwróć JSON: { "returnDate": string, "items": [ { "name": string, "consumed": n
       safeSetLocal('magazyn_offline_events', events);
       renderEvents();
       if (isCloudOnline) { try { await apiRequest(`/events?id=eq.${id}`, 'DELETE'); } catch (e) {} }
-    }
-
-    // --- KARTA WYDANIA DO DRUKU Z ZAZNACZONYCH POZYCJI ---
-    function openGenerateSheetModal() {
-      if (selectedItemIds.size === 0) return alert("Zaznacz najpierw pozycje na liście.");
-      document.getElementById('genSheetNum').value = '#' + Math.floor(100 + Math.random() * 899);
-      document.getElementById('genSheetDate').value = new Date().toLocaleDateString('pl-PL');
-      document.getElementById('genSheetName').value = '';
-
-      const list = document.getElementById('genSheetItemsList');
-      const selectedItems = inventory.filter(i => selectedItemIds.has(i.id));
-
-      list.innerHTML = selectedItems.map(it => `
-        <div class="bg-slate-900 border border-slate-700 rounded-lg p-2 flex items-center justify-between text-xs">
-          <span class="font-bold text-white flex-1 truncate pr-2">${it.name}</span>
-          <div class="flex items-center gap-1.5">
-            <input type="number" id="genQty_${it.id}" value="${Math.min(it.qty, 12) || 1}" min="1" max="${it.qty || 999}" class="w-14 bg-slate-800 border border-slate-600 rounded p-1 text-center font-bold text-amber-400 text-xs">
-            <span class="text-slate-400 text-[10px] w-6">${it.unit}</span>
-          </div>
-        </div>
-      `).join('');
-
-      document.getElementById('generateSheetModal').classList.remove('hidden');
-      document.getElementById('generateSheetModal').classList.add('flex');
-    }
-
-    function closeGenerateSheetModal() {
-      document.getElementById('generateSheetModal').classList.add('hidden');
-      document.getElementById('generateSheetModal').classList.remove('flex');
-    }
-
-    async function printGeneratedSheet(createEventInSystem = false) {
-      const evNum = document.getElementById('genSheetNum').value.trim() || '#EVENT';
-      const evDate = document.getElementById('genSheetDate').value.trim() || '-';
-      const evName = document.getElementById('genSheetName').value.trim() || 'Realizacja Cateringowa';
-
-      document.getElementById('printHeaderDate').innerText = evDate;
-      document.getElementById('printHeaderReturnDate').innerText = '-';
-      document.getElementById('printHeaderEvent').innerText = `${evNum} ${evName}`;
-      document.getElementById('printSheetTitleHeader').innerHTML = "WYDANIE NAPOJÓW<br>I ALKOHOLU<br>NA REALIZACJĘ";
-
-      const tbody = document.getElementById('printSheetTableBody');
-      const selectedItems = inventory.filter(i => selectedItemIds.has(i.id));
-      const eventItemsPayload = [];
-
-      tbody.innerHTML = selectedItems.map((it, idx) => {
-        const qty = parseInt(document.getElementById(`genQty_${it.id}`).value) || 1;
-        eventItemsPayload.push({ name: it.name, dispatched: qty, unit: it.unit || 'szt.' });
-        return `
-          <tr style="height: 22px; text-align: center;">
-            <td style="border: 1px solid #000; font-weight: bold;">${idx + 1}</td>
-            <td style="border: 1px solid #000; text-align: left; padding-left: 6px; font-weight: bold;">${it.name}</td>
-            <td style="border: 1px solid #000;">${it.unit}</td>
-            <td style="border: 1px solid #000; font-weight: bold; font-size: 11px;">${qty}</td>
-            <td style="border: 1px solid #000;">&nbsp;</td>
-            <td style="border: 1px solid #000; background: #d9ead3;">&nbsp;</td>
-            <td style="border: 1px solid #000; background: #d9ead3;">&nbsp;</td>
-            <td style="border: 1px solid #000; background: #d9ead3;">&nbsp;</td>
-            <td style="border: 1px solid #000; background: #d9ead3;">&nbsp;</td>
-            <td style="border: 1px solid #000;">&nbsp;</td>
-          </tr>
-        `;
-      }).join('');
-
-      const emptyRowsNeeded = Math.max(0, 15 - selectedItems.length);
-      for (let i = 0; i < emptyRowsNeeded; i++) {
-        tbody.innerHTML += `
-          <tr style="height: 22px; text-align: center;">
-            <td style="border: 1px solid #000;">${selectedItems.length + i + 1}</td>
-            <td style="border: 1px solid #000;">&nbsp;</td>
-            <td style="border: 1px solid #000;">&nbsp;</td>
-            <td style="border: 1px solid #000;">&nbsp;</td>
-            <td style="border: 1px solid #000;">&nbsp;</td>
-            <td style="border: 1px solid #000; background: #d9ead3;">&nbsp;</td>
-            <td style="border: 1px solid #000; background: #d9ead3;">&nbsp;</td>
-            <td style="border: 1px solid #000; background: #d9ead3;">&nbsp;</td>
-            <td style="border: 1px solid #000; background: #d9ead3;">&nbsp;</td>
-            <td style="border: 1px solid #000;">&nbsp;</td>
-          </tr>
-        `;
-      }
-
-      if (createEventInSystem) {
-        for (const it of selectedItems) {
-          const qty = parseInt(document.getElementById(`genQty_${it.id}`).value) || 1;
-          it.qty = Math.max(0, it.qty - qty);
-          it.inField = (it.inField || 0) + qty;
-          recordStockLog(it.id, it.name, 'Event Wyjazd', -qty, `Karta ${evNum}`);
-          if (isCloudOnline) {
-            try { await apiRequest(`/inventory?id=eq.${it.id}`, 'PATCH', { qty: it.qty, in_field: it.inField, updated_at: new Date() }); } catch (e) {}
-          }
-        }
-
-        const newEv = {
-          id: Date.now().toString(),
-          event_number: evNum,
-          event_name: evName,
-          dispatch_date: evDate,
-          return_date: '',
-          status: 'W trakcie',
-          items_json: eventItemsPayload,
-          dispatch_image: '',
-          return_image: '',
-          created_at: new Date()
-        };
-        events.unshift(newEv);
-        safeSetLocal('magazyn_offline_items', inventory);
-        safeSetLocal('magazyn_offline_events', events);
-        if (isCloudOnline) { try { await apiRequest('/events', 'POST', newEv); } catch (e) {} }
-      }
-
-      closeGenerateSheetModal();
-      toggleSelectMode();
-      renderInventory();
-      renderEvents();
-
-      document.body.classList.remove('print-mode-qr');
-      document.body.classList.add('print-mode-sheet');
-      window.print();
     }
 
     // --- INTERFEJS SKANERA, EDYCJI I AKCJI MAGAZYNOWYCH ---
@@ -2827,12 +3013,12 @@ Zwróć JSON: { "returnDate": string, "items": [ { "name": string, "consumed": n
       const btn = document.getElementById('btnToggleSelectMode');
       const bulkBar = document.getElementById('bulkActionBar');
       if (isSelectMode) {
-        btn.className = "bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-2 rounded-xl font-bold flex items-center gap-1.5 transition shadow";
-        btn.innerHTML = "<span>✕</span> Anuluj";
+        btn.className = "bg-amber-500 text-slate-950 text-xs px-3 py-2 rounded-xl font-black flex items-center gap-1.5 transition shadow";
+        btn.innerHTML = "<span>✕</span> Zakończ wybór";
         bulkBar.classList.remove('hidden');
       } else {
-        btn.className = "bg-slate-800 hover:bg-slate-700 border border-slate-600/70 text-slate-300 text-xs px-3 py-2 rounded-xl font-bold flex items-center gap-1.5 transition";
-        btn.innerHTML = "<span>☑️</span> Zaznacz";
+        btn.className = "bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/60 text-amber-300 text-xs px-3 py-2 rounded-xl font-bold flex items-center gap-1.5 transition";
+        btn.innerHTML = "<span>🚚</span> Wybierz na Event";
         bulkBar.classList.add('hidden');
         selectedItemIds.clear();
       }
@@ -2976,12 +3162,21 @@ Zwróć JSON: { "returnDate": string, "items": [ { "name": string, "consumed": n
       const item = inventory.find(i => String(i.id) === String(selectedItemId));
       if (!item) return;
       const amount = Math.max(1, parseInt(document.getElementById('modalStepQty').value) || 1);
+
+      // Jeśli użytkownik kliknął "Wydaj w teren", przekierowujemy go do Kreatora Karty Wydania z tą pozycją!
+      if (type === 'TO_FIELD') {
+        const targetId = item.id;
+        closeActionModal();
+        sheetCreatorMap.set(String(targetId), amount);
+        openGenerateSheetModal(true);
+        return;
+      }
+
       let actionLabel = 'Korekta';
       let change = 0;
 
       if (type === 'ADD') { item.qty += amount; actionLabel = 'Przyjęcie ręczne'; change = amount; }
       else if (type === 'REMOVE') { item.qty = Math.max(0, item.qty - amount); actionLabel = 'Wydanie ręczne'; change = -amount; }
-      else if (type === 'TO_FIELD') { item.qty = Math.max(0, item.qty - amount); item.inField = (item.inField || 0) + amount; actionLabel = 'Wydanie w teren'; change = -amount; }
       else if (type === 'FROM_FIELD') { item.inField = Math.max(0, (item.inField || 0) - amount); item.qty += amount; actionLabel = 'Zwrot z terenu'; change = amount; }
       
       recordStockLog(item.id, item.name, actionLabel, change);
