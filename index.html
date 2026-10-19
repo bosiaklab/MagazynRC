@@ -54,7 +54,7 @@
     <div class="flex items-center space-x-2.5">
       <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-base shadow">M</div>
       <div>
-        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v3.4 EVENT-FLOW</span></h1>
+        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v3.5 AUTO-MATCH</span></h1>
         <p id="syncStatus" class="text-[10px] text-amber-400 font-medium leading-none mt-0.5">Inicjalizacja...</p>
       </div>
     </div>
@@ -76,6 +76,7 @@
   <input type="file" id="eventDispatchInput" accept="image/*" capture="environment" class="hidden" onchange="processEventDispatchImage(event)">
   <input type="file" id="eventReturnProductsInput" accept="image/*" capture="environment" class="hidden" onchange="processEventReturnProductsImage(event)">
   <input type="file" id="eventReturnSheetInput" accept="image/*" capture="environment" class="hidden" onchange="processEventReturnSheetImage(event)">
+  <input type="file" id="eventAutoReturnSheetInput" accept="image/*" capture="environment" class="hidden" onchange="processAutoEventReturnSheetImage(event)">
   <input type="file" id="invoicePhotoInput1" accept="image/*" capture="environment" class="hidden" onchange="handleInvoicePhotoSelected(event, 1)">
   <input type="file" id="invoicePhotoInput2" accept="image/*" capture="environment" class="hidden" onchange="handleInvoicePhotoSelected(event, 2)">
 
@@ -198,21 +199,24 @@
       <div id="inventoryList" class="space-y-2"></div>
     </section>
 
-    <!-- WIDOK 2: REALIZACJE / EVENTY -->
+    <!-- WIDOK 2: REALIZACJE / EVENTY (Z AUTO-DOPASOWANIEM KARTY ZWROTU) -->
     <section id="viewEvents" class="hidden space-y-3">
-      <div class="bg-gradient-to-r from-slate-800 to-indigo-950/60 border border-indigo-700/50 rounded-2xl p-3.5 shadow-md flex flex-wrap items-center justify-between gap-2">
+      <div class="bg-gradient-to-r from-slate-800 to-indigo-950/60 border border-indigo-700/50 rounded-2xl p-3.5 shadow-md space-y-3">
         <div>
           <h3 class="font-bold text-xs text-white flex items-center gap-1.5">
-            <span>📋</span> Wydania w Teren i Rozliczenia Zwrotów
+            <span>📋</span> Centrum Wydań Eventowych i Automatycznych Zwrotów
           </h3>
-          <p class="text-[11px] text-slate-300 mt-0.5">Wybierz pozycje z magazynu, pobierz Kartę Wydania, a po powrocie zrób zdjęcie zwrotów</p>
+          <p class="text-[11px] text-slate-300 mt-0.5">Generuj karty wydania, zliczaj zwrócone butelki ze zdjęcia lub skanuj karty zwrotu z auto-dopasowaniem po #numerze</p>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
           <button onclick="openCreatorFromEventsTab()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs px-3 py-2 rounded-xl shadow transition active:scale-95 flex items-center gap-1 whitespace-nowrap">
             <span>➕</span> Utwórz Kartę Wydania
           </button>
+          <button onclick="triggerAutoReturnSheetUpload()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs px-3 py-2 rounded-xl shadow transition active:scale-95 flex items-center gap-1 whitespace-nowrap">
+            <span>📥</span> Skanuj Kartę Zwrotu (Auto-dopasuj)
+          </button>
           <button onclick="triggerDispatchUpload()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold text-xs px-2.5 py-2 rounded-xl shadow transition active:scale-95 flex items-center gap-1 whitespace-nowrap" title="Skanuj papierową kartę wydania">
-            <span>📸</span> Zeskanuj Kartę
+            <span>📸</span> Skanuj Wydanie
           </button>
         </div>
       </div>
@@ -299,7 +303,7 @@
 
   </main>
 
-  <!-- MODAL: KREATOR WYDANIA W TEREN I KARTY WYDANIA (Z DODAWANIEM POZYCJI) -->
+  <!-- MODAL: KREATOR WYDANIA W TEREN I KARTY WYDANIA -->
   <div id="generateSheetModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-4 space-y-3 shadow-2xl my-4 flex flex-col max-h-[94vh]">
       <div class="flex justify-between items-center border-b border-slate-700 pb-2">
@@ -327,7 +331,6 @@
         </div>
       </div>
 
-      <!-- Szybkie dodawanie kolejnych pozycji z magazynu bezpośrednio w oknie -->
       <div class="bg-slate-900/90 border border-slate-700/80 p-2.5 rounded-xl space-y-1.5">
         <label class="text-[10px] text-amber-300 font-bold block">➕ Dodaj pozycję z magazynu do tej karty:</label>
         <div class="flex gap-1.5">
@@ -362,7 +365,6 @@
         <button onclick="closeSheetPreviewModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
       </div>
 
-      <!-- Wizualny podgląd arkusza Excel wewnątrz aplikacji -->
       <div class="flex-1 overflow-auto bg-white p-2 rounded-xl border border-slate-600 text-black">
         <div id="sheetPreviewContainer"></div>
       </div>
@@ -695,7 +697,7 @@
     </div>
   </div>
 
-  <!-- MODAL: SKAN KARTY WYDANIA EVENTU (WYJŚCIE ZE ZDJĘCIA KARTY) -->
+  <!-- MODAL: SKAN KARTY WYDANIA EVENTU -->
   <div id="eventDispatchModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 shadow-2xl my-4 max-h-[94vh] flex flex-col">
       <div class="flex justify-between items-start border-b border-slate-700 pb-2.5">
@@ -726,7 +728,7 @@
     </div>
   </div>
 
-  <!-- MODAL: ROZLICZENIE POWROTU / ZWROTU (ZDJĘCIE PRODUKTÓW LUB RĘCZNIE) -->
+  <!-- MODAL: ROZLICZENIE POWROTU / ZWROTU (Z AUTO-DOPASOWANIEM IMPREZY) -->
   <div id="eventReturnModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 shadow-2xl my-4 max-h-[94vh] flex flex-col">
       <div class="flex justify-between items-start border-b border-slate-700 pb-2.5">
@@ -736,22 +738,33 @@
         </div>
         <button onclick="closeEventReturnModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
       </div>
+
       <div id="evReturnLoading" class="py-12 flex flex-col items-center justify-center space-y-3">
         <div class="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-        <p id="evReturnLoadingText" class="text-sm text-slate-200 font-medium">Model Gemini liczy zwrócone produkty na zdjęciu...</p>
-        <p class="text-xs text-slate-400">Dopasowywanie rozpoznanych butelek do listy wydania</p>
+        <p id="evReturnLoadingText" class="text-sm text-slate-200 font-medium">Analizowanie karty zwrotu i szukanie imprezy...</p>
+        <p class="text-xs text-slate-400">Odczytywanie #numeru imprezy, zwrotów i konsumpcji</p>
       </div>
+
       <div id="evReturnContent" class="hidden flex-1 overflow-y-auto space-y-3 pr-1">
-        <div class="bg-slate-900 border border-slate-700 p-2.5 rounded-xl flex justify-between text-xs items-center">
-          <div><span class="text-[10px] text-slate-400 block">Realizacja:</span><strong id="evReturnEventLabel" class="text-white text-xs">---</strong></div>
-          <div><span class="text-[10px] text-slate-400 block">Data zwrotu:</span><input type="text" id="evReturnDateInput" class="bg-slate-800 border border-slate-700 rounded px-2 py-0.5 text-xs text-emerald-400 font-mono"></div>
+        <!-- Wybór / potwierdzenie auto-dopasowanej imprezy -->
+        <div class="bg-slate-900 border border-emerald-700/60 p-2.5 rounded-xl space-y-2 text-xs">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-[10px] text-emerald-300 font-bold">🎯 Dopasowana realizacja:</span>
+            <div class="flex items-center gap-1.5">
+              <span class="text-[10px] text-slate-400">Data zwrotu:</span>
+              <input type="text" id="evReturnDateInput" class="bg-slate-800 border border-slate-700 rounded px-2 py-0.5 text-xs text-emerald-400 font-mono w-24 text-center">
+            </div>
+          </div>
+          <select id="evReturnEventSelect" onchange="handleReturnEventSelectChange()" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white font-bold"></select>
         </div>
-        <p class="text-[11px] text-slate-300">Wpisz lub zweryfikuj policzoną ilość zwrotu (Konsumpcja wylicza się automatycznie):</p>
+
+        <p class="text-[11px] text-slate-300">Zweryfikuj odczytane ilości (Zwrot wraca na magazyn, a Zeszło to konsumpcja):</p>
         <div id="evReturnItemsList" class="space-y-2.5"></div>
       </div>
+
       <div id="evReturnActions" class="hidden pt-2.5 border-t border-slate-700 flex justify-end gap-2">
         <button onclick="closeEventReturnModal()" class="px-4 py-2 rounded-xl text-xs text-slate-400 hover:bg-slate-700">Anuluj</button>
-        <button onclick="confirmAndApplyEventReturn()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-5 py-2.5 rounded-xl text-xs shadow">✓ Zatwierdź Zwrot na Magazyn i Generuj Kartę</button>
+        <button onclick="confirmAndApplyEventReturn()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-5 py-2.5 rounded-xl text-xs shadow">✓ Zatwierdź Zwrot i Rozlicz Imprezę</button>
       </div>
     </div>
   </div>
@@ -875,9 +888,10 @@
     let currentExtractedDelivery = null;
     let currentExtractedEventDispatch = null;
     let currentActiveReturnEventId = null;
+    let lastParsedReturnData = null;
+    let lastReturnImage = '';
     let currentShelfCountItems = [];
 
-    // Przechowywanie pozycji w Kreatorze Karty Wydania: Map(itemId -> qty)
     let sheetCreatorMap = new Map();
     let currentPreviewSheetData = null;
 
@@ -927,6 +941,39 @@
         }
       }
       return bestItem;
+    }
+
+    // --- INTELIGENTNE WYSZUKIWANIE IMPREZY PO NUMERZE LUB NAZWIE Z NAGŁÓWKA KARTY ---
+    function findBestEventMatch(scannedNumber, scannedName) {
+      const cleanNum = (scannedNumber || '').replace(/[^0-9a-zA-Z]/g, '').toLowerCase();
+      const cleanName = normalizeText(scannedName);
+
+      // Najpierw szukamy wśród aktywnych imprez ("W trakcie"), potem wszystkich
+      const sortedEvents = [...events].sort((a, b) => (a.status === 'W trakcie' ? -1 : 1));
+
+      if (cleanNum.length >= 2) {
+        for (const ev of sortedEvents) {
+          const evNumClean = (ev.event_number || '').replace(/[^0-9a-zA-Z]/g, '').toLowerCase();
+          if (evNumClean && (evNumClean === cleanNum || evNumClean.includes(cleanNum) || cleanNum.includes(evNumClean))) {
+            return ev;
+          }
+        }
+      }
+
+      if (cleanName.length >= 3) {
+        const nameWords = cleanName.split(' ').filter(w => w.length > 2);
+        for (const ev of sortedEvents) {
+          const evNameClean = normalizeText(ev.event_name);
+          if (evNameClean && (evNameClean.includes(cleanName) || cleanName.includes(evNameClean))) {
+            return ev;
+          }
+          for (const w of nameWords) {
+            if (evNameClean.includes(w)) return ev;
+          }
+        }
+      }
+
+      return sortedEvents.find(e => e.status === 'W trakcie') || null;
     }
 
     function findBestDepositMatch(targetName, unitPrice) {
@@ -1344,7 +1391,6 @@
       renderInventory();
       renderEvents();
 
-      // Od razu otwieramy wygenerowaną Kartę Wydania gotową do pobrania jako plik lub wydruku
       openSheetPreviewModal({
         eventNumber: evNum,
         eventName: evName,
@@ -1810,7 +1856,7 @@
       if (isCloudOnline) { try { await apiRequest(`/deliveries?id=eq.${deliveryId}`, 'DELETE'); } catch (e) {} }
     }
 
-    // --- RENDEROWANIE EVENTÓW (Z OPCJĄ ZLICZANIA ZWROTU ZE ZDJĘCIA PRODUKTÓW) ---
+    // --- RENDEROWANIE EVENTÓW ---
     function renderEvents() {
       const list = document.getElementById('eventsList');
       if (!list) return;
@@ -1846,7 +1892,6 @@
                 <p class="text-[10px] text-slate-400 mt-0.5">Wydano: ${ev.dispatch_date || '-'} ${ev.return_date ? `• Zwrot: ${ev.return_date}` : ''}</p>
               </div>
 
-              <!-- PRZYCISKI ROZLICZANIA ZWROTU: ZDJĘCIE TOWARU / RĘCZNIE / SKAN KARTY -->
               <div class="flex flex-wrap items-center gap-1.5">
                 <button onclick="triggerReturnProductsUpload('${ev.id}')" class="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs px-3 py-1.5 rounded-xl shadow transition active:scale-95 flex items-center gap-1">
                   <span>🍾</span> Zdjęcie towaru (Zlicz zwrot)
@@ -2622,7 +2667,7 @@ Zwróć czysty JSON:
       throw new Error(lastErrorMsg || "Serwery AI zajęte.");
     }
 
-    // --- EVENTY: SKAN KARTY WYDANIA LUB ZLICZANIE ZWROTÓW ZE ZDJĘCIA PRODUKTÓW ---
+    // --- EVENTY: SKAN KARTY WYDANIA, ZLICZANIE BUTELEK ORAZ AUTO-DOPASOWANIE KARTY ZWROTU ---
     function triggerDispatchUpload() {
       document.getElementById('eventDispatchInput').click();
     }
@@ -2635,6 +2680,11 @@ Zwróć czysty JSON:
     function triggerReturnSheetUpload(id) {
       currentActiveReturnEventId = id;
       document.getElementById('eventReturnSheetInput').click();
+    }
+
+    function triggerAutoReturnSheetUpload() {
+      currentActiveReturnEventId = null;
+      document.getElementById('eventAutoReturnSheetInput').click();
     }
 
     async function processEventDispatchImage(event) {
@@ -2754,7 +2804,90 @@ Zwróć czysty JSON: { "eventNumber": string, "eventName": string, "dispatchDate
       alert(`Wydanie na event ${evNum} zapisane!`);
     }
 
-    // --- NOWOŚĆ: ZLICZANIE ZWROTU ZE ZDJĘCIA FIZYCZNYCH PRODUKTÓW (NP. NA WÓZKU PO POWROCIE) ---
+    // --- NOWOŚĆ: AUTO-DOPASOWANIE KARTY ZWROTU PO #NUMERZE Z NAGŁÓWKA ---
+    async function processAutoEventReturnSheetImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const modal = document.getElementById('eventReturnModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.getElementById('evReturnModeBadge').innerText = "🎯 Auto-Dopasowanie Karty Zwrotu";
+      document.getElementById('evReturnLoadingText').innerText = "Odczytywanie #numeru imprezy i tabeli zwrotów...";
+      document.getElementById('evReturnLoading').classList.remove('hidden');
+      document.getElementById('evReturnContent').classList.add('hidden');
+      document.getElementById('evReturnActions').classList.add('hidden');
+
+      try {
+        const compressedDataUrl = await compressImage(file, 950, 0.72);
+        const base64Data = compressedDataUrl.split(',')[1];
+        const promptText = `Przeanalizuj to zdjęcie wypełnionego arkusza zwrotu napojów/alkoholu z realizacji ("WYDANIE NAPOJÓW I ALKOHOLU NA REALIZACJĘ").
+Wyciągnij z nagłówka i tabeli:
+1. eventNumber: numer imprezy z pola "IMPREZA, #NUMER:" (np. "#420", "#403", "#359")
+2. eventName: nazwa imprezy / klienta z pola "IMPREZA, #NUMER:" (np. "ENELMED", "AVIAREPS")
+3. dispatchDate: data z pola "DATA WYDANIA"
+4. returnDate: data z pola "DATA ZWROTU"
+5. items: tablica wszystkich wierszy wypełnionych w tabeli:
+   - name: nazwa produktu z kolumny NAZWA
+   - unit: jednostka (np. "szt.")
+   - dispatched: liczba z kolumny Wydane
+   - consumed: liczba z kolumny Konsumpcja (jeśli puste, podaj null)
+   - returned: liczba z kolumny Zwrot (jeśli puste, podaj null)
+
+Zwróć czysty JSON:
+{
+  "eventNumber": string,
+  "eventName": string,
+  "dispatchDate": string,
+  "returnDate": string,
+  "items": [ { "name": string, "unit": string, "dispatched": number, "consumed": number, "returned": number } ]
+}`;
+
+        const parsed = await queryGeminiAPI(promptText, [base64Data]);
+        lastParsedReturnData = parsed;
+        lastReturnImage = compressedDataUrl;
+
+        const matchedEv = findBestEventMatch(parsed.eventNumber, parsed.eventName);
+        currentActiveReturnEventId = matchedEv ? matchedEv.id : 'NEW_FROM_SHEET';
+
+        populateReturnEventSelector(currentActiveReturnEventId, parsed);
+        displayEventReturnModal(matchedEv, parsed, compressedDataUrl);
+        triggerScanFeedback();
+      } catch (err) {
+        alert("Błąd odczytu karty zwrotu: " + err.message);
+        closeEventReturnModal();
+      }
+      event.target.value = '';
+    }
+
+    function populateReturnEventSelector(selectedId, parsedData = null) {
+      const sel = document.getElementById('evReturnEventSelect');
+      if (!sel) return;
+
+      const scannedLabel = parsedData && (parsedData.eventNumber || parsedData.eventName)
+        ? `${parsedData.eventNumber || ''} ${parsedData.eventName || ''}`.trim()
+        : 'Nowa realizacja z karty';
+
+      let html = events.map(ev => `
+        <option value="${ev.id}" ${String(ev.id) === String(selectedId) ? 'selected' : ''}>
+          ${ev.status === 'W trakcie' ? '🚚' : '✓'} ${ev.event_number || '#EVENT'} — ${ev.event_name} (Wydano: ${ev.dispatch_date || '-'})
+        </option>
+      `).join('');
+
+      html += `<option value="NEW_FROM_SHEET" ${selectedId === 'NEW_FROM_SHEET' ? 'selected' : ''}>➕ Utwórz nową rozliczoną realizację z tej karty (${scannedLabel})</option>`;
+      sel.innerHTML = html;
+    }
+
+    function handleReturnEventSelectChange() {
+      const chosenId = document.getElementById('evReturnEventSelect').value;
+      currentActiveReturnEventId = chosenId;
+      const ev = events.find(e => String(e.id) === String(chosenId)) || null;
+      if (lastParsedReturnData) {
+        displayEventReturnModal(ev, lastParsedReturnData, lastReturnImage);
+      }
+    }
+
+    // --- ZLICZANIE ZWROTU ZE ZDJĘCIA FIZYCZNYCH PRODUKTÓW (NA WÓZKU PO POWROCIE) ---
     async function processEventReturnProductsImage(event) {
       const file = event.target.files[0];
       if (!file || !currentActiveReturnEventId) return;
@@ -2797,6 +2930,9 @@ Zwróć czysty JSON:
 }`;
 
         const parsedReturn = await queryGeminiAPI(promptText, [base64Data]);
+        lastParsedReturnData = parsedReturn;
+        lastReturnImage = compressedDataUrl;
+        populateReturnEventSelector(ev.id, parsedReturn);
         displayEventReturnModal(ev, parsedReturn, compressedDataUrl);
         triggerScanFeedback();
       } catch (err) {
@@ -2806,7 +2942,7 @@ Zwróć czysty JSON:
       event.target.value = '';
     }
 
-    // --- ALTERNATYWA: SKANOWANIE PAPIEROWEJ KARTY ZWROTU ---
+    // --- SKANOWANIE PAPIEROWEJ KARTY ZWROTU Z KONKRETNEGO KAFELKA EVENTU ---
     async function processEventReturnSheetImage(event) {
       const file = event.target.files[0];
       if (!file || !currentActiveReturnEventId) return;
@@ -2828,12 +2964,16 @@ Zwróć czysty JSON:
         const promptText = `Przeanalizuj to zdjęcie uzupełnionego odręcznie arkusza zwrotu napojów/alkoholu.
 Odczytaj kolumny tabeli:
 - NAZWA
+- Wydane
 - Konsumpcja (ilość zużyta)
 - Zwrot (ilość zwrócona na magazyn)
 - Data zwrotu (z pola DATA ZWROTU)
-Zwróć JSON: { "returnDate": string, "items": [ { "name": string, "consumed": number, "returned": number } ] }`;
+Zwróć JSON: { "returnDate": string, "items": [ { "name": string, "dispatched": number, "consumed": number, "returned": number } ] }`;
 
         const parsedReturn = await queryGeminiAPI(promptText, [base64Data]);
+        lastParsedReturnData = parsedReturn;
+        lastReturnImage = compressedDataUrl;
+        populateReturnEventSelector(ev.id, parsedReturn);
         displayEventReturnModal(ev, parsedReturn, compressedDataUrl);
         triggerScanFeedback();
       } catch (err) {
@@ -2855,47 +2995,78 @@ Zwróć JSON: { "returnDate": string, "items": [ { "name": string, "consumed": n
 
       const existingItems = (ev.items_json || []).map(it => ({
         name: it.name,
+        dispatched: it.dispatched,
         returned: it.returned !== undefined ? it.returned : 0,
         consumed: it.consumed !== undefined ? it.consumed : it.dispatched
       }));
 
-      displayEventReturnModal(ev, { returnDate: ev.return_date || new Date().toLocaleDateString('pl-PL'), items: existingItems }, ev.return_image || '');
+      lastParsedReturnData = { returnDate: ev.return_date || new Date().toLocaleDateString('pl-PL'), items: existingItems };
+      lastReturnImage = ev.return_image || '';
+      populateReturnEventSelector(ev.id, lastParsedReturnData);
+      displayEventReturnModal(ev, lastParsedReturnData, lastReturnImage);
     }
 
     function displayEventReturnModal(ev, parsedReturn, image) {
       document.getElementById('evReturnLoading').classList.add('hidden');
       document.getElementById('evReturnContent').classList.remove('hidden');
       document.getElementById('evReturnActions').classList.remove('hidden');
-      document.getElementById('evReturnModalTitle').innerText = `${ev.event_number} - ${ev.event_name}`;
-      document.getElementById('evReturnEventLabel').innerText = `${ev.event_name} (${ev.event_number})`;
+
+      const titleStr = ev
+        ? `Rozliczenie: ${ev.event_number} — ${ev.event_name}`
+        : `Nowa realizacja z karty: ${parsedReturn.eventNumber || '#EVENT'} ${parsedReturn.eventName || ''}`;
+      document.getElementById('evReturnModalTitle').innerText = titleStr;
       document.getElementById('evReturnDateInput').value = parsedReturn.returnDate || new Date().toLocaleDateString('pl-PL');
 
+      const baseItems = ev && ev.items_json && ev.items_json.length > 0
+        ? ev.items_json
+        : (parsedReturn.items || []).map(it => ({
+            name: it.name,
+            dispatched: Number(it.dispatched) || (Number(it.returned || 0) + Number(it.consumed || 0)),
+            unit: it.unit || 'szt.'
+          }));
+
       const list = document.getElementById('evReturnItemsList');
-      list.innerHTML = ev.items_json.map((dispItem, idx) => {
+      list.innerHTML = baseItems.map((dispItem, idx) => {
         const matchedReturn = (parsedReturn.items || []).find(it => 
           normalizeText(it.name).includes(normalizeText(dispItem.name)) || normalizeText(dispItem.name).includes(normalizeText(it.name))
         );
-        const retQty = matchedReturn && matchedReturn.returned !== undefined ? Number(matchedReturn.returned) : 0;
-        const consQty = Math.max(0, dispItem.dispatched - retQty);
+
+        const dispatchedQty = Number(dispItem.dispatched) || 0;
+        let retQty = 0;
+        let consQty = 0;
+
+        if (matchedReturn) {
+          if (matchedReturn.returned !== undefined && matchedReturn.returned !== null) {
+            retQty = Number(matchedReturn.returned);
+            consQty = (matchedReturn.consumed !== undefined && matchedReturn.consumed !== null)
+              ? Number(matchedReturn.consumed)
+              : Math.max(0, dispatchedQty - retQty);
+          } else if (matchedReturn.consumed !== undefined && matchedReturn.consumed !== null) {
+            consQty = Number(matchedReturn.consumed);
+            retQty = Math.max(0, dispatchedQty - consQty);
+          }
+        } else {
+          consQty = dispatchedQty;
+        }
 
         return `
           <div class="bg-slate-900 border border-slate-700/80 rounded-xl p-3 space-y-2">
             <div class="flex justify-between items-start">
               <div>
-                <h5 class="font-bold text-xs text-white">${dispItem.name}</h5>
-                <span class="text-[10px] text-amber-400">Wydano w teren: <strong>${dispItem.dispatched} ${dispItem.unit || 'szt.'}</strong></span>
+                <h5 class="font-bold text-xs text-white" id="evRetNameLabel_${idx}">${dispItem.name}</h5>
+                <span class="text-[10px] text-amber-400">Wydano w teren: <strong id="evRetDispVal_${idx}">${dispatchedQty}</strong> ${dispItem.unit || 'szt.'}</span>
               </div>
               <span class="text-[10px] text-emerald-300 font-bold bg-emerald-950/80 border border-emerald-700/50 px-2 py-0.5 rounded">
-                Policzono zwrot: ${retQty} ${dispItem.unit || 'szt.'}
+                Zwrot: ${retQty} | Zeszło: ${consQty}
               </span>
             </div>
             <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800">
               <div>
                 <span class="text-[10px] text-emerald-400 font-bold block">🍾 Zwrócono (wraca na stan):</span>
-                <input type="number" id="evRetQty_${idx}" value="${retQty}" min="0" oninput="autoCalcConsumption(${idx}, ${dispItem.dispatched})" class="w-full bg-slate-800 border border-emerald-600/70 rounded-lg p-1.5 text-center font-black text-emerald-400 text-xs">
+                <input type="number" id="evRetQty_${idx}" value="${retQty}" min="0" oninput="autoCalcConsumption(${idx}, ${dispatchedQty})" class="w-full bg-slate-800 border border-emerald-600/70 rounded-lg p-1.5 text-center font-black text-emerald-400 text-xs">
               </div>
               <div>
-                <span class="text-[10px] text-slate-400 block">Konsumpcja (zużyto na imprezie):</span>
+                <span class="text-[10px] text-slate-400 block">Konsumpcja (zeszło na imprezie):</span>
                 <input type="number" id="evConsQty_${idx}" value="${consQty}" min="0" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1.5 text-center font-bold text-indigo-300 text-xs">
               </div>
             </div>
@@ -2915,23 +3086,49 @@ Zwróć JSON: { "returnDate": string, "items": [ { "name": string, "consumed": n
       document.getElementById('eventReturnModal').classList.add('hidden');
       document.getElementById('eventReturnModal').classList.remove('flex');
       currentActiveReturnEventId = null;
+      lastParsedReturnData = null;
     }
 
     async function confirmAndApplyEventReturn() {
-      const ev = events.find(e => String(e.id) === String(currentActiveReturnEventId));
-      if (!ev) return;
-      const wasAlreadySettled = (ev.status === 'Rozliczona');
       const retDate = document.getElementById('evReturnDateInput').value.trim();
       const returnImage = document.getElementById('evRetImageHolder')?.value || '';
+      let ev = events.find(e => String(e.id) === String(currentActiveReturnEventId));
 
+      // Jeśli karta zwrotu nie miała wcześniej utworzonego eventu w aplikacji, tworzymy go automatycznie
+      if (!ev && lastParsedReturnData) {
+        const newItems = (lastParsedReturnData.items || []).map((it, idx) => {
+          const disp = Number(it.dispatched) || 0;
+          return { name: it.name, dispatched: disp, unit: it.unit || 'szt.' };
+        });
+        ev = {
+          id: Date.now().toString(),
+          event_number: lastParsedReturnData.eventNumber || ('#' + Math.floor(100 + Math.random() * 899)),
+          event_name: lastParsedReturnData.eventName || 'Realizacja z Karty Zwrotu',
+          dispatch_date: lastParsedReturnData.dispatchDate || retDate,
+          return_date: retDate,
+          status: 'W trakcie',
+          items_json: newItems,
+          dispatch_image: '',
+          return_image: returnImage,
+          created_at: new Date()
+        };
+        events.unshift(ev);
+        if (isCloudOnline) {
+          try { await apiRequest('/events', 'POST', ev); } catch (e) {}
+        }
+      }
+
+      if (!ev) return;
+
+      const wasAlreadySettled = (ev.status === 'Rozliczona');
       ev.return_date = retDate;
       ev.status = 'Rozliczona';
       if (returnImage) ev.return_image = returnImage;
 
       for (let i = 0; i < ev.items_json.length; i++) {
         const item = ev.items_json[i];
-        const retQty = parseInt(document.getElementById(`evRetQty_${i}`).value) || 0;
-        const consQty = parseInt(document.getElementById(`evConsQty_${i}`).value) || 0;
+        const retQty = parseInt(document.getElementById(`evRetQty_${i}`)?.value) || 0;
+        const consQty = parseInt(document.getElementById(`evConsQty_${i}`)?.value) || 0;
         const loss = Math.max(0, item.dispatched - (retQty + consQty));
 
         item.returned = retQty;
@@ -2943,7 +3140,7 @@ Zwróć JSON: { "returnDate": string, "items": [ { "name": string, "consumed": n
           if (match) {
             match.qty += retQty;
             match.inField = Math.max(0, (match.inField || 0) - item.dispatched);
-            recordStockLog(match.id, match.name, 'Event Zwrot', retQty, `Zwrot z ${ev.event_number}`);
+            recordStockLog(match.id, match.name, 'Event Zwrot', retQty, `Zwrot z ${ev.event_number} (Zeszło: ${consQty})`);
             if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${match.id}`, 'PATCH', { qty: match.qty, in_field: match.inField, updated_at: new Date() }); } catch (e) {} }
           }
         }
@@ -2962,7 +3159,6 @@ Zwróć JSON: { "returnDate": string, "items": [ { "name": string, "consumed": n
       renderInventory();
       renderEvents();
 
-      // Od razu otwieramy wygenerowaną Kartę Rozliczenia gotową do pobrania lub wydruku
       printEventSheet(settledEventId, 'RETURN');
     }
 
@@ -3163,7 +3359,6 @@ Zwróć JSON: { "returnDate": string, "items": [ { "name": string, "consumed": n
       if (!item) return;
       const amount = Math.max(1, parseInt(document.getElementById('modalStepQty').value) || 1);
 
-      // Jeśli użytkownik kliknął "Wydaj w teren", przekierowujemy go do Kreatora Karty Wydania z tą pozycją!
       if (type === 'TO_FIELD') {
         const targetId = item.id;
         closeActionModal();
