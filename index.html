@@ -10,38 +10,60 @@
   <meta name="theme-color" content="#0f172a">
   <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22MagazynRC%20System%22%2C%22short_name%22%3A%22MagazynRC%22%2C%22start_url%22%3A%22%2FMagazynRC%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f172a%22%2C%22theme_color%22%3A%22%230f172a%22%7D">
 
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Skaner kodów kreskowych i QR -->
   <script src="https://unpkg.com/html5-qrcode"></script>
-  <!-- Generator Kodów QR -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <style>
     body { -webkit-tap-highlight-color: transparent; }
     #reader__scan_region video { border-radius: 0.75rem; object-fit: cover; }
-    
+
+    /* Na ekranie sekcje wydruku są zawsze ukryte */
+    @media screen {
+      #printableSheet, #printArea { display: none !important; }
+    }
+
+    /* Podczas drukowania pokazujemy wyłącznie aktywny szablon (Karta Wydania lub Kod QR) */
     @media print {
-      body * { visibility: hidden; }
-      #printableSheet, #printableSheet * { visibility: visible; }
-      #printableSheet { position: absolute; left: 0; top: 0; width: 100%; padding: 10px; background: white; color: black; font-family: Arial, sans-serif; }
-      #printArea, #printArea * { visibility: visible; }
-      #printArea { position: absolute; left: 0; top: 0; width: 100%; padding: 15px; text-align: center; background: white; color: black; }
+      @page { margin: 8mm; }
+      body { background: #ffffff !important; color: #000000 !important; margin: 0 !important; padding: 0 !important; }
+      body > *:not(#printableSheet):not(#printArea) { display: none !important; }
+      
+      body.print-mode-sheet #printableSheet {
+        display: block !important;
+        width: 100% !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      body.print-mode-sheet #printArea { display: none !important; }
+
+      body.print-mode-qr #printArea {
+        display: block !important;
+        width: 100% !important;
+        text-align: center !important;
+        padding-top: 20px !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      body.print-mode-qr #printableSheet { display: none !important; }
     }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen pb-32 font-sans select-none" onclick="hideContextMenu()">
+<body class="bg-slate-900 text-slate-100 min-h-screen pb-32 font-sans select-none print-mode-sheet" onclick="hideContextMenu()">
 
   <!-- NAGŁÓWEK GÓRNY -->
   <header class="bg-slate-800/90 backdrop-blur border-b border-slate-700/80 sticky top-0 z-30 px-4 py-2.5 flex items-center justify-between shadow-md">
     <div class="flex items-center space-x-2.5">
       <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-base shadow">M</div>
       <div>
-        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-amber-400 bg-amber-950/70 border border-amber-700/50 px-1 py-0.5 rounded ml-1">v2.7 SYNC-SAFE</span></h1>
+        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v3.1 MASTER</span></h1>
         <p id="syncStatus" class="text-[10px] text-amber-400 font-medium leading-none mt-0.5">Inicjalizacja...</p>
       </div>
     </div>
     <div class="flex items-center gap-1.5">
+      <button onclick="fetchAllData()" class="bg-slate-700/80 hover:bg-slate-700 text-slate-200 text-xs px-2.5 py-1.5 rounded-lg font-medium border border-slate-600/50" title="Odśwież synchronizację">
+        🔄
+      </button>
       <button onclick="exportCSV()" class="bg-slate-700/80 hover:bg-slate-700 text-slate-200 text-xs px-2.5 py-1.5 rounded-lg font-medium flex items-center gap-1 border border-slate-600/50">
         <span>📊</span> CSV
       </button>
@@ -79,7 +101,7 @@
 
     <!-- ZAKŁADKI GŁÓWNE -->
     <div class="flex border-b border-slate-800 gap-3 text-xs font-medium overflow-x-auto pb-1">
-      <button onclick="switchMainTab('stock')" id="tabStockHeaderBtn" class="pb-2 border-b-2 border-emerald-500 text-emerald-400 font-bold whitespace-nowrap">
+      <button onclick="switchMainTab('stock')" id="tabStockHeaderBtn" class="pb-2 border-b-2 border-emerald-500 text-emerald-400 font-bold whitespace-nowrap flex items-center gap-1.5">
         📦 Stany Magazynowe
       </button>
       <button onclick="switchMainTab('deliveries')" id="tabDeliveriesHeaderBtn" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 whitespace-nowrap font-bold flex items-center gap-1.5">
@@ -88,7 +110,7 @@
       <button onclick="switchMainTab('events')" id="tabEventsHeaderBtn" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 whitespace-nowrap font-bold">
         <span>🎉</span> Realizacje / Eventy <span id="activeEventsBadge" class="bg-amber-950 text-amber-300 border border-amber-700/50 text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
       </button>
-      <button onclick="switchMainTab('alerts')" id="tabAlertsHeaderBtn" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1 whitespace-nowrap">
+      <button onclick="switchMainTab('alerts')" id="tabAlertsHeaderBtn" class="pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1 whitespace-nowrap font-bold">
         <span>⚠️</span> Alerty Cen <span id="alertsCountBadge" class="bg-rose-950 text-rose-300 border border-rose-700/50 text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
       </button>
     </div>
@@ -159,7 +181,7 @@
         </div>
         <div class="flex gap-2">
           <button onclick="openGenerateSheetModal()" class="bg-amber-600 hover:bg-amber-500 text-slate-950 font-bold text-xs px-3 py-1.5 rounded-lg flex items-center gap-1 shadow transition">
-            <span>📋</span> Karta Wydania
+            <span>📋</span> Karta Wydania / Event
           </button>
           <button onclick="deleteSelectedItems()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs px-3 py-1.5 rounded-lg flex items-center gap-1 shadow transition">
             <span>🗑️</span> Usuń
@@ -186,15 +208,15 @@
 
     <!-- WIDOK 3: REALIZACJE / EVENTY -->
     <section id="viewEvents" class="hidden space-y-3">
-      <div class="bg-gradient-to-r from-slate-800 to-indigo-950/60 border border-indigo-700/50 rounded-2xl p-3.5 shadow-md flex items-center justify-between">
+      <div class="bg-gradient-to-r from-slate-800 to-indigo-950/60 border border-indigo-700/50 rounded-2xl p-3.5 shadow-md flex items-center justify-between gap-2">
         <div>
           <h3 class="font-bold text-xs text-white flex items-center gap-1.5">
             <span>📋</span> Wydania i Zwroty Napojów / Alkoholu
           </h3>
           <p class="text-[11px] text-slate-300 mt-0.5">Skanuj arkusze wydań, konsumpcji i rozliczaj straty</p>
         </div>
-        <button onclick="triggerDispatchUpload()" class="bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-black text-xs px-3 py-2 rounded-xl shadow transition active:scale-95 flex items-center gap-1.5">
-          <span>📸</span> Nowe Wydanie
+        <button onclick="triggerDispatchUpload()" class="bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-black text-xs px-3 py-2 rounded-xl shadow transition active:scale-95 flex items-center gap-1.5 whitespace-nowrap">
+          <span>📸</span> Skanuj Wydanie
         </button>
       </div>
       <div id="eventsList" class="space-y-3"></div>
@@ -213,6 +235,22 @@
     </section>
 
   </main>
+
+  <!-- MODAL: LIGHTBOX DO PODGLĄDU ZDJĘĆ / SKANÓW -->
+  <div id="imagePreviewModal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
+    <div class="relative max-w-xl w-full bg-slate-900 border border-slate-700 rounded-2xl p-3 flex flex-col items-center shadow-2xl">
+      <div class="w-full flex justify-between items-center border-b border-slate-800 pb-2 mb-2">
+        <h4 id="imagePreviewTitle" class="text-xs font-bold text-white truncate pr-2">Podgląd skanu</h4>
+        <button onclick="closeImagePreviewModal()" class="text-slate-400 hover:text-white text-xl font-black p-1">✕</button>
+      </div>
+      <div class="w-full flex items-center justify-center max-h-[75vh] overflow-auto bg-black/60 rounded-xl p-1" style="touch-action: pinch-zoom;">
+        <img id="imagePreviewElement" src="" alt="Skan dokumentu" class="max-w-full max-h-[72vh] object-contain rounded-lg">
+      </div>
+      <div class="w-full flex justify-end pt-2">
+        <button onclick="closeImagePreviewModal()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-4 py-2 rounded-xl text-xs">Zamknij podgląd</button>
+      </div>
+    </div>
+  </div>
 
   <!-- PŁYWAJĄCE MENU KONTEKSTOWE -->
   <div id="customContextMenu" class="fixed hidden z-50 bg-slate-800/95 border border-slate-700 rounded-xl shadow-2xl py-1.5 w-52 backdrop-blur-md">
@@ -258,6 +296,82 @@
       <span class="text-[10px] font-bold">Nowy</span>
     </button>
   </nav>
+
+  <!-- SZABLON DO DRUKU KARTY WYDANIA / ROZLICZENIA (ZARZĄDZANY PRZEZ CSS @MEDIA PRINT) -->
+  <div id="printableSheet">
+    <div style="border: 2px solid #000; width: 100%; box-sizing: border-box; background: white; color: black; font-family: Arial, sans-serif;">
+      <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 11px;">
+        <tr>
+          <td rowspan="4" style="width: 20%; border: 2px solid #000; font-size: 15px; font-weight: bold; padding: 4px;">ROYAL CATERING</td>
+          <td colspan="2" style="background: #ffff00; font-weight: bold; border: 1px solid #000; padding: 4px;">DATA WYDANIA:</td>
+          <td rowspan="4" id="printSheetTitleHeader" style="width: 25%; background: #ffff00; font-size: 13px; font-weight: 900; border: 2px solid #000; padding: 5px;">WYDANIE NAPOJÓW<br>I ALKOHOLU<br>NA REALIZACJĘ</td>
+          <td colspan="2" style="background: #ffff00; font-weight: bold; border: 1px solid #000; padding: 4px;">DATA ZWROTU:</td>
+        </tr>
+        <tr>
+          <td colspan="2" id="printHeaderDate" style="border: 1px solid #000; font-weight: bold; padding: 4px;">-</td>
+          <td colspan="2" id="printHeaderReturnDate" style="border: 1px solid #000; padding: 4px; font-weight: bold;">-</td>
+        </tr>
+        <tr>
+          <td colspan="2" style="background: #ffff00; font-weight: bold; border: 1px solid #000; padding: 4px;">IMPREZA, #NUMER:</td>
+          <td colspan="2" style="border: 1px solid #000; padding: 4px;">&nbsp;</td>
+        </tr>
+        <tr>
+          <td colspan="2" id="printHeaderEvent" style="border: 1px solid #000; font-weight: bold; padding: 4px;">-</td>
+          <td colspan="2" style="border: 1px solid #000; padding: 4px;">&nbsp;</td>
+        </tr>
+      </table>
+      <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
+        <thead>
+          <tr style="background: #ffff00; font-weight: bold; text-align: center;">
+            <th style="border: 1px solid #000; width: 4%; padding: 4px;">Nr</th>
+            <th style="border: 1px solid #000; width: 36%; padding: 4px; text-align: left;">NAZWA</th>
+            <th style="border: 1px solid #000; width: 6%; padding: 4px;">Jedn.</th>
+            <th style="border: 1px solid #000; width: 8%; padding: 4px;">Wydane</th>
+            <th style="border: 1px solid #000; width: 9%; padding: 4px;">Podpis Magazyn</th>
+            <th style="border: 1px solid #000; width: 9%; background: #d9ead3; padding: 4px;">Sprawdzenie</th>
+            <th style="border: 1px solid #000; width: 9%; background: #d9ead3; padding: 4px;">Konsumpcja</th>
+            <th style="border: 1px solid #000; width: 7%; background: #d9ead3; padding: 4px;">Zwrot</th>
+            <th style="border: 1px solid #000; width: 6%; background: #d9ead3; padding: 4px;">Podpis</th>
+            <th style="border: 1px solid #000; width: 6%; padding: 4px;">Odbiór</th>
+          </tr>
+        </thead>
+        <tbody id="printSheetTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- OBSZAR DRUKU DLA KODÓW QR -->
+  <div id="printArea">
+    <div style="border: 2px dashed #333; padding: 15px; border-radius: 8px; display: inline-block; width: 300px; font-family: Arial, sans-serif;">
+      <h2 id="printItemName" style="font-size: 16px; font-weight: bold; margin: 0 0 5px 0; color: black;"></h2>
+      <p id="printItemCategory" style="font-size: 11px; margin: 0 0 10px 0; color: #555; text-transform: uppercase;"></p>
+      <div id="printQRCode" style="display: flex; justify-content: center; margin: 10px 0;"></div>
+      <p id="printItemBarcode" style="font-size: 14px; font-family: monospace; font-weight: bold; margin: 5px 0 0 0; color: black;"></p>
+    </div>
+  </div>
+
+  <!-- MODAL: GENEROWANIE KARTY WYDANIA Z ZAZNACZONYCH -->
+  <div id="generateSheetModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-3 z-50 overflow-y-auto">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-4 space-y-3.5 shadow-2xl my-4 flex flex-col">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+        <h3 class="text-sm font-bold text-white flex items-center gap-1.5"><span>📋</span> Karta Wydania na Realizację</h3>
+        <button onclick="closeGenerateSheetModal()" class="text-slate-400 hover:text-white p-1">✕</button>
+      </div>
+      <div class="space-y-2.5 text-xs">
+        <div class="grid grid-cols-2 gap-2">
+          <div><label class="text-[10px] text-slate-400 block mb-0.5">Numer imprezy:</label><input type="text" id="genSheetNum" placeholder="#405" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 font-bold text-amber-400"></div>
+          <div><label class="text-[10px] text-slate-400 block mb-0.5">Data wydania:</label><input type="text" id="genSheetDate" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-slate-200"></div>
+        </div>
+        <div><label class="text-[10px] text-slate-400 block mb-0.5">Nazwa imprezy / Klient:</label><input type="text" id="genSheetName" placeholder="Bankiet Firmowy Skyworks" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 font-bold text-white"></div>
+      </div>
+      <div id="genSheetItemsList" class="space-y-1.5 max-h-56 overflow-y-auto pr-1"></div>
+      <div class="flex flex-wrap justify-end gap-2 pt-2 border-t border-slate-700">
+        <button onclick="closeGenerateSheetModal()" class="px-3 py-1.5 rounded-xl text-xs text-slate-400 hover:bg-slate-700">Anuluj</button>
+        <button onclick="printGeneratedSheet(false)" class="bg-slate-700 hover:bg-slate-600 text-white font-bold px-3 py-1.5 rounded-xl text-xs shadow">🖨️ Tylko Drukuj</button>
+        <button onclick="printGeneratedSheet(true)" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-3.5 py-1.5 rounded-xl text-xs shadow">🚚 Wydaj w teren + Drukuj</button>
+      </div>
+    </div>
+  </div>
 
   <!-- MODAL: ZLICZANIE TOWARU ZE ZDJĘCIA WÓZKA / PÓŁKI -->
   <div id="shelfCountModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
@@ -312,7 +426,7 @@
       <div id="aiLoadingState" class="py-12 flex flex-col items-center justify-center space-y-3">
         <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
         <p class="text-sm text-slate-200 font-medium">Odczytywanie pozycji, NIP i terminu płatności...</p>
-        <p class="text-xs text-slate-500">Weryfikacja cen i danych bankowych dostawcy</p>
+        <p class="text-xs text-slate-500">Automatyczne przeliczanie zgrzewek na sztuki</p>
       </div>
 
       <div id="aiItemsContainer" class="hidden flex-1 overflow-y-auto space-y-3 pr-1">
@@ -349,7 +463,7 @@
           </div>
         </div>
 
-        <p class="text-[11px] text-slate-300">Wykryte towary (pozycje nieistniejące zostaną automatycznie utworzone):</p>
+        <p class="text-[11px] text-slate-300">Wykryte towary (jeśli faktura ma zgrzewki, kliknij przycisk rozbicia ×6 / ×12 / ×24):</p>
         <div id="aiItemsList" class="space-y-2.5"></div>
       </div>
 
@@ -362,70 +476,7 @@
     </div>
   </div>
 
-  <!-- MODAL: GENEROWANIE KARTY WYDANIA -->
-  <div id="generateSheetModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-3 z-50 overflow-y-auto">
-    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-4 space-y-3.5 shadow-2xl my-4 flex flex-col">
-      <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-        <h3 class="text-sm font-bold text-white flex items-center gap-1.5"><span>📋</span> Karta Wydania na Realizację</h3>
-        <button onclick="closeGenerateSheetModal()" class="text-slate-400 hover:text-white p-1">✕</button>
-      </div>
-      <div class="space-y-2.5 text-xs">
-        <div class="grid grid-cols-2 gap-2">
-          <div><label class="text-[10px] text-slate-400 block mb-0.5">Numer imprezy:</label><input type="text" id="genSheetNum" placeholder="#405" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 font-bold text-amber-400"></div>
-          <div><label class="text-[10px] text-slate-400 block mb-0.5">Data wydania:</label><input type="text" id="genSheetDate" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-slate-200"></div>
-        </div>
-        <div><label class="text-[10px] text-slate-400 block mb-0.5">Nazwa imprezy / Klient:</label><input type="text" id="genSheetName" placeholder="Bankiet Firmowy Skyworks" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 font-bold text-white"></div>
-      </div>
-      <div id="genSheetItemsList" class="space-y-1.5 max-h-56 overflow-y-auto pr-1"></div>
-      <div class="flex justify-end gap-2 pt-2 border-t border-slate-700">
-        <button onclick="closeGenerateSheetModal()" class="px-3 py-1.5 rounded-xl text-xs text-slate-400 hover:bg-slate-700">Anuluj</button>
-        <button onclick="printGeneratedSheet()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-1.5 rounded-xl text-xs shadow">🖨️ Drukuj Kartę</button>
-      </div>
-    </div>
-  </div>
-
-  <div id="printableSheet" class="hidden">
-    <div style="border: 2px solid #000; width: 100%; box-sizing: border-box;">
-      <table style="width: 100%; border-collapse: collapse; text-align: center; font-size: 11px;">
-        <tr>
-          <td rowspan="4" style="width: 20%; border: 2px solid #000; font-size: 15px; font-weight: bold;">ROYAL CATERING</td>
-          <td colspan="2" style="background: #ffff00; font-weight: bold; border: 1px solid #000; padding: 4px;">DATA WYDANIA:</td>
-          <td rowspan="4" style="width: 25%; background: #ffff00; font-size: 13px; font-weight: 900; border: 2px solid #000; padding: 5px;">WYDANIE NAPOJÓW<br>I ALKOHOLU<br>NA REALIZACJĘ</td>
-          <td colspan="2" style="background: #ffff00; font-weight: bold; border: 1px solid #000; padding: 4px;">DATA ZWROTU:</td>
-        </tr>
-        <tr>
-          <td colspan="2" id="printHeaderDate" style="border: 1px solid #000; font-weight: bold; padding: 4px;">-</td>
-          <td colspan="2" style="border: 1px solid #000; padding: 4px;">&nbsp;</td>
-        </tr>
-        <tr>
-          <td colspan="2" style="background: #ffff00; font-weight: bold; border: 1px solid #000; padding: 4px;">IMPREZA, #NUMER:</td>
-          <td colspan="2" style="border: 1px solid #000; padding: 4px;">&nbsp;</td>
-        </tr>
-        <tr>
-          <td colspan="2" id="printHeaderEvent" style="border: 1px solid #000; font-weight: bold; padding: 4px;">-</td>
-          <td colspan="2" style="border: 1px solid #000; padding: 4px;">&nbsp;</td>
-        </tr>
-      </table>
-      <table style="width: 100%; border-collapse: collapse; font-size: 10px;">
-        <thead>
-          <tr style="background: #ffff00; font-weight: bold; text-align: center;">
-            <th style="border: 1px solid #000; width: 4%; padding: 4px;">Nr</th>
-            <th style="border: 1px solid #000; width: 36%; padding: 4px; text-align: left;">NAZWA</th>
-            <th style="border: 1px solid #000; width: 6%; padding: 4px;">Jedn.</th>
-            <th style="border: 1px solid #000; width: 8%; padding: 4px;">Wydane</th>
-            <th style="border: 1px solid #000; width: 9%; padding: 4px;">Podpis Magazyn</th>
-            <th style="border: 1px solid #000; width: 9%; background: #d9ead3; padding: 4px;">Sprawdzenie</th>
-            <th style="border: 1px solid #000; width: 9%; background: #d9ead3; padding: 4px;">Konsumpcja</th>
-            <th style="border: 1px solid #000; width: 7%; background: #d9ead3; padding: 4px;">Zwrot</th>
-            <th style="border: 1px solid #000; width: 6%; background: #d9ead3; padding: 4px;">Podpis</th>
-            <th style="border: 1px solid #000; width: 6%; padding: 4px;">Odbiór</th>
-          </tr>
-        </thead>
-        <tbody id="printSheetTableBody"></tbody>
-      </table>
-    </div>
-  </div>
-
+  <!-- MODAL: SZYBKA AKCJA DLA TOWARU -->
   <div id="actionModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3.5 shadow-2xl my-4">
       <div class="flex justify-between items-start">
@@ -472,6 +523,7 @@
     </div>
   </div>
 
+  <!-- MODAL: KARTA WYDANIA EVENTU (WYJŚCIE) -->
   <div id="eventDispatchModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 shadow-2xl my-4 max-h-[94vh] flex flex-col">
       <div class="flex justify-between items-start border-b border-slate-700 pb-2.5">
@@ -502,6 +554,7 @@
     </div>
   </div>
 
+  <!-- MODAL: ROZLICZENIE POWROTU / ZWROTU -->
   <div id="eventReturnModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 shadow-2xl my-4 max-h-[94vh] flex flex-col">
       <div class="flex justify-between items-start border-b border-slate-700 pb-2.5">
@@ -529,6 +582,7 @@
     </div>
   </div>
 
+  <!-- MODAL: EDYCJA DANYCH -->
   <div id="editItemModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
     <form onsubmit="saveEditedItem(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-700 pb-2">
@@ -554,6 +608,7 @@
     </form>
   </div>
 
+  <!-- MODAL: NOWA POZYCJA -->
   <div id="newItemModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
     <form onsubmit="saveNewItem(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl">
       <div class="flex justify-between items-center"><h3 class="text-sm font-bold text-white">Nowa pozycja</h3><button type="button" onclick="closeNewItemModal()" class="text-slate-400 hover:text-white p-1">✕</button></div>
@@ -575,1661 +630,50 @@
     </form>
   </div>
 
-  <div id="printArea" class="hidden">
-    <div style="border: 2px dashed #333; padding: 15px; border-radius: 8px; display: inline-block; width: 320px; font-family: Arial, sans-serif;">
-      <h2 id="printItemName" style="font-size: 16px; font-weight: bold; margin: 0 0 5px 0; color: black;"></h2>
-      <p id="printItemCategory" style="font-size: 11px; margin: 0 0 10px 0; color: #555; text-transform: uppercase;"></p>
-      <div id="printQRCode" style="display: flex; justify-content: center; margin: 10px 0;"></div>
-      <p id="printItemBarcode" style="font-size: 14px; font-family: monospace; font-weight: bold; margin: 5px 0 0 0; color: black;"></p>
-    </div>
-  </div>
-
   <script>
     // --- KONFIGURACJA SUPABASE I GEMINI API ---
     const SUPABASE_BASE_URL = 'https://gojacqzjkrfjlnwokyeg.supabase.co/rest/v1';
     const SUPABASE_KEY = 'sb_publishable_EuUrE98PR8SAVwnrIMP60g_RUAL0KSp';
     const GEMINI_API_KEY = 'AQ.Ab8RN6JQHVTxqmEE-mAigOjJGt4ghfMGxGYDTjNUt0MGeq2f5Q';
 
-    let inventory = JSON.parse(localStorage.getItem('magazyn_offline_items')) || [];
-    let deliveries = JSON.parse(localStorage.getItem('magazyn_offline_deliveries')) || [];
-    let priceAlerts = JSON.parse(localStorage.getItem('magazyn_offline_price_alerts')) || [];
-    let events = JSON.parse(localStorage.getItem('magazyn_offline_events')) || [];
-    let stockLogs = JSON.parse(localStorage.getItem('magazyn_offline_stock_logs')) || [];
-
-    let selectedItemId = null;
-    let contextMenuItemId = null;
-    let html5QrCode = null;
-    let isCameraRunning = false;
-    let isCloudOnline = false;
-
-    let currentExtractedDelivery = null;
-    let currentExtractedEventDispatch = null;
-    let currentActiveReturnEventId = null;
-    let currentShelfCountItems = [];
-
-    let isSelectMode = false;
-    let selectedItemIds = new Set();
-
-    function triggerScanFeedback() {
-      if (navigator.vibrate) {
-        try { navigator.vibrate(60); } catch (e) {}
-      }
-    }
-
-    function normalizeText(text) {
-      return (text || '').toLowerCase()
-        .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()\[\]]/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
-    }
-
-    function findBestInventoryMatch(targetName) {
-      if (!targetName) return null;
-      const cleanTarget = normalizeText(targetName);
-      if (cleanTarget.length < 3) return null;
-
-      for (const item of inventory) {
-        const cleanItem = normalizeText(item.name);
-        if (cleanTarget === cleanItem) return item;
-      }
-
-      const targetWords = cleanTarget.split(' ').filter(w => w.length > 2);
-      let bestItem = null;
-      let maxOverlap = 0;
-
-      for (const item of inventory) {
-        const cleanItem = normalizeText(item.name);
-        const itemWords = cleanItem.split(' ').filter(w => w.length > 2);
-        let overlap = 0;
-        for (const word of targetWords) {
-          if (itemWords.includes(word)) overlap++;
-        }
-        if (overlap >= 3 && overlap > maxOverlap) {
-          maxOverlap = overlap;
-          bestItem = item;
-        }
-      }
-      return bestItem;
-    }
-
-    async function recordStockLog(itemId, itemName, actionType, qtyChange, note = '') {
-      const logEntry = {
-        id: Date.now().toString() + '_' + Math.floor(Math.random() * 1000),
-        item_id: String(itemId),
-        item_name: String(itemName),
-        action_type: actionType,
-        qty_change: qtyChange,
-        note: note,
-        created_at: new Date()
-      };
-      stockLogs.unshift(logEntry);
-      localStorage.setItem('magazyn_offline_stock_logs', JSON.stringify(stockLogs));
-
-      if (isCloudOnline) {
-        try { await apiRequest('/stock_logs', 'POST', logEntry); } catch (e) {}
-      }
-    }
-
-    async function apiRequest(endpoint, method = 'GET', body = null) {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000);
-
-      const headers = {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=representation'
-      };
-
-      const options = { method, headers, signal: controller.signal };
-      if (body) options.body = JSON.stringify(body);
-
+    // --- BEZPIECZNY ODCZYT I ZAPIS DO LOCALSTORAGE (CHRONI PRZED PRZEPEŁNIENIEM 5MB) ---
+    function safeGetLocal(key) {
       try {
-        const res = await fetch(`${SUPABASE_BASE_URL}${endpoint}`, options);
-        clearTimeout(timeoutId);
-        if (!res.ok) {
-          const errBody = await res.text();
-          throw new Error(`HTTP ${res.status}: ${errBody}`);
-        }
-        return await res.json();
-      } catch (err) {
-        clearTimeout(timeoutId);
-        throw err;
-      }
-    }
-
-    // --- BEZPIECZNE POBIERANIE BEZ KASOWANIA LOKALNYCH FAKTUR ---
-    async function fetchAllData() {
-      const syncEl = document.getElementById('syncStatus');
-      if (syncEl) syncEl.innerText = 'Łączenie z bazą...';
-      
-      try {
-        const invData = await apiRequest('/inventory?select=*&order=name.asc');
-        inventory = invData.map(i => ({
-          id: String(i.id),
-          barcode: String(i.barcode || ''),
-          name: String(i.name || ''),
-          category: String(i.category || 'Ogólne'),
-          location: String(i.location || '-'),
-          qty: Number(i.qty) || 0,
-          inField: Number(i.in_field) || 0,
-          minQty: Number(i.min_qty) || 0,
-          unit: String(i.unit || 'szt.'),
-          price: Number(i.price) || 0.00
-        }));
-        localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
-        isCloudOnline = true;
-        if (syncEl) {
-          syncEl.innerText = '🟢 Chmura aktywna na żywo';
-          syncEl.className = 'text-[10px] text-emerald-400 font-bold';
-        }
+        return JSON.parse(localStorage.getItem(key)) || [];
       } catch (e) {
-        isCloudOnline = false;
-        if (syncEl) {
-          syncEl.innerText = '🟡 Tryb lokalny (pełna gotowość)';
-          syncEl.className = 'text-[10px] text-amber-400 font-bold';
-        }
+        return [];
       }
+    }
 
-      // Bezpieczna synchronizacja faktur
+    function safeSetLocal(key, data) {
       try {
-        const cloudDeliveries = await apiRequest('/deliveries?select=*&order=created_at.desc');
-        if (cloudDeliveries && cloudDeliveries.length > 0) {
-          deliveries = cloudDeliveries;
-          localStorage.setItem('magazyn_offline_deliveries', JSON.stringify(deliveries));
-        } else {
-          // Jeśli chmura jest pusta, ale mamy faktury w pamięci telefonu, dosłuchajmy je do Supabase
-          const localDeliv = JSON.parse(localStorage.getItem('magazyn_offline_deliveries')) || [];
-          if (localDeliv.length > 0) {
-            deliveries = localDeliv;
-            for (const d of deliveries) {
-              try { await apiRequest('/deliveries', 'POST', d); } catch(err) {}
-            }
-          }
-        }
+        localStorage.setItem(key, JSON.stringify(data));
       } catch (e) {
-        // W razie błędu sieci/bazy, trzymamy lokalne faktury
-        deliveries = JSON.parse(localStorage.getItem('magazyn_offline_deliveries')) || [];
-      }
-
-      try { events = await apiRequest('/events?select=*&order=created_at.desc'); localStorage.setItem('magazyn_offline_events', JSON.stringify(events)); } catch (e) {}
-      try { priceAlerts = await apiRequest('/price_alerts?select=*&order=created_at.desc'); localStorage.setItem('magazyn_offline_price_alerts', JSON.stringify(priceAlerts)); } catch (e) {}
-      try { stockLogs = await apiRequest('/stock_logs?select=*&order=created_at.desc&limit=100'); localStorage.setItem('magazyn_offline_stock_logs', JSON.stringify(stockLogs)); } catch (e) {}
-
-      renderInventory();
-      renderEvents();
-      renderPriceAlerts();
-      renderDeliveries();
-    }
-
-    function renderInventory() {
-      const search = String(document.getElementById('searchFilter')?.value || '').toLowerCase();
-      const filter = document.getElementById('categoryFilter')?.value || 'ALL';
-      const list = document.getElementById('inventoryList');
-      if (!list) return;
-
-      const statTotal = document.getElementById('statTotalItems');
-      const statField = document.getElementById('statInField');
-      const statVal = document.getElementById('statTotalValue');
-
-      if (statTotal) statTotal.innerText = inventory.length;
-      if (statField) statField.innerText = inventory.reduce((sum, i) => sum + (Number(i.inField) || 0), 0);
-      
-      const totalVal = inventory.reduce((sum, i) => sum + ((Number(i.qty) || 0) * (Number(i.price) || 0)), 0);
-      if (statVal) statVal.innerText = `${totalVal.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} zł`;
-
-      const filtered = inventory.filter(item => {
-        const name = String(item.name || '').toLowerCase();
-        const barcode = String(item.barcode || '').toLowerCase();
-        const cat = String(item.category || '').toLowerCase();
-        const loc = String(item.location || '').toLowerCase();
-
-        const matchesText = name.includes(search) || barcode.includes(search) || cat.includes(search) || loc.includes(search);
-        if (!matchesText) return false;
-        if (filter === 'LOW') return (Number(item.qty) || 0) <= (Number(item.minQty) || 0);
-        if (filter === 'FIELD') return (Number(item.inField) || 0) > 0;
-        return true;
-      });
-
-      if (filtered.length === 0) {
-        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak pozycji w magazynie. Kliknij "Nowy" na dole, aby dodać.</div>`;
-        return;
-      }
-
-      list.innerHTML = filtered.map(item => {
-        const isLow = (Number(item.qty) || 0) <= (Number(item.minQty) || 0);
-        const isChecked = selectedItemIds.has(item.id);
-        const itemVal = ((item.qty || 0) * (item.price || 0)).toFixed(2);
-
-        return `
-          <div 
-            oncontextmenu="handleItemContextMenu(event, '${item.id}')"
-            onclick="handleItemCardClick(event, '${item.id}')" 
-            class="bg-slate-800 hover:bg-slate-750 border ${isLow ? 'border-rose-500/60' : 'border-slate-700/80'} rounded-xl p-3 flex items-center justify-between cursor-pointer transition shadow-sm active:scale-[0.99] relative"
-          >
-            ${isSelectMode ? `
-              <div class="pr-2.5 flex items-center" onclick="event.stopPropagation()">
-                <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSelectItem('${item.id}', this.checked)" class="w-4 h-4 rounded text-indigo-600 bg-slate-900 border-slate-600 cursor-pointer">
-              </div>
-            ` : ''}
-
-            <div class="space-y-1 pr-2 flex-1">
-              <div class="flex items-center gap-1.5 flex-wrap">
-                <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-slate-700 text-slate-300">${item.category || 'Ogólne'}</span>
-                <span class="text-[11px] text-slate-400">📍 ${item.location || 'Brak lok.'}</span>
-                <span class="text-[11px] text-slate-500 font-mono">#${item.barcode}</span>
-              </div>
-              <h4 class="font-bold text-xs text-white">${item.name}</h4>
-              <div class="flex items-center gap-2 text-[10px]">
-                <span class="text-emerald-400 font-bold">${Number(item.price || 0).toFixed(2)} zł / ${item.unit || 'szt.'}</span>
-                <span class="text-slate-500">(Wartość: ${itemVal} zł)</span>
-                ${isLow ? `<span class="text-rose-400 font-medium">⚠️ Niski stan (min: ${item.minQty})</span>` : ''}
-              </div>
-            </div>
-
-            <div class="text-right flex items-center gap-2">
-              ${item.inField > 0 ? `
-                <div class="bg-amber-950/60 border border-amber-700/50 px-2 py-0.5 rounded-lg text-center">
-                  <span class="text-[9px] text-amber-300 block">Teren</span>
-                  <span class="font-bold text-xs text-amber-400">${item.inField}</span>
-                </div>
-              ` : ''}
-              <div class="bg-slate-900 px-2.5 py-1 rounded-xl border border-slate-700 min-w-[56px] text-center">
-                <span class="text-[9px] text-slate-400 block">Magazyn</span>
-                <span class="font-black text-sm ${isLow ? 'text-rose-400' : 'text-emerald-400'}">${item.qty}</span>
-                <span class="text-[9px] text-slate-400">${item.unit || 'szt.'}</span>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function renderDeliveries() {
-      const list = document.getElementById('deliveriesList');
-      if (!list) return;
-
-      const unpaidList = deliveries.filter(d => (d.payment_status || 'Do zapłaty') === 'Do zapłaty');
-      const unpaidCountBadge = document.getElementById('unpaidCountBadge');
-      if (unpaidCountBadge) {
-        if (unpaidList.length > 0) {
-          unpaidCountBadge.innerText = unpaidList.length;
-          unpaidCountBadge.classList.remove('hidden');
-        } else {
-          unpaidCountBadge.classList.add('hidden');
-        }
-      }
-
-      const unpaidSum = unpaidList.reduce((sum, d) => sum + (parseFloat(String(d.total_gross).replace(',', '.')) || 0), 0);
-      const statUnpaid = document.getElementById('statUnpaidInvoices');
-      if (statUnpaid) statUnpaid.innerText = `${unpaidSum.toLocaleString('pl-PL', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} zł`;
-
-      if (deliveries.length === 0) {
-        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak zarejestrowanych faktur. Kliknij "Nowa Faktura" u góry.</div>`;
-        return;
-      }
-
-      list.innerHTML = deliveries.map(d => {
-        let items = [];
+        // Jeśli pamięć przeglądarki jest pełna przez duże zdjęcia base64, odchudzamy najstarsze skany lokalnie
         try {
-          items = typeof d.items_json === 'string' ? JSON.parse(d.items_json) : (d.items_json || []);
-        } catch (e) { items = []; }
-
-        const isPaid = (d.payment_status || 'Do zapłaty') === 'Opłacona';
-
-        return `
-          <div class="bg-slate-800 border ${isPaid ? 'border-slate-700' : 'border-rose-900/60'} rounded-2xl p-3.5 space-y-2.5 shadow-md">
-            <div class="flex justify-between items-start">
-              <div>
-                <div class="flex items-center gap-2">
-                  <span class="text-[11px] font-mono font-bold text-indigo-400">FAKTURA: ${d.doc_number || '-'}</span>
-                  <span class="text-[9px] font-bold px-1.5 py-0.2 rounded ${isPaid ? 'bg-emerald-950 text-emerald-300 border border-emerald-700/50' : 'bg-rose-950 text-rose-300 border border-rose-700/50'}">
-                    ${isPaid ? '✓ OPŁACONA' : '⏳ DO ZAPŁATY'}
-                  </span>
-                </div>
-                <h4 class="font-bold text-sm text-white mt-1">${d.supplier || 'Dostawca'}</h4>
-                ${d.nip ? `<span class="text-[10px] text-slate-400 block font-mono">NIP: ${d.nip}</span>` : ''}
-                <p class="text-[10px] text-slate-400 mt-0.5">Wystawiono: ${new Date(d.created_at || Date.now()).toLocaleDateString('pl-PL')}</p>
-              </div>
-              <div class="text-right">
-                <span class="text-xs font-black text-emerald-400 block">${d.total_gross ? d.total_gross + ' PLN' : ''}</span>
-                <span class="text-[10px] font-bold text-rose-400 block mt-0.5">Termin: ${d.payment_due_date || 'Brak'}</span>
-              </div>
-            </div>
-
-            ${d.bank_account ? `
-              <div class="bg-slate-900/90 rounded-lg p-2 flex items-center justify-between text-[11px] border border-slate-800">
-                <div class="truncate mr-2">
-                  <span class="text-[9px] text-slate-400 block">Konto do przelewu:</span>
-                  <span class="font-mono text-slate-200 select-all">${d.bank_account}</span>
-                </div>
-                <button onclick="copyToClipboard('${d.bank_account}')" class="bg-slate-800 hover:bg-slate-700 text-indigo-300 px-2 py-1 rounded text-[10px] whitespace-nowrap">
-                  Kopiuj
-                </button>
-              </div>
-            ` : ''}
-
-            <div class="bg-slate-900/80 rounded-xl p-2.5 border border-slate-800 space-y-1">
-              <span class="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">Produkty na tej fakturze (${items.length}):</span>
-              <div class="space-y-1 max-h-36 overflow-y-auto pr-1">
-                ${items.map(it => `
-                  <div class="flex justify-between items-center text-xs text-slate-200 border-b border-slate-800/60 pb-0.5">
-                    <span class="truncate pr-2 font-medium text-[11px]">• ${it.name}</span>
-                    <div class="flex items-center gap-2 whitespace-nowrap">
-                      ${it.netPrice ? `<span class="text-slate-400 text-[10px]">${Number(it.netPrice).toFixed(2)} zł</span>` : ''}
-                      <span class="font-bold text-emerald-400 text-[11px]">+${it.qty} ${it.unit || 'szt.'}</span>
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-
-            <div class="flex justify-between items-center pt-1 border-t border-slate-700/80 text-xs">
-              <button onclick="togglePaymentStatus('${d.id}')" class="text-[11px] font-bold ${isPaid ? 'text-amber-400 hover:underline' : 'text-emerald-400 hover:underline'}">
-                ${isPaid ? 'Cofnij status (Oznacz jako nieopłacona)' : '✓ Oznacz jako opłacona'}
-              </button>
-              ${d.image_url ? `<a href="${d.image_url}" target="_blank" class="text-[10px] text-indigo-300 hover:underline">Podgląd skanu ↗</a>` : ''}
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    async function togglePaymentStatus(deliveryId) {
-      const d = deliveries.find(x => x.id === deliveryId);
-      if (!d) return;
-
-      d.payment_status = (d.payment_status === 'Opłacona') ? 'Do zapłaty' : 'Opłacona';
-      localStorage.setItem('magazyn_offline_deliveries', JSON.stringify(deliveries));
-      renderDeliveries();
-      triggerScanFeedback();
-
-      if (isCloudOnline) {
-        try {
-          await apiRequest(`/deliveries?id=eq.${deliveryId}`, 'PATCH', { payment_status: d.payment_status });
-        } catch (e) {}
-      }
-    }
-
-    function copyToClipboard(text) {
-      navigator.clipboard.writeText(text).then(() => {
-        alert("Numer konta skopiowany: " + text);
-        triggerScanFeedback();
-      });
-    }
-
-    function renderEvents() {
-      const list = document.getElementById('eventsList');
-      if (!list) return;
-
-      const activeCount = events.filter(e => e.status === 'W trakcie').length;
-      const statEv = document.getElementById('statActiveEvents');
-      if (statEv) statEv.innerText = activeCount;
-
-      const badge = document.getElementById('activeEventsBadge');
-      if (badge) {
-        if (activeCount > 0) { badge.innerText = activeCount; badge.classList.remove('hidden'); }
-        else badge.classList.add('hidden');
-      }
-
-      if (events.length === 0) {
-        list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak zarejestrowanych wydań na eventy. Kliknij "Nowe Wydanie" u góry.</div>`;
-        return;
-      }
-
-      list.innerHTML = events.map(ev => {
-        const isPending = ev.status === 'W trakcie';
-        let items = [];
-        try { items = typeof ev.items_json === 'string' ? JSON.parse(ev.items_json) : (ev.items_json || []); } catch (e) {}
-
-        return `
-          <div class="bg-slate-800 border ${isPending ? 'border-amber-600/70' : 'border-slate-700/80'} rounded-2xl p-3.5 space-y-2.5 shadow-md">
-            <div class="flex justify-between items-start">
-              <div>
-                <div class="flex items-center gap-2">
-                  <span class="font-mono text-xs font-black text-amber-400">${ev.event_number || '#EVENT'}</span>
-                  <span class="text-[9px] font-bold px-2 py-0.5 rounded ${isPending ? 'bg-amber-950 text-amber-300 border border-amber-700/50' : 'bg-emerald-950 text-emerald-300 border border-emerald-700/50'}">
-                    ${isPending ? '🚚 W TRAKCIE IMPREZY' : '✓ ROZLICZONA'}
-                  </span>
-                </div>
-                <h4 class="font-bold text-sm text-white mt-1">${ev.event_name}</h4>
-                <p class="text-[10px] text-slate-400 mt-0.5">Wydano: ${ev.dispatch_date || '-'} ${ev.return_date ? `• Zwrot: ${ev.return_date}` : ''}</p>
-              </div>
-
-              ${isPending ? `
-                <button onclick="triggerReturnUpload('${ev.id}')" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs px-3 py-1.5 rounded-xl shadow transition active:scale-95 flex items-center gap-1">
-                  <span>📸</span> Rozlicz Zwrot
-                </button>
-              ` : `
-                <span class="text-xs text-emerald-400 font-bold">Zamknięta</span>
-              `}
-            </div>
-
-            <div class="bg-slate-900/90 rounded-xl p-2.5 text-xs space-y-1.5 border border-slate-800">
-              <div class="grid grid-cols-12 text-[10px] text-slate-400 font-bold border-b border-slate-800 pb-1">
-                <span class="col-span-6">Nazwa asortymentu</span>
-                <span class="col-span-2 text-center">Wydano</span>
-                <span class="col-span-2 text-center">Zwrot</span>
-                <span class="col-span-2 text-right">Zeszło</span>
-              </div>
-              ${items.map(it => {
-                const hasLoss = (it.loss || 0) > 0;
-                return `
-                  <div class="grid grid-cols-12 text-[11px] items-center text-slate-200">
-                    <span class="col-span-6 truncate font-medium">
-                      ${it.name}
-                      ${hasLoss ? `<span class="block text-[9px] text-rose-400 font-bold">⚠️ Strata: -${it.loss} ${it.unit}</span>` : ''}
-                    </span>
-                    <span class="col-span-2 text-center font-bold text-amber-400">${it.dispatched}</span>
-                    <span class="col-span-2 text-center font-bold ${it.returned !== undefined ? 'text-emerald-400' : 'text-slate-500'}">${it.returned !== undefined ? it.returned : '-'}</span>
-                    <span class="col-span-2 text-right font-bold text-indigo-300">${it.consumed !== undefined ? it.consumed : '-'}</span>
-                  </div>
-                `;
-              }).join('')}
-            </div>
-
-            <div class="flex justify-between items-center pt-1 text-[11px]">
-              <div class="flex gap-2">
-                ${ev.dispatch_image ? `<a href="${ev.dispatch_image}" target="_blank" class="text-slate-400 hover:text-indigo-300 underline">Karta wydania ↗</a>` : ''}
-                ${ev.return_image ? `<a href="${ev.return_image}" target="_blank" class="text-slate-400 hover:text-indigo-300 underline">Karta zwrotu ↗</a>` : ''}
-              </div>
-              <button onclick="deleteEvent('${ev.id}')" class="text-rose-400 hover:underline text-[10px]">Usuń realizację</button>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function renderPriceAlerts() {
-      const list = document.getElementById('alertsList');
-      if (!list) return;
-      const badge = document.getElementById('alertsCountBadge');
-      if (badge) {
-        if (priceAlerts.length > 0) { badge.innerText = priceAlerts.length; badge.classList.remove('hidden'); }
-        else badge.classList.add('hidden');
-      }
-      if (priceAlerts.length === 0) { list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak zarejestrowanych zmian cenowych.</div>`; return; }
-      list.innerHTML = priceAlerts.map(a => `
-        <div class="bg-slate-800 border ${a.diff_percent > 0 ? 'border-rose-600/60' : 'border-emerald-600/60'} rounded-xl p-3 flex justify-between">
-          <div>
-            <span class="text-[9px] font-bold px-1.5 py-0.5 rounded ${a.diff_percent > 0 ? 'bg-rose-950 text-rose-300' : 'bg-emerald-950 text-emerald-300'}">
-              ${a.diff_percent > 0 ? `🔺 +${a.diff_percent}%` : `🔻 ${a.diff_percent}%`}
-            </span>
-            <h4 class="font-bold text-xs text-white mt-1">${a.item_name}</h4>
-            <p class="text-[10px] text-slate-400">${a.supplier || ''} • ${a.doc_number || ''}</p>
-          </div>
-          <div class="text-right">
-            <span class="text-xs text-slate-400 line-through block">${Number(a.old_price).toFixed(2)} zł</span>
-            <span class="text-sm font-black ${a.diff_percent > 0 ? 'text-rose-400' : 'text-emerald-400'}">${Number(a.new_price).toFixed(2)} zł</span>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function clearPriceAlerts() {
-      if (!confirm("Wyczyścić alerty?")) return;
-      priceAlerts = [];
-      localStorage.setItem('magazyn_offline_price_alerts', JSON.stringify([]));
-      renderPriceAlerts();
-    }
-
-    // --- PRZEŁĄCZANIE ZAKŁADEK ---
-    function switchMainTab(tab) {
-      document.getElementById('viewStock').classList.add('hidden');
-      document.getElementById('viewEvents').classList.add('hidden');
-      document.getElementById('viewAlerts').classList.add('hidden');
-      document.getElementById('viewDeliveries').classList.add('hidden');
-
-      const tabs = ['Stock', 'Events', 'Alerts', 'Deliveries'];
-      tabs.forEach(t => {
-        const hBtn = document.getElementById(`tab${t}HeaderBtn`);
-        const nBtn = document.getElementById(`navBtn${t}`);
-        if (hBtn) hBtn.className = 'pb-2 border-b-2 border-transparent text-slate-400 hover:text-slate-200 whitespace-nowrap font-bold flex items-center gap-1.5';
-        if (nBtn) nBtn.className = 'flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200 py-1 px-2.5 transition active:scale-95';
-      });
-
-      if (tab === 'stock') {
-        document.getElementById('viewStock').classList.remove('hidden');
-        document.getElementById('tabStockHeaderBtn').className = 'pb-2 border-b-2 border-emerald-500 text-emerald-400 font-bold whitespace-nowrap flex items-center gap-1.5';
-        document.getElementById('navBtnStock').className = 'flex flex-col items-center gap-1 text-emerald-400 py-1 px-2.5 transition active:scale-95';
-        renderInventory();
-      } else if (tab === 'deliveries') {
-        document.getElementById('viewDeliveries').classList.remove('hidden');
-        document.getElementById('tabDeliveriesHeaderBtn').className = 'pb-2 border-b-2 border-indigo-500 text-indigo-400 font-bold whitespace-nowrap flex items-center gap-1.5';
-        document.getElementById('navBtnDeliveries').className = 'flex flex-col items-center gap-1 text-indigo-400 py-1 px-2.5 transition active:scale-95';
-        renderDeliveries();
-      } else if (tab === 'events') {
-        document.getElementById('viewEvents').classList.remove('hidden');
-        document.getElementById('tabEventsHeaderBtn').className = 'pb-2 border-b-2 border-amber-500 text-amber-400 font-bold whitespace-nowrap flex items-center gap-1.5';
-        document.getElementById('navBtnEvents').className = 'flex flex-col items-center gap-1 text-amber-400 py-1 px-2.5 transition active:scale-95';
-        renderEvents();
-      } else if (tab === 'alerts') {
-        document.getElementById('viewAlerts').classList.remove('hidden');
-        document.getElementById('tabAlertsHeaderBtn').className = 'pb-2 border-b-2 border-rose-500 text-rose-400 font-bold whitespace-nowrap flex items-center gap-1.5';
-        document.getElementById('navBtnAlerts').className = 'flex flex-col items-center gap-1 text-rose-400 py-1 px-2.5 transition active:scale-95';
-        renderPriceAlerts();
-      }
-      triggerScanFeedback();
-    }
-
-    // --- ZLICZANIE TOWARU ZE ZDJĘCIA WÓZKA / PÓŁKI ---
-    function triggerShelfCountUpload() {
-      document.getElementById('shelfCountInput').click();
-    }
-
-    async function processShelfCountImage(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const modal = document.getElementById('shelfCountModal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-      document.getElementById('shelfCountLoading').classList.remove('hidden');
-      document.getElementById('shelfCountContent').classList.add('hidden');
-      document.getElementById('shelfCountActions').classList.add('hidden');
-
-      try {
-        const compressedDataUrl = await compressImage(file, 1200, 0.8);
-        const base64Data = compressedDataUrl.split(',')[1];
-
-        const promptText = `Jesteś ekspertem magazynowym computer vision. Przeanalizuj to zdjęcie wózka transportowego, stołu lub półki z towarem.
-Zadanie:
-1. Zidentyfikuj widoczne produkty (rozpoznaj etykiety, butelki, kartony, zgrzewki).
-2. Dokładnie policz ile sztuk każdego z tych towarów widać na zdjęciu.
-3. Jeśli widzisz zgrzewkę np. 12 sztuk napoju, przelicz to na sztuki jednostkowe.
-
-Zwróć wynik jako czysty JSON o strukturze:
-{
-  "items": [
-    { "name": "dokładna nazwa rozpoznanego towaru", "qty": 12, "unit": "szt." }
-  ]
-}`;
-
-        const parsed = await queryGeminiAPI(promptText, base64Data);
-        currentShelfCountItems = parsed.items || [];
-        displayShelfCountModal(currentShelfCountItems);
-        triggerScanFeedback();
-      } catch (err) {
-        alert("Błąd zliczania ze zdjęcia: " + err.message);
-        closeShelfCountModal();
-      }
-      event.target.value = '';
-    }
-
-    function displayShelfCountModal(items) {
-      document.getElementById('shelfCountLoading').classList.add('hidden');
-      document.getElementById('shelfCountContent').classList.remove('hidden');
-      document.getElementById('shelfCountActions').classList.remove('hidden');
-
-      const container = document.getElementById('shelfCountItemsList');
-      if (items.length === 0) {
-        container.innerHTML = `<p class="text-xs text-rose-400">Nie udało się precyzyjnie policzyć obiektów. Upewnij się, że towar jest dobrze doświetlony.</p>`;
-        return;
-      }
-
-      container.innerHTML = items.map((it, idx) => {
-        const match = findBestInventoryMatch(it.name);
-        const matchedId = match ? match.id : '';
-
-        return `
-          <div class="bg-slate-900 border ${match ? 'border-emerald-600/70' : 'border-purple-600/70'} rounded-xl p-3 space-y-2">
-            <div class="flex items-center justify-between">
-              <span class="text-[9px] font-bold px-2 py-0.5 rounded ${match ? 'bg-emerald-950 text-emerald-300 border border-emerald-700/50' : 'bg-purple-950 text-purple-300 border border-purple-700/50'}">
-                ${match ? `✓ Rozpoznano w bazie: ${match.name} (Obecnie: ${match.qty} ${match.unit})` : '⭐ NOWY TOWAR'}
-              </span>
-            </div>
-
-            <div class="flex items-center justify-between gap-2">
-              <input type="text" id="shelfCountName_${idx}" value="${match ? match.name : it.name}" class="bg-transparent font-bold text-xs text-white flex-1 focus:outline-none focus:border-b border-purple-500">
-              <div class="flex items-center gap-1.5">
-                <span class="text-slate-400 text-[10px]">Policzono:</span>
-                <input type="number" id="shelfCountQty_${idx}" value="${it.qty || 1}" min="1" class="w-14 bg-slate-800 border border-slate-700 rounded-lg p-1 text-center font-black text-purple-300 text-xs">
-                <input type="text" id="shelfCountUnit_${idx}" value="${it.unit || 'szt.'}" class="w-12 bg-slate-800 border border-slate-700 rounded-lg p-1 text-center text-slate-300 text-[11px]">
-              </div>
-            </div>
-
-            <select id="shelfCountMatch_${idx}" class="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-[11px] text-white w-full">
-              <option value="" ${!matchedId ? 'selected' : ''}>⭐ DODAJ JAKO NOWY TOWAR</option>
-              ${inventory.map(inv => `<option value="${inv.id}" ${matchedId === inv.id ? 'selected' : ''}>🔗 Przypisz do: ${inv.name} (Stan: ${inv.qty} ${inv.unit})</option>`).join('')}
-            </select>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function closeShelfCountModal() {
-      document.getElementById('shelfCountModal').classList.add('hidden');
-      document.getElementById('shelfCountModal').classList.remove('flex');
-      currentShelfCountItems = [];
-    }
-
-    async function confirmAndApplyShelfCount(mode) {
-      if (currentShelfCountItems.length === 0) return;
-
-      for (let i = 0; i < currentShelfCountItems.length; i++) {
-        const name = document.getElementById(`shelfCountName_${i}`).value.trim();
-        const chosenId = document.getElementById(`shelfCountMatch_${i}`).value;
-        const countedQty = parseInt(document.getElementById(`shelfCountQty_${i}`).value) || 0;
-        const unit = document.getElementById(`shelfCountUnit_${i}`).value.trim() || 'szt.';
-
-        if (countedQty <= 0) continue;
-
-        if (chosenId) {
-          const match = inventory.find(inv => inv.id === chosenId);
-          if (match) {
-            const oldQty = match.qty;
-            if (mode === 'ADD') {
-              match.qty += countedQty;
-              recordStockLog(match.id, match.name, 'Zliczenie Vision (+)', countedQty, 'Zliczenie ze zdjęcia');
-            } else {
-              match.qty = countedQty;
-              recordStockLog(match.id, match.name, 'Inwentaryzacja Vision', countedQty - oldQty, 'Ustawienie stanu ze zdjęcia');
+          const slimData = data.map((entry, idx) => {
+            if (idx > 5) {
+              const copy = { ...entry };
+              delete copy.image_url;
+              delete copy.dispatch_image;
+              delete copy.return_image;
+              return copy;
             }
-
-            if (isCloudOnline) {
-              try {
-                await apiRequest(`/inventory?id=eq.${match.id}`, 'PATCH', { qty: match.qty, updated_at: new Date() });
-              } catch (e) {}
-            }
-          }
-        } else {
-          const newItem = {
-            id: Date.now().toString() + '_' + i,
-            barcode: 'RC-' + Math.floor(100000 + Math.random() * 900000),
-            name: name,
-            category: 'Inwentaryzacja Vision',
-            location: 'Magazyn Główny',
-            qty: countedQty,
-            in_field: 0,
-            unit: unit,
-            min_qty: 3,
-            price: 0.00
-          };
-          inventory.unshift(newItem);
-          recordStockLog(newItem.id, newItem.name, 'Nowy towar z Vision', countedQty, 'Zliczenie ze zdjęcia');
-
-          if (isCloudOnline) {
-            try { await apiRequest('/inventory', 'POST', newItem); } catch (e) {}
-          }
-        }
-      }
-
-      localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
-      triggerScanFeedback();
-      closeShelfCountModal();
-      renderInventory();
-      alert("Towary zliczone ze zdjęcia zostały pomyślnie zaktualizowane w magazynie!");
-    }
-
-    // --- FAKTURY ZAKUPU (AI OCR) ---
-    function triggerInvoiceUpload() {
-      document.getElementById('invoiceInput').click();
-    }
-
-    async function processInvoiceImage(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const aiModal = document.getElementById('aiModal');
-      aiModal.classList.remove('hidden');
-      aiModal.classList.add('flex');
-      document.getElementById('aiLoadingState').classList.remove('hidden');
-      document.getElementById('aiItemsContainer').classList.add('hidden');
-      document.getElementById('aiModalActions').classList.add('hidden');
-
-      try {
-        const compressedDataUrl = await compressImage(file, 1024, 0.75);
-        const base64Data = compressedDataUrl.split(',')[1];
-        const promptText = `Jesteś ekspertem księgowo-magazynowym. Przeanalizuj to zdjęcie faktury vat / rachunku.
-Wyciągnij:
-1. docNumber: numer faktury
-2. supplier: pełna nazwa sprzedawcy
-3. nip: NIP sprzedawcy (same cyfry lub z PL)
-4. totalGross: łączna kwota brutto do zapłaty
-5. paymentDueDate: termin płatności (data w formacie DD.MM.YYYY lub informacja np. "30 dni do 09.11.2026")
-6. bankAccount: numer rachunku bankowego sprzedawcy (IBAN)
-7. items: tablica towarów { "name": string, "qty": number (w sztukach!), "unit": "szt.", "netPrice": number (cena 1 sztuki!) }
-
-Zwróć czysty JSON:
-{
-  "docNumber": "F/036422/26",
-  "supplier": "MARCO 2 S.C.",
-  "nip": "5223142113",
-  "totalGross": "799.55",
-  "paymentDueDate": "09.11.2026",
-  "bankAccount": "46 1050 1025 1000 0090 3169 5548",
-  "items": []
-}`;
-
-        const parsed = await queryGeminiAPI(promptText, base64Data);
-        currentExtractedDelivery = {
-          docNumber: parsed.docNumber || 'FA/' + Date.now().toString().slice(-6),
-          supplier: parsed.supplier || 'Dostawca',
-          nip: parsed.nip || '',
-          totalGross: parsed.totalGross || '',
-          paymentDueDate: parsed.paymentDueDate || '',
-          bankAccount: parsed.bankAccount || '',
-          items: parsed.items || [],
-          imagePreview: '' // nie przesyłamy ciężkich zdjęć do bazy, aby zapobiec błędom payloadu
-        };
-        displayExtractedItems(currentExtractedDelivery);
-        triggerScanFeedback();
-      } catch (err) {
-        alert("Błąd faktury: " + err.message);
-        closeAiModal();
-      }
-      event.target.value = '';
-    }
-
-    function displayExtractedItems(delivery) {
-      document.getElementById('aiLoadingState').classList.add('hidden');
-      document.getElementById('aiItemsContainer').classList.remove('hidden');
-      document.getElementById('aiModalActions').classList.remove('hidden');
-      document.getElementById('aiDocInfo').innerText = "Weryfikacja danych finansowych i pozycji:";
-
-      document.getElementById('aiSupplierInput').value = delivery.supplier || 'Dostawca';
-      document.getElementById('aiNipInput').value = delivery.nip || '';
-      document.getElementById('aiDocNumInput').value = delivery.docNumber || '';
-      document.getElementById('aiTotalGrossInput').value = delivery.totalGross || '';
-      document.getElementById('aiDueDateInput').value = delivery.paymentDueDate || '';
-      document.getElementById('aiBankAccountInput').value = delivery.bankAccount || '';
-
-      const container = document.getElementById('aiItemsList');
-      if (!delivery.items || delivery.items.length === 0) {
-        container.innerHTML = `<p class="text-xs text-rose-400">Nie wykryto tabeli towarów na zdjęciu.</p>`;
-        return;
-      }
-
-      container.innerHTML = delivery.items.map((item, index) => {
-        const match = findBestInventoryMatch(item.name);
-        const matchedId = match ? match.id : '';
-        const incomingPrice = Number(item.netPrice || 0);
-
-        return `
-          <div class="bg-slate-900 border ${match ? 'border-emerald-600/70' : 'border-indigo-600/70'} rounded-xl p-3 space-y-2">
-            <div class="flex items-center justify-between gap-2 flex-wrap">
-              <span id="aiBadge_${index}" class="text-[9px] font-bold px-2 py-0.5 rounded ${match ? 'bg-emerald-950 text-emerald-300 border border-emerald-700/50' : 'bg-indigo-950 text-indigo-300 border border-indigo-700/50'}">
-                ${match ? `✓ Scal z: ${match.name} (Stan: ${match.qty}${match.unit})` : '⭐ NOWY TOWAR W BAZIE'}
-              </span>
-            </div>
-
-            <div class="flex items-center justify-between gap-2">
-              <input type="text" id="aiItemName_${index}" value="${item.name}" class="bg-transparent font-bold text-xs text-white flex-1 focus:outline-none focus:border-b border-indigo-500">
-              <div class="flex items-center gap-1.5">
-                <div>
-                  <span class="text-[9px] text-slate-400 block text-center">Cena netto</span>
-                  <input type="number" step="0.01" id="aiItemPrice_${index}" value="${incomingPrice.toFixed(2)}" class="w-16 bg-slate-800 border border-slate-700 rounded-lg p-1 text-center font-bold text-emerald-400 text-xs">
-                </div>
-                <div>
-                  <span class="text-[9px] text-slate-400 block text-center">Ilość</span>
-                  <input type="number" id="aiItemQty_${index}" value="${item.qty || 1}" min="1" class="w-14 bg-slate-800 border border-slate-700 rounded-lg p-1 text-center font-bold text-emerald-400 text-xs">
-                </div>
-                <div>
-                  <span class="text-[9px] text-slate-400 block text-center">J.m.</span>
-                  <input type="text" id="aiItemUnit_${index}" value="${item.unit || 'szt.'}" class="w-12 bg-slate-800 border border-slate-700 rounded-lg p-1 text-center text-[11px] text-slate-300">
-                </div>
-              </div>
-            </div>
-
-            <div class="pt-1 border-t border-slate-800 flex items-center gap-2">
-              <span class="text-[10px] text-slate-400 whitespace-nowrap">Decyzja:</span>
-              <select id="aiSelectMatch_${index}" onchange="handleManualMatchChange(${index})" class="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-[11px] text-white w-full">
-                <option value="" ${!matchedId ? 'selected' : ''}>⭐ DODAJ JAKO NOWĄ POZYCJĘ DO BAZY</option>
-                ${inventory.map(inv => `<option value="${inv.id}" ${matchedId === inv.id ? 'selected' : ''}>🔗 Połącz ze stanem: ${inv.name} (Obecnie: ${inv.qty}${inv.unit})</option>`).join('')}
-              </select>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function handleManualMatchChange(index) {
-      const select = document.getElementById(`aiSelectMatch_${index}`);
-      const badge = document.getElementById(`aiBadge_${index}`);
-      const selectedId = select.value;
-
-      if (selectedId) {
-        const item = inventory.find(i => i.id === selectedId);
-        if (item) {
-          badge.className = "text-[9px] font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-700/50";
-          badge.innerText = `✓ Scal z: ${item.name} (Obecnie: ${item.qty} ${item.unit})`;
-        }
-      } else {
-        badge.className = "text-[9px] font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50";
-        badge.innerText = "⭐ NOWY TOWAR W BAZIE";
-      }
-      triggerScanFeedback();
-    }
-
-    async function confirmAndApplyDelivery() {
-      if (!currentExtractedDelivery || !currentExtractedDelivery.items) return;
-      const finalItems = [];
-
-      for (let i = 0; i < currentExtractedDelivery.items.length; i++) {
-        const name = document.getElementById(`aiItemName_${i}`).value.trim();
-        const chosenMatchId = document.getElementById(`aiSelectMatch_${i}`).value;
-        const qty = parseInt(document.getElementById(`aiItemQty_${i}`).value) || 0;
-        const unit = document.getElementById(`aiItemUnit_${i}`).value.trim() || 'szt.';
-        const incomingPrice = parseFloat(document.getElementById(`aiItemPrice_${i}`).value) || 0.00;
-        if (qty <= 0) continue;
-
-        finalItems.push({ name, qty, unit, netPrice: incomingPrice });
-
-        if (chosenMatchId) {
-          const match = inventory.find(inv => inv.id === chosenMatchId);
-          if (match) {
-            const oldPrice = Number(match.price || 0);
-            if (oldPrice > 0 && incomingPrice > 0 && Math.abs(incomingPrice - oldPrice) > 0.01) {
-              const diffPct = (((incomingPrice - oldPrice) / oldPrice) * 100).toFixed(1);
-              const alertEntry = {
-                id: Date.now().toString() + '_' + i, item_name: match.name, supplier: document.getElementById('aiSupplierInput').value,
-                old_price: oldPrice, new_price: incomingPrice, diff_percent: parseFloat(diffPct), doc_number: document.getElementById('aiDocNumInput').value, created_at: new Date()
-              };
-              priceAlerts.unshift(alertEntry);
-              if (isCloudOnline) { try { await apiRequest('/price_alerts', 'POST', alertEntry); } catch (e) {} }
-            }
-            match.qty += qty;
-            match.price = incomingPrice > 0 ? incomingPrice : match.price;
-            recordStockLog(match.id, match.name, 'Przyjęcie Faktura', qty, `Faktura ${document.getElementById('aiDocNumInput').value}`);
-            if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${match.id}`, 'PATCH', { qty: match.qty, price: match.price, updated_at: new Date() }); } catch (e) {} }
-          }
-        } else {
-          const newItem = {
-            id: Date.now().toString() + '_' + i,
-            barcode: 'RC-' + Math.floor(100000 + Math.random() * 900000),
-            name: name,
-            category: 'Dostawa',
-            location: 'Magazyn Główny',
-            qty: qty,
-            in_field: 0,
-            unit: unit,
-            min_qty: 3,
-            price: incomingPrice
-          };
-          inventory.unshift(newItem);
-          recordStockLog(newItem.id, newItem.name, 'Nowy towar z Faktury', qty, `Faktura ${document.getElementById('aiDocNumInput').value}`);
-          if (isCloudOnline) { try { await apiRequest('/inventory', 'POST', newItem); } catch (e) {} }
-        }
-      }
-
-      const deliveryEntry = {
-        id: Date.now().toString(),
-        doc_number: document.getElementById('aiDocNumInput').value.trim(),
-        supplier: document.getElementById('aiSupplierInput').value.trim(),
-        nip: document.getElementById('aiNipInput').value.trim(),
-        total_gross: document.getElementById('aiTotalGrossInput').value.trim(),
-        payment_due_date: document.getElementById('aiDueDateInput').value.trim(),
-        bank_account: document.getElementById('aiBankAccountInput').value.trim(),
-        payment_status: 'Do zapłaty',
-        items_json: finalItems,
-        image_url: '',
-        created_at: new Date()
-      };
-
-      // Zapisujemy od razu lokalnie
-      deliveries.unshift(deliveryEntry);
-      localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
-      localStorage.setItem('magazyn_offline_deliveries', JSON.stringify(deliveries));
-      localStorage.setItem('magazyn_offline_price_alerts', JSON.stringify(priceAlerts));
-
-      if (isCloudOnline) {
-        try {
-          await apiRequest('/deliveries', 'POST', deliveryEntry);
-        } catch (e) {
-          console.error("Błąd zapisu faktury do bazy Supabase:", e);
-        }
-      }
-
-      triggerScanFeedback();
-      closeAiModal();
-      renderInventory();
-      renderDeliveries();
-      renderPriceAlerts();
-      alert("Faktura przyjęta, stany magazynowe i rejestr płatności zaktualizowane!");
-    }
-
-    function closeAiModal() {
-      document.getElementById('aiModal').classList.add('hidden');
-      document.getElementById('aiModal').classList.remove('flex');
-      currentExtractedDelivery = null;
-    }
-
-    // --- GEMINI MULTI-MODEL FALLBACK OCR ENGINE ---
-    async function queryGeminiAPI(promptText, base64Data) {
-      const models = ['gemini-3.5-flash-lite', 'gemini-1.5-flash', 'gemini-3.8-flash'];
-      let lastErrorMsg = '';
-
-      for (const model of models) {
-        try {
-          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_API_KEY}`;
-          const response = await fetch(endpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: promptText }, { inline_data: { mime_type: 'image/jpeg', data: base64Data } }] }],
-              generationConfig: { response_mime_type: "application/json", temperature: 0.1 }
-            })
+            return entry;
           });
-
-          const result = await response.json();
-          if (result.error) { lastErrorMsg = result.error.message; continue; }
-          if (result.candidates && result.candidates[0] && result.candidates[0].content) {
-            let rawText = result.candidates[0].content.parts[0].text.trim();
-            rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
-            return JSON.parse(rawText);
-          }
-        } catch (e) { lastErrorMsg = e.message; }
-      }
-      throw new Error(lastErrorMsg || "Serwery AI zajęte.");
-    }
-
-    // --- EVENTY: SKAN KARTY WYDANIA ---
-    function triggerDispatchUpload() {
-      document.getElementById('eventDispatchInput').click();
-    }
-    function triggerReturnUpload(id) {
-      currentActiveReturnEventId = id;
-      document.getElementById('eventReturnInput').click();
-    }
-
-    async function processEventDispatchImage(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const modal = document.getElementById('eventDispatchModal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-      document.getElementById('eventDispatchLoading').classList.remove('hidden');
-      document.getElementById('eventDispatchContent').classList.add('hidden');
-      document.getElementById('eventDispatchActions').classList.add('hidden');
-
-      try {
-        const compressedDataUrl = await compressImage(file, 1200, 0.8);
-        const base64Data = compressedDataUrl.split(',')[1];
-        const promptText = `Przeanalizuj to zdjęcie arkusza "WYDANIE NAPOJÓW I ALKOHOLU NA REALIZACJĘ".
-Wyciągnij:
-1. eventNumber: numer imprezy z pola IMPREZA, #NUMER (np. "#403" lub "#359")
-2. eventName: nazwa imprezy / klienta (np. "AVIAREPS SKYWORKS")
-3. dispatchDate: data wydania (np. "02.10.26")
-4. items: tablica pozycji z tabeli z kolumn NAZWA oraz WYDANE: { "name": string, "dispatched": number, "unit": string }
-Zwróć czysty JSON: { "eventNumber": string, "eventName": string, "dispatchDate": string, "items": [] }`;
-
-        const parsed = await queryGeminiAPI(promptText, base64Data);
-        currentExtractedEventDispatch = {
-          eventNumber: parsed.eventNumber || '#EVENT-' + Date.now().toString().slice(-4),
-          eventName: parsed.eventName || 'Realizacja Cateringowa',
-          dispatchDate: parsed.dispatchDate || new Date().toLocaleDateString('pl-PL'),
-          items: parsed.items || [],
-          image: compressedDataUrl
-        };
-        displayEventDispatchModal(currentExtractedEventDispatch);
-        triggerScanFeedback();
-      } catch (err) {
-        alert("Błąd karty wydania: " + err.message);
-        closeEventDispatchModal();
-      }
-      event.target.value = '';
-    }
-
-    function displayEventDispatchModal(data) {
-      document.getElementById('eventDispatchLoading').classList.add('hidden');
-      document.getElementById('eventDispatchContent').classList.remove('hidden');
-      document.getElementById('eventDispatchActions').classList.remove('hidden');
-      document.getElementById('evDispNum').value = data.eventNumber;
-      document.getElementById('evDispName').value = data.eventName;
-      document.getElementById('evDispDate').value = data.dispatchDate;
-
-      const list = document.getElementById('evDispItemsList');
-      list.innerHTML = data.items.map((it, idx) => `
-        <div class="bg-slate-900 border border-slate-700/80 rounded-xl p-2.5 flex items-center justify-between text-xs">
-          <input type="text" id="evDispItemName_${idx}" value="${it.name}" class="font-bold text-white bg-transparent flex-1 focus:outline-none focus:border-b border-amber-500 mr-2">
-          <div class="flex items-center gap-1.5">
-            <span class="text-slate-400">Wydane:</span>
-            <input type="number" id="evDispItemQty_${idx}" value="${it.dispatched}" min="1" class="w-14 bg-slate-800 border border-slate-700 rounded-lg p-1 text-center font-black text-amber-400">
-            <input type="text" id="evDispItemUnit_${idx}" value="${it.unit || 'szt.'}" class="w-12 bg-slate-800 border border-slate-700 rounded-lg p-1 text-center text-slate-300 text-[11px]">
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function closeEventDispatchModal() {
-      document.getElementById('eventDispatchModal').classList.add('hidden');
-      document.getElementById('eventDispatchModal').classList.remove('flex');
-      currentExtractedEventDispatch = null;
-    }
-
-    async function confirmAndApplyEventDispatch() {
-      if (!currentExtractedEventDispatch) return;
-      const evNum = document.getElementById('evDispNum').value.trim();
-      const evName = document.getElementById('evDispName').value.trim();
-      const evDate = document.getElementById('evDispDate').value.trim();
-      const finalItems = [];
-
-      for (let i = 0; i < currentExtractedEventDispatch.items.length; i++) {
-        const name = document.getElementById(`evDispItemName_${i}`).value.trim();
-        const qty = parseInt(document.getElementById(`evDispItemQty_${i}`).value) || 0;
-        const unit = document.getElementById(`evDispItemUnit_${i}`).value.trim() || 'szt.';
-        finalItems.push({ name, dispatched: qty, unit });
-
-        const match = findBestInventoryMatch(name);
-        if (match) {
-          match.qty = Math.max(0, match.qty - qty);
-          match.inField = (match.inField || 0) + qty;
-          recordStockLog(match.id, match.name, 'Event Wyjazd', -qty, `Impreza ${evNum}`);
-          if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${match.id}`, 'PATCH', { qty: match.qty, in_field: match.inField, updated_at: new Date() }); } catch (e) {} }
-        }
-      }
-
-      const newEvent = {
-        id: Date.now().toString(),
-        event_number: evNum,
-        event_name: evName,
-        dispatch_date: evDate,
-        return_date: '',
-        status: 'W trakcie',
-        items_json: finalItems,
-        dispatch_image: currentExtractedEventDispatch.image,
-        return_image: '',
-        created_at: new Date()
-      };
-
-      events.unshift(newEvent);
-      localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
-      localStorage.setItem('magazyn_offline_events', JSON.stringify(events));
-
-      if (isCloudOnline) {
-        try { await apiRequest('/events', 'POST', newEvent); } catch (e) {}
-      }
-
-      triggerScanFeedback();
-      closeEventDispatchModal();
-      renderInventory();
-      renderEvents();
-      switchMainTab('events');
-      alert(`Wydanie na event ${evNum} zapisane! Butelki przesunięte w teren.`);
-    }
-
-    // --- EVENTY: ROZLICZENIE POWROTU / ZWROTU ---
-    async function processEventReturnImage(event) {
-      const file = event.target.files[0];
-      if (!file || !currentActiveReturnEventId) return;
-      const ev = events.find(e => e.id === currentActiveReturnEventId);
-      if (!ev) return;
-
-      const modal = document.getElementById('eventReturnModal');
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-      document.getElementById('evReturnLoading').classList.remove('hidden');
-      document.getElementById('evReturnContent').classList.add('hidden');
-      document.getElementById('evReturnActions').classList.add('hidden');
-
-      try {
-        const compressedDataUrl = await compressImage(file, 1200, 0.8);
-        const base64Data = compressedDataUrl.split(',')[1];
-        const promptText = `Przeanalizuj to zdjęcie uzupełnionego odręcznie arkusza zwrotu napojów/alkoholu.
-Odczytaj kolumny tabeli:
-- NAZWA
-- Konsumpcja (ilość zużyta)
-- Zwrot (ilość zwrócona na magazyn)
-- Data zwrotu (z pola DATA ZWROTU)
-Zwróć JSON: { "returnDate": string, "items": [ { "name": string, "consumed": number, "returned": number } ] }`;
-
-        const parsedReturn = await queryGeminiAPI(promptText, base64Data);
-        displayEventReturnModal(ev, parsedReturn, compressedDataUrl);
-        triggerScanFeedback();
-      } catch (err) {
-        alert("Błąd karty zwrotu: " + err.message);
-        closeEventReturnModal();
-      }
-      event.target.value = '';
-    }
-
-    function displayEventReturnModal(ev, parsedReturn, image) {
-      document.getElementById('evReturnLoading').classList.add('hidden');
-      document.getElementById('evReturnContent').classList.remove('hidden');
-      document.getElementById('evReturnActions').classList.remove('hidden');
-      document.getElementById('evReturnModalTitle').innerText = `${ev.event_number} - ${ev.event_name}`;
-      document.getElementById('evReturnEventLabel').innerText = `${ev.event_name} (${ev.event_number})`;
-      document.getElementById('evReturnDateInput').value = parsedReturn.returnDate || new Date().toLocaleDateString('pl-PL');
-
-      const list = document.getElementById('evReturnItemsList');
-      list.innerHTML = ev.items_json.map((dispItem, idx) => {
-        const matchedReturn = (parsedReturn.items || []).find(it => 
-          normalizeText(it.name).includes(normalizeText(dispItem.name)) || normalizeText(dispItem.name).includes(normalizeText(it.name))
-        );
-        const retQty = matchedReturn ? (matchedReturn.returned || 0) : 0;
-        const consQty = matchedReturn ? (matchedReturn.consumed || 0) : 0;
-        const diff = dispItem.dispatched - (retQty + consQty);
-
-        return `
-          <div class="bg-slate-900 border ${diff > 0 ? 'border-rose-600/70' : 'border-slate-700/80'} rounded-xl p-3 space-y-2">
-            <div class="flex justify-between items-start">
-              <div>
-                <h5 class="font-bold text-xs text-white">${dispItem.name}</h5>
-                <span class="text-[10px] text-amber-400">Wydano: <strong>${dispItem.dispatched} ${dispItem.unit || 'szt.'}</strong></span>
-              </div>
-              ${diff > 0 ? `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-rose-950 text-rose-300 border border-rose-700/50">⚠️ Strata: -${diff}</span>` : ''}
-            </div>
-            <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800">
-              <div>
-                <span class="text-[10px] text-slate-400 block">Zwrócono (na magazyn):</span>
-                <input type="number" id="evRetQty_${idx}" value="${retQty}" min="0" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1.5 text-center font-bold text-emerald-400 text-xs">
-              </div>
-              <div>
-                <span class="text-[10px] text-slate-400 block">Konsumpcja (zeszło):</span>
-                <input type="number" id="evConsQty_${idx}" value="${consQty}" min="0" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-1.5 text-center font-bold text-indigo-300 text-xs">
-              </div>
-            </div>
-            <input type="hidden" id="evRetImageHolder" value="${image}">
-          </div>
-        `;
-      }).join('');
-    }
-
-    function closeEventReturnModal() {
-      document.getElementById('eventReturnModal').classList.add('hidden');
-      document.getElementById('eventReturnModal').classList.remove('flex');
-      currentActiveReturnEventId = null;
-    }
-
-    async function confirmAndApplyEventReturn() {
-      const ev = events.find(e => e.id === currentActiveReturnEventId);
-      if (!ev) return;
-      const retDate = document.getElementById('evReturnDateInput').value.trim();
-      const returnImage = document.getElementById('evRetImageHolder').value;
-
-      ev.return_date = retDate;
-      ev.status = 'Rozliczona';
-      ev.return_image = returnImage;
-
-      for (let i = 0; i < ev.items_json.length; i++) {
-        const item = ev.items_json[i];
-        const retQty = parseInt(document.getElementById(`evRetQty_${i}`).value) || 0;
-        const consQty = parseInt(document.getElementById(`evConsQty_${i}`).value) || 0;
-        const loss = Math.max(0, item.dispatched - (retQty + consQty));
-
-        item.returned = retQty;
-        item.consumed = consQty;
-        item.loss = loss;
-
-        const match = findBestInventoryMatch(item.name);
-        if (match) {
-          match.qty += retQty;
-          match.inField = Math.max(0, (match.inField || 0) - item.dispatched);
-          recordStockLog(match.id, match.name, 'Event Zwrot', retQty, `Zwrot z ${ev.event_number}`);
-          if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${match.id}`, 'PATCH', { qty: match.qty, in_field: match.inField, updated_at: new Date() }); } catch (e) {} }
-        }
-      }
-
-      localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
-      localStorage.setItem('magazyn_offline_events', JSON.stringify(events));
-
-      if (isCloudOnline) {
-        try { await apiRequest(`/events?id=eq.${ev.id}`, 'PATCH', { status: 'Rozliczona', return_date: retDate, items_json: ev.items_json, return_image: returnImage }); } catch (e) {}
-      }
-
-      triggerScanFeedback();
-      closeEventReturnModal();
-      renderInventory();
-      renderEvents();
-      alert(`Impreza ${ev.event_number} rozliczona! Butelki ze zwrotu wróciły na stan.`);
-    }
-
-    async function deleteEvent(id) {
-      if (!confirm("Czy na pewno usunąć tę realizację?")) return;
-      events = events.filter(e => e.id !== id);
-      localStorage.setItem('magazyn_offline_events', JSON.stringify(events));
-      renderEvents();
-      if (isCloudOnline) { try { await apiRequest(`/events?id=eq.${id}`, 'DELETE'); } catch (e) {} }
-    }
-
-    // --- KARTA WYDANIA DO DRUKU ---
-    function openGenerateSheetModal() {
-      if (selectedItemIds.size === 0) return alert("Zaznacz najpierw pozycje na liście.");
-      document.getElementById('genSheetNum').value = '#EVENT-' + Date.now().toString().slice(-4);
-      document.getElementById('genSheetDate').value = new Date().toLocaleDateString('pl-PL');
-      document.getElementById('genSheetName').value = '';
-
-      const list = document.getElementById('genSheetItemsList');
-      const selectedItems = inventory.filter(i => selectedItemIds.has(i.id));
-
-      list.innerHTML = selectedItems.map(it => `
-        <div class="bg-slate-900 border border-slate-700 rounded-lg p-2 flex items-center justify-between text-xs">
-          <span class="font-bold text-white flex-1 truncate pr-2">${it.name}</span>
-          <div class="flex items-center gap-1.5">
-            <input type="number" id="genQty_${it.id}" value="${Math.min(it.qty, 12) || 1}" min="1" max="${it.qty || 999}" class="w-14 bg-slate-800 border border-slate-600 rounded p-1 text-center font-bold text-amber-400 text-xs">
-            <span class="text-slate-400 text-[10px] w-6">${it.unit}</span>
-          </div>
-        </div>
-      `).join('');
-
-      document.getElementById('generateSheetModal').classList.remove('hidden');
-      document.getElementById('generateSheetModal').classList.add('flex');
-    }
-
-    function closeGenerateSheetModal() {
-      document.getElementById('generateSheetModal').classList.add('hidden');
-      document.getElementById('generateSheetModal').classList.remove('flex');
-    }
-
-    function printGeneratedSheet() {
-      const evNum = document.getElementById('genSheetNum').value.trim() || '#EVENT';
-      const evDate = document.getElementById('genSheetDate').value.trim() || '-';
-      const evName = document.getElementById('genSheetName').value.trim() || 'Realizacja Cateringowa';
-
-      document.getElementById('printHeaderDate').innerText = evDate;
-      document.getElementById('printHeaderEvent').innerText = `${evNum} ${evName}`;
-
-      const tbody = document.getElementById('printSheetTableBody');
-      const selectedItems = inventory.filter(i => selectedItemIds.has(i.id));
-
-      tbody.innerHTML = selectedItems.map((it, idx) => {
-        const qty = document.getElementById(`genQty_${it.id}`).value;
-        return `
-          <tr style="height: 22px; text-align: center;">
-            <td style="border: 1px solid #000; font-weight: bold;">${idx + 1}</td>
-            <td style="border: 1px solid #000; text-align: left; padding-left: 6px; font-weight: bold;">${it.name}</td>
-            <td style="border: 1px solid #000;">${it.unit}</td>
-            <td style="border: 1px solid #000; font-weight: bold; font-size: 11px;">${qty}</td>
-            <td style="border: 1px solid #000;">&nbsp;</td>
-            <td style="border: 1px solid #000; background: #d9ead3;">&nbsp;</td>
-            <td style="border: 1px solid #000; background: #d9ead3;">&nbsp;</td>
-            <td style="border: 1px solid #000; background: #d9ead3;">&nbsp;</td>
-            <td style="border: 1px solid #000; background: #d9ead3;">&nbsp;</td>
-            <td style="border: 1px solid #000;">&nbsp;</td>
-          </tr>
-        `;
-      }).join('');
-
-      const emptyRowsNeeded = Math.max(0, 15 - selectedItems.length);
-      for (let i = 0; i < emptyRowsNeeded; i++) {
-        tbody.innerHTML += `
-          <tr style="height: 22px; text-align: center;">
-            <td style="border: 1px solid #000;">${selectedItems.length + i + 1}</td>
-            <td style="border: 1px solid #000;">&nbsp;</td>
-            <td style="border: 1px solid #000;">&nbsp;</td>
-            <td style="border: 1px solid #000;">&nbsp;</td>
-            <td style="border: 1px solid #000;">&nbsp;</td>
-            <td style="border: 1px solid #000; background: #d9ead3;">&nbsp;</td>
-            <td style="border: 1px solid #000; background: #d9ead3;">&nbsp;</td>
-            <td style="border: 1px solid #000; background: #d9ead3;">&nbsp;</td>
-            <td style="border: 1px solid #000; background: #d9ead3;">&nbsp;</td>
-            <td style="border: 1px solid #000;">&nbsp;</td>
-          </tr>
-        `;
-      }
-
-      closeGenerateSheetModal();
-      toggleSelectMode();
-      setTimeout(() => { window.print(); }, 250);
-    }
-
-    // --- INTERFEJS SKANERA, EDYCJI I AKCJI MAGAZYNOWYCH ---
-    function handleItemContextMenu(e, id) {
-      e.preventDefault();
-      contextMenuItemId = id;
-      selectedItemId = id;
-      const menu = document.getElementById('customContextMenu');
-      menu.classList.remove('hidden');
-      let x = e.clientX, y = e.clientY;
-      if (x + 200 > window.innerWidth) x = window.innerWidth - 210;
-      if (y + 180 > window.innerHeight) y = window.innerHeight - 190;
-      menu.style.left = `${x}px`;
-      menu.style.top = `${y}px`;
-      triggerScanFeedback();
-    }
-
-    function hideContextMenu() {
-      const m = document.getElementById('customContextMenu');
-      if (m) m.classList.add('hidden');
-    }
-
-    function contextActionEdit() { hideContextMenu(); if (contextMenuItemId) openEditModal(contextMenuItemId); }
-    function contextActionOpenStock() { hideContextMenu(); if (contextMenuItemId) openActionModal(contextMenuItemId); }
-    function contextActionPrintQR() { hideContextMenu(); if (contextMenuItemId) { selectedItemId = contextMenuItemId; openPrintLabelModal(); } }
-    function contextActionDelete() { hideContextMenu(); if (contextMenuItemId) { selectedItemId = contextMenuItemId; deleteCurrentItem(); } }
-
-    function handleItemCardClick(e, id) {
-      if (isSelectMode) {
-        toggleSelectItem(id, !selectedItemIds.has(id));
-        renderInventory();
-      } else {
-        openActionModal(id);
-      }
-    }
-
-    function toggleSelectMode() {
-      isSelectMode = !isSelectMode;
-      const btn = document.getElementById('btnToggleSelectMode');
-      const bulkBar = document.getElementById('bulkActionBar');
-      if (isSelectMode) {
-        btn.className = "bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-2 rounded-xl font-bold flex items-center gap-1.5 transition shadow";
-        btn.innerHTML = "<span>✕</span> Anuluj";
-        bulkBar.classList.remove('hidden');
-      } else {
-        btn.className = "bg-slate-800 hover:bg-slate-700 border border-slate-600/70 text-slate-300 text-xs px-3 py-2 rounded-xl font-bold flex items-center gap-1.5 transition";
-        btn.innerHTML = "<span>☑️</span> Zaznacz";
-        bulkBar.classList.add('hidden');
-        selectedItemIds.clear();
-      }
-      updateBulkSelectedCount();
-      renderInventory();
-      triggerScanFeedback();
-    }
-
-    function toggleSelectItem(id, isChecked) {
-      if (isChecked) selectedItemIds.add(id);
-      else selectedItemIds.delete(id);
-      updateBulkSelectedCount();
-      triggerScanFeedback();
-    }
-
-    function toggleSelectAll() {
-      if (selectedItemIds.size === inventory.length) selectedItemIds.clear();
-      else inventory.forEach(i => selectedItemIds.add(i.id));
-      updateBulkSelectedCount();
-      renderInventory();
-      triggerScanFeedback();
-    }
-
-    function updateBulkSelectedCount() {
-      const c = document.getElementById('bulkSelectedCount');
-      if (c) c.innerText = `Wybrano: ${selectedItemIds.size}`;
-    }
-
-    async function deleteSelectedItems() {
-      if (selectedItemIds.size === 0) return alert("Zaznacz pozycje.");
-      if (!confirm(`Usunąć ${selectedItemIds.size} pozycji?`)) return;
-      const ids = Array.from(selectedItemIds);
-      inventory = inventory.filter(i => !selectedItemIds.has(i.id));
-      localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
-      toggleSelectMode();
-      renderInventory();
-      triggerScanFeedback();
-
-      if (isCloudOnline) {
-        for (const id of ids) {
-          try { await apiRequest(`/inventory?id=eq.${id}`, 'DELETE'); } catch (e) {}
-        }
-      }
-    }
-
-    function openEditModal(id) {
-      const item = inventory.find(i => i.id === id);
-      if (!item) return;
-      closeActionModal();
-      document.getElementById('editItemId').value = item.id;
-      document.getElementById('editItemBarcode').value = item.barcode;
-      document.getElementById('editItemName').value = item.name;
-      document.getElementById('editItemPrice').value = Number(item.price || 0).toFixed(2);
-      document.getElementById('editItemCategory').value = item.category || 'Ogólne';
-      document.getElementById('editItemLocation').value = item.location || '-';
-      document.getElementById('editItemUnit').value = item.unit || 'szt.';
-      document.getElementById('editItemMinQty').value = item.minQty || 0;
-      document.getElementById('editItemModal').classList.remove('hidden');
-      document.getElementById('editItemModal').classList.add('flex');
-    }
-
-    function closeEditModal() {
-      document.getElementById('editItemModal').classList.add('hidden');
-      document.getElementById('editItemModal').classList.remove('flex');
-    }
-
-    async function saveEditedItem(e) {
-      e.preventDefault();
-      const id = document.getElementById('editItemId').value;
-      const item = inventory.find(i => i.id === id);
-      if (!item) return;
-
-      item.barcode = document.getElementById('editItemBarcode').value.trim();
-      item.name = document.getElementById('editItemName').value.trim();
-      item.price = parseFloat(document.getElementById('editItemPrice').value) || 0.00;
-      item.category = document.getElementById('editItemCategory').value.trim() || 'Ogólne';
-      item.location = document.getElementById('editItemLocation').value.trim() || '-';
-      item.unit = document.getElementById('editItemUnit').value.trim() || 'szt.';
-      item.minQty = parseInt(document.getElementById('editItemMinQty').value) || 0;
-
-      localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
-      renderInventory();
-      closeEditModal();
-      triggerScanFeedback();
-
-      if (isCloudOnline) {
-        try {
-          await apiRequest(`/inventory?id=eq.${item.id}`, 'PATCH', {
-            barcode: item.barcode, name: item.name, price: item.price, category: item.category,
-            location: item.location, unit: item.unit, min_qty: item.minQty, updated_at: new Date()
-          });
+          localStorage.setItem(key, JSON.stringify(slimData));
         } catch (err) {}
       }
     }
 
-    function openActionModal(id) {
-      const item = inventory.find(i => i.id === id);
-      if (!item) return;
-      selectedItemId = id;
-      document.getElementById('modalItemCategory').innerText = `${item.category || 'Ogólne'} • ${item.location || 'Brak lok.'}`;
-      document.getElementById('modalItemName').innerText = item.name;
-      document.getElementById('modalItemBarcode').innerText = `KOD: ${item.barcode}`;
-      document.getElementById('modalItemPrice').innerText = `${Number(item.price || 0).toFixed(2)} zł`;
-      document.getElementById('modalItemQty').innerText = item.qty;
-      document.getElementById('modalItemUnit').innerText = item.unit || 'szt.';
-      document.getElementById('modalItemInField').innerText = item.inField || 0;
-      document.getElementById('modalStepQty').value = 1;
-
-      const logsList = document.getElementById('modalItemLogsList');
-      const itemLogs = stockLogs.filter(l => l.item_id === item.id).slice(0, 10);
-      if (itemLogs.length === 0) {
-        logsList.innerHTML = `<span class="text-slate-500 italic">Brak zarejestrowanych ruchów tego towaru.</span>`;
-      } else {
-        logsList.innerHTML = itemLogs.map(l => `
-          <div class="flex justify-between items-center text-slate-300 border-b border-slate-800/60 pb-0.5">
-            <span>${l.action_type} ${l.note ? `<span class="text-slate-500">(${l.note})</span>` : ''}</span>
-            <span class="font-bold ${l.qty_change > 0 ? 'text-emerald-400' : 'text-rose-400'}">${l.qty_change > 0 ? '+' : ''}${l.qty_change} ${item.unit}</span>
-          </div>
-        `).join('');
-      }
-
-      document.getElementById('actionModal').classList.remove('hidden');
-      document.getElementById('actionModal').classList.add('flex');
-    }
-
-    function closeActionModal() {
-      document.getElementById('actionModal').classList.add('hidden');
-      document.getElementById('actionModal').classList.remove('flex');
-      selectedItemId = null;
-    }
-
-    function adjustStepQty(delta) {
-      const inp = document.getElementById('modalStepQty');
-      inp.value = Math.max(1, (parseInt(inp.value) || 1) + delta);
-      triggerScanFeedback();
-    }
-
-    function setStepQty(val) {
-      document.getElementById('modalStepQty').value = val;
-      triggerScanFeedback();
-    }
-
-    async function executeStockAction(type) {
-      const item = inventory.find(i => i.id === selectedItemId);
-      if (!item) return;
-      const amount = Math.max(1, parseInt(document.getElementById('modalStepQty').value) || 1);
-      let actionLabel = 'Korekta';
-      let change = 0;
-
-      if (type === 'ADD') { item.qty += amount; actionLabel = 'Przyjęcie ręczne'; change = amount; }
-      else if (type === 'REMOVE') { item.qty = Math.max(0, item.qty - amount); actionLabel = 'Wydanie ręczne'; change = -amount; }
-      else if (type === 'TO_FIELD') { item.qty = Math.max(0, item.qty - amount); item.inField = (item.inField || 0) + amount; actionLabel = 'Wydanie w teren'; change = -amount; }
-      else if (type === 'FROM_FIELD') { item.inField = Math.max(0, (item.inField || 0) - amount); item.qty += amount; actionLabel = 'Zwrot z terenu'; change = amount; }
-      
-      recordStockLog(item.id, item.name, actionLabel, change);
-      triggerScanFeedback();
-      localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
-      renderInventory();
-      closeActionModal();
-
-      if (isCloudOnline) {
-        try {
-          await apiRequest(`/inventory?id=eq.${item.id}`, 'PATCH', { qty: item.qty, in_field: item.inField, updated_at: new Date() });
-        } catch (e) {}
-      }
-    }
-
-    async function deleteCurrentItem() {
-      if (!confirm('Usunąć pozycję?')) return;
-      inventory = inventory.filter(i => i.id !== selectedItemId);
-      localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
-      renderInventory();
-      closeActionModal();
-      if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${selectedItemId}`, 'DELETE'); } catch (e) {} }
-    }
-
-    function generateRandomCode() {
-      document.getElementById('newBarcode').value = 'RC-' + Math.floor(100000 + Math.random() * 900000);
-      triggerScanFeedback();
-    }
-
-    function openNewItemModal(p) {
-      document.getElementById('newBarcode').value = p || ('RC-' + Math.floor(100000 + Math.random() * 900000));
-      document.getElementById('newName').value = '';
-      document.getElementById('newPrice').value = '0.00';
-      document.getElementById('newCategory').value = '';
-      document.getElementById('newLocation').value = '';
-      document.getElementById('newQty').value = 1;
-      document.getElementById('newItemModal').classList.remove('hidden');
-      document.getElementById('newItemModal').classList.add('flex');
-    }
-
-    function closeNewItemModal() {
-      document.getElementById('newItemModal').classList.add('hidden');
-      document.getElementById('newItemModal').classList.remove('flex');
-    }
-
-    async function saveNewItem(e) {
-      e.preventDefault();
-      const newItem = {
-        id: Date.now().toString(),
-        barcode: document.getElementById('newBarcode').value.trim(),
-        name: document.getElementById('newName').value.trim(),
-        price: parseFloat(document.getElementById('newPrice').value) || 0.00,
-        category: document.getElementById('newCategory').value.trim() || 'Ogólne',
-        location: document.getElementById('newLocation').value.trim() || '-',
-        qty: parseInt(document.getElementById('newQty').value) || 0,
-        in_field: 0,
-        unit: document.getElementById('newUnit').value.trim() || 'szt.',
-        min_qty: parseInt(document.getElementById('newMinQty').value) || 0
-      };
-
-      inventory.unshift(newItem);
-      recordStockLog(newItem.id, newItem.name, 'Utworzenie pozycji', newItem.qty);
-      localStorage.setItem('magazyn_offline_items', JSON.stringify(inventory));
-      renderInventory();
-      closeNewItemModal();
-      triggerScanFeedback();
-
-      if (isCloudOnline) {
-        try { await apiRequest('/inventory', 'POST', newItem); } catch (e) {}
-      }
-    }
-
-    function handleScannedCode(code) {
-      if (!code) return;
-      const clean = code.trim();
-      triggerScanFeedback();
-      const f = inventory.find(i => String(i.barcode).toLowerCase() === clean.toLowerCase());
-      if (f) openActionModal(f.id);
-      else if (confirm(`Kod "${clean}" nie istnieje. Dodać?`)) openNewItemModal(clean);
-    }
-
-    function handleManualBarcodeSubmit(e) {
-      e.preventDefault();
-      const inp = document.getElementById('barcodeInput');
-      handleScannedCode(inp.value);
-      inp.value = '';
-    }
-
-    function toggleCamera() {
-      const container = document.getElementById('cameraContainer');
-      const btn = document.getElementById('btnToggleCamera');
-      if (isCameraRunning && html5QrCode) {
-        html5QrCode.stop().then(() => {
-          container.classList.add('hidden');
-          btn.innerText = 'Włącz kamerę';
-          btn.classList.replace('bg-rose-600', 'bg-indigo-600');
-          isCameraRunning = false;
-        });
-        return;
-      }
-      container.classList.remove('hidden');
-      btn.innerText = 'Zatrzymaj kamerę';
-      btn.classList.replace('bg-indigo-600', 'bg-rose-600');
-      html5QrCode = new Html5Qrcode("reader");
-      html5QrCode.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 250, height: 140 } },
-        (d) => {
-          html5QrCode.stop().then(() => {
-            container.classList.add('hidden');
-            btn.innerText = 'Włącz kamerę';
-            btn.classList.replace('bg-rose-600', 'bg-indigo-600');
-            isCameraRunning = false;
-            handleScannedCode(d);
-          });
-        },
-        () => {}
-      ).then(() => { isCameraRunning = true; }).catch(err => {
-        alert("Błąd kamery.");
-        container.classList.add('hidden');
-        btn.innerText = 'Włącz kamerę';
-        btn.classList.replace('bg-rose-600', 'bg-indigo-600');
-      });
-    }
-
-    function openPrintLabelModal() {
-      const item = inventory.find(i => i.id === selectedItemId);
-      if (!item) return;
-      document.getElementById('printItemName').innerText = item.name;
-      document.getElementById('printItemCategory').innerText = `${item.category} • ${item.location}`;
-      document.getElementById('printItemBarcode').innerText = item.barcode;
-      const c = document.getElementById('printQRCode');
-      c.innerHTML = '';
-      new QRCode(c, { text: item.barcode, width: 140, height: 140, colorDark: "#000000", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H });
-      setTimeout(() => { window.print(); }, 300);
-    }
-
-    function compressImage(file, maxWidth = 1024, quality = 0.75) {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.onload = () => {
-          let width = img.width, height = img.height;
-          if (width > maxWidth) { height = Math.round((height * maxWidth) / width); width = maxWidth; }
-          const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL('image/jpeg', quality));
-        };
-        img.onerror = reject;
-        img.src = URL.createObjectURL(file);
-      });
-    }
-
-    function exportCSV() {
-      const headers = ['Kod', 'Nazwa', 'Cena Netto', 'Kategoria', 'Lokalizacja', 'Magazyn', 'W terenie', 'Jednostka', 'Min'];
-      const rows = inventory.map(i => [`"${i.barcode}"`, `"${i.name.replace(/"/g, '""')}"`, Number(i.price || 0).toFixed(2), `"${i.category}"`, `"${i.location}"`, i.qty, i.inField || 0, `"${i.unit}"`, i.minQty]);
-      const csvContent = '\uFEFF' + [headers.join(';'), ...rows.map(r => r.join(';'))].join('\n');
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `magazyn_${new Date().toISOString().slice(0,10)}.csv`;
-      link.click();
-    }
-
-    // Inicjalizacja startowa aplikacji
-    fetchAllData();
-  </script>
-</body>
-</html>
+    // --- MAPERY DANYCH (100% SPÓJNOŚCI MIĘDZY JS A SUPABASE) ---
+    function normalizeItem(raw) {
+      if (!raw) return null;
+      return {
+        id: String(raw.id),
+        barcode: String(raw.barcode || ''),
+        name: String(raw.name || ''),
+        category: String(raw.category || 'Ogólne'),
+        location: String(raw.location || '-'),
+        qty: Number(raw.qty) || 0,
+        inField
