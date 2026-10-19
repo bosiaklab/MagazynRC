@@ -37,7 +37,7 @@
     <div class="flex items-center space-x-2.5">
       <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-base shadow">M</div>
       <div>
-        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-amber-400 bg-amber-950/70 border border-amber-700/50 px-1 py-0.5 rounded ml-1">v2.4 VISION PRO</span></h1>
+        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-amber-400 bg-amber-950/70 border border-amber-700/50 px-1 py-0.5 rounded ml-1">v2.5 STABLE</span></h1>
         <p id="syncStatus" class="text-[10px] text-amber-400 font-medium leading-none mt-0.5">Inicjalizacja...</p>
       </div>
     </div>
@@ -48,7 +48,7 @@
     </div>
   </header>
 
-  <!-- UKRYTE INPUTY DLA APARATU -->
+  <!-- UKRYTY INPUT DLA APARATU -->
   <input type="file" id="invoiceInput" accept="image/*" capture="environment" class="hidden" onchange="processInvoiceImage(event)">
   <input type="file" id="shelfCountInput" accept="image/*" capture="environment" class="hidden" onchange="processShelfCountImage(event)">
   <input type="file" id="eventDispatchInput" accept="image/*" capture="environment" class="hidden" onchange="processEventDispatchImage(event)">
@@ -95,7 +95,7 @@
 
     <!-- WIDOK 1: STANY MAGAZYNOWE -->
     <section id="viewStock" class="space-y-3">
-      <!-- Skaner kodów + Zliczanie ze zdjęcia wózka -->
+      <!-- Skaner kodów + Zliczanie ze zdjęcia -->
       <section id="scannerSection" class="bg-slate-800/90 border border-slate-700 rounded-2xl p-3.5 shadow-lg space-y-3">
         <div class="flex items-center justify-between">
           <div>
@@ -260,7 +260,7 @@
     </button>
   </nav>
 
-  <!-- MODAL: ZLICZANIE TOWARU ZE ZDJĘCIA WÓZKA / PÓŁKI (NOWOŚĆ) -->
+  <!-- MODAL: ZLICZANIE TOWARU ZE ZDJĘCIA WÓZKA / PÓŁKI -->
   <div id="shelfCountModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 shadow-2xl my-4 max-h-[94vh] flex flex-col">
       <div class="flex justify-between items-start border-b border-slate-700 pb-2">
@@ -292,7 +292,7 @@
           📥 Przyjmij na stan (+)
         </button>
         <button onclick="confirmAndApplyShelfCount('SET')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-1.5 rounded-xl text-xs shadow">
-          📝 Ustaw jako stan (Inwentaryzacja)
+          📝 Ustaw jako stan
         </button>
       </div>
     </div>
@@ -335,7 +335,7 @@
               <input type="text" id="aiDocNumInput" class="w-full bg-slate-800 border border-slate-700 rounded p-1 font-mono text-amber-400 text-xs">
             </div>
             <div>
-              <span class="text-[10px] text-slate-400 block">Kwota Brutto (PLN):</span>
+              <span class="text-[10px] text-slate-400 block">Kwota Brutto:</span>
               <input type="text" id="aiTotalGrossInput" class="w-full bg-slate-800 border border-slate-700 rounded p-1 font-bold text-emerald-400 text-xs">
             </div>
             <div>
@@ -586,7 +586,7 @@
   </div>
 
   <script>
-    // --- MODUŁ WIZYJNEGO ZLICZANIA ZE ZDJĘCIA (WÓZEK / PÓŁKA) ---
+    // --- ZLICZANIE TOWARU ZE ZDJĘCIA WÓZKA / PÓŁKI ---
     let currentShelfCountItems = [];
 
     function triggerShelfCountUpload() {
@@ -736,6 +736,9 @@ Zwróć wynik jako czysty JSON o strukturze:
       renderInventory();
       alert("Towary zliczone ze zdjęcia zostały pomyślnie zaktualizowane w magazynie!");
     }
+
+    // Inicjalizacja startowa aplikacji
+    fetchAllData();
   </script>
 </body>
 </html>
