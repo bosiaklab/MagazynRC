@@ -27,18 +27,19 @@
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen pb-32 font-sans select-none print-mode-sheet" onclick="hideContextMenu()">
 
-  <header class="bg-slate-800/90 backdrop-blur border-b border-slate-700/80 sticky top-0 z-30 px-4 py-2.5 flex items-center justify-between shadow-md">
-    <div class="flex items-center space-x-2.5">
+  <header class="bg-slate-800/90 backdrop-blur border-b border-slate-700/80 sticky top-0 z-30 px-3.5 py-2.5 flex items-center justify-between shadow-md">
+    <div class="flex items-center space-x-2">
       <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-base shadow">M</div>
       <div>
-        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v3.7 CATALOG & EDIT</span></h1>
+        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v3.8 SMART-MERGE</span></h1>
         <p id="syncStatus" class="text-[10px] text-amber-400 font-medium leading-none mt-0.5">Inicjalizacja...</p>
       </div>
     </div>
-    <div class="flex items-center gap-1.5">
-      <button onclick="copyLowStockWhatsApp()" class="bg-slate-700/80 hover:bg-slate-700 text-amber-300 text-xs px-2.5 py-1.5 rounded-lg font-medium flex items-center gap-1 border border-slate-600/50"><span>📲</span> Braki</button>
-      <button onclick="fetchAllData()" class="bg-slate-700/80 hover:bg-slate-700 text-slate-200 text-xs px-2.5 py-1.5 rounded-lg font-medium border border-slate-600/50">🔄</button>
-      <button onclick="exportCSV()" class="bg-slate-700/80 hover:bg-slate-700 text-slate-200 text-xs px-2.5 py-1.5 rounded-lg font-medium flex items-center gap-1 border border-slate-600/50"><span>📊</span> CSV</button>
+    <div class="flex items-center gap-1">
+      <button onclick="mergeExistingDuplicates()" class="bg-indigo-950/90 hover:bg-indigo-900 text-indigo-300 text-xs px-2 py-1.5 rounded-lg font-bold flex items-center gap-1 border border-indigo-700/60" title="Scal zduplikowane pozycje w magazynie"><span>🔗</span> Scal</button>
+      <button onclick="copyLowStockWhatsApp()" class="bg-slate-700/80 hover:bg-slate-700 text-amber-300 text-xs px-2 py-1.5 rounded-lg font-medium flex items-center gap-1 border border-slate-600/50"><span>📲</span> Braki</button>
+      <button onclick="fetchAllData()" class="bg-slate-700/80 hover:bg-slate-700 text-slate-200 text-xs px-2 py-1.5 rounded-lg font-medium border border-slate-600/50">🔄</button>
+      <button onclick="exportCSV()" class="bg-slate-700/80 hover:bg-slate-700 text-slate-200 text-xs px-2 py-1.5 rounded-lg font-medium flex items-center gap-1 border border-slate-600/50"><span>📊</span> CSV</button>
     </div>
   </header>
 
@@ -206,7 +207,7 @@
     </section>
   </main>
 
-  <!-- MODAL: EDYCJA ZAPISANEJ FAKTURY / DOSTAWY (NOWOŚĆ) -->
+  <!-- MODAL: EDYCJA ZAPISANEJ FAKTURY / DOSTAWY -->
   <div id="editDeliveryModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <form onsubmit="saveEditedDelivery(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 shadow-2xl my-4 flex flex-col max-h-[94vh]">
       <div class="flex justify-between items-center border-b border-slate-700 pb-2">
@@ -312,7 +313,7 @@
         <h3 class="text-sm font-bold text-white flex items-center gap-1.5"><span>⚡</span> Skanuj Fakturę (1 lub 2 zdjęcia)</h3>
         <button onclick="closeInvoiceUploadModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
       </div>
-      <p class="text-xs text-slate-300">Możesz zeskanować <strong>bieżącą dostawę</strong> (doda stany i fakturę) lub <strong>starą fakturę</strong> (aby wyciągnąć same nazwy produktów i ceny do bazy ze stanem 0):</p>
+      <p class="text-xs text-slate-300">Zeskanuj <strong>bieżącą dostawę</strong> (doda stany i fakturę) lub <strong>starą fakturę</strong> (wyciągnie same nowe produkty i ceny do bazy ze stanem 0):</p>
       <div class="grid grid-cols-2 gap-2.5 pt-1">
         <div onclick="el('invoicePhotoInput1').click()" class="border-2 border-dashed border-indigo-500/70 hover:border-indigo-400 bg-slate-900/90 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer min-h-[120px] text-center transition">
           <div id="invoiceSlot1Empty"><span class="text-2xl block mb-1">📸</span><span class="text-[11px] font-bold text-indigo-300 block">Zdjęcie 1 (Góra)</span><span class="text-[9px] text-slate-500 block">(wymagane)</span></div>
@@ -332,14 +333,14 @@
     </div>
   </div>
 
-  <!-- MODAL AI OCR: WERYFIKACJA FAKTURY (Z WYBOREM: TYLKO BAZA VS NOWA DOSTAWA) -->
+  <!-- MODAL AI OCR: WERYFIKACJA FAKTURY -->
   <div id="aiModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 shadow-2xl my-4 max-h-[94vh] flex flex-col">
       <div class="flex justify-between items-start border-b border-slate-700 pb-2">
         <div>
           <span class="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50">Smart WMS & Catalog Builder</span>
           <h3 class="text-sm font-bold text-white mt-1">Weryfikacja Odczytanych Produktów</h3>
-          <p id="aiDocInfo" class="text-[11px] text-slate-400 mt-0.5">Przeliczanie zgrzewek na sztuki oraz wyodrębnianie cen...</p>
+          <p id="aiDocInfo" class="text-[11px] text-slate-400 mt-0.5">Rozróżnianie pojemności i usuwanie duplikatów...</p>
         </div>
         <button onclick="closeAiModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
       </div>
@@ -371,11 +372,10 @@
         </div>
       </div>
 
-      <!-- DWA TRYBY ZAPISU: STARA FAKTURA (TYLKO BAZA ZE STANEM 0) VS NOWA DOSTAWA (+STAN) -->
       <div id="aiModalActions" class="hidden pt-2.5 border-t border-slate-700 flex flex-col sm:flex-row justify-between gap-2">
         <button onclick="closeAiModal()" class="px-3 py-2 rounded-xl text-xs text-slate-400 hover:bg-slate-700">Anuluj</button>
         <div class="flex flex-wrap gap-2 justify-end">
-          <button onclick="confirmAndApplyDelivery('CATALOG_ONLY')" class="bg-purple-600 hover:bg-purple-500 text-white font-black px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow" title="Dodaje nowe produkty i ceny do magazynu ze stanem 0 szt., bez tworzenia nowej dostawy">
+          <button onclick="confirmAndApplyDelivery('CATALOG_ONLY')" class="bg-purple-600 hover:bg-purple-500 text-white font-black px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow">
             <span>📚</span> Stara faktura: Tylko baza produktów (Stan 0)
           </button>
           <button onclick="confirmAndApplyDelivery('FULL_DELIVERY')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow">
@@ -724,23 +724,130 @@
     let editingDeliveryItems = [], editingDeliveryPhotos = [];
 
     function triggerScanFeedback() { if (navigator.vibrate) { try { navigator.vibrate(50); } catch (e) {} } }
-    function normalizeText(t) { return (t || '').toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()\[\]]/g, ' ').replace(/\s+/g, ' ').trim(); }
+
+    // --- PRECYZYJNA NORMALIZACJA I DOPASOWANIE PRODUKTÓW (ROZRÓŻNIA 0.25 vs 0.85, PET vs RGB, ZERO vs ZWYKŁA) ---
+    function cleanCanonicalKey(text) {
+      return (text || '').toLowerCase()
+        .replace(/,/g, '.')
+        .replace(/\bx\s*\d+\b/gi, ' ') // usuwa mnożnik zgrzewki np. X12, X24 z klucza porównania
+        .replace(/\bders\b|\bdrs\b|\bop\b|\bszt\b/gi, ' ')
+        .replace(/[^a-z0-9ąćęłńóśźż.]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function extractProductSpecs(text) {
+      const s = (text || '').toLowerCase().replace(/,/g, '.');
+      // Wyciągamy pojemności np. 0.25, 0.33, 0.5, 0.7, 0.85, 1.0, 1.5
+      const caps = (s.match(/\b0\.\d+\b|\b1\.5\b|\b1\s*l\b|\b0\.\d+l\b/g) || []).map(c => c.replace('l', '').trim());
+      const pack = [];
+      if (/\bpet\b/.test(s)) pack.push('pet');
+      if (/\brgb\b|\bszk[łl]/.test(s)) pack.push('rgb');
+      if (/\bcan\b|\bpusz/.test(s)) pack.push('can');
+
+      const variants = [];
+      ['zero', 'light', 'bez laktozy', 'sojowe', 'białe', 'czerwone', 'perla', 'gaz', 'niegaz', 'jabłk', 'pomarańcz', 'cytryn'].forEach(v => {
+        if (s.includes(v)) variants.push(v);
+      });
+      return { caps, pack, variants };
+    }
+
+    function areSpecsCompatible(nameA, nameB) {
+      const a = extractProductSpecs(nameA);
+      const b = extractProductSpecs(nameB);
+      // Jeśli oba mają pojemność i pojemności są różne (np. 0.25 vs 0.85) -> NIE SĄ TYM SAMYM PRODUKTEM!
+      if (a.caps.length > 0 && b.caps.length > 0 && a.caps[0] !== b.caps[0]) return false;
+      // Jeśli jeden ma PET a drugi RGB lub CAN -> NIE SĄ TYM SAMYM PRODUKTEM!
+      if (a.pack.length > 0 && b.pack.length > 0 && a.pack[0] !== b.pack[0]) return false;
+      // Jeśli jeden ma słowa typu ZERO, BIAŁE, CZERWONE, BEZ LAKTOZY a drugi nie -> NIE SĄ TYM SAMYM PRODUKTEM!
+      for (const v of ['zero', 'bez laktozy', 'sojowe', 'białe', 'czerwone']) {
+        if (a.variants.includes(v) !== b.variants.includes(v)) return false;
+      }
+      return true;
+    }
 
     function findBestInventoryMatch(targetName) {
       if (!targetName) return null;
-      const cleanTarget = normalizeText(targetName);
-      if (cleanTarget.length < 3) return null;
-      for (const item of inventory) { if (cleanTarget === normalizeText(item.name)) return item; }
-      const targetWords = cleanTarget.split(' ').filter(w => w.length > 2);
-      let bestItem = null, maxOverlap = 0;
+      const targetKey = cleanCanonicalKey(targetName);
+      if (targetKey.length < 3) return null;
+
+      // 1. Dokładne dopasowanie po oczyszczonym kluczu
       for (const item of inventory) {
-        const itemWords = normalizeText(item.name).split(' ').filter(w => w.length > 2);
+        if (cleanCanonicalKey(item.name) === targetKey && areSpecsCompatible(targetName, item.name)) {
+          return item;
+        }
+      }
+
+      // 2. Dopasowanie po słowach marki (tylko jeśli pojemność, opakowanie i wariant ZERO/itp. się zgadzają!)
+      const ignoreTokens = new Set(['can', 'rgb', 'pet', 'drs', 'szt', 'but', 'zgrz', '0.25', '0.33', '0.5', '0.7', '0.85', '1.0']);
+      const targetWords = targetKey.split(' ').filter(w => w.length >= 3 && !ignoreTokens.has(w));
+      if (targetWords.length === 0) return null;
+
+      let bestItem = null, bestRatio = 0;
+      for (const item of inventory) {
+        if (!areSpecsCompatible(targetName, item.name)) continue;
+        const itemKey = cleanCanonicalKey(item.name);
+        const itemWords = itemKey.split(' ').filter(w => w.length >= 3 && !ignoreTokens.has(w));
+        if (itemWords.length === 0) continue;
+
         let overlap = 0;
-        for (const w of targetWords) { if (itemWords.includes(w)) overlap++; }
-        if (overlap >= 3 && overlap > maxOverlap) { maxOverlap = overlap; bestItem = item; }
+        for (const w of targetWords) {
+          if (itemWords.includes(w)) overlap++;
+        }
+        const ratio = overlap / Math.max(targetWords.length, itemWords.length);
+        // Wymagamy wysokiego pokrycia słów marki (np. "Burn Zero", "Coca Cola", "Ballantines")
+        if ((overlap >= 2 && ratio >= 0.65) || (overlap >= 1 && targetWords.length === 1 && itemWords.length === 1)) {
+          if (ratio > bestRatio) {
+            bestRatio = ratio;
+            bestItem = item;
+          }
+        }
       }
       return bestItem;
     }
+
+    // --- FUNKCJA SCALANIA ISTNIEJĄCYCH DUPLIKATÓW W MAGAZYNIE (1 KLIKNIĘCIE) ---
+    async function mergeExistingDuplicates() {
+      const groups = new Map();
+      const toDeleteIds = [];
+      let mergedCount = 0;
+
+      for (const item of inventory) {
+        const spec = extractProductSpecs(item.name);
+        const key = cleanCanonicalKey(item.name) + '|' + (spec.caps[0] || '') + '|' + (spec.pack[0] || '') + '|' + spec.variants.join(',');
+        if (!groups.has(key)) {
+          groups.set(key, item);
+        } else {
+          const master = groups.get(key);
+          master.qty = (Number(master.qty) || 0) + (Number(item.qty) || 0);
+          master.inField = (Number(master.inField) || 0) + (Number(item.inField) || 0);
+          if (Number(item.price) > 0) master.price = Number(item.price);
+          toDeleteIds.push(item.id);
+          mergedCount++;
+        }
+      }
+
+      if (mergedCount === 0) {
+        return alert("Brak duplikatów w magazynie! Wszystkie pozycje są unikalne.");
+      }
+
+      inventory = Array.from(groups.values());
+      safeSetLocal('magazyn_offline_items', inventory);
+      renderInventory();
+      triggerScanFeedback();
+
+      if (isCloudOnline) {
+        for (const delId of toDeleteIds) {
+          try { await apiRequest(`/inventory?id=eq.${delId}`, 'DELETE'); } catch (e) {}
+        }
+        for (const master of inventory) {
+          try { await apiRequest(`/inventory?id=eq.${master.id}`, 'PATCH', toDbItem(master)); } catch (e) {}
+        }
+      }
+      alert(`🔗 Pomyślnie scalono ${mergedCount} zduplikowanych pozycji i zsumowano ich stany!`);
+    }
+
+    function normalizeText(t) { return (t || '').toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()\[\]]/g, ' ').replace(/\s+/g, ' ').trim(); }
 
     function findBestEventMatch(scannedNumber, scannedName) {
       const cleanNum = (scannedNumber || '').replace(/[^0-9a-zA-Z]/g, '').toLowerCase();
@@ -891,7 +998,7 @@
               <div class="flex items-center gap-2 text-[10px]">
                 <span class="text-emerald-400 font-bold">${Number(item.price || 0).toFixed(2)} zł / ${item.unit || 'szt.'}</span>
                 <span class="text-slate-500">(${itemVal} zł)</span>
-                ${isLow ? `<span class="text-rose-400 font-medium">${item.qty === 0 ? '⚪ Stan 0 (Baza)' : `⚠️ Niski stan (min: ${item.minQty})`}</span>` : ''}
+                ${isLow ? `<span class="text-rose-400 font-medium">${item.qty === 0 ? '⚪ Stan 0 (W bazie)' : `⚠️ Niski stan (min: ${item.minQty})`}</span>` : ''}
               </div>
             </div>
             <div class="text-right flex items-center gap-2">
@@ -1157,7 +1264,7 @@
       if (isCloudOnline) { try { await apiRequest(`/deposits?id=eq.${id}`, 'DELETE'); } catch (e) {} }
     }
 
-    // --- FAKTURY / DOSTAWY + PEŁNA EDYCJA FAKTUR ---
+    // --- FAKTURY / DOSTAWY + EDYCJA FAKTUR ---
     function renderDeliveries() {
       const list = el('deliveriesList'); if (!list) return;
       if (deliveries.length === 0) { list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak zarejestrowanych dostaw.</div>`; return; }
@@ -1394,7 +1501,7 @@
       try {
         const comp = await compressImage(file, 1024, 0.7);
         const catNames = inventory.slice(0, 60).map(i => i.name).join(', ');
-        const parsed = await queryGeminiAPI(`Przeanalizuj zdjęcie towaru na wózku/półce. Policz widoczne produkty (butelki, napoje, jednorazówki). Zgrzewki przelicz na sztuki. Jeśli rozpoznasz produkt z naszej bazy (${catNames}), użyj jego nazwy. Zwróć JSON: { "items": [ { "name": string, "qty": number, "unit": "szt." } ] }`, [comp.split(',')[1]]);
+        const parsed = await queryGeminiAPI(`Przeanalizuj zdjęcie towaru na wózku/półce. Policz widoczne produkty (butelki, napoje, jednorazówki). Zgrzewki przelicz na sztuki. Jeśli rozpoznasz produkt z naszej bazy (${catNames}), użyj jego dokładnej nazwy. Zwróć JSON: { "items": [ { "name": string, "qty": number, "unit": "szt." } ] }`, [comp.split(',')[1]]);
         currentShelfCountItems = parsed.items || [];
         el('shelfCountLoading').classList.add('hidden'); el('shelfCountContent').classList.remove('hidden'); el('shelfCountActions').classList.remove('hidden');
         el('shelfCountItemsList').innerHTML = currentShelfCountItems.map((it, idx) => {
@@ -1410,13 +1517,11 @@
       for (let i = 0; i < currentShelfCountItems.length; i++) {
         const name = el(`shelfCountName_${i}`).value.trim(), cid = el(`shelfCountMatch_${i}`).value, q = parseInt(el(`shelfCountQty_${i}`).value) || 0, u = el(`shelfCountUnit_${i}`).value.trim() || 'szt.';
         if (q <= 0) continue;
-        if (cid) {
-          const m = inventory.find(x => String(x.id) === String(cid));
-          if (m) {
-            const old = m.qty; m.qty = (mode === 'ADD') ? (m.qty + q) : q;
-            recordStockLog(m.id, m.name, mode === 'ADD' ? 'Zliczenie (+)' : 'Inwentaryzacja', mode === 'ADD' ? q : (q - old), 'Ze zdjęcia');
-            if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${m.id}`, 'PATCH', { qty: m.qty, updated_at: new Date() }); } catch (e) {} }
-          }
+        let m = cid ? inventory.find(x => String(x.id) === String(cid)) : findBestInventoryMatch(name);
+        if (m) {
+          const old = m.qty; m.qty = (mode === 'ADD') ? (m.qty + q) : q;
+          recordStockLog(m.id, m.name, mode === 'ADD' ? 'Zliczenie (+)' : 'Inwentaryzacja', mode === 'ADD' ? q : (q - old), 'Ze zdjęcia');
+          if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${m.id}`, 'PATCH', { qty: m.qty, updated_at: new Date() }); } catch (e) {} }
         } else {
           const ni = normalizeItem({ id: Date.now().toString() + '_' + i, barcode: 'RC-' + Math.floor(100000 + Math.random() * 900000), name, category: 'Napoje', location: 'Magazyn Główny', qty: q, inField: 0, unit: u, minQty: 3, price: 0 });
           inventory.unshift(ni); recordStockLog(ni.id, ni.name, 'Nowy z Vision', q, 'Ze zdjęcia');
@@ -1426,7 +1531,7 @@
       safeSetLocal('magazyn_offline_items', inventory); hideModal('shelfCountModal'); renderInventory(); alert("Zaktualizowano stany magazynowe!");
     }
 
-    // --- FAKTURY NA 1 LUB 2 ZDJĘCIA (DOSTAWA LUB TYLKO BAZA ZE STARYCH FAKTUR) ---
+    // --- FAKTURY NA 1 LUB 2 ZDJĘCIA (Z USUWANIE NAKŁADAJĄCYCH SIĘ WIERSZY I STAŁĄ REGUŁĄ CENY) ---
     function openInvoiceUploadModal() { resetInvoicePhotos(); showModal('invoiceCaptureModal'); }
     function closeInvoiceUploadModal() { hideModal('invoiceCaptureModal'); resetInvoicePhotos(); }
     function resetInvoicePhotos() {
@@ -1455,19 +1560,42 @@
       el('aiLoadingState').classList.remove('hidden'); el('aiItemsContainer').classList.add('hidden'); el('aiModalActions').classList.add('hidden');
 
       try {
-        const prompt = `Przeanalizuj 1 lub 2 zdjęcia faktury. Wyodrębnij osobno produkty (napoje, alkohole, jednorazówki) oraz osobno kaucje/opakowania zwrotne:
+        const prompt = `Przeanalizuj 1 lub 2 zdjęcia tej samej faktury.
+WAŻNE PRZY 2 ZDJĘCIACH: Zdjęcie 1 (góra) i Zdjęcie 2 (dół) mogą nachodzić na siebie w środkowej części tabeli. Jeśli ten sam wiersz (ten sam kod produktu i nazwa) jest widoczny na końcu Zdjęcia 1 i na początku Zdjęcia 2, zwróć go TYLKO JEDEN RAZ!
+JEDNOLITA REGUŁA CENY: Jeśli pod pozycją widnieje dopisek "Cena zaokrąglona za sztu", ZAWSZE podaj tę wartość jako unitPriceHint. Jako rawPrice podaj cenę netto "Po rabacie bez opłat" (pierwsza kolumna ceny netto).
+Wyodrębnij:
 1. docNumber, 2. supplier, 3. totalGross, 4. receiverName (podpis odbiorcy np. KANA/BARTEK),
-5. items: { "name": string, "rawQty": number, "rawPrice": number, "unitPriceHint": number (jeśli jest dopisek 'Cena zaokrąglona za sztu' podaj liczbę, inaczej null) },
+5. items: { "code": string (kod produktu z 1 kolumny jeśli jest), "name": string (pełna nazwa z pojemnością np. 0.25 RGB X24 COCA-COLA lub 0.85 PET X12 COCA-COLA ZERO), "rawQty": number, "rawPrice": number, "unitPriceHint": number },
 6. deposits: z sekcji opakowań zwrotnych i systemu kaucyjnego { "name": string, "category": "PET_CAN_050"|"BUTELKA_SZKLO"|"SKRZYNKA"|"PALETA_INNE", "netQty": number, "unitPrice": number }. Zwróć JSON.`;
         const parsed = await queryGeminiAPI(prompt, b64);
-        const calcItems = (parsed.items || []).map(it => {
+
+        // Lokalna deduplikacja wierszy z nałożenia 2 zdjęć tej samej faktury
+        const seenInScan = new Map();
+        for (const it of (parsed.items || [])) {
           const mult = detectPackMultiplier(it.name), rq = Number(it.rawQty) || 1, rp = Number(it.rawPrice) || 0;
-          return { name: it.name, qty: mult > 1 ? rq * mult : rq, netPrice: mult > 1 ? (it.unitPriceHint ? Number(it.unitPriceHint) : parseFloat((rp / mult).toFixed(2))) : rp, unit: 'szt.', packMultiplier: mult, rawQty: rq };
-        });
+          const unitP = mult > 1
+            ? (it.unitPriceHint ? Number(it.unitPriceHint) : parseFloat((rp / mult).toFixed(2)))
+            : (it.unitPriceHint ? Number(it.unitPriceHint) : rp);
+          const finalQ = mult > 1 ? rq * mult : rq;
+
+          const spec = extractProductSpecs(it.name);
+          const dedupKey = (it.code ? String(it.code).trim() : '') + '|' + cleanCanonicalKey(it.name) + '|' + (spec.caps[0] || '');
+          if (!seenInScan.has(dedupKey)) {
+            seenInScan.set(dedupKey, {
+              name: it.name.trim(),
+              qty: finalQ,
+              netPrice: unitP,
+              unit: 'szt.',
+              packMultiplier: mult,
+              rawQty: rq
+            });
+          }
+        }
+
         currentExtractedDelivery = {
           docNumber: parsed.docNumber || 'FA/' + Date.now().toString().slice(-6), supplier: parsed.supplier || 'Dostawca',
           totalGross: parsed.totalGross || '', receiverName: parsed.receiverName || localStorage.getItem('magazyn_default_receiver') || 'Bartek',
-          items: calcItems, deposits: parsed.deposits || [], photos: savedUrls
+          items: Array.from(seenInScan.values()), deposits: parsed.deposits || [], photos: savedUrls
         };
         displayExtractedItems(currentExtractedDelivery); triggerScanFeedback();
       } catch (err) { alert("Błąd odczytu: " + err.message); closeAiModal(); }
@@ -1478,7 +1606,7 @@
       el('aiSupplierInput').value = delivery.supplier; el('aiDocNumInput').value = delivery.docNumber; el('aiReceiverInput').value = delivery.receiverName; el('aiTotalGrossInput').value = delivery.totalGross;
       el('aiItemsList').innerHTML = (delivery.items || []).map((it, idx) => {
         const m = findBestInventoryMatch(it.name);
-        return `<div class="bg-slate-900 border ${m ? 'border-emerald-600/70' : 'border-indigo-600/70'} rounded-xl p-3 space-y-2"><div class="flex justify-between flex-wrap gap-1"><span id="aiBadge_${idx}" class="text-[9px] font-bold px-2 py-0.5 rounded ${m ? 'bg-emerald-950 text-emerald-300' : 'bg-indigo-950 text-indigo-300'}">${m ? `✓ W bazie: ${m.name}` : '⭐ NOWY PRODUKT'}</span>${it.packMultiplier > 1 ? `<span class="text-[9px] font-bold bg-amber-950 text-amber-300 px-2 py-0.5 rounded">📦 ×${it.packMultiplier}: ${it.rawQty} op. ➔ ${it.qty} szt.</span>` : ''}</div><div class="flex justify-between gap-2"><input type="text" id="aiItemName_${idx}" value="${it.name}" class="bg-transparent font-bold text-xs text-white flex-1 border-b border-indigo-500"><input type="number" step="0.01" id="aiItemPrice_${idx}" value="${Number(it.netPrice || 0).toFixed(2)}" title="Cena netto za 1 szt." class="w-16 bg-slate-800 border border-slate-700 rounded p-1 text-center font-bold text-emerald-400 text-xs"><input type="number" id="aiItemQty_${idx}" value="${it.qty || 1}" title="Ilość" class="w-14 bg-slate-800 border border-slate-700 rounded p-1 text-center font-bold text-emerald-400 text-xs"><input type="text" id="aiItemUnit_${idx}" value="${it.unit || 'szt.'}" class="w-11 bg-slate-800 border border-slate-700 rounded p-1 text-center text-xs text-slate-300"></div><select id="aiSelectMatch_${idx}" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-[11px] text-white w-full"><option value="" ${!m ? 'selected' : ''}>⭐ DODAJ JAKO NOWY PRODUKT DO BAZY</option>${inventory.map(inv => `<option value="${inv.id}" ${m && m.id === inv.id ? 'selected' : ''}>🔗 Połącz z: ${inv.name} (Stan: ${inv.qty})</option>`).join('')}</select></div>`;
+        return `<div class="bg-slate-900 border ${m ? 'border-emerald-600/70' : 'border-indigo-600/70'} rounded-xl p-3 space-y-2"><div class="flex justify-between flex-wrap gap-1"><span id="aiBadge_${idx}" class="text-[9px] font-bold px-2 py-0.5 rounded ${m ? 'bg-emerald-950 text-emerald-300' : 'bg-indigo-950 text-indigo-300'}">${m ? `✓ W bazie: ${m.name} (Stan: ${m.qty})` : '⭐ NOWY PRODUKT (Brak w bazie)'}</span>${it.packMultiplier > 1 ? `<span class="text-[9px] font-bold bg-amber-950 text-amber-300 px-2 py-0.5 rounded">📦 ×${it.packMultiplier}: ${it.rawQty} op. ➔ ${it.qty} szt.</span>` : ''}</div><div class="flex justify-between gap-2"><input type="text" id="aiItemName_${idx}" value="${it.name}" class="bg-transparent font-bold text-xs text-white flex-1 border-b border-indigo-500"><input type="number" step="0.01" id="aiItemPrice_${idx}" value="${Number(it.netPrice || 0).toFixed(2)}" title="Cena netto za 1 szt." class="w-16 bg-slate-800 border border-slate-700 rounded p-1 text-center font-bold text-emerald-400 text-xs"><input type="number" id="aiItemQty_${idx}" value="${it.qty || 1}" title="Ilość" class="w-14 bg-slate-800 border border-slate-700 rounded p-1 text-center font-bold text-emerald-400 text-xs"><input type="text" id="aiItemUnit_${idx}" value="${it.unit || 'szt.'}" class="w-11 bg-slate-800 border border-slate-700 rounded p-1 text-center text-xs text-slate-300"></div><select id="aiSelectMatch_${idx}" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-[11px] text-white w-full"><option value="" ${!m ? 'selected' : ''}>⭐ DODAJ JAKO NOWY PRODUKT DO BAZY</option>${inventory.map(inv => `<option value="${inv.id}" ${m && m.id === inv.id ? 'selected' : ''}>🔗 Scal i zsumuj z: ${inv.name} (Stan: ${inv.qty} | ${Number(inv.price).toFixed(2)} zł)</option>`).join('')}</select></div>`;
       }).join('');
       renderExtractedDepositsInModal();
     }
@@ -1490,7 +1618,7 @@
 
     function addManualDepositRowToModal() { if (!currentExtractedDelivery) return; currentExtractedDelivery.deposits.push({ name: 'Kaucja zwrotna', category: 'BUTELKA_SZKLO', netQty: 12, unitPrice: 1.00 }); renderExtractedDepositsInModal(); }
 
-    // --- OBSŁUGA OBU TRYBÓW: 'CATALOG_ONLY' (STARA FAKTURA -> BAZA ZE STANEM 0) ORAZ 'FULL_DELIVERY' ---
+    // --- ZAPIS BEZ DUPLIKATÓW: SUMUJE IDENTYCZNE POZYCJE I DODAJE NOWE ZE STARYCH FAKTUR ---
     async function confirmAndApplyDelivery(mode = 'FULL_DELIVERY') {
       if (!currentExtractedDelivery) return;
       const isCatalogOnly = (mode === 'CATALOG_ONLY');
@@ -1498,7 +1626,7 @@
       const rcv = el('aiReceiverInput').value.trim() || 'Magazyn', docNum = el('aiDocNumInput').value.trim(), sup = el('aiSupplierInput').value.trim();
       localStorage.setItem('magazyn_default_receiver', rcv);
 
-      let addedCatalogCount = 0;
+      let addedCatalogCount = 0, mergedCount = 0;
 
       for (let i = 0; i < (currentExtractedDelivery.items || []).length; i++) {
         const name = el(`aiItemName_${i}`)?.value.trim(), cid = el(`aiSelectMatch_${i}`)?.value, q = parseInt(el(`aiItemQty_${i}`)?.value) || 0, u = el(`aiItemUnit_${i}`)?.value.trim() || 'szt.', p = parseFloat(el(`aiItemPrice_${i}`)?.value) || 0;
@@ -1507,24 +1635,28 @@
 
         finalItems.push({ name, qty: q, unit: u, netPrice: p });
 
-        if (cid) {
-          const m = inventory.find(x => String(x.id) === String(cid));
-          if (m) {
-            if (m.price > 0 && p > 0 && Math.abs(p - m.price) > 0.01) {
-              const al = { id: Date.now().toString() + '_' + i, item_name: m.name, supplier: sup, old_price: m.price, new_price: p, diff_percent: parseFloat((((p - m.price) / m.price) * 100).toFixed(1)), doc_number: docNum, created_at: new Date() };
-              priceAlerts.unshift(al); if (isCloudOnline) { try { await apiRequest('/price_alerts', 'POST', al); } catch (e) {} }
-            }
-            if (!isCatalogOnly) {
-              m.qty += q;
-              recordStockLog(m.id, m.name, 'Przyjęcie Faktura', q, `${docNum} • ${rcv}`);
-            }
-            if (p > 0) m.price = p;
-            if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${m.id}`, 'PATCH', { qty: m.qty, price: m.price, updated_at: new Date() }); } catch (e) {} }
+        // Szukamy wybranego z listy LUB sprawdzamy, czy identyczny produkt już istnieje w magazynie (zapobiega dublowaniu!)
+        let targetItem = cid
+          ? inventory.find(x => String(x.id) === String(cid))
+          : findBestInventoryMatch(name);
+
+        if (targetItem) {
+          mergedCount++;
+          // Alerty cenowe generujemy tylko dla bieżących dostaw i tylko gdy różnica przekracza 0.05 zł
+          if (!isCatalogOnly && targetItem.price > 0 && p > 0 && Math.abs(p - targetItem.price) > 0.05) {
+            const al = { id: Date.now().toString() + '_' + i, item_name: targetItem.name, supplier: sup, old_price: targetItem.price, new_price: p, diff_percent: parseFloat((((p - targetItem.price) / targetItem.price) * 100).toFixed(1)), doc_number: docNum, created_at: new Date() };
+            priceAlerts.unshift(al); if (isCloudOnline) { try { await apiRequest('/price_alerts', 'POST', al); } catch (e) {} }
           }
+          if (!isCatalogOnly) {
+            targetItem.qty = (Number(targetItem.qty) || 0) + q;
+            recordStockLog(targetItem.id, targetItem.name, 'Przyjęcie Faktura', q, `${docNum} • ${rcv}`);
+          }
+          if (p > 0) targetItem.price = p;
+          if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${targetItem.id}`, 'PATCH', { qty: targetItem.qty, price: targetItem.price, updated_at: new Date() }); } catch (e) {} }
         } else {
           const nl = name.toLowerCase();
           let cat = 'Napoje';
-          if (nl.includes('wino') || nl.includes('wódka') || nl.includes('piwo') || nl.includes('whisky') || nl.includes('gin') || nl.includes('rum')) cat = 'Alkohole';
+          if (nl.includes('wino') || nl.includes('wódka') || nl.includes('piwo') || nl.includes('whisky') || nl.includes('gin') || nl.includes('rum') || nl.includes('prosecco')) cat = 'Alkohole';
           else if (nl.includes('kubek') || nl.includes('talerz') || nl.includes('sztuć') || nl.includes('serwet') || nl.includes('słomk')) cat = 'Jednorazówki';
 
           const initialQty = isCatalogOnly ? 0 : q;
@@ -1555,9 +1687,9 @@
       closeAiModal(); renderInventory(); renderDeposits(); renderDeliveries(); renderPriceAlerts();
 
       if (isCatalogOnly) {
-        alert(`📚 Baza uzupełniona! Dodano ${addedCatalogCount} nowych produktów ze stanem 0 szt. (bez tworzenia dostawy). Teraz możesz nabić ich fizyczny stan przez "👁️ Zlicz ze zdjęcia" lub ręcznie.`);
+        alert(`📚 Baza zaktualizowana! Dodano ${addedCatalogCount} nowych produktów ze stanem 0 szt., a dla ${mergedCount} istniejących zaktualizowano cenę.`);
       } else {
-        alert(`📥 Dostawa przyjęta przez: ${rcv}! Stany magazynowe i faktury zostały zaktualizowane.`);
+        alert(`📥 Dostawa przyjęta! Nowych pozycji: ${addedCatalogCount}, zsumowanych z istniejącymi: ${mergedCount}.`);
       }
     }
 
@@ -1804,7 +1936,16 @@
 
     async function saveNewItem(e) {
       e.preventDefault();
-      const ni = normalizeItem({ id: Date.now().toString(), barcode: el('newBarcode').value.trim(), name: el('newName').value.trim(), price: parseFloat(el('newPrice').value) || 0, category: el('newCategory').value, location: el('newLocation').value.trim() || '-', qty: parseInt(el('newQty').value) || 0, inField: 0, unit: el('newUnit').value, minQty: parseInt(el('newMinQty').value) || 0 });
+      const name = el('newName').value.trim();
+      const existing = findBestInventoryMatch(name);
+      const q = parseInt(el('newQty').value) || 0, p = parseFloat(el('newPrice').value) || 0;
+      if (existing && cleanCanonicalKey(existing.name) === cleanCanonicalKey(name)) {
+        existing.qty += q; if (p > 0) existing.price = p;
+        safeSetLocal('magazyn_offline_items', inventory); renderInventory(); hideModal('newItemModal');
+        if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${existing.id}`, 'PATCH', toDbItem(existing)); } catch (err) {} }
+        return;
+      }
+      const ni = normalizeItem({ id: Date.now().toString(), barcode: el('newBarcode').value.trim(), name, price: p, category: el('newCategory').value, location: el('newLocation').value.trim() || '-', qty: q, inField: 0, unit: el('newUnit').value, minQty: parseInt(el('newMinQty').value) || 0 });
       inventory.unshift(ni); recordStockLog(ni.id, ni.name, 'Utworzenie pozycji', ni.qty);
       safeSetLocal('magazyn_offline_items', inventory); renderInventory(); hideModal('newItemModal');
       if (isCloudOnline) { try { await apiRequest('/inventory', 'POST', toDbItem(ni)); } catch (e) {} }
@@ -1827,7 +1968,7 @@
 
     function openPrintLabelModal() {
       const it = inventory.find(i => String(i.id) === String(selectedItemId)); if (!it) return;
-      el('printItemName').innerText = it.name; el('printItemCategory').innerText = `${it.category} • ${it.location}`; el('printItemBarcode').innerText = it.barcode;
+      el('printItemName').innerText = item.name; el('printItemCategory').innerText = `${it.category} • ${it.location}`; el('printItemBarcode').innerText = it.barcode;
       el('printQRCode').innerHTML = ''; new QRCode(el('printQRCode'), { text: it.barcode, width: 140, height: 140 });
       document.body.classList.remove('print-mode-sheet'); document.body.classList.add('print-mode-qr'); window.print();
     }
