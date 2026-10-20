@@ -31,14 +31,14 @@
     <div class="flex items-center space-x-2">
       <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-base shadow">M</div>
       <div>
-        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v3.8 SMART-MERGE</span></h1>
+        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v3.9 AUTO-CAT</span></h1>
         <p id="syncStatus" class="text-[10px] text-amber-400 font-medium leading-none mt-0.5">Inicjalizacja...</p>
       </div>
     </div>
     <div class="flex items-center gap-1">
-      <button onclick="mergeExistingDuplicates()" class="bg-indigo-950/90 hover:bg-indigo-900 text-indigo-300 text-xs px-2 py-1.5 rounded-lg font-bold flex items-center gap-1 border border-indigo-700/60" title="Scal zduplikowane pozycje w magazynie"><span>🔗</span> Scal</button>
+      <button onclick="runOnlineAIClassifier(true)" class="bg-purple-950/90 hover:bg-purple-900 text-purple-300 text-xs px-2 py-1.5 rounded-lg font-bold flex items-center gap-1 border border-purple-700/60" title="Wymuś sprawdzenie kategorii wszystkich produktów online przez AI"><span>🧠</span> Kategoryzuj</button>
+      <button onclick="mergeExistingDuplicates()" class="bg-indigo-950/90 hover:bg-indigo-900 text-indigo-300 text-xs px-2 py-1.5 rounded-lg font-bold flex items-center gap-1 border border-indigo-700/60" title="Scal zduplikowane pozycje"><span>🔗</span> Scal</button>
       <button onclick="copyLowStockWhatsApp()" class="bg-slate-700/80 hover:bg-slate-700 text-amber-300 text-xs px-2 py-1.5 rounded-lg font-medium flex items-center gap-1 border border-slate-600/50"><span>📲</span> Braki</button>
-      <button onclick="fetchAllData()" class="bg-slate-700/80 hover:bg-slate-700 text-slate-200 text-xs px-2 py-1.5 rounded-lg font-medium border border-slate-600/50">🔄</button>
       <button onclick="exportCSV()" class="bg-slate-700/80 hover:bg-slate-700 text-slate-200 text-xs px-2 py-1.5 rounded-lg font-medium flex items-center gap-1 border border-slate-600/50"><span>📊</span> CSV</button>
     </div>
   </header>
@@ -100,18 +100,19 @@
         </form>
       </section>
 
+      <!-- ZAKŁADKI KATEGORII Z LICZNIKAMI POZYCJI -->
       <div class="flex gap-1.5 overflow-x-auto pb-0.5 text-xs">
-        <button onclick="setCategoryPill('ALL')" id="pillCat_ALL" class="bg-emerald-600 text-slate-950 font-black px-3 py-1.5 rounded-xl whitespace-nowrap shadow transition">Wszystko</button>
-        <button onclick="setCategoryPill('ALCOHOL')" id="pillCat_ALCOHOL" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-1.5 rounded-xl whitespace-nowrap font-medium transition">🍷 Alkohole</button>
-        <button onclick="setCategoryPill('BEVERAGE')" id="pillCat_BEVERAGE" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-1.5 rounded-xl whitespace-nowrap font-medium transition">🥤 Napoje & Kawa</button>
-        <button onclick="setCategoryPill('DISPOSABLES')" id="pillCat_DISPOSABLES" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-1.5 rounded-xl whitespace-nowrap font-medium transition">🍽️ Jednorazówki & Serwis</button>
-        <button onclick="setCategoryPill('LOW')" id="pillCat_LOW" class="bg-slate-800 hover:bg-slate-700 text-rose-400 border border-slate-700 px-3 py-1.5 rounded-xl whitespace-nowrap font-medium transition">⚠️ Braki / Stan 0</button>
-        <button onclick="setCategoryPill('FIELD')" id="pillCat_FIELD" class="bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 px-3 py-1.5 rounded-xl whitespace-nowrap font-medium transition">🚚 Teren</button>
+        <button onclick="setCategoryPill('ALL')" id="pillCat_ALL" class="bg-emerald-600 text-slate-950 font-black px-3 py-1.5 rounded-xl whitespace-nowrap shadow transition">Wszystko <span id="countCat_ALL" class="opacity-80 text-[10px] ml-0.5">(0)</span></button>
+        <button onclick="setCategoryPill('ALCOHOL')" id="pillCat_ALCOHOL" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-1.5 rounded-xl whitespace-nowrap font-medium transition">🍷 Alkohole <span id="countCat_ALCOHOL" class="opacity-75 text-[10px] ml-0.5">(0)</span></button>
+        <button onclick="setCategoryPill('BEVERAGE')" id="pillCat_BEVERAGE" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-1.5 rounded-xl whitespace-nowrap font-medium transition">🥤 Napoje & Kawa <span id="countCat_BEVERAGE" class="opacity-75 text-[10px] ml-0.5">(0)</span></button>
+        <button onclick="setCategoryPill('DISPOSABLES')" id="pillCat_DISPOSABLES" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-1.5 rounded-xl whitespace-nowrap font-medium transition">🍽️ Jednorazówki & Serwis <span id="countCat_DISPOSABLES" class="opacity-75 text-[10px] ml-0.5">(0)</span></button>
+        <button onclick="setCategoryPill('LOW')" id="pillCat_LOW" class="bg-slate-800 hover:bg-slate-700 text-rose-400 border border-slate-700 px-3 py-1.5 rounded-xl whitespace-nowrap font-medium transition">⚠️ Braki / Stan 0 <span id="countCat_LOW" class="opacity-75 text-[10px] ml-0.5">(0)</span></button>
+        <button onclick="setCategoryPill('FIELD')" id="pillCat_FIELD" class="bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 px-3 py-1.5 rounded-xl whitespace-nowrap font-medium transition">🚚 Teren <span id="countCat_FIELD" class="opacity-75 text-[10px] ml-0.5">(0)</span></button>
       </div>
 
       <div class="flex flex-wrap gap-2 items-center justify-between">
         <div class="flex-1 min-w-[220px]">
-          <input type="text" id="searchFilter" oninput="renderInventory()" placeholder="Szukaj po nazwie, regale, kodzie..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500" />
+          <input type="text" id="searchFilter" oninput="renderInventory()" placeholder="Szukaj po nazwie, podkategorii (np. Whisky, Rum, Soft), regale..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500" />
         </div>
         <button id="btnToggleSelectMode" onclick="toggleSelectMode()" class="bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/60 text-amber-300 text-xs px-3 py-2 rounded-xl font-bold flex items-center gap-1.5 transition"><span>🚚</span> Wybierz na Event</button>
       </div>
@@ -340,7 +341,7 @@
         <div>
           <span class="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50">Smart WMS & Catalog Builder</span>
           <h3 class="text-sm font-bold text-white mt-1">Weryfikacja Odczytanych Produktów</h3>
-          <p id="aiDocInfo" class="text-[11px] text-slate-400 mt-0.5">Rozróżnianie pojemności i usuwanie duplikatów...</p>
+          <p id="aiDocInfo" class="text-[11px] text-slate-400 mt-0.5">Automatyczna kategoryzacja i rozróżnianie pojemności...</p>
         </div>
         <button onclick="closeAiModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
       </div>
@@ -616,13 +617,23 @@
       </div>
       <div class="grid grid-cols-2 gap-2">
         <div>
-          <label class="text-[11px] text-slate-300 block mb-1">Kategoria:</label>
-          <select id="editItemCategory" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2 py-1.5 text-xs text-white">
-            <option value="Alkohole">🍷 Alkohole</option>
-            <option value="Napoje">🥤 Napoje & Bar</option>
-            <option value="Jednorazówki">🍽️ Jednorazówki & Serwis</option>
-            <option value="Inne">📦 Inne / Magazyn</option>
-          </select>
+          <label class="text-[11px] text-slate-300 block mb-1">Kategoria (możesz wpisać własną lub wybrać):</label>
+          <input type="text" id="editItemCategory" list="categoryPresetsList" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white font-bold">
+          <datalist id="categoryPresetsList">
+            <option value="Alkohole • Whisky">
+            <option value="Alkohole • Wódka">
+            <option value="Alkohole • Rum">
+            <option value="Alkohole • Gin / Tequila">
+            <option value="Alkohole • Wino / Prosecco">
+            <option value="Alkohole • Piwo">
+            <option value="Napoje • Gazowane / Soft">
+            <option value="Napoje • Energetyk">
+            <option value="Napoje • Soki / Nektary">
+            <option value="Napoje • Woda">
+            <option value="Napoje • Kawa / Herbata / Mleko">
+            <option value="Jednorazówki • Opakowania / Lunchbox">
+            <option value="Jednorazówki • Kubki / Sztućce / Serwetki">
+          </datalist>
         </div>
         <div><label class="text-[11px] text-slate-300 block mb-1">Regał / Lokalizacja:</label><input type="text" id="editItemLocation" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white"></div>
       </div>
@@ -639,7 +650,7 @@
     <form onsubmit="saveNewItem(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl">
       <div class="flex justify-between items-center"><h3 class="text-sm font-bold text-white">Nowa pozycja w magazynie</h3><button type="button" onclick="hideModal('newItemModal')" class="text-slate-400 hover:text-white p-1">✕</button></div>
       <div><label class="text-[11px] text-slate-300 block mb-1">Kod kreskowy / QR:</label><div class="flex gap-2"><input type="text" id="newBarcode" placeholder="RC-001" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white font-mono"><button type="button" onclick="generateRandomCode()" class="bg-slate-700 px-3 py-1.5 rounded-xl text-xs font-semibold">Losuj</button></div></div>
-      <div><label class="text-[11px] text-slate-300 block mb-1">Nazwa towaru *:</label><input type="text" id="newName" required placeholder="Np. Kubki papierowe 250ml / Wino Białe" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold"></div>
+      <div><label class="text-[11px] text-slate-300 block mb-1">Nazwa towaru * (Kategoria dobierze się sama):</label><input type="text" id="newName" required oninput="autoPreviewNewItemCategory()" placeholder="Np. Ballantine's 0.7L / Lunchbox 2-dzielny" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold"></div>
       <div class="grid grid-cols-2 gap-2">
         <div><label class="text-[11px] text-slate-300 block mb-1">Cena netto (PLN):</label><input type="number" step="0.01" id="newPrice" value="0.00" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-emerald-400 font-bold"></div>
         <div>
@@ -654,13 +665,8 @@
       </div>
       <div class="grid grid-cols-2 gap-2">
         <div>
-          <label class="text-[11px] text-slate-300 block mb-1">Kategoria:</label>
-          <select id="newCategory" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2 py-1.5 text-xs text-white">
-            <option value="Alkohole">🍷 Alkohole</option>
-            <option value="Napoje">🥤 Napoje & Bar</option>
-            <option value="Jednorazówki">🍽️ Jednorazówki & Serwis</option>
-            <option value="Inne">📦 Inne / Magazyn</option>
-          </select>
+          <label class="text-[11px] text-slate-300 block mb-1">Kategoria (Auto):</label>
+          <input type="text" id="newCategory" list="categoryPresetsList" value="Napoje • Gazowane / Soft" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-emerald-300 font-bold">
         </div>
         <div><label class="text-[11px] text-slate-300 block mb-1">Regał / Lokalizacja:</label><input type="text" id="newLocation" placeholder="Np. Półka B2" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white"></div>
       </div>
@@ -681,6 +687,88 @@
     const showModal = (id) => { const m = el(id); if (m) { m.classList.remove('hidden'); m.classList.add('flex'); } };
     const hideModal = (id) => { const m = el(id); if (m) { m.classList.add('hidden'); m.classList.remove('flex'); } };
 
+    // --- INTELIGENTNY SŁOWNIK MAREK I PRODUKTÓW HORECA (WARSTWA 1: NATYCHMIASTOWA) ---
+    function classifyProductSmartLocal(name, currentCategory = '') {
+      const n = (name || '').toLowerCase();
+
+      // 1. JEDNORAZÓWKI & SERWIS
+      if (/lunchbox|menubox|menu box|lunch box|pojemnik|kubek|kubki|kubeczk|wieczk|dekiel|talerz|sztuć|widelc|widelec|nóż|noże|nożyk|łyżk|łyżecz|mieszadeł|serwet|słomk|rurk|tacka|taca|folia|strecz|alumin|pergamin|papier|rękawicz|worek|worki|wykałacz|szpadk|obrus|świecz|podgrzewacz|paliwo|chafing|czyściw|ręcznik/.test(n)) {
+        if (/lunchbox|menubox|menu box|lunch box|pojemnik|wieczk|dekiel|tacka/.test(n)) return 'Jednorazówki • Opakowania / Lunchbox';
+        if (/kubek|kubki|kubeczk|słomk|mieszadeł/.test(n)) return 'Jednorazówki • Kubki / Bar';
+        if (/sztuć|widelc|widelec|nóż|noże|łyżk|łyżecz|talerz/.test(n)) return 'Jednorazówki • Sztućce / Talerze';
+        return 'Jednorazówki • Serwis / Higiena';
+      }
+
+      // 2. ALKOHOLE (Rozpoznawanie po markach oraz stężeniu %)
+      if (/ballantine|grant'?s|johnnie walker|jack daniel|jim beam|jameson|chivas|tullamore|bushmills|glen|monkey shoulder|maker'?s mark|bourbon|whisky|whiskey|scotch/.test(n)) {
+        return 'Alkohole • Whisky';
+      }
+      if (/bacardi|captain morgan|havana|malibu|kraken|diplomatico|bumba|rum\b/.test(n)) {
+        return 'Alkohole • Rum';
+      }
+      if (/wyborowa|finlandia|absolut|bocian|żubrówka|zubrowka|stoli|belvedere|chopin|baczewski|pan tadeusz|żołądkowa|zoladkowa|soplica|krupnik|stock|amundsen|smirnoff|nemiroff|ostoya|wódka|wodka|czysta/.test(n)) {
+        return 'Alkohole • Wódka';
+      }
+      if (/lubuski|beefeater|bombay|tanqueray|hendrick|gordon'?s|\bgin\b|tequila|sierra|olmeca|jagermeister|jägermeister|aperol|campari|baileys|kahlua|cointreau|amaretto|limoncello|hennessy|metaxa|koniak|brandy|likier/.test(n)) {
+        return 'Alkohole • Gin / Likier / Aperitif';
+      }
+      if (/wino|wine|prosecco|cava|szampan|champagne|frizzante|martini|cinzano|carlo rossi|fresco|septimo|cero zero|cabernet|merlot|chardonnay|sauvignon|pinot|shiraz|riesling|primitivo|chianti|rioja|tokaj|vermouth/.test(n)) {
+        return 'Alkohole • Wino / Prosecco';
+      }
+      if (/piwo|heineken|lech\b|żywiec|zywiec|tyskie|perła|perla|carlsberg|desperados|corona|kormoran|książęce|ksiazece|zatecky|okocim|harnas|kasztelan|lomza|łomża|namysłów|paulaner|pilsner|guinness|somersby|cydr|radler/.test(n) && !/zdrój|zdroj/.test(n)) {
+        return 'Alkohole • Piwo / Cydr';
+      }
+      // Jeśli ma w nazwie procenty alkoholu np. 40%, 37,5%, 38%, 12%, 13.5% (a nie jest mlekiem 3,2% ani 2% ani 1,5%)
+      if (/\b(1[1-9]|[2-8][0-9])([.,]\d+)?\s*%/.test(n)) {
+        return 'Alkohole • Mocne';
+      }
+
+      // 3. NAPOJE & KAWA & BAR
+      if (/burn|red bull|redbull|monster|tiger|black energy|rockstar|oshee|energetyk/.test(n)) {
+        return 'Napoje • Energetyk';
+      }
+      if (/coca-cola|coca cola|pepsi|fanta|sprite|kinley|schweppes|7up|mirinda|mountain dew|orangina|tonik|tonic|lemoniada|napój gaz/.test(n)) {
+        return 'Napoje • Gazowane / Soft';
+      }
+      if (/cisowianka|perlage|kropla beskidu|żywiec zdrój|zywiec zdroj|nałęczowianka|naleczowianka|muszynianka|kinga pienińska|pellegrino|acqua panna|polaris|woda\b/.test(n)) {
+        return 'Napoje • Woda';
+      }
+      if (/sok\b|nektar|tymbark|hortex|cappy|tarczyn|fortuna|riviva|tłoczony|jabłko|pomarańcz|grejpfrut|czarna porzeczka|wieloowocowy|pomidor/.test(n)) {
+        return 'Napoje • Soki / Nektary';
+      }
+      if (/kawa|filcori|lavazza|illy|pellini|segafredo|dallmayr|tchibo|ziarn|mielona|espresso|herbata|lipton|dilmah|richmont|earl grey|zielona|mięta|mleko|bez laktozy|sojowe|owsiane|śmietank|cukier|syrop|monin|rioba|purée|puree|cytryn/.test(n)) {
+        return 'Napoje • Kawa / Herbata / Dodatki';
+      }
+      if (/\bcan\b|\brgb\b|\bpet\b|\b0\.25\b|\b0\.33\b|\b0\.5\b|\b0\.85\b/.test(n)) {
+        return 'Napoje • Gazowane / Soft';
+      }
+
+      // Jeśli produkt miał już konkretną kategorię, zachowaj ją
+      const c = (currentCategory || '').toLowerCase();
+      if (c.includes('alko') || c.includes('jednoraz') || (c.includes('napoje') && c.includes('•'))) {
+        return currentCategory;
+      }
+      return null; // Oznacza, że trzeba dopytać AI online
+    }
+
+    function getMainCategoryGroup(item) {
+      const cat = String(item.category || '').toLowerCase();
+      const smart = classifyProductSmartLocal(item.name, item.category) || '';
+      const combined = (cat + ' ' + smart.toLowerCase());
+      if (combined.includes('alko') || combined.includes('whisky') || combined.includes('wódka') || combined.includes('rum') || combined.includes('wino') || combined.includes('piwo')) return 'ALCOHOL';
+      if (combined.includes('jednoraz') || combined.includes('serwis') || combined.includes('lunchbox') || combined.includes('kubki') || combined.includes('sztućce')) return 'DISPOSABLES';
+      return 'BEVERAGE';
+    }
+
+    function autoPreviewNewItemCategory() {
+      const name = el('newName')?.value || '';
+      const guessed = classifyProductSmartLocal(name);
+      if (guessed && el('newCategory')) {
+        el('newCategory').value = guessed;
+        if (guessed.startsWith('Jednorazówki') && el('newUnit')) el('newUnit').value = 'op.';
+      }
+    }
+
     function safeGetLocal(key) { try { return JSON.parse(localStorage.getItem(key)) || []; } catch (e) { return []; } }
     function safeSetLocal(key, data) {
       try { localStorage.setItem(key, JSON.stringify(data)); } catch (e) {
@@ -693,9 +781,13 @@
 
     function normalizeItem(raw) {
       if (!raw) return null;
+      const rawCat = String(raw.category || '');
+      const isGenericCat = !rawCat || ['dostawa', 'ogólne', 'inwentaryzacja vision', 'inne', 'napoje'].includes(rawCat.toLowerCase().trim());
+      const smartCat = isGenericCat ? (classifyProductSmartLocal(raw.name, rawCat) || rawCat || 'Napoje • Pozostałe') : rawCat;
+
       return {
         id: String(raw.id), barcode: String(raw.barcode || ''), name: String(raw.name || ''),
-        category: String(raw.category || 'Napoje'), location: String(raw.location || '-'),
+        category: smartCat, location: String(raw.location || '-'),
         qty: Number(raw.qty) || 0, inField: Number(raw.inField !== undefined ? raw.inField : raw.in_field) || 0,
         minQty: Number(raw.minQty !== undefined ? raw.minQty : raw.min_qty) || 0,
         unit: String(raw.unit || 'szt.'), price: Number(raw.price) || 0.00
@@ -725,11 +817,126 @@
 
     function triggerScanFeedback() { if (navigator.vibrate) { try { navigator.vibrate(50); } catch (e) {} } }
 
-    // --- PRECYZYJNA NORMALIZACJA I DOPASOWANIE PRODUKTÓW (ROZRÓŻNIA 0.25 vs 0.85, PET vs RGB, ZERO vs ZWYKŁA) ---
+    // --- WARSTWA 2: AUTOMATYCZNY KLASYFIKATOR ONLINE AI (SPRAWDZA BAZĘ PRZY ODŚWIEŻENIU STRONY) ---
+    async function runOnlineAIClassifier(forceAll = false) {
+      if (inventory.length === 0) return;
+
+      // Krok 1: Zastosuj natychmiastowy klasyfikator lokalny dla wszystkich pozycji i zaktualizuj w Supabase te, które miały "Dostawa" / "Ogólne"
+      const changedLocally = [];
+      inventory.forEach(item => {
+        const smart = classifyProductSmartLocal(item.name, forceAll ? '' : item.category);
+        if (smart && smart !== item.category) {
+          item.category = smart;
+          changedLocally.push(item);
+        }
+      });
+
+      if (changedLocally.length > 0) {
+        safeSetLocal('magazyn_offline_items', inventory);
+        renderInventory();
+        if (isCloudOnline) {
+          for (const it of changedLocally) {
+            try { await apiRequest(`/inventory?id=eq.${it.id}`, 'PATCH', { category: it.category, updated_at: new Date() }); } catch (e) {}
+          }
+        }
+      }
+
+      // Krok 2: Wybierz pozycje, które nadal nie mają pewnej podkategorii (lub wszystkie, jeśli kliknięto przycisk "🧠 Kategoryzuj")
+      const itemsToVerifyOnline = forceAll
+        ? inventory
+        : inventory.filter(it => !it.category.includes('•') || it.category.includes('Pozostałe') || ['Dostawa', 'Ogólne', 'Inne'].includes(it.category));
+
+      if (itemsToVerifyOnline.length === 0) {
+        if (forceAll) alert(`✓ Wszystkie pozycje (${inventory.length}) są już przypisane do właściwych kategorii!`);
+        return;
+      }
+
+      const syncEl = el('syncStatus');
+      if (syncEl) syncEl.innerText = `🧠 AI weryfikuje kategorie online (${itemsToVerifyOnline.length})...`;
+
+      try {
+        const payloadList = itemsToVerifyOnline.map(i => ({ id: i.id, name: i.name }));
+        const promptText = `Jesteś ekspertem ds. produktów gastronomicznych i katalogu HoReCa. Na podstawie wiedzy o markach (np. Ballantine's to Whisky, Wyborowa to Wódka, Bacardi to Rum, Coca-Cola/Fanta/Sprite/Kinley to Napoje Gazowane/Soft, Burn to Energetyk, Cisowianka to Woda, Filcori to Kawa, a Lunchbox/Menubox/Kubki/Serwetki to Jednorazówki) przypisz każdy produkt z poniższej listy do DOKŁADNIE JEDNEJ kategorii z poniższego słownika:
+- "Alkohole • Whisky"
+- "Alkohole • Wódka"
+- "Alkohole • Rum"
+- "Alkohole • Gin / Likier / Aperitif"
+- "Alkohole • Wino / Prosecco"
+- "Alkohole • Piwo / Cydr"
+- "Napoje • Gazowane / Soft"
+- "Napoje • Energetyk"
+- "Napoje • Woda"
+- "Napoje • Soki / Nektary"
+- "Napoje • Kawa / Herbata / Dodatki"
+- "Jednorazówki • Opakowania / Lunchbox"
+- "Jednorazówki • Kubki / Sztućce / Serwetki"
+
+Lista produktów:
+${JSON.stringify(payloadList)}
+
+Zwróć czysty JSON:
+{
+  "classified": [
+    { "id": "id_produktu", "category": "Wybrana Kategoria", "suggestedUnit": "szt." lub "op." }
+  ]
+}`;
+
+        const result = await queryGeminiTextOnlyAPI(promptText);
+        let updatedByAI = 0;
+
+        for (const entry of (result.classified || [])) {
+          const item = inventory.find(x => String(x.id) === String(entry.id));
+          if (item && entry.category) {
+            if (item.category !== entry.category) {
+              item.category = entry.category;
+              if (entry.category.startsWith('Jednorazówki') && entry.suggestedUnit === 'op.') {
+                item.unit = 'op.';
+              }
+              updatedByAI++;
+              if (isCloudOnline) {
+                try { await apiRequest(`/inventory?id=eq.${item.id}`, 'PATCH', { category: item.category, unit: item.unit, updated_at: new Date() }); } catch (e) {}
+              }
+            }
+          }
+        }
+
+        safeSetLocal('magazyn_offline_items', inventory);
+        renderInventory();
+        if (syncEl) {
+          syncEl.innerText = isCloudOnline ? '🟢 Chmura aktywna • Kategorie zweryfikowane' : '🟡 Tryb lokalny • Kategorie zweryfikowane';
+        }
+        if (forceAll) {
+          alert(`🧠 Weryfikacja online zakończona! Przeanalizowano produktów: ${itemsToVerifyOnline.length}, zaktualizowano kategorii: ${updatedByAI + changedLocally.length}.`);
+        }
+      } catch (err) {
+        if (syncEl) syncEl.innerText = isCloudOnline ? '🟢 Chmura aktywna na żywo' : '🟡 Tryb lokalny';
+        if (forceAll) alert(`Sklasyfikowano lokalnie ${changedLocally.length} pozycji.`);
+      }
+    }
+
+    async function queryGeminiTextOnlyAPI(promptText) {
+      const models = ['gemini-3.5-flash-lite', 'gemini-1.5-flash', 'gemini-3.8-flash'];
+      let lastErr = '';
+      for (const m of models) {
+        try {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${GEMINI_API_KEY}`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
+            body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }], generationConfig: { response_mime_type: "application/json", temperature: 0.1 } })
+          });
+          const j = await res.json();
+          if (j.error) { lastErr = j.error.message; continue; }
+          if (j.candidates?.[0]?.content) {
+            return JSON.parse(j.candidates[0].content.parts[0].text.replace(/```json/g, '').replace(/```/g, '').trim());
+          }
+        } catch (e) { lastErr = e.message; }
+      }
+      throw new Error(lastErr || "Serwery AI zajęte.");
+    }
+
     function cleanCanonicalKey(text) {
       return (text || '').toLowerCase()
         .replace(/,/g, '.')
-        .replace(/\bx\s*\d+\b/gi, ' ') // usuwa mnożnik zgrzewki np. X12, X24 z klucza porównania
+        .replace(/\bx\s*\d+\b/gi, ' ')
         .replace(/\bders\b|\bdrs\b|\bop\b|\bszt\b/gi, ' ')
         .replace(/[^a-z0-9ąćęłńóśźż.]/g, ' ')
         .replace(/\s+/g, ' ')
@@ -738,7 +945,6 @@
 
     function extractProductSpecs(text) {
       const s = (text || '').toLowerCase().replace(/,/g, '.');
-      // Wyciągamy pojemności np. 0.25, 0.33, 0.5, 0.7, 0.85, 1.0, 1.5
       const caps = (s.match(/\b0\.\d+\b|\b1\.5\b|\b1\s*l\b|\b0\.\d+l\b/g) || []).map(c => c.replace('l', '').trim());
       const pack = [];
       if (/\bpet\b/.test(s)) pack.push('pet');
@@ -755,11 +961,8 @@
     function areSpecsCompatible(nameA, nameB) {
       const a = extractProductSpecs(nameA);
       const b = extractProductSpecs(nameB);
-      // Jeśli oba mają pojemność i pojemności są różne (np. 0.25 vs 0.85) -> NIE SĄ TYM SAMYM PRODUKTEM!
       if (a.caps.length > 0 && b.caps.length > 0 && a.caps[0] !== b.caps[0]) return false;
-      // Jeśli jeden ma PET a drugi RGB lub CAN -> NIE SĄ TYM SAMYM PRODUKTEM!
       if (a.pack.length > 0 && b.pack.length > 0 && a.pack[0] !== b.pack[0]) return false;
-      // Jeśli jeden ma słowa typu ZERO, BIAŁE, CZERWONE, BEZ LAKTOZY a drugi nie -> NIE SĄ TYM SAMYM PRODUKTEM!
       for (const v of ['zero', 'bez laktozy', 'sojowe', 'białe', 'czerwone']) {
         if (a.variants.includes(v) !== b.variants.includes(v)) return false;
       }
@@ -771,14 +974,12 @@
       const targetKey = cleanCanonicalKey(targetName);
       if (targetKey.length < 3) return null;
 
-      // 1. Dokładne dopasowanie po oczyszczonym kluczu
       for (const item of inventory) {
         if (cleanCanonicalKey(item.name) === targetKey && areSpecsCompatible(targetName, item.name)) {
           return item;
         }
       }
 
-      // 2. Dopasowanie po słowach marki (tylko jeśli pojemność, opakowanie i wariant ZERO/itp. się zgadzają!)
       const ignoreTokens = new Set(['can', 'rgb', 'pet', 'drs', 'szt', 'but', 'zgrz', '0.25', '0.33', '0.5', '0.7', '0.85', '1.0']);
       const targetWords = targetKey.split(' ').filter(w => w.length >= 3 && !ignoreTokens.has(w));
       if (targetWords.length === 0) return null;
@@ -795,7 +996,6 @@
           if (itemWords.includes(w)) overlap++;
         }
         const ratio = overlap / Math.max(targetWords.length, itemWords.length);
-        // Wymagamy wysokiego pokrycia słów marki (np. "Burn Zero", "Coca Cola", "Ballantines")
         if ((overlap >= 2 && ratio >= 0.65) || (overlap >= 1 && targetWords.length === 1 && itemWords.length === 1)) {
           if (ratio > bestRatio) {
             bestRatio = ratio;
@@ -806,7 +1006,6 @@
       return bestItem;
     }
 
-    // --- FUNKCJA SCALANIA ISTNIEJĄCYCH DUPLIKATÓW W MAGAZYNIE (1 KLIKNIĘCIE) ---
     async function mergeExistingDuplicates() {
       const groups = new Map();
       const toDeleteIds = [];
@@ -885,7 +1084,7 @@
 
     function detectPackMultiplier(name) {
       if (!name) return 1;
-      const m = name.match(/\bX\s*(\d+)\b/i) || name.match(/[\s(]X\s*(\d+)/i) || name.match(/\b(\d+)\s*X\b/i) || name.match(/\((\d+)\s*(?:szt\vert{}can\vert{}rgb\vert{}pet\vert{}pusz\vert{}but)?\)/i);
+      const m = name.match(/\bX\s*(\d+)\b/i) || name.match(/[\s(]X\s*(\d+)/i) || name.match(/\b(\d+)\s*X\b/i) || name.match(/\((\d+)\s*(?:szt|can|rgb|pet|pusz|but)?\)/i);
       if (m && m[1]) { const val = parseInt(m[1], 10); if (val > 1 && val <= 100) return val; }
       return 1;
     }
@@ -940,6 +1139,8 @@
         try { const clog = await apiRequest('/stock_logs?select=*&order=created_at.desc&limit=100'); if (clog) { stockLogs = clog; safeSetLocal('magazyn_offline_stock_logs', stockLogs); } } catch (e) {}
       }
       renderInventory(); renderDeposits(); renderEvents(); renderPriceAlerts(); renderDeliveries();
+      // Automatyczne sprawdzenie i przypisanie kategorii przy każdym odświeżeniu strony!
+      runOnlineAIClassifier(false);
     }
 
     function copyLowStockWhatsApp() {
@@ -968,29 +1169,49 @@
       const totalVal = inventory.reduce((s, i) => s + ((Number(i.qty) || 0) * (Number(i.price) || 0)), 0);
       el('statTotalValue').innerText = `${totalVal.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} zł`;
 
+      // Aktualizacja liczników na zakładkach kategorii
+      let cAlco = 0, cBev = 0, cDisp = 0, cLow = 0, cField = 0;
+      inventory.forEach(it => {
+        const g = getMainCategoryGroup(it);
+        if (g === 'ALCOHOL') cAlco++;
+        else if (g === 'DISPOSABLES') cDisp++;
+        else cBev++;
+        if ((Number(it.qty) || 0) <= (Number(it.minQty) || 0)) cLow++;
+        if ((Number(it.inField) || 0) > 0) cField++;
+      });
+      if (el('countCat_ALL')) el('countCat_ALL').innerText = `(${inventory.length})`;
+      if (el('countCat_ALCOHOL')) el('countCat_ALCOHOL').innerText = `(${cAlco})`;
+      if (el('countCat_BEVERAGE')) el('countCat_BEVERAGE').innerText = `(${cBev})`;
+      if (el('countCat_DISPOSABLES')) el('countCat_DISPOSABLES').innerText = `(${cDisp})`;
+      if (el('countCat_LOW')) el('countCat_LOW').innerText = `(${cLow})`;
+      if (el('countCat_FIELD')) el('countCat_FIELD').innerText = `(${cField})`;
+
       const filtered = inventory.filter(item => {
         const n = String(item.name || '').toLowerCase(), b = String(item.barcode || '').toLowerCase(), c = String(item.category || '').toLowerCase(), l = String(item.location || '').toLowerCase();
         if (!(n.includes(search) || b.includes(search) || c.includes(search) || l.includes(search))) return false;
         if (currentCategoryPill === 'LOW') return (Number(item.qty) || 0) <= (Number(item.minQty) || 0);
         if (currentCategoryPill === 'FIELD') return (Number(item.inField) || 0) > 0;
-        if (currentCategoryPill === 'ALCOHOL') return c.includes('alko') || c.includes('wino') || c.includes('piwo') || n.includes('wódka') || n.includes('wino') || n.includes('piwo') || n.includes('whisky');
-        if (currentCategoryPill === 'BEVERAGE') return c.includes('napój') || c.includes('napoje') || c.includes('kawa') || c.includes('herbata') || c.includes('sok') || c.includes('woda');
-        if (currentCategoryPill === 'DISPOSABLES') return c.includes('jednoraz') || c.includes('serwis') || n.includes('talerz') || n.includes('kubek') || n.includes('sztuć') || n.includes('serwet');
+        if (currentCategoryPill === 'ALCOHOL') return getMainCategoryGroup(item) === 'ALCOHOL';
+        if (currentCategoryPill === 'BEVERAGE') return getMainCategoryGroup(item) === 'BEVERAGE';
+        if (currentCategoryPill === 'DISPOSABLES') return getMainCategoryGroup(item) === 'DISPOSABLES';
         return true;
       });
 
-      if (filtered.length === 0) { list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak pozycji w tym widoku.</div>`; return; }
+      if (filtered.length === 0) { list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak pozycji w tej kategorii.</div>`; return; }
 
       list.innerHTML = filtered.map(item => {
         const isLow = (Number(item.qty) || 0) <= (Number(item.minQty) || 0);
         const isChecked = selectedItemIds.has(item.id);
         const itemVal = ((item.qty || 0) * (item.price || 0)).toFixed(2);
+        const grp = getMainCategoryGroup(item);
+        const badgeColor = grp === 'ALCOHOL' ? 'bg-amber-950 text-amber-300 border border-amber-700/50' : (grp === 'DISPOSABLES' ? 'bg-purple-950 text-purple-300 border border-purple-700/50' : 'bg-sky-950 text-sky-300 border border-sky-700/50');
+
         return `
           <div oncontextmenu="handleItemContextMenu(event, '${item.id}')" onclick="handleItemCardClick(event, '${item.id}')" class="bg-slate-800 hover:bg-slate-750 border ${isChecked ? 'border-amber-400' : (isLow ? 'border-rose-500/60' : 'border-slate-700/80')} rounded-xl p-3 flex items-center justify-between cursor-pointer transition shadow-sm relative">
             ${isSelectMode ? `<div class="pr-2.5 flex items-center" onclick="event.stopPropagation()"><input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSelectItem('${item.id}', this.checked)" class="w-4 h-4 rounded text-amber-500 bg-slate-900 border-slate-600"></div>` : ''}
             <div class="space-y-1 pr-2 flex-1">
               <div class="flex items-center gap-1.5 flex-wrap">
-                <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded bg-slate-700 text-slate-300">${item.category || 'Napoje'}</span>
+                <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${badgeColor}">${item.category || 'Napoje'}</span>
                 <span class="text-[11px] text-slate-400">📍 ${item.location || '-'}</span>
                 <span class="text-[11px] text-slate-500 font-mono">#${item.barcode}</span>
               </div>
@@ -1296,7 +1517,7 @@
             <div class="bg-slate-900/90 rounded-xl p-2.5 border border-slate-800 space-y-1">
               <span class="text-[10px] text-emerald-400 uppercase font-bold block">📦 Przyjęte produkty (${items.length}):</span>
               <div class="space-y-1 max-h-44 overflow-y-auto pr-1">
-                ${items.map(it => `<div class="flex justify-between items-center text-xs text-slate-200 border-b border-slate-800/60 pb-0.5"><span class="truncate pr-2 text-[11px]">• ${it.name}</span><div class="flex items-center gap-2 whitespace-nowrap">${it.netPrice ? `<span class="text-slate-400 text-[10px]">${Number(it.netPrice).toFixed(2)} zł</span>` : ''}<span class="font-bold text-emerald-400 text-[11px]">+${it.qty}${it.unit || 'szt.'}</span></div></div>`).join('')}
+                ${items.map(it => `<div class="flex justify-between items-center text-xs text-slate-200 border-b border-slate-800/60 pb-0.5"><span class="truncate pr-2 text-[11px]">• ${it.name}</span><div class="flex items-center gap-2 whitespace-nowrap">${it.netPrice ? `<span class="text-slate-400 text-[10px]">${Number(it.netPrice).toFixed(2)} zł</span>` : ''}<span class="font-bold text-emerald-400 text-[11px]">+${it.qty} ${it.unit || 'szt.'}</span></div></div>`).join('')}
               </div>
             </div>
             ${depItems.length > 0 ? `<div class="bg-cyan-950/30 rounded-xl p-2.5 border border-cyan-900/50 space-y-1"><span class="text-[10px] text-cyan-300 uppercase font-bold block">♻️ Kaucje (${depItems.length}):</span>${depItems.map(dp => `<div class="flex justify-between text-[11px] text-cyan-100"><span>• ${dp.name} (${Number(dp.unitPrice).toFixed(2)} zł)</span><span class="font-bold text-cyan-400">${dp.netQty >= 0 ? '+' : ''}${dp.netQty} szt.</span></div>`).join('')}</div>` : ''}
@@ -1523,15 +1744,16 @@
           recordStockLog(m.id, m.name, mode === 'ADD' ? 'Zliczenie (+)' : 'Inwentaryzacja', mode === 'ADD' ? q : (q - old), 'Ze zdjęcia');
           if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${m.id}`, 'PATCH', { qty: m.qty, updated_at: new Date() }); } catch (e) {} }
         } else {
-          const ni = normalizeItem({ id: Date.now().toString() + '_' + i, barcode: 'RC-' + Math.floor(100000 + Math.random() * 900000), name, category: 'Napoje', location: 'Magazyn Główny', qty: q, inField: 0, unit: u, minQty: 3, price: 0 });
+          const smartCat = classifyProductSmartLocal(name) || 'Napoje • Pozostałe';
+          const ni = normalizeItem({ id: Date.now().toString() + '_' + i, barcode: 'RC-' + Math.floor(100000 + Math.random() * 900000), name, category: smartCat, location: 'Magazyn Główny', qty: q, inField: 0, unit: u, minQty: 3, price: 0 });
           inventory.unshift(ni); recordStockLog(ni.id, ni.name, 'Nowy z Vision', q, 'Ze zdjęcia');
           if (isCloudOnline) { try { await apiRequest('/inventory', 'POST', toDbItem(ni)); } catch (e) {} }
         }
       }
-      safeSetLocal('magazyn_offline_items', inventory); hideModal('shelfCountModal'); renderInventory(); alert("Zaktualizowano stany magazynowe!");
+      safeSetLocal('magazyn_offline_items', inventory); hideModal('shelfCountModal'); renderInventory(); runOnlineAIClassifier(false); alert("Zaktualizowano stany magazynowe!");
     }
 
-    // --- FAKTURY NA 1 LUB 2 ZDJĘCIA (Z USUWANIE NAKŁADAJĄCYCH SIĘ WIERSZY I STAŁĄ REGUŁĄ CENY) ---
+    // --- FAKTURY NA 1 LUB 2 ZDJĘCIA ---
     function openInvoiceUploadModal() { resetInvoicePhotos(); showModal('invoiceCaptureModal'); }
     function closeInvoiceUploadModal() { hideModal('invoiceCaptureModal'); resetInvoicePhotos(); }
     function resetInvoicePhotos() {
@@ -1561,15 +1783,15 @@
 
       try {
         const prompt = `Przeanalizuj 1 lub 2 zdjęcia tej samej faktury.
-WAŻNE PRZY 2 ZDJĘCIACH: Zdjęcie 1 (góra) i Zdjęcie 2 (dół) mogą nachodzić na siebie w środkowej części tabeli. Jeśli ten sam wiersz (ten sam kod produktu i nazwa) jest widoczny na końcu Zdjęcia 1 i na początku Zdjęcia 2, zwróć go TYLKO JEDEN RAZ!
-JEDNOLITA REGUŁA CENY: Jeśli pod pozycją widnieje dopisek "Cena zaokrąglona za sztu", ZAWSZE podaj tę wartość jako unitPriceHint. Jako rawPrice podaj cenę netto "Po rabacie bez opłat" (pierwsza kolumna ceny netto).
+WAŻNE PRZY 2 ZDJĘCIACH: Jeśli ten sam wiersz jest widoczny na końcu Zdjęcia 1 i na początku Zdjęcia 2, zwróć go TYLKO JEDEN RAZ!
+JEDNOLITA REGUŁA CENY: Jeśli pod pozycją widnieje dopisek "Cena zaokrąglona za sztu", ZAWSZE podaj tę wartość jako unitPriceHint. Jako rawPrice podaj cenę netto "Po rabacie bez opłat".
+KATEGORYZACJA: Dla każdego produktu określ od razu jego kategorię (category) na podstawie wiedzy o markach (np. Ballantine's -> "Alkohole • Whisky", Wyborowa -> "Alkohole • Wódka", Bacardi -> "Alkohole • Rum", Wino -> "Alkohole • Wino / Prosecco", Coca-Cola/Fanta/Sprite/Kinley -> "Napoje • Gazowane / Soft", Burn -> "Napoje • Energetyk", Cisowianka -> "Napoje • Woda", Lunchbox/Menubox/Kubki/Serwetki -> "Jednorazówki • Opakowania / Lunchbox").
 Wyodrębnij:
-1. docNumber, 2. supplier, 3. totalGross, 4. receiverName (podpis odbiorcy np. KANA/BARTEK),
-5. items: { "code": string (kod produktu z 1 kolumny jeśli jest), "name": string (pełna nazwa z pojemnością np. 0.25 RGB X24 COCA-COLA lub 0.85 PET X12 COCA-COLA ZERO), "rawQty": number, "rawPrice": number, "unitPriceHint": number },
-6. deposits: z sekcji opakowań zwrotnych i systemu kaucyjnego { "name": string, "category": "PET_CAN_050"|"BUTELKA_SZKLO"|"SKRZYNKA"|"PALETA_INNE", "netQty": number, "unitPrice": number }. Zwróć JSON.`;
+1. docNumber, 2. supplier, 3. totalGross, 4. receiverName,
+5. items: { "code": string, "name": string, "category": string, "rawQty": number, "rawPrice": number, "unitPriceHint": number },
+6. deposits: { "name": string, "category": "PET_CAN_050"|"BUTELKA_SZKLO"|"SKRZYNKA"|"PALETA_INNE", "netQty": number, "unitPrice": number }. Zwróć JSON.`;
         const parsed = await queryGeminiAPI(prompt, b64);
 
-        // Lokalna deduplikacja wierszy z nałożenia 2 zdjęć tej samej faktury
         const seenInScan = new Map();
         for (const it of (parsed.items || [])) {
           const mult = detectPackMultiplier(it.name), rq = Number(it.rawQty) || 1, rp = Number(it.rawPrice) || 0;
@@ -1577,15 +1799,17 @@ Wyodrębnij:
             ? (it.unitPriceHint ? Number(it.unitPriceHint) : parseFloat((rp / mult).toFixed(2)))
             : (it.unitPriceHint ? Number(it.unitPriceHint) : rp);
           const finalQ = mult > 1 ? rq * mult : rq;
+          const smartCat = classifyProductSmartLocal(it.name, it.category) || it.category || 'Napoje • Gazowane / Soft';
 
           const spec = extractProductSpecs(it.name);
           const dedupKey = (it.code ? String(it.code).trim() : '') + '|' + cleanCanonicalKey(it.name) + '|' + (spec.caps[0] || '');
           if (!seenInScan.has(dedupKey)) {
             seenInScan.set(dedupKey, {
               name: it.name.trim(),
+              category: smartCat,
               qty: finalQ,
               netPrice: unitP,
-              unit: 'szt.',
+              unit: smartCat.startsWith('Jednorazówki') ? 'op.' : 'szt.',
               packMultiplier: mult,
               rawQty: rq
             });
@@ -1606,7 +1830,7 @@ Wyodrębnij:
       el('aiSupplierInput').value = delivery.supplier; el('aiDocNumInput').value = delivery.docNumber; el('aiReceiverInput').value = delivery.receiverName; el('aiTotalGrossInput').value = delivery.totalGross;
       el('aiItemsList').innerHTML = (delivery.items || []).map((it, idx) => {
         const m = findBestInventoryMatch(it.name);
-        return `<div class="bg-slate-900 border ${m ? 'border-emerald-600/70' : 'border-indigo-600/70'} rounded-xl p-3 space-y-2"><div class="flex justify-between flex-wrap gap-1"><span id="aiBadge_${idx}" class="text-[9px] font-bold px-2 py-0.5 rounded ${m ? 'bg-emerald-950 text-emerald-300' : 'bg-indigo-950 text-indigo-300'}">${m ? `✓ W bazie: ${m.name} (Stan: ${m.qty})` : '⭐ NOWY PRODUKT (Brak w bazie)'}</span>${it.packMultiplier > 1 ? `<span class="text-[9px] font-bold bg-amber-950 text-amber-300 px-2 py-0.5 rounded">📦 ×${it.packMultiplier}: ${it.rawQty} op. ➔ ${it.qty} szt.</span>` : ''}</div><div class="flex justify-between gap-2"><input type="text" id="aiItemName_${idx}" value="${it.name}" class="bg-transparent font-bold text-xs text-white flex-1 border-b border-indigo-500"><input type="number" step="0.01" id="aiItemPrice_${idx}" value="${Number(it.netPrice || 0).toFixed(2)}" title="Cena netto za 1 szt." class="w-16 bg-slate-800 border border-slate-700 rounded p-1 text-center font-bold text-emerald-400 text-xs"><input type="number" id="aiItemQty_${idx}" value="${it.qty || 1}" title="Ilość" class="w-14 bg-slate-800 border border-slate-700 rounded p-1 text-center font-bold text-emerald-400 text-xs"><input type="text" id="aiItemUnit_${idx}" value="${it.unit || 'szt.'}" class="w-11 bg-slate-800 border border-slate-700 rounded p-1 text-center text-xs text-slate-300"></div><select id="aiSelectMatch_${idx}" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-[11px] text-white w-full"><option value="" ${!m ? 'selected' : ''}>⭐ DODAJ JAKO NOWY PRODUKT DO BAZY</option>${inventory.map(inv => `<option value="${inv.id}" ${m && m.id === inv.id ? 'selected' : ''}>🔗 Scal i zsumuj z: ${inv.name} (Stan: ${inv.qty} | ${Number(inv.price).toFixed(2)} zł)</option>`).join('')}</select></div>`;
+        return `<div class="bg-slate-900 border ${m ? 'border-emerald-600/70' : 'border-indigo-600/70'} rounded-xl p-3 space-y-2"><div class="flex justify-between flex-wrap gap-1"><span id="aiBadge_${idx}" class="text-[9px] font-bold px-2 py-0.5 rounded ${m ? 'bg-emerald-950 text-emerald-300' : 'bg-indigo-950 text-indigo-300'}">${m ? `✓ W bazie: ${m.name}` : '⭐ NOWY PRODUKT'}</span><span class="text-[9px] font-bold bg-slate-800 text-cyan-300 px-2 py-0.5 rounded border border-slate-700">${it.category || 'Napoje'}</span></div><div class="flex justify-between gap-2"><input type="text" id="aiItemName_${idx}" value="${it.name}" class="bg-transparent font-bold text-xs text-white flex-1 border-b border-indigo-500"><input type="number" step="0.01" id="aiItemPrice_${idx}" value="${Number(it.netPrice || 0).toFixed(2)}" class="w-16 bg-slate-800 border border-slate-700 rounded p-1 text-center font-bold text-emerald-400 text-xs"><input type="number" id="aiItemQty_${idx}" value="${it.qty || 1}" class="w-14 bg-slate-800 border border-slate-700 rounded p-1 text-center font-bold text-emerald-400 text-xs"><input type="text" id="aiItemUnit_${idx}" value="${it.unit || 'szt.'}" class="w-11 bg-slate-800 border border-slate-700 rounded p-1 text-center text-xs text-slate-300"></div><input type="hidden" id="aiItemCat_${idx}" value="${it.category || 'Napoje'}"><select id="aiSelectMatch_${idx}" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-[11px] text-white w-full"><option value="" ${!m ? 'selected' : ''}>⭐ DODAJ JAKO NOWY PRODUKT DO BAZY</option>${inventory.map(inv => `<option value="${inv.id}" ${m && m.id === inv.id ? 'selected' : ''}>🔗 Scal i zsumuj z: ${inv.name} (Stan: ${inv.qty} | ${Number(inv.price).toFixed(2)} zł)</option>`).join('')}</select></div>`;
       }).join('');
       renderExtractedDepositsInModal();
     }
@@ -1618,7 +1842,6 @@ Wyodrębnij:
 
     function addManualDepositRowToModal() { if (!currentExtractedDelivery) return; currentExtractedDelivery.deposits.push({ name: 'Kaucja zwrotna', category: 'BUTELKA_SZKLO', netQty: 12, unitPrice: 1.00 }); renderExtractedDepositsInModal(); }
 
-    // --- ZAPIS BEZ DUPLIKATÓW: SUMUJE IDENTYCZNE POZYCJE I DODAJE NOWE ZE STARYCH FAKTUR ---
     async function confirmAndApplyDelivery(mode = 'FULL_DELIVERY') {
       if (!currentExtractedDelivery) return;
       const isCatalogOnly = (mode === 'CATALOG_ONLY');
@@ -1630,19 +1853,20 @@ Wyodrębnij:
 
       for (let i = 0; i < (currentExtractedDelivery.items || []).length; i++) {
         const name = el(`aiItemName_${i}`)?.value.trim(), cid = el(`aiSelectMatch_${i}`)?.value, q = parseInt(el(`aiItemQty_${i}`)?.value) || 0, u = el(`aiItemUnit_${i}`)?.value.trim() || 'szt.', p = parseFloat(el(`aiItemPrice_${i}`)?.value) || 0;
+        const aiCat = el(`aiItemCat_${i}`)?.value || '';
         if (!name) continue;
         if (!isCatalogOnly && q <= 0) continue;
 
         finalItems.push({ name, qty: q, unit: u, netPrice: p });
 
-        // Szukamy wybranego z listy LUB sprawdzamy, czy identyczny produkt już istnieje w magazynie (zapobiega dublowaniu!)
         let targetItem = cid
           ? inventory.find(x => String(x.id) === String(cid))
           : findBestInventoryMatch(name);
 
+        const resolvedCat = classifyProductSmartLocal(name, aiCat) || aiCat || 'Napoje • Gazowane / Soft';
+
         if (targetItem) {
           mergedCount++;
-          // Alerty cenowe generujemy tylko dla bieżących dostaw i tylko gdy różnica przekracza 0.05 zł
           if (!isCatalogOnly && targetItem.price > 0 && p > 0 && Math.abs(p - targetItem.price) > 0.05) {
             const al = { id: Date.now().toString() + '_' + i, item_name: targetItem.name, supplier: sup, old_price: targetItem.price, new_price: p, diff_percent: parseFloat((((p - targetItem.price) / targetItem.price) * 100).toFixed(1)), doc_number: docNum, created_at: new Date() };
             priceAlerts.unshift(al); if (isCloudOnline) { try { await apiRequest('/price_alerts', 'POST', al); } catch (e) {} }
@@ -1652,15 +1876,11 @@ Wyodrębnij:
             recordStockLog(targetItem.id, targetItem.name, 'Przyjęcie Faktura', q, `${docNum} • ${rcv}`);
           }
           if (p > 0) targetItem.price = p;
-          if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${targetItem.id}`, 'PATCH', { qty: targetItem.qty, price: targetItem.price, updated_at: new Date() }); } catch (e) {} }
+          targetItem.category = resolvedCat;
+          if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${targetItem.id}`, 'PATCH', { qty: targetItem.qty, price: targetItem.price, category: targetItem.category, updated_at: new Date() }); } catch (e) {} }
         } else {
-          const nl = name.toLowerCase();
-          let cat = 'Napoje';
-          if (nl.includes('wino') || nl.includes('wódka') || nl.includes('piwo') || nl.includes('whisky') || nl.includes('gin') || nl.includes('rum') || nl.includes('prosecco')) cat = 'Alkohole';
-          else if (nl.includes('kubek') || nl.includes('talerz') || nl.includes('sztuć') || nl.includes('serwet') || nl.includes('słomk')) cat = 'Jednorazówki';
-
           const initialQty = isCatalogOnly ? 0 : q;
-          const ni = normalizeItem({ id: Date.now().toString() + '_' + i, barcode: 'RC-' + Math.floor(100000 + Math.random() * 900000), name, category: cat, location: 'Magazyn Główny', qty: initialQty, inField: 0, unit: u, minQty: 3, price: p });
+          const ni = normalizeItem({ id: Date.now().toString() + '_' + i, barcode: 'RC-' + Math.floor(100000 + Math.random() * 900000), name, category: resolvedCat, location: 'Magazyn Główny', qty: initialQty, inField: 0, unit: u, minQty: 3, price: p });
           inventory.unshift(ni);
           addedCatalogCount++;
           recordStockLog(ni.id, ni.name, isCatalogOnly ? 'Dodano do bazy (Stara faktura)' : 'Nowy z Faktury', initialQty, `${docNum}`);
@@ -1685,9 +1905,10 @@ Wyodrębnij:
       safeSetLocal('magazyn_offline_items', inventory);
       safeSetLocal('magazyn_offline_price_alerts', priceAlerts);
       closeAiModal(); renderInventory(); renderDeposits(); renderDeliveries(); renderPriceAlerts();
+      runOnlineAIClassifier(false);
 
       if (isCatalogOnly) {
-        alert(`📚 Baza zaktualizowana! Dodano ${addedCatalogCount} nowych produktów ze stanem 0 szt., a dla ${mergedCount} istniejących zaktualizowano cenę.`);
+        alert(`📚 Baza zaktualizowana! Dodano ${addedCatalogCount} nowych produktów ze stanem 0 szt., a dla ${mergedCount} istniejących zaktualizowano cenę i kategorię.`);
       } else {
         alert(`📥 Dostawa przyjęta! Nowych pozycji: ${addedCatalogCount}, zsumowanych z istniejącymi: ${mergedCount}.`);
       }
@@ -1898,7 +2119,7 @@ Wyodrębnij:
     async function saveEditedItem(e) {
       e.preventDefault();
       const it = inventory.find(i => String(i.id) === String(el('editItemId').value)); if (!it) return;
-      it.barcode = el('editItemBarcode').value.trim(); it.name = el('editItemName').value.trim(); it.price = parseFloat(el('editItemPrice').value) || 0; it.category = el('editItemCategory').value; it.location = el('editItemLocation').value.trim() || '-'; it.unit = el('editItemUnit').value; it.minQty = parseInt(el('editItemMinQty').value) || 0;
+      it.barcode = el('editItemBarcode').value.trim(); it.name = el('editItemName').value.trim(); it.price = parseFloat(el('editItemPrice').value) || 0; it.category = el('editItemCategory').value.trim() || 'Napoje'; it.location = el('editItemLocation').value.trim() || '-'; it.unit = el('editItemUnit').value; it.minQty = parseInt(el('editItemMinQty').value) || 0;
       safeSetLocal('magazyn_offline_items', inventory); renderInventory(); hideModal('editItemModal');
       if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${it.id}`, 'PATCH', toDbItem(it)); } catch (err) {} }
     }
@@ -1932,23 +2153,25 @@ Wyodrębnij:
     }
 
     function generateRandomCode() { el('newBarcode').value = 'RC-' + Math.floor(100000 + Math.random() * 900000); }
-    function openNewItemModal(p) { el('newBarcode').value = p || ('RC-' + Math.floor(100000 + Math.random() * 900000)); el('newName').value = ''; el('newPrice').value = '0.00'; el('newCategory').value = 'Napoje'; el('newUnit').value = 'szt.'; el('newLocation').value = ''; el('newQty').value = 1; showModal('newItemModal'); }
+    function openNewItemModal(p) { el('newBarcode').value = p || ('RC-' + Math.floor(100000 + Math.random() * 900000)); el('newName').value = ''; el('newPrice').value = '0.00'; el('newCategory').value = 'Napoje • Gazowane / Soft'; el('newUnit').value = 'szt.'; el('newLocation').value = ''; el('newQty').value = 1; showModal('newItemModal'); }
 
     async function saveNewItem(e) {
       e.preventDefault();
       const name = el('newName').value.trim();
       const existing = findBestInventoryMatch(name);
       const q = parseInt(el('newQty').value) || 0, p = parseFloat(el('newPrice').value) || 0;
+      const chosenCat = classifyProductSmartLocal(name, el('newCategory').value.trim()) || el('newCategory').value.trim() || 'Napoje';
       if (existing && cleanCanonicalKey(existing.name) === cleanCanonicalKey(name)) {
-        existing.qty += q; if (p > 0) existing.price = p;
+        existing.qty += q; if (p > 0) existing.price = p; existing.category = chosenCat;
         safeSetLocal('magazyn_offline_items', inventory); renderInventory(); hideModal('newItemModal');
         if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${existing.id}`, 'PATCH', toDbItem(existing)); } catch (err) {} }
         return;
       }
-      const ni = normalizeItem({ id: Date.now().toString(), barcode: el('newBarcode').value.trim(), name, price: p, category: el('newCategory').value, location: el('newLocation').value.trim() || '-', qty: q, inField: 0, unit: el('newUnit').value, minQty: parseInt(el('newMinQty').value) || 0 });
+      const ni = normalizeItem({ id: Date.now().toString(), barcode: el('newBarcode').value.trim(), name, price: p, category: chosenCat, location: el('newLocation').value.trim() || '-', qty: q, inField: 0, unit: el('newUnit').value, minQty: parseInt(el('newMinQty').value) || 0 });
       inventory.unshift(ni); recordStockLog(ni.id, ni.name, 'Utworzenie pozycji', ni.qty);
       safeSetLocal('magazyn_offline_items', inventory); renderInventory(); hideModal('newItemModal');
       if (isCloudOnline) { try { await apiRequest('/inventory', 'POST', toDbItem(ni)); } catch (e) {} }
+      runOnlineAIClassifier(false);
     }
 
     function handleScannedCode(code) {
@@ -1968,7 +2191,7 @@ Wyodrębnij:
 
     function openPrintLabelModal() {
       const it = inventory.find(i => String(i.id) === String(selectedItemId)); if (!it) return;
-      el('printItemName').innerText = item.name; el('printItemCategory').innerText = `${it.category} • ${it.location}`; el('printItemBarcode').innerText = it.barcode;
+      el('printItemName').innerText = it.name; el('printItemCategory').innerText = `${it.category} • ${it.location}`; el('printItemBarcode').innerText = it.barcode;
       el('printQRCode').innerHTML = ''; new QRCode(el('printQRCode'), { text: it.barcode, width: 140, height: 140 });
       document.body.classList.remove('print-mode-sheet'); document.body.classList.add('print-mode-qr'); window.print();
     }
