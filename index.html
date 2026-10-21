@@ -31,26 +31,43 @@
     <div class="flex items-center space-x-2">
       <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-base shadow">M</div>
       <div>
-        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v3.9 AUTO-CAT</span></h1>
+        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v4.0 SMART-FILES</span></h1>
         <p id="syncStatus" class="text-[10px] text-amber-400 font-medium leading-none mt-0.5">Inicjalizacja...</p>
       </div>
     </div>
     <div class="flex items-center gap-1">
-      <button onclick="runOnlineAIClassifier(true)" class="bg-purple-950/90 hover:bg-purple-900 text-purple-300 text-xs px-2 py-1.5 rounded-lg font-bold flex items-center gap-1 border border-purple-700/60" title="Wymuś sprawdzenie kategorii wszystkich produktów online przez AI"><span>🧠</span> Kategoryzuj</button>
-      <button onclick="mergeExistingDuplicates()" class="bg-indigo-950/90 hover:bg-indigo-900 text-indigo-300 text-xs px-2 py-1.5 rounded-lg font-bold flex items-center gap-1 border border-indigo-700/60" title="Scal zduplikowane pozycje"><span>🔗</span> Scal</button>
+      <button onclick="runOnlineAIClassifier(true)" class="bg-purple-950/90 hover:bg-purple-900 text-purple-300 text-xs px-2 py-1.5 rounded-lg font-bold flex items-center gap-1 border border-purple-700/60" title="Sprawdź i naucz kategorie online"><span>🧠</span> Ucz AI</button>
+      <button onclick="mergeExistingDuplicates()" class="bg-indigo-950/90 hover:bg-indigo-900 text-indigo-300 text-xs px-2 py-1.5 rounded-lg font-bold flex items-center gap-1 border border-indigo-700/60" title="Scal duplikaty"><span>🔗</span> Scal</button>
       <button onclick="copyLowStockWhatsApp()" class="bg-slate-700/80 hover:bg-slate-700 text-amber-300 text-xs px-2 py-1.5 rounded-lg font-medium flex items-center gap-1 border border-slate-600/50"><span>📲</span> Braki</button>
       <button onclick="exportCSV()" class="bg-slate-700/80 hover:bg-slate-700 text-slate-200 text-xs px-2 py-1.5 rounded-lg font-medium flex items-center gap-1 border border-slate-600/50"><span>📊</span> CSV</button>
     </div>
   </header>
 
-  <input type="file" id="shelfCountInput" accept="image/*" capture="environment" class="hidden" onchange="processShelfCountImage(event)">
-  <input type="file" id="eventDispatchInput" accept="image/*" capture="environment" class="hidden" onchange="processEventDispatchImage(event)">
-  <input type="file" id="eventReturnProductsInput" accept="image/*" capture="environment" class="hidden" onchange="processEventReturnProductsImage(event)">
-  <input type="file" id="eventReturnSheetInput" accept="image/*" capture="environment" class="hidden" onchange="processEventReturnSheetImage(event)">
-  <input type="file" id="eventAutoReturnSheetInput" accept="image/*" capture="environment" class="hidden" onchange="processAutoEventReturnSheetImage(event)">
-  <input type="file" id="invoicePhotoInput1" accept="image/*" capture="environment" class="hidden" onchange="handleInvoicePhotoSelected(event, 1)">
-  <input type="file" id="invoicePhotoInput2" accept="image/*" capture="environment" class="hidden" onchange="handleInvoicePhotoSelected(event, 2)">
-  <input type="file" id="editDelivPhotoInput" accept="image/*" capture="environment" class="hidden" onchange="handleEditDeliveryAddPhoto(event)">
+  <!-- INPUTY OBSŁUGUJĄCE ZARÓWNO APARAT, GALERIĘ (MESSENGER/SMS), JAK I PLIKI PDF Z MAILA -->
+  <input type="file" id="shelfCountInput" accept="image/*,application/pdf" multiple class="hidden" onchange="processShelfCountImage(event)">
+  <input type="file" id="eventDispatchInput" accept="image/*,application/pdf" class="hidden" onchange="processEventDispatchImage(event)">
+  <input type="file" id="eventReturnProductsInput" accept="image/*,application/pdf" multiple class="hidden" onchange="processEventReturnProductsImage(event)">
+  <input type="file" id="eventReturnSheetInput" accept="image/*,application/pdf" class="hidden" onchange="processEventReturnSheetImage(event)">
+  <input type="file" id="eventAutoReturnSheetInput" accept="image/*,application/pdf" class="hidden" onchange="processAutoEventReturnSheetImage(event)">
+  <input type="file" id="invoicePhotoInput1" accept="image/*,application/pdf" multiple class="hidden" onchange="handleInvoicePhotoSelected(event, 1)">
+  <input type="file" id="invoicePhotoInput2" accept="image/*,application/pdf" class="hidden" onchange="handleInvoicePhotoSelected(event, 2)">
+  <input type="file" id="editDelivPhotoInput" accept="image/*,application/pdf" class="hidden" onchange="handleEditDeliveryAddPhoto(event)">
+
+  <datalist id="categoryPresetsList">
+    <option value="Alkohole • Whisky">
+    <option value="Alkohole • Wódka">
+    <option value="Alkohole • Rum">
+    <option value="Alkohole • Gin / Likier / Aperitif">
+    <option value="Alkohole • Wino / Prosecco">
+    <option value="Alkohole • Piwo / Cydr">
+    <option value="Napoje • Woda">
+    <option value="Napoje • Gazowane / Soft">
+    <option value="Napoje • Energetyk">
+    <option value="Napoje • Soki / Nektary">
+    <option value="Napoje • Kawa / Herbata / Dodatki">
+    <option value="Jednorazówki • Opakowania / Lunchbox">
+    <option value="Jednorazówki • Kubki / Sztućce / Serwetki">
+  </datalist>
 
   <main class="max-w-4xl mx-auto p-3.5 space-y-4">
     <div class="grid grid-cols-4 gap-2">
@@ -83,14 +100,14 @@
     <!-- WIDOK 1: MAGAZYN -->
     <section id="viewStock" class="space-y-3">
       <section id="scannerSection" class="bg-slate-800/90 border border-slate-700 rounded-2xl p-3.5 shadow-lg space-y-3">
-        <div class="flex items-center justify-between">
+        <div class="flex items-center justify-between flex-wrap gap-2">
           <div>
-            <h2 class="font-bold text-xs text-white flex items-center gap-1.5"><span>📷</span> Skaner Kodów i Liczenie Wizyjne</h2>
-            <p class="text-[11px] text-slate-400">Nabijaj stany ze zdjęcia produktów lub skanuj kody</p>
+            <h2 class="font-bold text-xs text-white flex items-center gap-1.5"><span>📷</span> Skaner i Dodawanie ze Zdjęć / Plików</h2>
+            <p class="text-[11px] text-slate-400">Zrób zdjęcie aparatem lub wybierz plik z Messengera / Galerii / Maila</p>
           </div>
           <div class="flex gap-2">
-            <button onclick="el('shelfCountInput').click()" class="bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold px-3 py-1.5 rounded-xl transition shadow flex items-center gap-1"><span>👁️</span> Zlicz ze zdjęcia</button>
-            <button id="btnToggleCamera" onclick="toggleCamera()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-1.5 rounded-xl transition shadow">Włącz kamerę</button>
+            <button onclick="el('shelfCountInput').click()" class="bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition shadow flex items-center gap-1"><span>👁️</span> Zlicz ze zdjęcia / pliku</button>
+            <button id="btnToggleCamera" onclick="toggleCamera()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-1.5 rounded-xl transition shadow">Skaner QR/EAN</button>
           </div>
         </div>
         <div id="cameraContainer" class="hidden overflow-hidden rounded-xl bg-black border border-slate-700"><div id="reader" class="w-full"></div></div>
@@ -100,7 +117,6 @@
         </form>
       </section>
 
-      <!-- ZAKŁADKI KATEGORII Z LICZNIKAMI POZYCJI -->
       <div class="flex gap-1.5 overflow-x-auto pb-0.5 text-xs">
         <button onclick="setCategoryPill('ALL')" id="pillCat_ALL" class="bg-emerald-600 text-slate-950 font-black px-3 py-1.5 rounded-xl whitespace-nowrap shadow transition">Wszystko <span id="countCat_ALL" class="opacity-80 text-[10px] ml-0.5">(0)</span></button>
         <button onclick="setCategoryPill('ALCOHOL')" id="pillCat_ALCOHOL" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3 py-1.5 rounded-xl whitespace-nowrap font-medium transition">🍷 Alkohole <span id="countCat_ALCOHOL" class="opacity-75 text-[10px] ml-0.5">(0)</span></button>
@@ -112,7 +128,7 @@
 
       <div class="flex flex-wrap gap-2 items-center justify-between">
         <div class="flex-1 min-w-[220px]">
-          <input type="text" id="searchFilter" oninput="renderInventory()" placeholder="Szukaj po nazwie, podkategorii (np. Whisky, Rum, Soft), regale..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500" />
+          <input type="text" id="searchFilter" oninput="renderInventory()" placeholder="Szukaj po nazwie, podkategorii (np. Woda, Whisky, Rum, Soft)..." class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500" />
         </div>
         <button id="btnToggleSelectMode" onclick="toggleSelectMode()" class="bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/60 text-amber-300 text-xs px-3 py-2 rounded-xl font-bold flex items-center gap-1.5 transition"><span>🚚</span> Wybierz na Event</button>
       </div>
@@ -135,12 +151,12 @@
       <div class="bg-gradient-to-r from-slate-800 to-indigo-950/60 border border-indigo-700/50 rounded-2xl p-3.5 shadow-md space-y-3">
         <div>
           <h3 class="font-bold text-xs text-white flex items-center gap-1.5"><span>📋</span> Centrum Wydań Eventowych i Rozliczeń Zwrotów</h3>
-          <p class="text-[11px] text-slate-300 mt-0.5">Wydawaj napoje i jednorazówki w teren, pobieraj Kartę Wydania (.xls), a po powrocie zliczaj zwrot ze zdjęcia towaru lub karty</p>
+          <p class="text-[11px] text-slate-300 mt-0.5">Wgrywaj zdjęcia zejścia alkoholu lub karty zwrotu prosto z Messengera, SMS-a, maila lub aparatu</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
           <button onclick="openCreatorFromEventsTab()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs px-3 py-2 rounded-xl shadow transition flex items-center gap-1 whitespace-nowrap"><span>➕</span> Utwórz Kartę Wydania</button>
-          <button onclick="triggerAutoReturnSheetUpload()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs px-3 py-2 rounded-xl shadow transition flex items-center gap-1 whitespace-nowrap"><span>📥</span> Skanuj Kartę Zwrotu (Auto)</button>
-          <button onclick="el('eventDispatchInput').click()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold text-xs px-2.5 py-2 rounded-xl shadow transition flex items-center gap-1 whitespace-nowrap"><span>📸</span> Skanuj Wydanie</button>
+          <button onclick="triggerAutoReturnSheetUpload()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs px-3 py-2 rounded-xl shadow transition flex items-center gap-1 whitespace-nowrap"><span>📥</span> Wgraj Kartę Zwrotu (Auto-dopasuj)</button>
+          <button onclick="el('eventDispatchInput').click()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold text-xs px-2.5 py-2 rounded-xl shadow transition flex items-center gap-1 whitespace-nowrap"><span>📂</span> Wgraj Kartę Wydania</button>
         </div>
       </div>
       <div id="eventsList" class="space-y-3"></div>
@@ -151,9 +167,9 @@
       <div class="flex items-center justify-between gap-2 flex-wrap">
         <div>
           <h3 class="font-bold text-xs text-white">Archiwum Przyjętych Dostaw i Faktur</h3>
-          <p class="text-[10px] text-slate-400">Pełna edycja wpisów, spis produktów, osoba przyjmująca oraz podpięte zdjęcia</p>
+          <p class="text-[10px] text-slate-400">Obsługa zdjęć oraz plików PDF z maila / Messengera</p>
         </div>
-        <button onclick="openInvoiceUploadModal()" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs px-3 py-2 rounded-xl shadow transition flex items-center gap-1"><span>⚡</span> Skanuj Fakturę (Dostawa / Baza)</button>
+        <button onclick="openInvoiceUploadModal()" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs px-3 py-2 rounded-xl shadow transition flex items-center gap-1"><span>⚡</span> Dodaj Fakturę (Zdjęcie / PDF)</button>
       </div>
       <div id="deliveriesList" class="space-y-3.5"></div>
     </section>
@@ -208,14 +224,11 @@
     </section>
   </main>
 
-  <!-- MODAL: EDYCJA ZAPISANEJ FAKTURY / DOSTAWY -->
+  <!-- MODAL: EDYCJA ZAPISANEJ FAKTURY -->
   <div id="editDeliveryModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <form onsubmit="saveEditedDelivery(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 shadow-2xl my-4 flex flex-col max-h-[94vh]">
       <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-        <div>
-          <span class="text-[9px] uppercase font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50">Edycja Dokumentu</span>
-          <h3 class="text-sm font-bold text-white mt-0.5">✏️ Edytuj Fakturę / Dostawę</h3>
-        </div>
+        <h3 class="text-sm font-bold text-white">✏️ Edytuj Fakturę / Dostawę</h3>
         <button type="button" onclick="hideModal('editDeliveryModal')" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
       </div>
       <input type="hidden" id="editDelivId">
@@ -230,7 +243,6 @@
             <div><label class="text-[10px] text-slate-400 block">Kwota Brutto (PLN):</label><input type="text" id="editDelivTotalGross" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-slate-200"></div>
           </div>
         </div>
-
         <div class="space-y-1.5">
           <div class="flex justify-between items-center">
             <span class="text-[10px] text-slate-300 font-bold uppercase">Pozycje na tej fakturze:</span>
@@ -238,18 +250,17 @@
           </div>
           <div id="editDelivItemsList" class="space-y-1.5"></div>
         </div>
-
         <div class="space-y-1.5 pt-2 border-t border-slate-700">
           <div class="flex justify-between items-center">
-            <span class="text-[10px] text-slate-300 font-bold uppercase">📎 Podpięte zdjęcia faktury:</span>
-            <button type="button" onclick="el('editDelivPhotoInput').click()" class="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-700/60 px-2.5 py-1 rounded-lg font-bold">📸 + Dodaj zdjęcie</button>
+            <span class="text-[10px] text-slate-300 font-bold uppercase">📎 Podpięte pliki/zdjęcia:</span>
+            <button type="button" onclick="el('editDelivPhotoInput').click()" class="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-700/60 px-2.5 py-1 rounded-lg font-bold">📂 + Dodaj plik/zdjęcie</button>
           </div>
           <div id="editDelivPhotosList" class="flex gap-2.5 overflow-x-auto py-1"></div>
         </div>
       </div>
       <div class="flex justify-end gap-2 pt-2 border-t border-slate-700">
         <button type="button" onclick="hideModal('editDeliveryModal')" class="px-3 py-2 rounded-xl text-xs text-slate-400 hover:bg-slate-700">Anuluj</button>
-        <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-black px-5 py-2 rounded-xl text-xs shadow">Zapisz zmiany w fakturze</button>
+        <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-black px-5 py-2 rounded-xl text-xs shadow">Zapisz zmiany</button>
       </div>
     </form>
   </div>
@@ -258,10 +269,7 @@
   <div id="generateSheetModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-4 space-y-3 shadow-2xl my-4 flex flex-col max-h-[94vh]">
       <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-        <div>
-          <span class="text-[9px] uppercase font-bold px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-700/50">Wydanie w teren & Generator Karty</span>
-          <h3 class="text-sm font-bold text-white mt-1">Przygotuj Kartę Wydania na Realizację</h3>
-        </div>
+        <h3 class="text-sm font-bold text-white">📋 Przygotuj Kartę Wydania na Realizację</h3>
         <button onclick="hideModal('generateSheetModal')" class="text-slate-400 hover:text-white p-1 text-lg font-bold">✕</button>
       </div>
       <div class="space-y-2 text-xs">
@@ -272,7 +280,7 @@
         <div><label class="text-[10px] text-slate-400 block mb-0.5">Nazwa imprezy / Klient:</label><input type="text" id="genSheetName" placeholder="Np. Bankiet Firmowy Skyworks" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 font-bold text-white"></div>
       </div>
       <div class="bg-slate-900/90 border border-slate-700/80 p-2.5 rounded-xl space-y-1.5">
-        <label class="text-[10px] text-amber-300 font-bold block">➕ Dodaj pozycję (napój, alkohol, jednorazówki) do tej karty:</label>
+        <label class="text-[10px] text-amber-300 font-bold block">➕ Dodaj pozycję z magazynu do tej karty:</label>
         <div class="flex gap-1.5">
           <select id="genSheetAddSelect" class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white"></select>
           <button type="button" onclick="addItemToSheetCreator()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-3 py-1.5 rounded-lg text-xs whitespace-nowrap">+ Dodaj</button>
@@ -290,46 +298,43 @@
   <div id="sheetPreviewModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-2.5 z-50 overflow-y-auto">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-3xl w-full p-4 space-y-3 shadow-2xl my-4 flex flex-col max-h-[95vh]">
       <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-        <div>
-          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-700/50">Gotowy Dokument</span>
-          <h3 id="sheetPreviewModalTitle" class="text-sm font-bold text-white mt-0.5">Karta Wydania na Realizację</h3>
-        </div>
+        <h3 id="sheetPreviewModalTitle" class="text-sm font-bold text-white">Karta Wydania na Realizację</h3>
         <button onclick="hideModal('sheetPreviewModal')" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
       </div>
       <div class="flex-1 overflow-auto bg-white p-2 rounded-xl border border-slate-600 text-black"><div id="sheetPreviewContainer"></div></div>
       <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-700">
         <button onclick="hideModal('sheetPreviewModal')" class="px-3 py-2 rounded-xl text-xs text-slate-300 hover:bg-slate-700">Zamknij</button>
         <div class="flex flex-wrap gap-2">
-          <button onclick="downloadCurrentSheetAsExcel()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow"><span>📥</span> Pobierz plik Karty (.xls / Excel)</button>
+          <button onclick="downloadCurrentSheetAsExcel()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow"><span>📥</span> Pobierz plik (.xls / Excel)</button>
           <button onclick="triggerBrowserPrintSheet()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow"><span>🖨️</span> Drukuj / Zapisz PDF</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- MODAL: WYBÓR 1 LUB 2 ZDJĘĆ FAKTURY -->
+  <!-- MODAL: WYBÓR ZDJĘĆ LUB PLIKÓW PDF DO FAKTURY -->
   <div id="invoiceCaptureModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-        <h3 class="text-sm font-bold text-white flex items-center gap-1.5"><span>⚡</span> Skanuj Fakturę (1 lub 2 zdjęcia)</h3>
+        <h3 class="text-sm font-bold text-white flex items-center gap-1.5"><span>⚡</span> Wgraj Fakturę (Aparat / Galeria / PDF)</h3>
         <button onclick="closeInvoiceUploadModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
       </div>
-      <p class="text-xs text-slate-300">Zeskanuj <strong>bieżącą dostawę</strong> (doda stany i fakturę) lub <strong>starą fakturę</strong> (wyciągnie same nowe produkty i ceny do bazy ze stanem 0):</p>
+      <p class="text-xs text-slate-300">Wybierz zdjęcie z Messengera/Galerii, plik PDF z maila lub zrób zdjęcie aparatem (możesz wybrać 1 lub 2 pliki naraz):</p>
       <div class="grid grid-cols-2 gap-2.5 pt-1">
-        <div onclick="el('invoicePhotoInput1').click()" class="border-2 border-dashed border-indigo-500/70 hover:border-indigo-400 bg-slate-900/90 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer min-h-[120px] text-center transition">
-          <div id="invoiceSlot1Empty"><span class="text-2xl block mb-1">📸</span><span class="text-[11px] font-bold text-indigo-300 block">Zdjęcie 1 (Góra)</span><span class="text-[9px] text-slate-500 block">(wymagane)</span></div>
-          <img id="invoiceSlot1Preview" src="" class="hidden max-h-24 w-auto rounded object-contain mb-1">
-          <span id="invoiceSlot1Done" class="hidden text-[10px] text-emerald-400 font-bold">✓ Zdjęcie 1 gotowe</span>
+        <div onclick="el('invoicePhotoInput1').click()" class="border-2 border-dashed border-indigo-500/70 hover:border-indigo-400 bg-slate-900/90 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer min-h-[115px] text-center transition">
+          <div id="invoiceSlot1Empty"><span class="text-2xl block mb-1">📂</span><span class="text-[11px] font-bold text-indigo-300 block">Plik 1 / Zdjęcie 1</span><span class="text-[9px] text-slate-400 block">Aparat / Galeria / PDF</span></div>
+          <img id="invoiceSlot1Preview" src="" class="hidden max-h-20 w-auto rounded object-contain mb-1">
+          <span id="invoiceSlot1Done" class="hidden text-[10px] text-emerald-400 font-bold">✓ Plik 1 gotowy</span>
         </div>
-        <div onclick="el('invoicePhotoInput2').click()" class="border-2 border-dashed border-slate-600 hover:border-indigo-400 bg-slate-900/90 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer min-h-[120px] text-center transition">
-          <div id="invoiceSlot2Empty"><span class="text-2xl block mb-1">➕</span><span class="text-[11px] font-bold text-slate-300 block">Zdjęcie 2 (Dół/Kaucje)</span><span class="text-[9px] text-slate-500 block">(opcjonalnie)</span></div>
-          <img id="invoiceSlot2Preview" src="" class="hidden max-h-24 w-auto rounded object-contain mb-1">
-          <span id="invoiceSlot2Done" class="hidden text-[10px] text-emerald-400 font-bold">✓ Zdjęcie 2 gotowe</span>
+        <div onclick="el('invoicePhotoInput2').click()" class="border-2 border-dashed border-slate-600 hover:border-indigo-400 bg-slate-900/90 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer min-h-[115px] text-center transition">
+          <div id="invoiceSlot2Empty"><span class="text-2xl block mb-1">➕</span><span class="text-[11px] font-bold text-slate-300 block">Plik 2 / Dół faktury</span><span class="text-[9px] text-slate-400 block">(opcjonalnie)</span></div>
+          <img id="invoiceSlot2Preview" src="" class="hidden max-h-20 w-auto rounded object-contain mb-1">
+          <span id="invoiceSlot2Done" class="hidden text-[10px] text-emerald-400 font-bold">✓ Plik 2 gotowy</span>
         </div>
       </div>
       <div class="flex justify-between items-center pt-2 border-t border-slate-700">
-        <button onclick="resetInvoicePhotos()" class="text-xs text-slate-400 hover:text-white">Wyczyść zdjęcia</button>
-        <button id="btnProcessInvoice" onclick="startMultiInvoiceProcessing()" disabled class="bg-indigo-600 disabled:bg-slate-700 disabled:text-slate-500 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow transition"><span>🚀</span> Odczytaj Pozycje i Ceny</button>
+        <button onclick="resetInvoicePhotos()" class="text-xs text-slate-400 hover:text-white">Wyczyść</button>
+        <button id="btnProcessInvoice" onclick="startMultiInvoiceProcessing()" disabled class="bg-indigo-600 disabled:bg-slate-700 disabled:text-slate-500 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow transition"><span>🚀</span> Odczytaj Dokument</button>
       </div>
     </div>
   </div>
@@ -339,49 +344,44 @@
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 shadow-2xl my-4 max-h-[94vh] flex flex-col">
       <div class="flex justify-between items-start border-b border-slate-700 pb-2">
         <div>
-          <span class="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50">Smart WMS & Catalog Builder</span>
+          <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50">Smart OCR & Self-Learning</span>
           <h3 class="text-sm font-bold text-white mt-1">Weryfikacja Odczytanych Produktów</h3>
-          <p id="aiDocInfo" class="text-[11px] text-slate-400 mt-0.5">Automatyczna kategoryzacja i rozróżnianie pojemności...</p>
+          <p id="aiDocInfo" class="text-[11px] text-slate-400 mt-0.5">Każda zmiana kategorii uczy system na przyszłość</p>
         </div>
         <button onclick="closeAiModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
       </div>
       <div id="aiLoadingState" class="py-12 flex flex-col items-center justify-center space-y-3">
         <div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-        <p class="text-sm text-slate-200 font-medium">Model Gemini analizuje zdjęcia faktury...</p>
+        <p class="text-sm text-slate-200 font-medium">Model Gemini analizuje dokument...</p>
       </div>
       <div id="aiItemsContainer" class="hidden flex-1 overflow-y-auto space-y-3 pr-1">
-        <div class="bg-slate-900 border border-indigo-800/60 p-3 rounded-xl space-y-2.5 text-xs">
+        <div class="bg-slate-900 border border-indigo-800/60 p-3 rounded-xl space-y-2 text-xs">
           <div class="grid grid-cols-2 gap-2">
-            <div><span class="text-[10px] text-slate-400 block">Dostawca / Hurtownia:</span><input type="text" id="aiSupplierInput" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-white text-xs"></div>
-            <div><span class="text-[10px] text-slate-400 block">Nr Dokumentu / Faktury:</span><input type="text" id="aiDocNumInput" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-mono text-amber-400 text-xs"></div>
+            <div><span class="text-[10px] text-slate-400 block">Dostawca:</span><input type="text" id="aiSupplierInput" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-white"></div>
+            <div><span class="text-[10px] text-slate-400 block">Nr Dokumentu:</span><input type="text" id="aiDocNumInput" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-mono text-amber-400"></div>
           </div>
           <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800">
-            <div><span class="text-[10px] text-emerald-300 font-bold block">👤 Kto przyjmował dostawę:</span><input type="text" id="aiReceiverInput" placeholder="Np. Bartek / Kana" class="w-full bg-slate-800 border border-emerald-700/60 rounded p-1.5 font-bold text-emerald-400 text-xs"></div>
-            <div><span class="text-[10px] text-slate-400 block">Suma Brutto:</span><input type="text" id="aiTotalGrossInput" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-slate-200 text-xs"></div>
+            <div><span class="text-[10px] text-emerald-300 font-bold block">👤 Kto przyjmował:</span><input type="text" id="aiReceiverInput" class="w-full bg-slate-800 border border-emerald-700/60 rounded p-1.5 font-bold text-emerald-400"></div>
+            <div><span class="text-[10px] text-slate-400 block">Suma Brutto:</span><input type="text" id="aiTotalGrossInput" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-slate-200"></div>
           </div>
         </div>
         <div class="space-y-2">
-          <p class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">📦 1. Rozpoznane Produkty i Ceny jednostkowe:</p>
+          <p class="text-[11px] font-bold text-emerald-400 uppercase">📦 1. Produkty i Ceny jednostkowe:</p>
           <div id="aiItemsList" class="space-y-2"></div>
         </div>
         <div class="space-y-2 pt-2 border-t border-slate-700">
           <div class="flex items-center justify-between">
-            <p class="text-[11px] font-bold text-cyan-400 uppercase tracking-wider">♻️ 2. Kaucje (tylko przy nowej dostawie):</p>
+            <p class="text-[11px] font-bold text-cyan-400 uppercase">♻️ 2. Kaucje (przy nowej dostawie):</p>
             <button type="button" onclick="addManualDepositRowToModal()" class="text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-700/60 px-2 py-0.5 rounded-lg font-bold">+ Dodaj kaucję</button>
           </div>
           <div id="aiDepositsList" class="space-y-2"></div>
         </div>
       </div>
-
       <div id="aiModalActions" class="hidden pt-2.5 border-t border-slate-700 flex flex-col sm:flex-row justify-between gap-2">
         <button onclick="closeAiModal()" class="px-3 py-2 rounded-xl text-xs text-slate-400 hover:bg-slate-700">Anuluj</button>
         <div class="flex flex-wrap gap-2 justify-end">
-          <button onclick="confirmAndApplyDelivery('CATALOG_ONLY')" class="bg-purple-600 hover:bg-purple-500 text-white font-black px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow">
-            <span>📚</span> Stara faktura: Tylko baza produktów (Stan 0)
-          </button>
-          <button onclick="confirmAndApplyDelivery('FULL_DELIVERY')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow">
-            <span>📥</span> Nowa dostawa (+Stan i Faktura)
-          </button>
+          <button onclick="confirmAndApplyDelivery('CATALOG_ONLY')" class="bg-purple-600 hover:bg-purple-500 text-white font-black px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow"><span>📚</span> Stara faktura: Tylko baza (Stan 0)</button>
+          <button onclick="confirmAndApplyDelivery('FULL_DELIVERY')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow"><span>📥</span> Nowa dostawa (+Stan i Faktura)</button>
         </div>
       </div>
     </div>
@@ -391,14 +391,14 @@
   <div id="depositModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
     <form onsubmit="saveDepositModal(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-        <h3 class="text-sm font-bold text-white flex items-center gap-1.5"><span>♻️</span> Pozycja Kaucyjna / Opakowanie</h3>
+        <h3 class="text-sm font-bold text-white">♻️ Pozycja Kaucyjna / Opakowanie</h3>
         <button type="button" onclick="hideModal('depositModal')" class="text-slate-400 hover:text-white p-1">✕</button>
       </div>
       <input type="hidden" id="depModalId">
-      <div><label class="text-[11px] text-slate-300 block mb-1">Nazwa opakowania / kaucji *:</label><input type="text" id="depModalName" required placeholder="Np. Kaucja PET 0.85L / Skrzynka CC" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold"></div>
+      <div><label class="text-[11px] text-slate-300 block mb-1">Nazwa kaucji *:</label><input type="text" id="depModalName" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold"></div>
       <div class="grid grid-cols-2 gap-2">
         <div>
-          <label class="text-[11px] text-slate-300 block mb-1">Rodzaj kaucji:</label>
+          <label class="text-[11px] text-slate-300 block mb-1">Rodzaj:</label>
           <select id="depModalCategory" onchange="handleDepCategoryPreset()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white">
             <option value="PET_CAN_050">PET / Puszka (0,50 zł)</option>
             <option value="BUTELKA_SZKLO">Butelka Szklana (1,00 zł)</option>
@@ -406,12 +406,12 @@
             <option value="PALETA_INNE">Paleta / Keg / Inne</option>
           </select>
         </div>
-        <div><label class="text-[11px] text-slate-300 block mb-1">Stawka za 1 szt. (PLN):</label><input type="number" step="0.01" id="depModalPrice" value="0.50" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-cyan-400 font-bold text-center"></div>
+        <div><label class="text-[11px] text-slate-300 block mb-1">Stawka (PLN):</label><input type="number" step="0.01" id="depModalPrice" value="0.50" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-cyan-400 font-bold text-center"></div>
       </div>
-      <div><label class="text-[11px] text-slate-300 block mb-1">Ilość na stanie (szt.):</label><input type="number" id="depModalQty" value="1" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold text-center"></div>
+      <div><label class="text-[11px] text-slate-300 block mb-1">Ilość (szt.):</label><input type="number" id="depModalQty" value="1" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold text-center"></div>
       <div class="flex justify-end gap-2 pt-2 border-t border-slate-700">
-        <button type="button" onclick="hideModal('depositModal')" class="px-3 py-1.5 rounded-xl text-xs text-slate-300 hover:bg-slate-700">Anuluj</button>
-        <button type="submit" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black px-4 py-1.5 rounded-xl text-xs shadow">Zapisz kaucję</button>
+        <button type="button" onclick="hideModal('depositModal')" class="px-3 py-1.5 rounded-xl text-xs text-slate-300">Anuluj</button>
+        <button type="submit" class="bg-cyan-500 text-slate-950 font-black px-4 py-1.5 rounded-xl text-xs">Zapisz</button>
       </div>
     </form>
   </div>
@@ -420,20 +420,20 @@
   <div id="imagePreviewModal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="relative max-w-xl w-full bg-slate-900 border border-slate-700 rounded-2xl p-3 flex flex-col items-center shadow-2xl">
       <div class="w-full flex justify-between items-center border-b border-slate-800 pb-2 mb-2">
-        <h4 id="imagePreviewTitle" class="text-xs font-bold text-white truncate pr-2">Podgląd skanu</h4>
+        <h4 id="imagePreviewTitle" class="text-xs font-bold text-white truncate pr-2">Podgląd dokumentu</h4>
         <button onclick="closeImagePreviewModal()" class="text-slate-400 hover:text-white text-xl font-black p-1">✕</button>
       </div>
       <div id="imagePreviewTabs" class="w-full flex gap-2 mb-2 hidden"></div>
-      <div class="w-full flex items-center justify-center max-h-[75vh] overflow-auto bg-black/60 rounded-xl p-1" style="touch-action: pinch-zoom;">
-        <img id="imagePreviewElement" src="" alt="Skan dokumentu" class="max-w-full max-h-[72vh] object-contain rounded-lg">
+      <div class="w-full flex items-center justify-center max-h-[75vh] overflow-auto bg-black/60 rounded-xl p-1">
+        <img id="imagePreviewElement" src="" alt="Dokument" class="max-w-full max-h-[72vh] object-contain rounded-lg">
       </div>
-      <div class="w-full flex justify-end pt-2"><button onclick="closeImagePreviewModal()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-4 py-2 rounded-xl text-xs">Zamknij podgląd</button></div>
+      <div class="w-full flex justify-end pt-2"><button onclick="closeImagePreviewModal()" class="bg-slate-800 text-white font-bold px-4 py-2 rounded-xl text-xs">Zamknij</button></div>
     </div>
   </div>
 
   <!-- MENU KONTEKSTOWE -->
   <div id="customContextMenu" class="fixed hidden z-50 bg-slate-800/95 border border-slate-700 rounded-xl shadow-2xl py-1.5 w-52 backdrop-blur-md">
-    <button onclick="contextActionEdit()" class="w-full text-left px-3.5 py-2 text-xs text-slate-200 hover:bg-slate-700/80 flex items-center gap-2"><span>✏️</span> Edytuj dane i cenę</button>
+    <button onclick="contextActionEdit()" class="w-full text-left px-3.5 py-2 text-xs text-slate-200 hover:bg-slate-700/80 flex items-center gap-2"><span>✏️</span> Edytuj dane i kategorię</button>
     <button onclick="contextActionOpenStock()" class="w-full text-left px-3.5 py-2 text-xs text-slate-200 hover:bg-slate-700/80 flex items-center gap-2"><span>⚡</span> Operacja stanu i historia</button>
     <button onclick="contextActionPrintQR()" class="w-full text-left px-3.5 py-2 text-xs text-slate-200 hover:bg-slate-700/80 flex items-center gap-2"><span>🏷️</span> Drukuj etykietę QR</button>
     <div class="border-t border-slate-700/80 my-1"></div>
@@ -460,13 +460,13 @@
     </div>
   </div>
 
-  <!-- MODAL: ZLICZANIE ZE ZDJĘCIA (WÓZEK / PÓŁKA) -->
+  <!-- MODAL: ZLICZANIE ZE ZDJĘCIA / PLIKU (POJEDYNCZE I WIELE PRODUKTÓW) -->
   <div id="shelfCountModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 shadow-2xl my-4 max-h-[94vh] flex flex-col">
       <div class="flex justify-between items-start border-b border-slate-700 pb-2">
         <div>
-          <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-700/50">Wizyjne Nabijanie Stanu</span>
-          <h3 class="text-sm font-bold text-white mt-1">Zliczanie Butelek / Produktów ze Zdjęcia</h3>
+          <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-700/50">Wizyjne Nabijanie Stanu (1 lub wiele produktów)</span>
+          <h3 class="text-sm font-bold text-white mt-1">Rozpoznane Produkty ze Zdjęcia / Pliku</h3>
         </div>
         <button onclick="hideModal('shelfCountModal')" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
       </div>
@@ -478,7 +478,7 @@
         <div id="shelfCountItemsList" class="space-y-2.5"></div>
       </div>
       <div id="shelfCountActions" class="hidden pt-2.5 border-t border-slate-700 flex justify-end gap-2">
-        <button onclick="hideModal('shelfCountModal')" class="px-3 py-1.5 rounded-xl text-xs text-slate-400 hover:bg-slate-700">Anuluj</button>
+        <button onclick="hideModal('shelfCountModal')" class="px-3 py-1.5 rounded-xl text-xs text-slate-400">Anuluj</button>
         <button onclick="confirmAndApplyShelfCount('ADD')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-1.5 rounded-xl text-xs shadow">📥 Dodaj do stanu (+)</button>
         <button onclick="confirmAndApplyShelfCount('SET')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-1.5 rounded-xl text-xs shadow">📝 Ustaw jako stan</button>
       </div>
@@ -535,7 +535,7 @@
   <div id="eventDispatchModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 shadow-2xl my-4 max-h-[94vh] flex flex-col">
       <div class="flex justify-between items-start border-b border-slate-700 pb-2.5">
-        <h3 class="text-sm font-bold text-white">Rejestracja Wyjazdu ze Skana Karty</h3>
+        <h3 class="text-sm font-bold text-white">Rejestracja Wyjazdu z Pliku / Zdjęcia Karty</h3>
         <button onclick="hideModal('eventDispatchModal')" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
       </div>
       <div id="eventDispatchLoading" class="py-12 flex flex-col items-center justify-center space-y-3">
@@ -553,8 +553,8 @@
         <div id="evDispItemsList" class="space-y-2"></div>
       </div>
       <div id="eventDispatchActions" class="hidden pt-2.5 border-t border-slate-700 flex justify-end gap-2">
-        <button onclick="hideModal('eventDispatchModal')" class="px-4 py-2 rounded-xl text-xs text-slate-400 hover:bg-slate-700">Anuluj</button>
-        <button onclick="confirmAndApplyEventDispatch()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-5 py-2.5 rounded-xl text-xs shadow">🚚 Zatwierdź wydanie w teren</button>
+        <button onclick="hideModal('eventDispatchModal')" class="px-4 py-2 rounded-xl text-xs text-slate-400">Anuluj</button>
+        <button onclick="confirmAndApplyEventDispatch()" class="bg-amber-500 text-slate-950 font-black px-5 py-2.5 rounded-xl text-xs shadow">🚚 Zatwierdź wydanie w teren</button>
       </div>
     </div>
   </div>
@@ -587,8 +587,8 @@
         <div id="evReturnItemsList" class="space-y-2.5"></div>
       </div>
       <div id="evReturnActions" class="hidden pt-2.5 border-t border-slate-700 flex justify-end gap-2">
-        <button onclick="hideModal('eventReturnModal')" class="px-4 py-2 rounded-xl text-xs text-slate-400 hover:bg-slate-700">Anuluj</button>
-        <button onclick="confirmAndApplyEventReturn()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-5 py-2.5 rounded-xl text-xs shadow">✓ Zatwierdź Zwrot i Rozlicz Imprezę</button>
+        <button onclick="hideModal('eventReturnModal')" class="px-4 py-2 rounded-xl text-xs text-slate-400">Anuluj</button>
+        <button onclick="confirmAndApplyEventReturn()" class="bg-emerald-500 text-slate-950 font-black px-5 py-2.5 rounded-xl text-xs shadow">✓ Zatwierdź Zwrot i Rozlicz Imprezę</button>
       </div>
     </div>
   </div>
@@ -597,7 +597,7 @@
   <div id="editItemModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
     <form onsubmit="saveEditedItem(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-700 pb-2">
-        <h3 class="text-sm font-bold text-white">✏️ Edycja kartoteki</h3>
+        <h3 class="text-sm font-bold text-white">✏️ Edycja kartoteki (Uczy AI)</h3>
         <button type="button" onclick="hideModal('editItemModal')" class="text-slate-400 hover:text-white p-1">✕</button>
       </div>
       <input type="hidden" id="editItemId">
@@ -617,30 +617,15 @@
       </div>
       <div class="grid grid-cols-2 gap-2">
         <div>
-          <label class="text-[11px] text-slate-300 block mb-1">Kategoria (możesz wpisać własną lub wybrać):</label>
-          <input type="text" id="editItemCategory" list="categoryPresetsList" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white font-bold">
-          <datalist id="categoryPresetsList">
-            <option value="Alkohole • Whisky">
-            <option value="Alkohole • Wódka">
-            <option value="Alkohole • Rum">
-            <option value="Alkohole • Gin / Tequila">
-            <option value="Alkohole • Wino / Prosecco">
-            <option value="Alkohole • Piwo">
-            <option value="Napoje • Gazowane / Soft">
-            <option value="Napoje • Energetyk">
-            <option value="Napoje • Soki / Nektary">
-            <option value="Napoje • Woda">
-            <option value="Napoje • Kawa / Herbata / Mleko">
-            <option value="Jednorazówki • Opakowania / Lunchbox">
-            <option value="Jednorazówki • Kubki / Sztućce / Serwetki">
-          </datalist>
+          <label class="text-[11px] text-emerald-300 font-bold block mb-1">🧠 Kategoria (Zapamięta):</label>
+          <input type="text" id="editItemCategory" list="categoryPresetsList" class="w-full bg-slate-900 border border-emerald-700/60 rounded-xl px-2.5 py-1.5 text-xs text-white font-bold">
         </div>
         <div><label class="text-[11px] text-slate-300 block mb-1">Regał / Lokalizacja:</label><input type="text" id="editItemLocation" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white"></div>
       </div>
       <div><label class="text-[11px] text-slate-300 block mb-1">Alarm stanu minimalnego:</label><input type="number" id="editItemMinQty" value="3" min="0" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2 py-1.5 text-xs text-white text-center"></div>
       <div class="flex justify-end gap-2 pt-2 border-t border-slate-700">
-        <button type="button" onclick="hideModal('editItemModal')" class="px-3 py-1.5 rounded-xl text-xs text-slate-300 hover:bg-slate-700">Anuluj</button>
-        <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-1.5 rounded-xl text-xs shadow">Zapisz</button>
+        <button type="button" onclick="hideModal('editItemModal')" class="px-3 py-1.5 rounded-xl text-xs text-slate-300">Anuluj</button>
+        <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-1.5 rounded-xl text-xs shadow">Zapisz i Naucz</button>
       </div>
     </form>
   </div>
@@ -650,7 +635,7 @@
     <form onsubmit="saveNewItem(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl">
       <div class="flex justify-between items-center"><h3 class="text-sm font-bold text-white">Nowa pozycja w magazynie</h3><button type="button" onclick="hideModal('newItemModal')" class="text-slate-400 hover:text-white p-1">✕</button></div>
       <div><label class="text-[11px] text-slate-300 block mb-1">Kod kreskowy / QR:</label><div class="flex gap-2"><input type="text" id="newBarcode" placeholder="RC-001" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white font-mono"><button type="button" onclick="generateRandomCode()" class="bg-slate-700 px-3 py-1.5 rounded-xl text-xs font-semibold">Losuj</button></div></div>
-      <div><label class="text-[11px] text-slate-300 block mb-1">Nazwa towaru * (Kategoria dobierze się sama):</label><input type="text" id="newName" required oninput="autoPreviewNewItemCategory()" placeholder="Np. Ballantine's 0.7L / Lunchbox 2-dzielny" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold"></div>
+      <div><label class="text-[11px] text-slate-300 block mb-1">Nazwa towaru *:</label><input type="text" id="newName" required oninput="autoPreviewNewItemCategory()" placeholder="Np. Cisowianka Perlage 0.3L / Lunchbox" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold"></div>
       <div class="grid grid-cols-2 gap-2">
         <div><label class="text-[11px] text-slate-300 block mb-1">Cena netto (PLN):</label><input type="number" step="0.01" id="newPrice" value="0.00" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-emerald-400 font-bold"></div>
         <div>
@@ -674,7 +659,7 @@
         <div><label class="text-[11px] text-slate-300 block mb-1">Ilość start:</label><input type="number" id="newQty" value="1" min="0" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2 py-1.5 text-xs text-white text-center font-bold"></div>
         <div><label class="text-[11px] text-slate-300 block mb-1">Alarm min:</label><input type="number" id="newMinQty" value="3" min="0" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2 py-1.5 text-xs text-white text-center font-bold"></div>
       </div>
-      <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="hideModal('newItemModal')" class="px-3 py-1.5 rounded-xl text-xs text-slate-300 hover:bg-slate-700">Anuluj</button><button type="submit" class="bg-emerald-500 text-slate-950 font-bold px-4 py-1.5 rounded-xl text-xs">Zapisz</button></div>
+      <div class="flex justify-end gap-2 pt-2"><button type="button" onclick="hideModal('newItemModal')" class="px-3 py-1.5 rounded-xl text-xs text-slate-300">Anuluj</button><button type="submit" class="bg-emerald-500 text-slate-950 font-bold px-4 py-1.5 rounded-xl text-xs">Zapisz</button></div>
     </form>
   </div>
 
@@ -687,74 +672,92 @@
     const showModal = (id) => { const m = el(id); if (m) { m.classList.remove('hidden'); m.classList.add('flex'); } };
     const hideModal = (id) => { const m = el(id); if (m) { m.classList.add('hidden'); m.classList.remove('flex'); } };
 
-    // --- INTELIGENTNY SŁOWNIK MAREK I PRODUKTÓW HORECA (WARSTWA 1: NATYCHMIASTOWA) ---
+    // --- PAMIĘĆ UCZĄCA SIĘ APLIKACJI (SELF-LEARNING MEMORY) ---
+    let learnedRules = {};
+    try { learnedRules = JSON.parse(localStorage.getItem('magazyn_learned_rules')) || {}; } catch (e) { learnedRules = {}; }
+
+    function learnProductRule(name, category, unit) {
+      if (!name || !category) return;
+      const key = cleanCanonicalKey(name);
+      if (key.length < 2) return;
+      learnedRules[key] = { category, unit: unit || 'szt.' };
+      try { localStorage.setItem('magazyn_learned_rules', JSON.stringify(learnedRules)); } catch (e) {}
+    }
+
+    // --- NAPRAWIONY KLASYFIKATOR (WODA I CISOWIANKA PERLAGE PRZED ALKOHOLAMI + PAMIĘĆ AI) ---
     function classifyProductSmartLocal(name, currentCategory = '') {
       const n = (name || '').toLowerCase();
+      const key = cleanCanonicalKey(name);
 
-      // 1. JEDNORAZÓWKI & SERWIS
-      if (/lunchbox|menubox|menu box|lunch box|pojemnik|kubek|kubki|kubeczk|wieczk|dekiel|talerz|sztuć|widelc|widelec|nóż|noże|nożyk|łyżk|łyżecz|mieszadeł|serwet|słomk|rurk|tacka|taca|folia|strecz|alumin|pergamin|papier|rękawicz|worek|worki|wykałacz|szpadk|obrus|świecz|podgrzewacz|paliwo|chafing|czyściw|ręcznik/.test(n)) {
-        if (/lunchbox|menubox|menu box|lunch box|pojemnik|wieczk|dekiel|tacka/.test(n)) return 'Jednorazówki • Opakowania / Lunchbox';
-        if (/kubek|kubki|kubeczk|słomk|mieszadeł/.test(n)) return 'Jednorazówki • Kubki / Bar';
-        if (/sztuć|widelc|widelec|nóż|noże|łyżk|łyżecz|talerz/.test(n)) return 'Jednorazówki • Sztućce / Talerze';
-        return 'Jednorazówki • Serwis / Higiena';
+      // 0. Sprawdź pamięć nauczoną przez użytkownika/AI
+      if (learnedRules[key]?.category) {
+        // Wyjątek naprawczy: jeśli wcześniej błędnie zapisano Cisowiankę jako alkohol, ignorujemy stary błąd
+        if (!(/cisowianka|perlage|woda/.test(n) && learnedRules[key].category.includes('Alkohole'))) {
+          return learnedRules[key].category;
+        }
       }
 
-      // 2. ALKOHOLE (Rozpoznawanie po markach oraz stężeniu %)
+      // 1. WODA (Sprawdzana PRZED alkoholami, aby "Perlage" nigdy nie wpadło w piwo "Perła"!)
+      if (/cisowianka|perlage|kropla beskidu|żywiec zdrój|zywiec zdroj|nałęczowianka|naleczowianka|muszynianka|kinga pienińska|pellegrino|perrier|acqua panna|polaris|\bwoda\b/.test(n)) {
+        return 'Napoje • Woda';
+      }
+
+      // 2. KAWA, HERBATA, MLEKO, SYROPY (Sprawdzane przed alkoholami z uwagi na np. Mleko 3,2%)
+      if (/kawa|filcori|lavazza|illy|pellini|segafredo|dallmayr|tchibo|ziarn|mielona|espresso|herbata|lipton|dilmah|richmont|earl grey|mleko|bez laktozy|sojowe|owsiane|śmietank|cukier|syrop|monin|rioba|purée|puree/.test(n)) {
+        return 'Napoje • Kawa / Herbata / Dodatki';
+      }
+
+      // 3. JEDNORAZÓWKI & SERWIS
+      if (/lunchbox|menubox|menu box|lunch box|pojemnik|kubek|kubki|kubeczk|wieczk|dekiel|talerz|sztuć|widelc|widelec|nóż|noże|nożyk|łyżk|łyżecz|mieszadeł|serwet|słomk|rurk|tacka|taca|folia|strecz|alumin|pergamin|rękawicz|worek|worki|wykałacz|szpadk|obrus|świecz|podgrzewacz|paliwo|chafing|czyściw|ręcznik/.test(n)) {
+        if (/lunchbox|menubox|menu box|lunch box|pojemnik|wieczk|dekiel|tacka/.test(n)) return 'Jednorazówki • Opakowania / Lunchbox';
+        return 'Jednorazówki • Kubki / Sztućce / Serwetki';
+      }
+
+      // 4. ALKOHOLE (Z bezpiecznymi granicami słów \b)
       if (/ballantine|grant'?s|johnnie walker|jack daniel|jim beam|jameson|chivas|tullamore|bushmills|glen|monkey shoulder|maker'?s mark|bourbon|whisky|whiskey|scotch/.test(n)) {
         return 'Alkohole • Whisky';
       }
-      if (/bacardi|captain morgan|havana|malibu|kraken|diplomatico|bumba|rum\b/.test(n)) {
+      if (/bacardi|captain morgan|havana|malibu|kraken|diplomatico|bumba|\brum\b/.test(n)) {
         return 'Alkohole • Rum';
       }
-      if (/wyborowa|finlandia|absolut|bocian|żubrówka|zubrowka|stoli|belvedere|chopin|baczewski|pan tadeusz|żołądkowa|zoladkowa|soplica|krupnik|stock|amundsen|smirnoff|nemiroff|ostoya|wódka|wodka|czysta/.test(n)) {
+      if (/wyborowa|finlandia|absolut|bocian|żubrówka|zubrowka|stoli|belvedere|chopin|baczewski|pan tadeusz|żołądkowa|zoladkowa|soplica|krupnik|stock|amundsen|smirnoff|nemiroff|ostoya|wódka|wodka|\bczysta\b/.test(n)) {
         return 'Alkohole • Wódka';
       }
       if (/lubuski|beefeater|bombay|tanqueray|hendrick|gordon'?s|\bgin\b|tequila|sierra|olmeca|jagermeister|jägermeister|aperol|campari|baileys|kahlua|cointreau|amaretto|limoncello|hennessy|metaxa|koniak|brandy|likier/.test(n)) {
         return 'Alkohole • Gin / Likier / Aperitif';
       }
-      if (/wino|wine|prosecco|cava|szampan|champagne|frizzante|martini|cinzano|carlo rossi|fresco|septimo|cero zero|cabernet|merlot|chardonnay|sauvignon|pinot|shiraz|riesling|primitivo|chianti|rioja|tokaj|vermouth/.test(n)) {
+      if (/\bwino\b|\bwine\b|prosecco|\bcava\b|szampan|champagne|frizzante|martini|cinzano|carlo rossi|fresco|septimo|cero zero|cabernet|merlot|chardonnay|sauvignon|pinot|shiraz|riesling|primitivo|chianti|rioja|tokaj|vermouth/.test(n)) {
         return 'Alkohole • Wino / Prosecco';
       }
-      if (/piwo|heineken|lech\b|żywiec|zywiec|tyskie|perła|perla|carlsberg|desperados|corona|kormoran|książęce|ksiazece|zatecky|okocim|harnas|kasztelan|lomza|łomża|namysłów|paulaner|pilsner|guinness|somersby|cydr|radler/.test(n) && !/zdrój|zdroj/.test(n)) {
+      if (/\bpiwo\b|heineken|\blech\b|\bżywiec\b|\bzywiec\b|tyskie|\bperła\b|\bperla\b|carlsberg|desperados|corona|kormoran|książęce|ksiazece|zatecky|okocim|harnas|kasztelan|lomza|łomża|namysłów|paulaner|pilsner|guinness|somersby|\bcydr\b|radler/.test(n)) {
         return 'Alkohole • Piwo / Cydr';
       }
-      // Jeśli ma w nazwie procenty alkoholu np. 40%, 37,5%, 38%, 12%, 13.5% (a nie jest mlekiem 3,2% ani 2% ani 1,5%)
       if (/\b(1[1-9]|[2-8][0-9])([.,]\d+)?\s*%/.test(n)) {
         return 'Alkohole • Mocne';
       }
 
-      // 3. NAPOJE & KAWA & BAR
+      // 5. NAPOJE GAZOWANE, SOKI, ENERGETYKI
       if (/burn|red bull|redbull|monster|tiger|black energy|rockstar|oshee|energetyk/.test(n)) {
         return 'Napoje • Energetyk';
       }
       if (/coca-cola|coca cola|pepsi|fanta|sprite|kinley|schweppes|7up|mirinda|mountain dew|orangina|tonik|tonic|lemoniada|napój gaz/.test(n)) {
         return 'Napoje • Gazowane / Soft';
       }
-      if (/cisowianka|perlage|kropla beskidu|żywiec zdrój|zywiec zdroj|nałęczowianka|naleczowianka|muszynianka|kinga pienińska|pellegrino|acqua panna|polaris|woda\b/.test(n)) {
-        return 'Napoje • Woda';
-      }
-      if (/sok\b|nektar|tymbark|hortex|cappy|tarczyn|fortuna|riviva|tłoczony|jabłko|pomarańcz|grejpfrut|czarna porzeczka|wieloowocowy|pomidor/.test(n)) {
+      if (/\bsok\b|nektar|tymbark|hortex|cappy|tarczyn|fortuna|riviva|tłoczony|jabłko|pomarańcz|grejpfrut|czarna porzeczka|wieloowocowy|pomidor/.test(n)) {
         return 'Napoje • Soki / Nektary';
-      }
-      if (/kawa|filcori|lavazza|illy|pellini|segafredo|dallmayr|tchibo|ziarn|mielona|espresso|herbata|lipton|dilmah|richmont|earl grey|zielona|mięta|mleko|bez laktozy|sojowe|owsiane|śmietank|cukier|syrop|monin|rioba|purée|puree|cytryn/.test(n)) {
-        return 'Napoje • Kawa / Herbata / Dodatki';
       }
       if (/\bcan\b|\brgb\b|\bpet\b|\b0\.25\b|\b0\.33\b|\b0\.5\b|\b0\.85\b/.test(n)) {
         return 'Napoje • Gazowane / Soft';
       }
 
-      // Jeśli produkt miał już konkretną kategorię, zachowaj ją
       const c = (currentCategory || '').toLowerCase();
-      if (c.includes('alko') || c.includes('jednoraz') || (c.includes('napoje') && c.includes('•'))) {
-        return currentCategory;
-      }
-      return null; // Oznacza, że trzeba dopytać AI online
+      if (c.includes('alko') || c.includes('jednoraz') || (c.includes('napoje') && c.includes('•'))) return currentCategory;
+      return null;
     }
 
     function getMainCategoryGroup(item) {
-      const cat = String(item.category || '').toLowerCase();
-      const smart = classifyProductSmartLocal(item.name, item.category) || '';
-      const combined = (cat + ' ' + smart.toLowerCase());
+      const smart = classifyProductSmartLocal(item.name, item.category) || item.category || '';
+      const combined = smart.toLowerCase();
       if (combined.includes('alko') || combined.includes('whisky') || combined.includes('wódka') || combined.includes('rum') || combined.includes('wino') || combined.includes('piwo')) return 'ALCOHOL';
       if (combined.includes('jednoraz') || combined.includes('serwis') || combined.includes('lunchbox') || combined.includes('kubki') || combined.includes('sztućce')) return 'DISPOSABLES';
       return 'BEVERAGE';
@@ -782,9 +785,7 @@
     function normalizeItem(raw) {
       if (!raw) return null;
       const rawCat = String(raw.category || '');
-      const isGenericCat = !rawCat || ['dostawa', 'ogólne', 'inwentaryzacja vision', 'inne', 'napoje'].includes(rawCat.toLowerCase().trim());
-      const smartCat = isGenericCat ? (classifyProductSmartLocal(raw.name, rawCat) || rawCat || 'Napoje • Pozostałe') : rawCat;
-
+      const smartCat = classifyProductSmartLocal(raw.name, rawCat) || rawCat || 'Napoje • Pozostałe';
       return {
         id: String(raw.id), barcode: String(raw.barcode || ''), name: String(raw.name || ''),
         category: smartCat, location: String(raw.location || '-'),
@@ -812,116 +813,48 @@
     let currentExtractedDelivery = null, currentExtractedEventDispatch = null;
     let currentActiveReturnEventId = null, lastParsedReturnData = null, lastReturnImage = '';
     let currentShelfCountItems = [], sheetCreatorMap = new Map(), currentPreviewSheetData = null;
-    let invoicePhoto1 = null, invoicePhoto2 = null, selectedItemIds = new Set();
+    let invoiceFilePart1 = null, invoiceFilePart2 = null, selectedItemIds = new Set();
     let editingDeliveryItems = [], editingDeliveryPhotos = [];
 
     function triggerScanFeedback() { if (navigator.vibrate) { try { navigator.vibrate(50); } catch (e) {} } }
 
-    // --- WARSTWA 2: AUTOMATYCZNY KLASYFIKATOR ONLINE AI (SPRAWDZA BAZĘ PRZY ODŚWIEŻENIU STRONY) ---
-    async function runOnlineAIClassifier(forceAll = false) {
-      if (inventory.length === 0) return;
-
-      // Krok 1: Zastosuj natychmiastowy klasyfikator lokalny dla wszystkich pozycji i zaktualizuj w Supabase te, które miały "Dostawa" / "Ogólne"
-      const changedLocally = [];
-      inventory.forEach(item => {
-        const smart = classifyProductSmartLocal(item.name, forceAll ? '' : item.category);
-        if (smart && smart !== item.category) {
-          item.category = smart;
-          changedLocally.push(item);
+    // --- UNIWERSALNY CZYTNIK PLIKÓW (ZDJĘCIA Z MESSENGERA/GALERII ORAZ PLIKI PDF Z MAILA) ---
+    function prepareFileForGemini(file, maxW = 950, q = 0.72) {
+      return new Promise((res, rej) => {
+        if (!file) return rej(new Error("Brak pliku"));
+        if (file.type === 'application/pdf' || file.name?.toLowerCase().endsWith('.pdf')) {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const dataUrl = reader.result;
+            res({ mimeType: 'application/pdf', base64: dataUrl.split(',')[1], previewUrl: dataUrl, isPdf: true });
+          };
+          reader.onerror = rej;
+          reader.readAsDataURL(file);
+        } else {
+          const img = new Image();
+          img.onload = () => {
+            let w = img.width, h = img.height;
+            if (w > maxW) { h = Math.round((h * maxW) / w); w = maxW; }
+            const cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+            cv.getContext('2d').drawImage(img, 0, 0, w, h);
+            const dataUrl = cv.toDataURL('image/jpeg', q);
+            res({ mimeType: 'image/jpeg', base64: dataUrl.split(',')[1], previewUrl: dataUrl, isPdf: false });
+          };
+          img.onerror = rej;
+          img.src = URL.createObjectURL(file);
         }
       });
-
-      if (changedLocally.length > 0) {
-        safeSetLocal('magazyn_offline_items', inventory);
-        renderInventory();
-        if (isCloudOnline) {
-          for (const it of changedLocally) {
-            try { await apiRequest(`/inventory?id=eq.${it.id}`, 'PATCH', { category: it.category, updated_at: new Date() }); } catch (e) {}
-          }
-        }
-      }
-
-      // Krok 2: Wybierz pozycje, które nadal nie mają pewnej podkategorii (lub wszystkie, jeśli kliknięto przycisk "🧠 Kategoryzuj")
-      const itemsToVerifyOnline = forceAll
-        ? inventory
-        : inventory.filter(it => !it.category.includes('•') || it.category.includes('Pozostałe') || ['Dostawa', 'Ogólne', 'Inne'].includes(it.category));
-
-      if (itemsToVerifyOnline.length === 0) {
-        if (forceAll) alert(`✓ Wszystkie pozycje (${inventory.length}) są już przypisane do właściwych kategorii!`);
-        return;
-      }
-
-      const syncEl = el('syncStatus');
-      if (syncEl) syncEl.innerText = `🧠 AI weryfikuje kategorie online (${itemsToVerifyOnline.length})...`;
-
-      try {
-        const payloadList = itemsToVerifyOnline.map(i => ({ id: i.id, name: i.name }));
-        const promptText = `Jesteś ekspertem ds. produktów gastronomicznych i katalogu HoReCa. Na podstawie wiedzy o markach (np. Ballantine's to Whisky, Wyborowa to Wódka, Bacardi to Rum, Coca-Cola/Fanta/Sprite/Kinley to Napoje Gazowane/Soft, Burn to Energetyk, Cisowianka to Woda, Filcori to Kawa, a Lunchbox/Menubox/Kubki/Serwetki to Jednorazówki) przypisz każdy produkt z poniższej listy do DOKŁADNIE JEDNEJ kategorii z poniższego słownika:
-- "Alkohole • Whisky"
-- "Alkohole • Wódka"
-- "Alkohole • Rum"
-- "Alkohole • Gin / Likier / Aperitif"
-- "Alkohole • Wino / Prosecco"
-- "Alkohole • Piwo / Cydr"
-- "Napoje • Gazowane / Soft"
-- "Napoje • Energetyk"
-- "Napoje • Woda"
-- "Napoje • Soki / Nektary"
-- "Napoje • Kawa / Herbata / Dodatki"
-- "Jednorazówki • Opakowania / Lunchbox"
-- "Jednorazówki • Kubki / Sztućce / Serwetki"
-
-Lista produktów:
-${JSON.stringify(payloadList)}
-
-Zwróć czysty JSON:
-{
-  "classified": [
-    { "id": "id_produktu", "category": "Wybrana Kategoria", "suggestedUnit": "szt." lub "op." }
-  ]
-}`;
-
-        const result = await queryGeminiTextOnlyAPI(promptText);
-        let updatedByAI = 0;
-
-        for (const entry of (result.classified || [])) {
-          const item = inventory.find(x => String(x.id) === String(entry.id));
-          if (item && entry.category) {
-            if (item.category !== entry.category) {
-              item.category = entry.category;
-              if (entry.category.startsWith('Jednorazówki') && entry.suggestedUnit === 'op.') {
-                item.unit = 'op.';
-              }
-              updatedByAI++;
-              if (isCloudOnline) {
-                try { await apiRequest(`/inventory?id=eq.${item.id}`, 'PATCH', { category: item.category, unit: item.unit, updated_at: new Date() }); } catch (e) {}
-              }
-            }
-          }
-        }
-
-        safeSetLocal('magazyn_offline_items', inventory);
-        renderInventory();
-        if (syncEl) {
-          syncEl.innerText = isCloudOnline ? '🟢 Chmura aktywna • Kategorie zweryfikowane' : '🟡 Tryb lokalny • Kategorie zweryfikowane';
-        }
-        if (forceAll) {
-          alert(`🧠 Weryfikacja online zakończona! Przeanalizowano produktów: ${itemsToVerifyOnline.length}, zaktualizowano kategorii: ${updatedByAI + changedLocally.length}.`);
-        }
-      } catch (err) {
-        if (syncEl) syncEl.innerText = isCloudOnline ? '🟢 Chmura aktywna na żywo' : '🟡 Tryb lokalny';
-        if (forceAll) alert(`Sklasyfikowano lokalnie ${changedLocally.length} pozycji.`);
-      }
     }
 
-    async function queryGeminiTextOnlyAPI(promptText) {
+    async function queryGeminiAPI(promptText, mediaParts = []) {
       const models = ['gemini-3.5-flash-lite', 'gemini-1.5-flash', 'gemini-3.8-flash'];
+      const parts = [{ text: promptText }, ...mediaParts.map(m => typeof m === 'string' ? { inline_data: { mime_type: 'image/jpeg', data: m } } : { inline_data: { mime_type: m.mimeType || 'image/jpeg', data: m.base64 } })];
       let lastErr = '';
       for (const m of models) {
         try {
           const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${GEMINI_API_KEY}`, {
             method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
-            body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }], generationConfig: { response_mime_type: "application/json", temperature: 0.1 } })
+            body: JSON.stringify({ contents: [{ parts }], generationConfig: { response_mime_type: "application/json", temperature: 0.1 } })
           });
           const j = await res.json();
           if (j.error) { lastErr = j.error.message; continue; }
@@ -933,39 +866,78 @@ Zwróć czysty JSON:
       throw new Error(lastErr || "Serwery AI zajęte.");
     }
 
+    // --- AUTOMATYCZNA KATEGORYZACJA I NAUKA ONLINE ---
+    async function runOnlineAIClassifier(forceAll = false) {
+      if (inventory.length === 0) return;
+      const changedLocally = [];
+      inventory.forEach(item => {
+        const smart = classifyProductSmartLocal(item.name, forceAll ? '' : item.category);
+        if (smart && smart !== item.category) { item.category = smart; changedLocally.push(item); }
+      });
+
+      if (changedLocally.length > 0) {
+        safeSetLocal('magazyn_offline_items', inventory); renderInventory();
+        if (isCloudOnline) { for (const it of changedLocally) { try { await apiRequest(`/inventory?id=eq.${it.id}`, 'PATCH', { category: it.category, updated_at: new Date() }); } catch (e) {} } }
+      }
+
+      const toVerify = forceAll ? inventory : inventory.filter(it => !it.category.includes('•') || it.category.includes('Pozostałe') || ['Dostawa', 'Ogólne', 'Inne'].includes(it.category));
+      if (toVerify.length === 0) {
+        if (forceAll) alert(`✓ Wszystkie produkty (${inventory.length}) mają przypisane poprawne kategorie!`);
+        return;
+      }
+
+      const syncEl = el('syncStatus');
+      if (syncEl) syncEl.innerText = `🧠 AI uczy się kategorii (${toVerify.length})...`;
+
+      try {
+        const prompt = `Przypisz każdy produkt do JEDNEJ kategorii. UWAGA: Cisowianka Perlage to zawsze "Napoje • Woda" (nigdy alkohol!).
+Kategorie: "Alkohole • Whisky", "Alkohole • Wódka", "Alkohole • Rum", "Alkohole • Gin / Likier / Aperitif", "Alkohole • Wino / Prosecco", "Alkohole • Piwo / Cydr", "Napoje • Woda", "Napoje • Gazowane / Soft", "Napoje • Energetyk", "Napoje • Soki / Nektary", "Napoje • Kawa / Herbata / Dodatki", "Jednorazówki • Opakowania / Lunchbox", "Jednorazówki • Kubki / Sztućce / Serwetki".
+Produkty: ${JSON.stringify(toVerify.map(i => ({ id: i.id, name: i.name })))}
+Zwróć JSON: { "classified": [ { "id": string, "category": string, "suggestedUnit": "szt."|"op." } ] }`;
+
+        const result = await queryGeminiAPI(prompt, []);
+        let updated = 0;
+        for (const entry of (result.classified || [])) {
+          const item = inventory.find(x => String(x.id) === String(entry.id));
+          if (item && entry.category) {
+            // Zabezpieczenie przed błędem AI na wodzie Perlage
+            const finalCat = /cisowianka|perlage|woda/i.test(item.name) ? 'Napoje • Woda' : entry.category;
+            learnProductRule(item.name, finalCat, item.unit);
+            if (item.category !== finalCat) {
+              item.category = finalCat; updated++;
+              if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${item.id}`, 'PATCH', { category: item.category, updated_at: new Date() }); } catch (e) {} }
+            }
+          }
+        }
+        safeSetLocal('magazyn_offline_items', inventory); renderInventory();
+        if (syncEl) syncEl.innerText = isCloudOnline ? '🟢 Chmura aktywna • AI Nauczone' : '🟡 Tryb lokalny • AI Nauczone';
+        if (forceAll) alert(`🧠 Zakończono! Zaktualizowano i zapamiętano kategorie dla ${updated + changedLocally.length} pozycji.`);
+      } catch (err) {
+        if (syncEl) syncEl.innerText = isCloudOnline ? '🟢 Chmura aktywna' : '🟡 Tryb lokalny';
+      }
+    }
+
     function cleanCanonicalKey(text) {
-      return (text || '').toLowerCase()
-        .replace(/,/g, '.')
-        .replace(/\bx\s*\d+\b/gi, ' ')
-        .replace(/\bders\b|\bdrs\b|\bop\b|\bszt\b/gi, ' ')
-        .replace(/[^a-z0-9ąćęłńóśźż.]/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
+      return (text || '').toLowerCase().replace(/,/g, '.').replace(/\bx\s*\d+\b/gi, ' ').replace(/\bders\b|\bdrs\b|\bop\b|\bszt\b/gi, ' ').replace(/[^a-z0-9ąćęłńóśźż.]/g, ' ').replace(/\s+/g, ' ').trim();
     }
 
     function extractProductSpecs(text) {
       const s = (text || '').toLowerCase().replace(/,/g, '.');
-      const caps = (s.match(/\b0\.\d+\b|\b1\.5\b|\b1\s*l\b|\b0\.\d+l\b/g) || []).map(c => c.replace('l', '').trim());
+      const caps = (s.match(/\b0\.\d+\b|\b1\.5\b|\b1\s*l\b|\b0\.\d+l\b|\b\d{3}\s*ml\b/g) || []).map(c => c.includes('ml') ? (parseInt(c) / 1000).toString() : c.replace('l', '').trim());
       const pack = [];
       if (/\bpet\b/.test(s)) pack.push('pet');
       if (/\brgb\b|\bszk[łl]/.test(s)) pack.push('rgb');
       if (/\bcan\b|\bpusz/.test(s)) pack.push('can');
-
       const variants = [];
-      ['zero', 'light', 'bez laktozy', 'sojowe', 'białe', 'czerwone', 'perla', 'gaz', 'niegaz', 'jabłk', 'pomarańcz', 'cytryn'].forEach(v => {
-        if (s.includes(v)) variants.push(v);
-      });
+      ['zero', 'light', 'bez laktozy', 'sojowe', 'białe', 'czerwone', 'perlage', 'gaz', 'niegaz', 'jabłk', 'pomarańcz', 'cytryn'].forEach(v => { if (s.includes(v)) variants.push(v); });
       return { caps, pack, variants };
     }
 
     function areSpecsCompatible(nameA, nameB) {
-      const a = extractProductSpecs(nameA);
-      const b = extractProductSpecs(nameB);
+      const a = extractProductSpecs(nameA), b = extractProductSpecs(nameB);
       if (a.caps.length > 0 && b.caps.length > 0 && a.caps[0] !== b.caps[0]) return false;
       if (a.pack.length > 0 && b.pack.length > 0 && a.pack[0] !== b.pack[0]) return false;
-      for (const v of ['zero', 'bez laktozy', 'sojowe', 'białe', 'czerwone']) {
-        if (a.variants.includes(v) !== b.variants.includes(v)) return false;
-      }
+      for (const v of ['zero', 'bez laktozy', 'sojowe', 'białe', 'czerwone']) { if (a.variants.includes(v) !== b.variants.includes(v)) return false; }
       return true;
     }
 
@@ -973,77 +945,43 @@ Zwróć czysty JSON:
       if (!targetName) return null;
       const targetKey = cleanCanonicalKey(targetName);
       if (targetKey.length < 3) return null;
-
-      for (const item of inventory) {
-        if (cleanCanonicalKey(item.name) === targetKey && areSpecsCompatible(targetName, item.name)) {
-          return item;
-        }
-      }
-
-      const ignoreTokens = new Set(['can', 'rgb', 'pet', 'drs', 'szt', 'but', 'zgrz', '0.25', '0.33', '0.5', '0.7', '0.85', '1.0']);
-      const targetWords = targetKey.split(' ').filter(w => w.length >= 3 && !ignoreTokens.has(w));
-      if (targetWords.length === 0) return null;
-
-      let bestItem = null, bestRatio = 0;
+      for (const item of inventory) { if (cleanCanonicalKey(item.name) === targetKey && areSpecsCompatible(targetName, item.name)) return item; }
+      const ignore = new Set(['can', 'rgb', 'pet', 'drs', 'szt', 'but', 'zgrz', '0.25', '0.3', '0.33', '0.5', '0.7', '0.85', '1.0', '300ml']);
+      const tWords = targetKey.split(' ').filter(w => w.length >= 3 && !ignore.has(w));
+      if (tWords.length === 0) return null;
+      let best = null, bestR = 0;
       for (const item of inventory) {
         if (!areSpecsCompatible(targetName, item.name)) continue;
-        const itemKey = cleanCanonicalKey(item.name);
-        const itemWords = itemKey.split(' ').filter(w => w.length >= 3 && !ignoreTokens.has(w));
-        if (itemWords.length === 0) continue;
-
-        let overlap = 0;
-        for (const w of targetWords) {
-          if (itemWords.includes(w)) overlap++;
-        }
-        const ratio = overlap / Math.max(targetWords.length, itemWords.length);
-        if ((overlap >= 2 && ratio >= 0.65) || (overlap >= 1 && targetWords.length === 1 && itemWords.length === 1)) {
-          if (ratio > bestRatio) {
-            bestRatio = ratio;
-            bestItem = item;
-          }
-        }
+        const iWords = cleanCanonicalKey(item.name).split(' ').filter(w => w.length >= 3 && !ignore.has(w));
+        if (iWords.length === 0) continue;
+        let ov = 0; for (const w of tWords) { if (iWords.includes(w)) ov++; }
+        const r = ov / Math.max(tWords.length, iWords.length);
+        if ((ov >= 2 && r >= 0.65) || (ov >= 1 && tWords.length === 1 && iWords.length === 1)) { if (r > bestR) { bestR = r; best = item; } }
       }
-      return bestItem;
+      return best;
     }
 
     async function mergeExistingDuplicates() {
-      const groups = new Map();
-      const toDeleteIds = [];
-      let mergedCount = 0;
-
+      const groups = new Map(), toDel = []; let count = 0;
       for (const item of inventory) {
-        const spec = extractProductSpecs(item.name);
-        const key = cleanCanonicalKey(item.name) + '|' + (spec.caps[0] || '') + '|' + (spec.pack[0] || '') + '|' + spec.variants.join(',');
-        if (!groups.has(key)) {
-          groups.set(key, item);
-        } else {
-          const master = groups.get(key);
-          master.qty = (Number(master.qty) || 0) + (Number(item.qty) || 0);
-          master.inField = (Number(master.inField) || 0) + (Number(item.inField) || 0);
-          if (Number(item.price) > 0) master.price = Number(item.price);
-          toDeleteIds.push(item.id);
-          mergedCount++;
+        const sp = extractProductSpecs(item.name);
+        const key = cleanCanonicalKey(item.name) + '|' + (sp.caps[0] || '') + '|' + (sp.pack[0] || '') + '|' + sp.variants.join(',');
+        if (!groups.has(key)) groups.set(key, item);
+        else {
+          const m = groups.get(key);
+          m.qty = (Number(m.qty) || 0) + (Number(item.qty) || 0);
+          m.inField = (Number(m.inField) || 0) + (Number(item.inField) || 0);
+          if (Number(item.price) > 0) m.price = Number(item.price);
+          toDel.push(item.id); count++;
         }
       }
-
-      if (mergedCount === 0) {
-        return alert("Brak duplikatów w magazynie! Wszystkie pozycje są unikalne.");
-      }
-
-      inventory = Array.from(groups.values());
-      safeSetLocal('magazyn_offline_items', inventory);
-      renderInventory();
-      triggerScanFeedback();
-
+      if (count === 0) return alert("Brak duplikatów! Wszystkie pozycje są unikalne.");
+      inventory = Array.from(groups.values()); safeSetLocal('magazyn_offline_items', inventory); renderInventory();
       if (isCloudOnline) {
-        for (const delId of toDeleteIds) {
-          try { await apiRequest(`/inventory?id=eq.${delId}`, 'DELETE'); } catch (e) {}
-        }
-        for (const master of inventory) {
-          try { await apiRequest(`/inventory?id=eq.${master.id}`, 'PATCH', toDbItem(master)); } catch (e) {}
-        }
+        for (const id of toDel) { try { await apiRequest(`/inventory?id=eq.${id}`, 'DELETE'); } catch (e) {} }
+        for (const m of inventory) { try { await apiRequest(`/inventory?id=eq.${m.id}`, 'PATCH', toDbItem(m)); } catch (e) {} }
       }
-      alert(`🔗 Pomyślnie scalono ${mergedCount} zduplikowanych pozycji i zsumowano ich stany!`);
+      alert(`🔗 Scalono ${count} zduplikowanych pozycji!`);
     }
 
     function normalizeText(t) { return (t || '').toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()\[\]]/g, ' ').replace(/\s+/g, ' ').trim(); }
@@ -1094,33 +1032,29 @@ Zwróć czysty JSON:
       if (Array.isArray(field)) return field.filter(Boolean);
       const s = String(field).trim();
       if (s.startsWith('[')) { try { return JSON.parse(s).filter(Boolean); } catch (e) { return []; } }
-      if (s.startsWith('data:image') || s.startsWith('http')) return [s];
+      if (s.startsWith('data:') || s.startsWith('http')) return [s];
       return [];
     }
 
     async function recordStockLog(itemId, itemName, actionType, qtyChange, note = '') {
       const logEntry = { id: Date.now().toString() + '_' + Math.floor(Math.random() * 1000), item_id: String(itemId), item_name: String(itemName), action_type: actionType, qty_change: qtyChange, note: note, created_at: new Date() };
-      stockLogs.unshift(logEntry);
-      safeSetLocal('magazyn_offline_stock_logs', stockLogs);
+      stockLogs.unshift(logEntry); safeSetLocal('magazyn_offline_stock_logs', stockLogs);
       if (isCloudOnline) { try { await apiRequest('/stock_logs', 'POST', logEntry); } catch (e) {} }
     }
 
     async function apiRequest(endpoint, method = 'GET', body = null) {
-      const ctrl = new AbortController();
-      const tid = setTimeout(() => ctrl.abort(), 4500);
+      const ctrl = new AbortController(); const tid = setTimeout(() => ctrl.abort(), 4500);
       const opts = { method, headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' }, signal: ctrl.signal };
       if (body) opts.body = JSON.stringify(body);
       try {
-        const res = await fetch(`${SUPABASE_BASE_URL}${endpoint}`, opts);
-        clearTimeout(tid);
+        const res = await fetch(`${SUPABASE_BASE_URL}${endpoint}`, opts); clearTimeout(tid);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return await res.json();
       } catch (err) { clearTimeout(tid); throw err; }
     }
 
     async function fetchAllData() {
-      const syncEl = el('syncStatus');
-      if (syncEl) syncEl.innerText = 'Synchronizacja z bazą...';
+      const syncEl = el('syncStatus'); if (syncEl) syncEl.innerText = 'Synchronizacja z bazą...';
       try {
         const invData = await apiRequest('/inventory?select=*&order=name.asc');
         if (invData && invData.length > 0) { inventory = invData.map(normalizeItem); safeSetLocal('magazyn_offline_items', inventory); }
@@ -1139,16 +1073,15 @@ Zwróć czysty JSON:
         try { const clog = await apiRequest('/stock_logs?select=*&order=created_at.desc&limit=100'); if (clog) { stockLogs = clog; safeSetLocal('magazyn_offline_stock_logs', stockLogs); } } catch (e) {}
       }
       renderInventory(); renderDeposits(); renderEvents(); renderPriceAlerts(); renderDeliveries();
-      // Automatyczne sprawdzenie i przypisanie kategorii przy każdym odświeżeniu strony!
       runOnlineAIClassifier(false);
     }
 
     function copyLowStockWhatsApp() {
       const low = inventory.filter(i => (Number(i.qty) || 0) <= (Number(i.minQty) || 0));
-      if (low.length === 0) return alert("Wszystkie towary i jednorazówki są powyżej stanu minimalnego!");
+      if (low.length === 0) return alert("Wszystkie towary są powyżej stanu minimalnego!");
       let msg = `📦 *ZAMÓWIENIE / BRAKI MAGAZYNOWE (${new Date().toLocaleDateString('pl-PL')}):*\n\n`;
       low.forEach((it, idx) => { msg += `${idx + 1}. *${it.name}* [${it.category}] — stan: ${it.qty} ${it.unit} (min: ${it.minQty})\n`; });
-      navigator.clipboard.writeText(msg).then(() => { alert(`Skopiowano listę ${low.length} braków! Możesz wkleić na WhatsApp.`); triggerScanFeedback(); });
+      navigator.clipboard.writeText(msg).then(() => { alert(`Skopiowano listę ${low.length} braków!`); triggerScanFeedback(); });
     }
 
     function setCategoryPill(catKey) {
@@ -1162,20 +1095,16 @@ Zwróć czysty JSON:
 
     function renderInventory() {
       const search = String(el('searchFilter')?.value || '').toLowerCase();
-      const list = el('inventoryList');
-      if (!list) return;
+      const list = el('inventoryList'); if (!list) return;
       el('statTotalItems').innerText = inventory.length;
       el('statInField').innerText = inventory.reduce((s, i) => s + (Number(i.inField) || 0), 0);
       const totalVal = inventory.reduce((s, i) => s + ((Number(i.qty) || 0) * (Number(i.price) || 0)), 0);
       el('statTotalValue').innerText = `${totalVal.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} zł`;
 
-      // Aktualizacja liczników na zakładkach kategorii
       let cAlco = 0, cBev = 0, cDisp = 0, cLow = 0, cField = 0;
       inventory.forEach(it => {
         const g = getMainCategoryGroup(it);
-        if (g === 'ALCOHOL') cAlco++;
-        else if (g === 'DISPOSABLES') cDisp++;
-        else cBev++;
+        if (g === 'ALCOHOL') cAlco++; else if (g === 'DISPOSABLES') cDisp++; else cBev++;
         if ((Number(it.qty) || 0) <= (Number(it.minQty) || 0)) cLow++;
         if ((Number(it.inField) || 0) > 0) cField++;
       });
@@ -1219,7 +1148,7 @@ Zwróć czysty JSON:
               <div class="flex items-center gap-2 text-[10px]">
                 <span class="text-emerald-400 font-bold">${Number(item.price || 0).toFixed(2)} zł / ${item.unit || 'szt.'}</span>
                 <span class="text-slate-500">(${itemVal} zł)</span>
-                ${isLow ? `<span class="text-rose-400 font-medium">${item.qty === 0 ? '⚪ Stan 0 (W bazie)' : `⚠️ Niski stan (min: ${item.minQty})`}</span>` : ''}
+                ${isLow ? `<span class="text-rose-400 font-medium">${item.qty === 0 ? '⚪ Stan 0 (Baza)' : `⚠️ Niski stan (min: ${item.minQty})`}</span>` : ''}
               </div>
             </div>
             <div class="text-right flex items-center gap-2">
@@ -1234,9 +1163,8 @@ Zwróć czysty JSON:
       }).join('');
     }
 
-    // --- KREATOR WYDANIA W TEREN I KARTY (.XLS / DRUK) ---
+    // --- KREATOR KARTY WYDANIA ---
     function openCreatorFromEventsTab() { sheetCreatorMap.clear(); openGenerateSheetModal(true); }
-
     function openGenerateSheetModal(allowEmpty = false) {
       selectedItemIds.forEach(id => {
         if (!sheetCreatorMap.has(String(id))) {
@@ -1249,35 +1177,22 @@ Zwróć czysty JSON:
       el('genSheetDate').value = new Date().toLocaleDateString('pl-PL');
       el('genSheetName').value = '';
       el('genSheetAddSelect').innerHTML = `<option value="">-- Wybierz towar z magazynu (${inventory.length}) --</option>` + inventory.map(it => `<option value="${it.id}">[${it.category}] ${it.name} (Stan: ${it.qty} ${it.unit})</option>`).join('');
-      renderSheetCreatorItems();
-      showModal('generateSheetModal');
+      renderSheetCreatorItems(); showModal('generateSheetModal');
     }
 
     function addItemToSheetCreator() {
-      const id = el('genSheetAddSelect').value;
-      if (!id) return;
-      const it = inventory.find(x => String(x.id) === String(id));
-      if (!it) return;
+      const id = el('genSheetAddSelect').value; if (!id) return;
+      const it = inventory.find(x => String(x.id) === String(id)); if (!it) return;
       sheetCreatorMap.set(String(id), (sheetCreatorMap.get(String(id)) || 0) + (Math.min(it.qty, 6) || 1));
-      el('genSheetAddSelect').value = '';
-      renderSheetCreatorItems(); triggerScanFeedback();
+      el('genSheetAddSelect').value = ''; renderSheetCreatorItems(); triggerScanFeedback();
     }
 
     function renderSheetCreatorItems() {
       const list = el('genSheetItemsList');
       if (sheetCreatorMap.size === 0) { list.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs">Wybierz towar z listy powyżej i kliknij "+ Dodaj".</div>`; return; }
       list.innerHTML = Array.from(sheetCreatorMap.entries()).map(([id, qty]) => {
-        const it = inventory.find(x => String(x.id) === String(id));
-        if (!it) return '';
-        return `
-          <div class="bg-slate-900 border border-slate-700 rounded-xl p-2.5 flex items-center justify-between text-xs gap-2">
-            <div class="flex-1 truncate"><span class="font-bold text-white block truncate">${it.name}</span><span class="text-[10px] text-slate-400">[${it.category}] • Stan: ${it.qty} ${it.unit}</span></div>
-            <div class="flex items-center gap-1.5">
-              <input type="number" value="${qty}" min="1" oninput="sheetCreatorMap.set('${it.id}', Math.max(1, parseInt(this.value)||1))" class="w-16 bg-slate-800 border border-amber-500/70 rounded-lg p-1.5 text-center font-black text-amber-400 text-xs">
-              <span class="text-slate-400 text-[10px]">${it.unit}</span>
-              <button type="button" onclick="sheetCreatorMap.delete('${it.id}');renderSheetCreatorItems()" class="text-rose-400 font-bold px-1.5 py-1">✕</button>
-            </div>
-          </div>`;
+        const it = inventory.find(x => String(x.id) === String(id)); if (!it) return '';
+        return `<div class="bg-slate-900 border border-slate-700 rounded-xl p-2.5 flex items-center justify-between text-xs gap-2"><div class="flex-1 truncate"><span class="font-bold text-white block truncate">${it.name}</span><span class="text-[10px] text-slate-400">[${it.category}] • Stan: ${it.qty} ${it.unit}</span></div><div class="flex items-center gap-1.5"><input type="number" value="${qty}" min="1" oninput="sheetCreatorMap.set('${it.id}', Math.max(1, parseInt(this.value)||1))" class="w-16 bg-slate-800 border border-amber-500/70 rounded-lg p-1.5 text-center font-black text-amber-400 text-xs"><span class="text-slate-400 text-[10px]">${it.unit}</span><button type="button" onclick="sheetCreatorMap.delete('${it.id}');renderSheetCreatorItems()" class="text-rose-400 font-bold px-1.5 py-1">✕</button></div></div>`;
       }).join('');
     }
 
@@ -1286,8 +1201,7 @@ Zwróć czysty JSON:
       const evNum = el('genSheetNum').value.trim() || '#EVENT', evDate = el('genSheetDate').value.trim() || new Date().toLocaleDateString('pl-PL'), evName = el('genSheetName').value.trim() || 'Realizacja Cateringowa';
       const payload = [];
       for (const [id, qty] of sheetCreatorMap.entries()) {
-        const it = inventory.find(x => String(x.id) === String(id));
-        if (!it) continue;
+        const it = inventory.find(x => String(x.id) === String(id)); if (!it) continue;
         payload.push({ name: it.name, dispatched: qty, unit: it.unit || 'szt.' });
         if (createEvent) {
           it.qty = Math.max(0, it.qty - qty); it.inField = (it.inField || 0) + qty;
@@ -1309,43 +1223,18 @@ Zwróć czysty JSON:
     function buildRoyalCateringSheetHTML(data) {
       const title = data.isReturn ? "ROZLICZENIE ZWROTU<br>I KONSUMPCJI<br>Z REALIZACJI" : "WYDANIE NAPOJÓW<br>I ALKOHOLU<br>NA REALIZACJĘ";
       const items = data.items || [];
-      let rows = items.map((it, idx) => `
-        <tr style="height:24px;text-align:center;">
-          <td style="border:1px solid #000;font-weight:bold;">${idx + 1}</td>
-          <td style="border:1px solid #000;text-align:left;padding-left:6px;font-weight:bold;">${it.name}</td>
-          <td style="border:1px solid #000;">${it.unit || 'szt.'}</td>
-          <td style="border:1px solid #000;font-weight:bold;font-size:12px;">${it.dispatched !== undefined ? it.dispatched : ''}</td>
-          <td style="border:1px solid #000;">&nbsp;</td>
-          <td style="border:1px solid #000;background:#d9ead3;">&nbsp;</td>
-          <td style="border:1px solid #000;background:#d9ead3;font-weight:bold;">${data.isReturn && it.consumed !== undefined ? it.consumed : ''}</td>
-          <td style="border:1px solid #000;background:#d9ead3;font-weight:bold;">${data.isReturn && it.returned !== undefined ? it.returned : ''}</td>
-          <td style="border:1px solid #000;background:#d9ead3;">&nbsp;</td>
-          <td style="border:1px solid #000;">&nbsp;</td>
-        </tr>`).join('');
+      let rows = items.map((it, idx) => `<tr style="height:24px;text-align:center;"><td style="border:1px solid #000;font-weight:bold;">${idx + 1}</td><td style="border:1px solid #000;text-align:left;padding-left:6px;font-weight:bold;">${it.name}</td><td style="border:1px solid #000;">${it.unit || 'szt.'}</td><td style="border:1px solid #000;font-weight:bold;font-size:12px;">${it.dispatched !== undefined ? it.dispatched : ''}</td><td style="border:1px solid #000;">&nbsp;</td><td style="border:1px solid #000;background:#d9ead3;">&nbsp;</td><td style="border:1px solid #000;background:#d9ead3;font-weight:bold;">${data.isReturn && it.consumed !== undefined ? it.consumed : ''}</td><td style="border:1px solid #000;background:#d9ead3;font-weight:bold;">${data.isReturn && it.returned !== undefined ? it.returned : ''}</td><td style="border:1px solid #000;background:#d9ead3;">&nbsp;</td><td style="border:1px solid #000;">&nbsp;</td></tr>`).join('');
       for (let i = 0; i < Math.max(0, 15 - items.length); i++) {
         rows += `<tr style="height:24px;text-align:center;"><td style="border:1px solid #000;">${items.length + i + 1}</td><td style="border:1px solid #000;">&nbsp;</td><td style="border:1px solid #000;">&nbsp;</td><td style="border:1px solid #000;">&nbsp;</td><td style="border:1px solid #000;">&nbsp;</td><td style="border:1px solid #000;background:#d9ead3;">&nbsp;</td><td style="border:1px solid #000;background:#d9ead3;">&nbsp;</td><td style="border:1px solid #000;background:#d9ead3;">&nbsp;</td><td style="border:1px solid #000;background:#d9ead3;">&nbsp;</td><td style="border:1px solid #000;">&nbsp;</td></tr>`;
       }
-      return `
-        <div style="border:2px solid #000;width:100%;box-sizing:border-box;background:white;color:black;font-family:Arial,sans-serif;">
-          <table style="width:100%;border-collapse:collapse;text-align:center;font-size:11px;">
-            <tr><td rowspan="4" style="width:20%;border:2px solid #000;font-size:15px;font-weight:bold;padding:4px;">ROYAL CATERING</td><td colspan="2" style="background:#ffff00;font-weight:bold;border:1px solid #000;padding:4px;">DATA WYDANIA:</td><td rowspan="4" style="width:25%;background:#ffff00;font-size:13px;font-weight:900;border:2px solid #000;padding:5px;">${title}</td><td colspan="2" style="background:#ffff00;font-weight:bold;border:1px solid #000;padding:4px;">DATA ZWROTU:</td></tr>
-            <tr><td colspan="2" style="border:1px solid #000;font-weight:bold;padding:4px;">${data.dispatchDate || '-'}</td><td colspan="2" style="border:1px solid #000;padding:4px;font-weight:bold;">${data.returnDate || '-'}</td></tr>
-            <tr><td colspan="2" style="background:#ffff00;font-weight:bold;border:1px solid #000;padding:4px;">IMPREZA, #NUMER:</td><td colspan="2" style="border:1px solid #000;padding:4px;">&nbsp;</td></tr>
-            <tr><td colspan="2" style="border:1px solid #000;font-weight:bold;padding:4px;">${data.eventNumber || ''} ${data.eventName || ''}</td><td colspan="2" style="border:1px solid #000;padding:4px;">&nbsp;</td></tr>
-          </table>
-          <table style="width:100%;border-collapse:collapse;font-size:10px;">
-            <thead><tr style="background:#ffff00;font-weight:bold;text-align:center;"><th style="border:1px solid #000;width:4%;padding:4px;">Nr</th><th style="border:1px solid #000;width:36%;padding:4px;text-align:left;">NAZWA</th><th style="border:1px solid #000;width:6%;padding:4px;">Jedn.</th><th style="border:1px solid #000;width:8%;padding:4px;">Wydane</th><th style="border:1px solid #000;width:9%;padding:4px;">Podpis Magazyn</th><th style="border:1px solid #000;width:9%;background:#d9ead3;padding:4px;">Sprawdzenie</th><th style="border:1px solid #000;width:9%;background:#d9ead3;padding:4px;">Konsumpcja</th><th style="border:1px solid #000;width:7%;background:#d9ead3;padding:4px;">Zwrot</th><th style="border:1px solid #000;width:6%;background:#d9ead3;padding:4px;">Podpis</th><th style="border:1px solid #000;width:6%;padding:4px;">Odbiór</th></tr></thead>
-            <tbody>${rows}</tbody>
-          </table>
-        </div>`;
+      return `<div style="border:2px solid #000;width:100%;box-sizing:border-box;background:white;color:black;font-family:Arial,sans-serif;"><table style="width:100%;border-collapse:collapse;text-align:center;font-size:11px;"><tr><td rowspan="4" style="width:20%;border:2px solid #000;font-size:15px;font-weight:bold;padding:4px;">ROYAL CATERING</td><td colspan="2" style="background:#ffff00;font-weight:bold;border:1px solid #000;padding:4px;">DATA WYDANIA:</td><td rowspan="4" style="width:25%;background:#ffff00;font-size:13px;font-weight:900;border:2px solid #000;padding:5px;">${title}</td><td colspan="2" style="background:#ffff00;font-weight:bold;border:1px solid #000;padding:4px;">DATA ZWROTU:</td></tr><tr><td colspan="2" style="border:1px solid #000;font-weight:bold;padding:4px;">${data.dispatchDate || '-'}</td><td colspan="2" style="border:1px solid #000;padding:4px;font-weight:bold;">${data.returnDate || '-'}</td></tr><tr><td colspan="2" style="background:#ffff00;font-weight:bold;border:1px solid #000;padding:4px;">IMPREZA, #NUMER:</td><td colspan="2" style="border:1px solid #000;padding:4px;">&nbsp;</td></tr><tr><td colspan="2" style="border:1px solid #000;font-weight:bold;padding:4px;">${data.eventNumber || ''} ${data.eventName || ''}</td><td colspan="2" style="border:1px solid #000;padding:4px;">&nbsp;</td></tr></table><table style="width:100%;border-collapse:collapse;font-size:10px;"><thead><tr style="background:#ffff00;font-weight:bold;text-align:center;"><th style="border:1px solid #000;width:4%;padding:4px;">Nr</th><th style="border:1px solid #000;width:36%;padding:4px;text-align:left;">NAZWA</th><th style="border:1px solid #000;width:6%;padding:4px;">Jedn.</th><th style="border:1px solid #000;width:8%;padding:4px;">Wydane</th><th style="border:1px solid #000;width:9%;padding:4px;">Podpis Magazyn</th><th style="border:1px solid #000;width:9%;background:#d9ead3;padding:4px;">Sprawdzenie</th><th style="border:1px solid #000;width:9%;background:#d9ead3;padding:4px;">Konsumpcja</th><th style="border:1px solid #000;width:7%;background:#d9ead3;padding:4px;">Zwrot</th><th style="border:1px solid #000;width:6%;background:#d9ead3;padding:4px;">Podpis</th><th style="border:1px solid #000;width:6%;padding:4px;">Odbiór</th></tr></thead><tbody>${rows}</tbody></table></div>`;
     }
 
     function openSheetPreviewModal(sheetData) {
       currentPreviewSheetData = sheetData;
       const html = buildRoyalCateringSheetHTML(sheetData);
       el('sheetPreviewModalTitle').innerText = `${sheetData.isReturn ? 'Karta Rozliczenia' : 'Karta Wydania'}: ${sheetData.eventNumber} ${sheetData.eventName}`;
-      el('sheetPreviewContainer').innerHTML = html;
-      el('printableSheet').innerHTML = html;
+      el('sheetPreviewContainer').innerHTML = html; el('printableSheet').innerHTML = html;
       showModal('sheetPreviewModal');
     }
 
@@ -1355,15 +1244,13 @@ Zwróć czysty JSON:
       if (!currentPreviewSheetData) return;
       const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"></head><body>${buildRoyalCateringSheetHTML(currentPreviewSheetData)}</body></html>`;
       const blob = new Blob(['\uFEFF' + html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
+      const link = document.createElement('a'); link.href = URL.createObjectURL(blob);
       link.download = `${(currentPreviewSheetData.isReturn ? 'Rozliczenie_' : 'Karta_Wydania_') + currentPreviewSheetData.eventNumber + '_' + currentPreviewSheetData.eventName}.xls`.replace(/[^a-zA-Z0-9._-]/g, '_');
       link.click(); triggerScanFeedback();
     }
 
     function printEventSheet(eventId, type) {
-      const ev = events.find(e => String(e.id) === String(eventId));
-      if (!ev) return;
+      const ev = events.find(e => String(e.id) === String(eventId)); if (!ev) return;
       let items = []; try { items = typeof ev.items_json === 'string' ? JSON.parse(ev.items_json) : (ev.items_json || []); } catch (e) {}
       openSheetPreviewModal({ eventNumber: ev.event_number || '#EVENT', eventName: ev.event_name || '', dispatchDate: ev.dispatch_date || '-', returnDate: ev.return_date || '-', isReturn: (type === 'RETURN'), items });
     }
@@ -1393,56 +1280,28 @@ Zwróć czysty JSON:
       list.innerHTML = deposits.map(dep => {
         const ci = catLabels[dep.category] || catLabels['PALETA_INNE'];
         const val = ((Number(dep.qty) || 0) * (Number(dep.unit_price) || 0)).toFixed(2);
-        return `
-          <div class="bg-slate-800 border border-slate-700/90 rounded-2xl p-3.5 flex flex-col gap-2.5 shadow-sm">
-            <div class="flex justify-between items-start">
-              <div>
-                <span class="text-[9px] font-bold px-2 py-0.5 rounded border ${ci.c}">${ci.l}</span>
-                <h4 class="font-bold text-xs text-white mt-1.5">${dep.name}</h4>
-                <p class="text-[11px] text-slate-400 mt-0.5">Stawka: <strong class="text-cyan-400">${Number(dep.unit_price).toFixed(2)} zł</strong> • Razem: <strong class="text-white">${val} zł</strong></p>
-              </div>
-              <div class="bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-xl text-center min-w-[68px]">
-                <span class="text-[9px] text-slate-400 block">Stan</span>
-                <span class="text-base font-black text-cyan-400">${dep.qty}</span>
-              </div>
-            </div>
-            <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-700/70 text-xs">
-              <div class="flex items-center gap-1.5">
-                <button onclick="adjustDepositQty('${dep.id}', 1)" class="bg-slate-700 hover:bg-slate-600 text-emerald-400 font-bold px-2.5 py-1 rounded-lg">+1</button>
-                <button onclick="adjustDepositQty('${dep.id}', 10)" class="bg-slate-700 hover:bg-slate-600 text-emerald-400 font-bold px-2.5 py-1 rounded-lg">+10</button>
-                <button onclick="returnDepositToDriver('${dep.id}')" class="bg-amber-600/90 hover:bg-amber-500 text-slate-950 font-black px-2.5 py-1 rounded-lg flex items-center gap-1 shadow"><span>🚚</span> Oddaj kierowcy</button>
-              </div>
-              <div class="flex items-center gap-2">
-                <button onclick="openEditDepositModal('${dep.id}')" class="text-[11px] text-slate-300 hover:underline">✏️ Edytuj</button>
-                <button onclick="deleteDepositItem('${dep.id}')" class="text-[11px] text-rose-400 hover:underline">🗑️ Usuń</button>
-              </div>
-            </div>
-          </div>`;
+        return `<div class="bg-slate-800 border border-slate-700/90 rounded-2xl p-3.5 flex flex-col gap-2.5 shadow-sm"><div class="flex justify-between items-start"><div><span class="text-[9px] font-bold px-2 py-0.5 rounded border ${ci.c}">${ci.l}</span><h4 class="font-bold text-xs text-white mt-1.5">${dep.name}</h4><p class="text-[11px] text-slate-400 mt-0.5">Stawka: <strong class="text-cyan-400">${Number(dep.unit_price).toFixed(2)} zł</strong> • Razem: <strong class="text-white">${val} zł</strong></p></div><div class="bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-xl text-center min-w-[68px]"><span class="text-[9px] text-slate-400 block">Stan</span><span class="text-base font-black text-cyan-400">${dep.qty}</span></div></div><div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-700/70 text-xs"><div class="flex items-center gap-1.5"><button onclick="adjustDepositQty('${dep.id}', 1)" class="bg-slate-700 text-emerald-400 font-bold px-2.5 py-1 rounded-lg">+1</button><button onclick="adjustDepositQty('${dep.id}', 10)" class="bg-slate-700 text-emerald-400 font-bold px-2.5 py-1 rounded-lg">+10</button><button onclick="returnDepositToDriver('${dep.id}')" class="bg-amber-600/90 text-slate-950 font-black px-2.5 py-1 rounded-lg shadow">🚚 Oddaj kierowcy</button></div><div class="flex items-center gap-2"><button onclick="openEditDepositModal('${dep.id}')" class="text-[11px] text-slate-300 hover:underline">✏️ Edytuj</button><button onclick="deleteDepositItem('${dep.id}')" class="text-[11px] text-rose-400 hover:underline">🗑️ Usuń</button></div></div></div>`;
       }).join('');
     }
 
     async function adjustDepositQty(depId, delta) {
       const dep = deposits.find(d => String(d.id) === String(depId)); if (!dep) return;
-      dep.qty = Math.max(0, (Number(dep.qty) || 0) + delta);
-      safeSetLocal('magazyn_offline_deposits', deposits); renderDeposits(); triggerScanFeedback();
+      dep.qty = Math.max(0, (Number(dep.qty) || 0) + delta); safeSetLocal('magazyn_offline_deposits', deposits); renderDeposits();
       if (isCloudOnline) { try { await apiRequest(`/deposits?id=eq.${dep.id}`, 'PATCH', { qty: dep.qty, updated_at: new Date() }); } catch (e) {} }
     }
 
     async function returnDepositToDriver(depId) {
       const dep = deposits.find(d => String(d.id) === String(depId)); if (!dep) return;
-      const s = prompt(`Ile sztuk "${dep.name}" oddajesz kierowcy? (Stan: ${dep.qty})`, dep.qty);
-      if (s === null) return;
+      const s = prompt(`Ile sztuk "${dep.name}" oddajesz kierowcy? (Stan: ${dep.qty})`, dep.qty); if (s === null) return;
       const amt = parseInt(s, 10); if (isNaN(amt) || amt <= 0) return;
-      dep.qty = Math.max(0, (Number(dep.qty) || 0) - amt);
-      safeSetLocal('magazyn_offline_deposits', deposits); renderDeposits(); triggerScanFeedback();
+      dep.qty = Math.max(0, (Number(dep.qty) || 0) - amt); safeSetLocal('magazyn_offline_deposits', deposits); renderDeposits();
       if (isCloudOnline) { try { await apiRequest(`/deposits?id=eq.${dep.id}`, 'PATCH', { qty: dep.qty, updated_at: new Date() }); } catch (e) {} }
     }
 
     async function quickAddPresetDeposit(name, category, price) {
-      const s = prompt(`Ilość sztuk dla "${name}" (${price.toFixed(2)} zł/szt.):`, "12");
-      if (s === null) return;
+      const s = prompt(`Ilość sztuk dla "${name}" (${price.toFixed(2)} zł/szt.):`, "12"); if (s === null) return;
       const q = parseInt(s, 10); if (isNaN(q) || q <= 0) return;
-      await upsertDepositEntry(name, category, price, q); renderDeposits(); triggerScanFeedback();
+      await upsertDepositEntry(name, category, price, q); renderDeposits();
     }
 
     async function upsertDepositEntry(name, category, unitPrice, qtyDelta) {
@@ -1452,8 +1311,7 @@ Zwróć czysty JSON:
         if (isCloudOnline) { try { await apiRequest(`/deposits?id=eq.${ex.id}`, 'PATCH', { qty: ex.qty, updated_at: new Date() }); } catch (e) {} }
       } else {
         const nd = { id: Date.now().toString() + '_' + Math.floor(Math.random() * 1000), name, category: category || 'BUTELKA_SZKLO', unit_price: Number(unitPrice) || 0.50, qty: Math.max(0, qtyDelta), updated_at: new Date() };
-        deposits.unshift(nd);
-        if (isCloudOnline) { try { await apiRequest('/deposits', 'POST', nd); } catch (e) {} }
+        deposits.unshift(nd); if (isCloudOnline) { try { await apiRequest('/deposits', 'POST', nd); } catch (e) {} }
       }
       safeSetLocal('magazyn_offline_deposits', deposits);
     }
@@ -1477,7 +1335,7 @@ Zwróć czysty JSON:
         const nd = { id: Date.now().toString(), name, category, unit_price: price, qty, updated_at: new Date() };
         deposits.unshift(nd); if (isCloudOnline) { try { await apiRequest('/deposits', 'POST', nd); } catch (err) {} }
       }
-      safeSetLocal('magazyn_offline_deposits', deposits); renderDeposits(); hideModal('depositModal'); triggerScanFeedback();
+      safeSetLocal('magazyn_offline_deposits', deposits); renderDeposits(); hideModal('depositModal');
     }
     async function deleteDepositItem(id) {
       if (!confirm("Usunąć tę pozycję kaucyjną?")) return;
@@ -1485,7 +1343,7 @@ Zwróć czysty JSON:
       if (isCloudOnline) { try { await apiRequest(`/deposits?id=eq.${id}`, 'DELETE'); } catch (e) {} }
     }
 
-    // --- FAKTURY / DOSTAWY + EDYCJA FAKTUR ---
+    // --- FAKTURY / DOSTAWY + EDYCJA ---
     function renderDeliveries() {
       const list = el('deliveriesList'); if (!list) return;
       if (deliveries.length === 0) { list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak zarejestrowanych dostaw.</div>`; return; }
@@ -1495,129 +1353,44 @@ Zwróć czysty JSON:
         try { depItems = typeof d.deposits_json === 'string' ? JSON.parse(d.deposits_json) : (d.deposits_json || []); } catch (e) {}
         const photos = parseDeliveryImages(d.image_url);
         const rcv = d.receiver_name || 'Magazyn';
-        return `
-          <div class="bg-slate-800 border border-slate-700 rounded-2xl p-3.5 space-y-3 shadow-md">
-            <div class="flex justify-between items-start gap-2">
-              <div>
-                <div class="flex items-center gap-2 flex-wrap">
-                  <span class="text-[11px] font-mono font-bold text-indigo-400">DOKUMENT: ${d.doc_number || '-'}</span>
-                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700/60">👤 Przyjął: ${rcv}</span>
-                </div>
-                <h4 class="font-bold text-sm text-white mt-1">${d.supplier || 'Dostawca'}</h4>
-                <p class="text-[10px] text-slate-400 mt-0.5">Data: ${new Date(d.created_at || Date.now()).toLocaleDateString('pl-PL')}</p>
-              </div>
-              <div class="text-right">
-                <span class="text-xs font-black text-emerald-400 block">${d.total_gross ? d.total_gross + ' PLN' : ''}</span>
-                <div class="flex items-center justify-end gap-2 mt-1.5">
-                  <button type="button" onclick="openEditDeliveryModal('${d.id}')" class="text-[11px] bg-slate-700 hover:bg-slate-600 text-indigo-300 font-bold px-2.5 py-1 rounded-lg border border-slate-600">✏️ Edytuj fakturę</button>
-                  <button type="button" onclick="deleteDelivery('${d.id}')" class="text-[11px] text-rose-400 hover:underline px-1">🗑️ Usuń</button>
-                </div>
-              </div>
-            </div>
-            <div class="bg-slate-900/90 rounded-xl p-2.5 border border-slate-800 space-y-1">
-              <span class="text-[10px] text-emerald-400 uppercase font-bold block">📦 Przyjęte produkty (${items.length}):</span>
-              <div class="space-y-1 max-h-44 overflow-y-auto pr-1">
-                ${items.map(it => `<div class="flex justify-between items-center text-xs text-slate-200 border-b border-slate-800/60 pb-0.5"><span class="truncate pr-2 text-[11px]">• ${it.name}</span><div class="flex items-center gap-2 whitespace-nowrap">${it.netPrice ? `<span class="text-slate-400 text-[10px]">${Number(it.netPrice).toFixed(2)} zł</span>` : ''}<span class="font-bold text-emerald-400 text-[11px]">+${it.qty} ${it.unit || 'szt.'}</span></div></div>`).join('')}
-              </div>
-            </div>
-            ${depItems.length > 0 ? `<div class="bg-cyan-950/30 rounded-xl p-2.5 border border-cyan-900/50 space-y-1"><span class="text-[10px] text-cyan-300 uppercase font-bold block">♻️ Kaucje (${depItems.length}):</span>${depItems.map(dp => `<div class="flex justify-between text-[11px] text-cyan-100"><span>• ${dp.name} (${Number(dp.unitPrice).toFixed(2)} zł)</span><span class="font-bold text-cyan-400">${dp.netQty >= 0 ? '+' : ''}${dp.netQty} szt.</span></div>`).join('')}</div>` : ''}
-            ${photos.length > 0 ? `<div class="pt-1 border-t border-slate-700/80 space-y-1.5"><span class="text-[10px] text-slate-400 font-bold block">📎 Podpięte zdjęcia faktury (${photos.length}):</span><div class="flex gap-2.5 overflow-x-auto pb-1">${photos.map((src, idx) => `<div onclick="openMediaPreview('${d.id}', 'DELIVERY', ${idx})" class="relative cursor-pointer border border-indigo-500/50 rounded-xl overflow-hidden bg-black w-24 h-24 flex-shrink-0"><img src="${src}" class="w-full h-full object-cover"><span class="absolute bottom-0 inset-x-0 bg-black/80 text-[9px] text-center text-indigo-300 font-bold py-0.5">🔍 Strona ${idx + 1}</span></div>`).join('')}</div></div>` : ''}
-          </div>`;
+        return `<div class="bg-slate-800 border border-slate-700 rounded-2xl p-3.5 space-y-3 shadow-md"><div class="flex justify-between items-start gap-2"><div><div class="flex items-center gap-2 flex-wrap"><span class="text-[11px] font-mono font-bold text-indigo-400">DOKUMENT: ${d.doc_number || '-'}</span><span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700/60">👤 Przyjął: ${rcv}</span></div><h4 class="font-bold text-sm text-white mt-1">${d.supplier || 'Dostawca'}</h4><p class="text-[10px] text-slate-400 mt-0.5">Data: ${new Date(d.created_at || Date.now()).toLocaleDateString('pl-PL')}</p></div><div class="text-right"><span class="text-xs font-black text-emerald-400 block">${d.total_gross ? d.total_gross + ' PLN' : ''}</span><div class="flex items-center justify-end gap-2 mt-1.5"><button type="button" onclick="openEditDeliveryModal('${d.id}')" class="text-[11px] bg-slate-700 text-indigo-300 font-bold px-2.5 py-1 rounded-lg border border-slate-600">✏️ Edytuj</button><button type="button" onclick="deleteDelivery('${d.id}')" class="text-[11px] text-rose-400 hover:underline px-1">🗑️ Usuń</button></div></div></div><div class="bg-slate-900/90 rounded-xl p-2.5 border border-slate-800 space-y-1"><span class="text-[10px] text-emerald-400 uppercase font-bold block">📦 Przyjęte produkty (${items.length}):</span><div class="space-y-1 max-h-44 overflow-y-auto pr-1">${items.map(it => `<div class="flex justify-between items-center text-xs text-slate-200 border-b border-slate-800/60 pb-0.5"><span class="truncate pr-2 text-[11px]">• ${it.name}</span><div class="flex items-center gap-2 whitespace-nowrap">${it.netPrice ? `<span class="text-slate-400 text-[10px]">${Number(it.netPrice).toFixed(2)} zł</span>` : ''}<span class="font-bold text-emerald-400 text-[11px]">+${it.qty} ${it.unit || 'szt.'}</span></div></div>`).join('')}</div></div>${depItems.length > 0 ? `<div class="bg-cyan-950/30 rounded-xl p-2.5 border border-cyan-900/50 space-y-1"><span class="text-[10px] text-cyan-300 uppercase font-bold block">♻️ Kaucje (${depItems.length}):</span>${depItems.map(dp => `<div class="flex justify-between text-[11px] text-cyan-100"><span>• ${dp.name} (${Number(dp.unitPrice).toFixed(2)} zł)</span><span class="font-bold text-cyan-400">${dp.netQty >= 0 ? '+' : ''}${dp.netQty} szt.</span></div>`).join('')}</div>` : ''}${photos.length > 0 ? `<div class="pt-1 border-t border-slate-700/80 space-y-1.5"><span class="text-[10px] text-slate-400 font-bold block">📎 Załączone dokumenty (${photos.length}):</span><div class="flex gap-2.5 overflow-x-auto pb-1">${photos.map((src, idx) => src.startsWith('data:application/pdf') ? `<a href="${src}" download="Faktura_${d.doc_number}_${idx+1}.pdf" class="border border-indigo-500/50 rounded-xl bg-slate-900 w-24 h-20 flex flex-col items-center justify-center text-xs text-indigo-300 font-bold">📄 PDF ${idx+1}</a>` : `<div onclick="openMediaPreview('${d.id}', 'DELIVERY', ${idx})" class="relative cursor-pointer border border-indigo-500/50 rounded-xl overflow-hidden bg-black w-24 h-20 flex-shrink-0"><img src="${src}" class="w-full h-full object-cover"><span class="absolute bottom-0 inset-x-0 bg-black/80 text-[9px] text-center text-indigo-300 font-bold py-0.5">🔍 Strona ${idx + 1}</span></div>`).join('')}</div></div>` : ''}</div>`;
       }).join('');
     }
 
     function openEditDeliveryModal(deliveryId) {
-      const d = deliveries.find(x => String(x.id) === String(deliveryId));
-      if (!d) return;
-      el('editDelivId').value = d.id;
-      el('editDelivSupplier').value = d.supplier || '';
-      el('editDelivDocNum').value = d.doc_number || '';
-      el('editDelivReceiver').value = d.receiver_name || 'Bartek';
-      el('editDelivTotalGross').value = d.total_gross || '';
-
-      try {
-        editingDeliveryItems = JSON.parse(JSON.stringify(typeof d.items_json === 'string' ? JSON.parse(d.items_json) : (d.items_json || [])));
-      } catch (e) { editingDeliveryItems = []; }
+      const d = deliveries.find(x => String(x.id) === String(deliveryId)); if (!d) return;
+      el('editDelivId').value = d.id; el('editDelivSupplier').value = d.supplier || ''; el('editDelivDocNum').value = d.doc_number || ''; el('editDelivReceiver').value = d.receiver_name || 'Bartek'; el('editDelivTotalGross').value = d.total_gross || '';
+      try { editingDeliveryItems = JSON.parse(JSON.stringify(typeof d.items_json === 'string' ? JSON.parse(d.items_json) : (d.items_json || []))); } catch (e) { editingDeliveryItems = []; }
       editingDeliveryPhotos = [...parseDeliveryImages(d.image_url)];
-
-      renderEditDeliveryItems();
-      renderEditDeliveryPhotos();
-      showModal('editDeliveryModal');
+      renderEditDeliveryItems(); renderEditDeliveryPhotos(); showModal('editDeliveryModal');
     }
 
     function renderEditDeliveryItems() {
-      const container = el('editDelivItemsList');
-      if (editingDeliveryItems.length === 0) {
-        container.innerHTML = `<p class="text-[11px] text-slate-500 italic">Brak pozycji. Kliknij "+ Dodaj wiersz".</p>`;
-        return;
-      }
-      container.innerHTML = editingDeliveryItems.map((it, idx) => `
-        <div class="bg-slate-900 border border-slate-700 rounded-lg p-2 flex items-center gap-1.5">
-          <input type="text" value="${it.name || ''}" oninput="editingDeliveryItems[${idx}].name=this.value" placeholder="Nazwa produktu" class="bg-slate-800 border border-slate-700 rounded p-1 text-white font-bold flex-1 text-xs">
-          <input type="number" step="0.01" value="${Number(it.netPrice || 0).toFixed(2)}" oninput="editingDeliveryItems[${idx}].netPrice=parseFloat(this.value)||0" title="Cena netto" class="w-16 bg-slate-800 border border-slate-700 rounded p-1 text-center text-emerald-400 font-bold text-xs">
-          <input type="number" value="${it.qty || 1}" oninput="editingDeliveryItems[${idx}].qty=parseInt(this.value)||0" title="Ilość" class="w-14 bg-slate-800 border border-slate-700 rounded p-1 text-center text-amber-400 font-bold text-xs">
-          <input type="text" value="${it.unit || 'szt.'}" oninput="editingDeliveryItems[${idx}].unit=this.value" class="w-10 bg-slate-800 border border-slate-700 rounded p-1 text-center text-slate-300 text-[10px]">
-          <button type="button" onclick="editingDeliveryItems.splice(${idx},1);renderEditDeliveryItems()" class="text-rose-400 font-bold px-1.5">✕</button>
-        </div>
-      `).join('');
+      const c = el('editDelivItemsList');
+      if (editingDeliveryItems.length === 0) { c.innerHTML = `<p class="text-[11px] text-slate-500 italic">Brak pozycji.</p>`; return; }
+      c.innerHTML = editingDeliveryItems.map((it, idx) => `<div class="bg-slate-900 border border-slate-700 rounded-lg p-2 flex items-center gap-1.5"><input type="text" value="${it.name || ''}" oninput="editingDeliveryItems[${idx}].name=this.value" class="bg-slate-800 border border-slate-700 rounded p-1 text-white font-bold flex-1 text-xs"><input type="number" step="0.01" value="${Number(it.netPrice || 0).toFixed(2)}" oninput="editingDeliveryItems[${idx}].netPrice=parseFloat(this.value)||0" class="w-16 bg-slate-800 border border-slate-700 rounded p-1 text-center text-emerald-400 font-bold text-xs"><input type="number" value="${it.qty || 1}" oninput="editingDeliveryItems[${idx}].qty=parseInt(this.value)||0" class="w-14 bg-slate-800 border border-slate-700 rounded p-1 text-center text-amber-400 font-bold text-xs"><input type="text" value="${it.unit || 'szt.'}" oninput="editingDeliveryItems[${idx}].unit=this.value" class="w-10 bg-slate-800 border border-slate-700 rounded p-1 text-center text-slate-300 text-[10px]"><button type="button" onclick="editingDeliveryItems.splice(${idx},1);renderEditDeliveryItems()" class="text-rose-400 font-bold px-1.5">✕</button></div>`).join('');
     }
-
-    function addEditDeliveryItemRow() {
-      editingDeliveryItems.push({ name: '', netPrice: 0.00, qty: 1, unit: 'szt.' });
-      renderEditDeliveryItems();
-    }
+    function addEditDeliveryItemRow() { editingDeliveryItems.push({ name: '', netPrice: 0.00, qty: 1, unit: 'szt.' }); renderEditDeliveryItems(); }
 
     function renderEditDeliveryPhotos() {
-      const container = el('editDelivPhotosList');
-      if (editingDeliveryPhotos.length === 0) {
-        container.innerHTML = `<span class="text-[11px] text-slate-500 italic">Brak podpiętych zdjęć. Kliknij "+ Dodaj zdjęcie".</span>`;
-        return;
-      }
-      container.innerHTML = editingDeliveryPhotos.map((src, idx) => `
-        <div class="relative w-20 h-20 rounded-xl overflow-hidden border border-slate-600 bg-black flex-shrink-0">
-          <img src="${src}" class="w-full h-full object-cover">
-          <button type="button" onclick="editingDeliveryPhotos.splice(${idx},1);renderEditDeliveryPhotos()" class="absolute top-1 right-1 bg-rose-600 text-white rounded-full w-5 h-5 text-[10px] font-black flex items-center justify-center shadow">✕</button>
-        </div>
-      `).join('');
+      const c = el('editDelivPhotosList');
+      if (editingDeliveryPhotos.length === 0) { c.innerHTML = `<span class="text-[11px] text-slate-500 italic">Brak załączników.</span>`; return; }
+      c.innerHTML = editingDeliveryPhotos.map((src, idx) => `<div class="relative w-20 h-20 rounded-xl overflow-hidden border border-slate-600 bg-black flex-shrink-0 flex items-center justify-center">${src.startsWith('data:application/pdf') ? `<span class="text-xs font-bold text-indigo-300">📄 PDF</span>` : `<img src="${src}" class="w-full h-full object-cover">`}<button type="button" onclick="editingDeliveryPhotos.splice(${idx},1);renderEditDeliveryPhotos()" class="absolute top-1 right-1 bg-rose-600 text-white rounded-full w-5 h-5 text-[10px] font-black flex items-center justify-center">✕</button></div>`).join('');
     }
 
     async function handleEditDeliveryAddPhoto(event) {
       const file = event.target.files[0]; if (!file) return;
-      try {
-        const comp = await compressImage(file, 950, 0.7);
-        editingDeliveryPhotos.push(comp);
-        renderEditDeliveryPhotos();
-        triggerScanFeedback();
-      } catch (err) { alert(err.message); }
+      try { const prep = await prepareFileForGemini(file); editingDeliveryPhotos.push(prep.previewUrl); renderEditDeliveryPhotos(); } catch (err) { alert(err.message); }
       event.target.value = '';
     }
 
     async function saveEditedDelivery(e) {
       e.preventDefault();
-      const id = el('editDelivId').value;
-      const d = deliveries.find(x => String(x.id) === String(id));
-      if (!d) return;
-
-      d.supplier = el('editDelivSupplier').value.trim();
-      d.doc_number = el('editDelivDocNum').value.trim();
-      d.receiver_name = el('editDelivReceiver').value.trim() || 'Magazyn';
-      d.total_gross = el('editDelivTotalGross').value.trim();
-      d.items_json = editingDeliveryItems.filter(it => it.name && it.name.trim().length > 0);
-      d.image_url = JSON.stringify(editingDeliveryPhotos);
-
-      safeSetLocal('magazyn_offline_deliveries', deliveries);
-      renderDeliveries();
-      hideModal('editDeliveryModal');
-      triggerScanFeedback();
-
-      if (isCloudOnline) {
-        try {
-          await apiRequest(`/deliveries?id=eq.${d.id}`, 'PATCH', {
-            supplier: d.supplier, doc_number: d.doc_number, receiver_name: d.receiver_name,
-            total_gross: d.total_gross, items_json: d.items_json, image_url: d.image_url
-          });
-        } catch (err) {}
-      }
+      const d = deliveries.find(x => String(x.id) === String(el('editDelivId').value)); if (!d) return;
+      d.supplier = el('editDelivSupplier').value.trim(); d.doc_number = el('editDelivDocNum').value.trim(); d.receiver_name = el('editDelivReceiver').value.trim() || 'Magazyn'; d.total_gross = el('editDelivTotalGross').value.trim();
+      d.items_json = editingDeliveryItems.filter(it => it.name && it.name.trim().length > 0); d.image_url = JSON.stringify(editingDeliveryPhotos);
+      safeSetLocal('magazyn_offline_deliveries', deliveries); renderDeliveries(); hideModal('editDeliveryModal');
+      if (isCloudOnline) { try { await apiRequest(`/deliveries?id=eq.${d.id}`, 'PATCH', { supplier: d.supplier, doc_number: d.doc_number, receiver_name: d.receiver_name, total_gross: d.total_gross, items_json: d.items_json, image_url: d.image_url }); } catch (err) {} }
     }
 
     async function deleteDelivery(id) {
@@ -1626,32 +1399,41 @@ Zwróć czysty JSON:
       if (isCloudOnline) { try { await apiRequest(`/deliveries?id=eq.${id}`, 'DELETE'); } catch (e) {} }
     }
 
-    // --- EVENTY ---
+    // --- EVENTY (Z AUTOMATYCZNYM KOSZTEM ZUŻYCIA NETTO) ---
     function renderEvents() {
       const list = el('eventsList'); if (!list) return;
       const activeCount = events.filter(e => e.status === 'W trakcie').length;
       const badge = el('activeEventsBadge');
       if (badge) { if (activeCount > 0) { badge.innerText = activeCount; badge.classList.remove('hidden'); } else badge.classList.add('hidden'); }
-      if (events.length === 0) { list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak aktywnych wydań. Kliknij "➕ Utwórz Kartę Wydania".</div>`; return; }
+      if (events.length === 0) { list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak aktywnych wydań.</div>`; return; }
 
       list.innerHTML = events.map(ev => {
         const isPending = ev.status === 'W trakcie';
         let items = []; try { items = typeof ev.items_json === 'string' ? JSON.parse(ev.items_json) : (ev.items_json || []); } catch (e) {}
+        let eventConsumedCost = 0;
+        items.forEach(it => {
+          if (it.consumed) {
+            const match = findBestInventoryMatch(it.name);
+            if (match && match.price) eventConsumedCost += Number(it.consumed) * Number(match.price);
+          }
+        });
+
         return `
           <div class="bg-slate-800 border ${isPending ? 'border-amber-500/80' : 'border-slate-700/80'} rounded-2xl p-3.5 space-y-2.5 shadow-md">
             <div class="flex justify-between items-start gap-2 flex-wrap">
               <div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
                   <span class="font-mono text-xs font-black text-amber-400">${ev.event_number || '#EVENT'}</span>
                   <span class="text-[9px] font-bold px-2 py-0.5 rounded ${isPending ? 'bg-amber-950 text-amber-300 border border-amber-700/50' : 'bg-emerald-950 text-emerald-300 border border-emerald-700/50'}">${isPending ? '🚚 W TERENIE' : '✓ ROZLICZONA'}</span>
+                  ${eventConsumedCost > 0 ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-900 text-emerald-400 border border-slate-700">Koszt zużycia: ${eventConsumedCost.toFixed(2)} zł netto</span>` : ''}
                 </div>
                 <h4 class="font-bold text-sm text-white mt-1">${ev.event_name}</h4>
                 <p class="text-[10px] text-slate-400 mt-0.5">Wydano: ${ev.dispatch_date || '-'} ${ev.return_date ? `• Zwrot: ${ev.return_date}` : ''}</p>
               </div>
               <div class="flex flex-wrap items-center gap-1.5">
-                <button onclick="triggerReturnProductsUpload('${ev.id}')" class="bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-black text-xs px-3 py-1.5 rounded-xl shadow flex items-center gap-1"><span>🍾</span> Zdjęcie towaru (Zlicz zwrot)</button>
-                <button onclick="openManualEventReturn('${ev.id}')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold text-xs px-2.5 py-1.5 rounded-xl shadow">✍️ Ręcznie</button>
-                <button onclick="triggerReturnSheetUpload('${ev.id}')" class="bg-slate-700 hover:bg-slate-600 text-slate-300 font-bold text-xs px-2 py-1.5 rounded-xl shadow" title="Skanuj kartę">📋</button>
+                <button onclick="triggerReturnProductsUpload('${ev.id}')" class="bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-black text-xs px-3 py-1.5 rounded-xl shadow flex items-center gap-1"><span>🍾</span> Zdjęcie/Plik zwrotu towaru</button>
+                <button onclick="openManualEventReturn('${ev.id}')" class="bg-slate-700 text-slate-200 font-bold text-xs px-2.5 py-1.5 rounded-xl shadow">✍️ Ręcznie</button>
+                <button onclick="triggerReturnSheetUpload('${ev.id}')" class="bg-slate-700 text-slate-300 font-bold text-xs px-2 py-1.5 rounded-xl shadow" title="Wgraj kartę zwrotu">📋</button>
               </div>
             </div>
             <div class="bg-slate-900/90 rounded-xl p-2.5 text-xs space-y-1.5 border border-slate-800">
@@ -1662,8 +1444,8 @@ Zwróć czysty JSON:
             </div>
             <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-700/80 text-xs">
               <div class="flex gap-2">
-                <button type="button" onclick="printEventSheet('${ev.id}', 'DISPATCH')" class="bg-amber-500/90 hover:bg-amber-400 text-slate-950 font-black px-2.5 py-1.5 rounded-lg text-xs shadow">📥 Karta Wydania (.xls/Druk)</button>
-                <button type="button" onclick="printEventSheet('${ev.id}', 'RETURN')" class="bg-emerald-500/90 hover:bg-emerald-400 text-slate-950 font-black px-2.5 py-1.5 rounded-lg text-xs shadow">📥 Karta Rozliczenia</button>
+                <button type="button" onclick="printEventSheet('${ev.id}', 'DISPATCH')" class="bg-amber-500/90 text-slate-950 font-black px-2.5 py-1.5 rounded-lg text-xs shadow">📥 Karta Wydania (.xls/Druk)</button>
+                <button type="button" onclick="printEventSheet('${ev.id}', 'RETURN')" class="bg-emerald-500/90 text-slate-950 font-black px-2.5 py-1.5 rounded-lg text-xs shadow">📥 Karta Rozliczenia</button>
               </div>
               <div class="flex items-center gap-2">
                 ${ev.dispatch_image ? `<button type="button" onclick="openMediaPreview('${ev.id}', 'EVENT_DISPATCH', 0)" class="text-[11px] font-bold text-indigo-300 bg-slate-900 border border-indigo-700/50 px-2 py-1 rounded-lg">📸 Skan wydania</button>` : ''}
@@ -1677,17 +1459,16 @@ Zwróć czysty JSON:
 
     function openMediaPreview(itemId, type, photoIdx = 0) {
       let photos = [], title = 'Podgląd dokumentu';
-      if (type === 'DELIVERY') { const d = deliveries.find(x => String(x.id) === String(itemId)); photos = parseDeliveryImages(d?.image_url); title = `Faktura: ${d?.doc_number || ''} • Przyjął: ${d?.receiver_name || '-'}`; }
+      if (type === 'DELIVERY') { const d = deliveries.find(x => String(x.id) === String(itemId)); photos = parseDeliveryImages(d?.image_url); title = `Faktura: ${d?.doc_number || ''}`; }
       else if (type === 'EVENT_DISPATCH') { const ev = events.find(x => String(x.id) === String(itemId)); if (ev?.dispatch_image) photos = [ev.dispatch_image]; title = `Wydanie: ${ev?.event_number || ''}`; }
       else if (type === 'EVENT_RETURN') { const ev = events.find(x => String(x.id) === String(itemId)); if (ev?.return_image) photos = [ev.return_image]; title = `Zwrot: ${ev?.event_number || ''}`; }
-      if (photos.length === 0) return alert("Brak zapisanego zdjęcia.");
+      if (photos.length === 0) return alert("Brak zapisanego podglądu.");
       el('imagePreviewTitle').innerText = title; el('imagePreviewElement').src = photos[photoIdx] || photos[0];
       const tc = el('imagePreviewTabs');
-      if (photos.length > 1) { tc.classList.remove('hidden'); tc.innerHTML = photos.map((s, idx) => `<button onclick="el('imagePreviewElement').src='${s}'" class="bg-slate-800 hover:bg-indigo-600 text-xs text-white font-bold px-3 py-1 rounded-lg border border-slate-700">📄 Zdjęcie ${idx + 1}</button>`).join(''); }
+      if (photos.length > 1) { tc.classList.remove('hidden'); tc.innerHTML = photos.map((s, idx) => `<button onclick="el('imagePreviewElement').src='${s}'" class="bg-slate-800 text-xs text-white font-bold px-3 py-1 rounded-lg border border-slate-700">📄 Strona ${idx + 1}</button>`).join(''); }
       else { tc.classList.add('hidden'); tc.innerHTML = ''; }
       showModal('imagePreviewModal');
     }
-
     function closeImagePreviewModal() { hideModal('imagePreviewModal'); el('imagePreviewElement').src = ''; }
 
     function renderPriceAlerts() {
@@ -1715,19 +1496,20 @@ Zwróć czysty JSON:
       triggerScanFeedback();
     }
 
-    // --- ZLICZANIE ZE ZDJĘCIA WÓZKA / PÓŁKI ---
+    // --- ZLICZANIE ZE ZDJĘCIA LUB PLIKU (POJEDYNCZE I WIELE PRODUKTÓW) ---
     async function processShelfCountImage(event) {
-      const file = event.target.files[0]; if (!file) return;
+      const files = Array.from(event.target.files || []); if (files.length === 0) return;
       showModal('shelfCountModal'); el('shelfCountLoading').classList.remove('hidden'); el('shelfCountContent').classList.add('hidden'); el('shelfCountActions').classList.add('hidden');
       try {
-        const comp = await compressImage(file, 1024, 0.7);
+        const mediaParts = await Promise.all(files.map(f => prepareFileForGemini(f, 1024, 0.72)));
         const catNames = inventory.slice(0, 60).map(i => i.name).join(', ');
-        const parsed = await queryGeminiAPI(`Przeanalizuj zdjęcie towaru na wózku/półce. Policz widoczne produkty (butelki, napoje, jednorazówki). Zgrzewki przelicz na sztuki. Jeśli rozpoznasz produkt z naszej bazy (${catNames}), użyj jego dokładnej nazwy. Zwróć JSON: { "items": [ { "name": string, "qty": number, "unit": "szt." } ] }`, [comp.split(',')[1]]);
+        const parsed = await queryGeminiAPI(`Przeanalizuj zdjęcie/plik (może przedstawiać 1 pojedynczą butelkę/produkt lub wiele produktów na wózku/półce). Policz sztuki każdego towaru. Zgrzewki przelicz na sztuki. Jeśli rozpoznasz produkt z bazy (${catNames}), użyj jego dokładnej nazwy. Zwróć JSON: { "items": [ { "name": string, "qty": number, "unit": "szt.", "category": string } ] }`, mediaParts);
         currentShelfCountItems = parsed.items || [];
         el('shelfCountLoading').classList.add('hidden'); el('shelfCountContent').classList.remove('hidden'); el('shelfCountActions').classList.remove('hidden');
         el('shelfCountItemsList').innerHTML = currentShelfCountItems.map((it, idx) => {
           const m = findBestInventoryMatch(it.name);
-          return `<div class="bg-slate-900 border ${m ? 'border-emerald-600/70' : 'border-purple-600/70'} rounded-xl p-3 space-y-2"><span class="text-[9px] font-bold px-2 py-0.5 rounded ${m ? 'bg-emerald-950 text-emerald-300' : 'bg-purple-950 text-purple-300'}">${m ? `✓ W bazie: ${m.name} (Stan: ${m.qty} | Cena: ${Number(m.price).toFixed(2)} zł)` : '⭐ NOWY TOWAR'}</span><div class="flex justify-between gap-2"><input type="text" id="shelfCountName_${idx}" value="${m ? m.name : it.name}" class="bg-transparent font-bold text-xs text-white flex-1 border-b border-purple-500"><input type="number" id="shelfCountQty_${idx}" value="${it.qty || 1}" class="w-14 bg-slate-800 border border-slate-700 rounded p-1 text-center font-black text-purple-300 text-xs"><input type="text" id="shelfCountUnit_${idx}" value="${m ? m.unit : (it.unit || 'szt.')}" class="w-12 bg-slate-800 border border-slate-700 rounded p-1 text-center text-xs text-slate-300"></div><select id="shelfCountMatch_${idx}" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-[11px] text-white w-full"><option value="" ${!m ? 'selected' : ''}>⭐ DODAJ JAKO NOWY TOWAR</option>${inventory.map(inv => `<option value="${inv.id}" ${m && m.id === inv.id ? 'selected' : ''}>🔗 Przypisz: ${inv.name} (Stan: ${inv.qty} | ${Number(inv.price).toFixed(2)} zł)</option>`).join('')}</select></div>`;
+          const cat = m ? m.category : (classifyProductSmartLocal(it.name, it.category) || 'Napoje • Gazowane / Soft');
+          return `<div class="bg-slate-900 border ${m ? 'border-emerald-600/70' : 'border-purple-600/70'} rounded-xl p-3 space-y-2"><div class="flex justify-between items-center gap-2"><span class="text-[9px] font-bold px-2 py-0.5 rounded ${m ? 'bg-emerald-950 text-emerald-300' : 'bg-purple-950 text-purple-300'}">${m ? `✓ W bazie: ${m.name} (Stan: ${m.qty})` : '⭐ NOWY TOWAR'}</span><input type="text" id="shelfCountCat_${idx}" list="categoryPresetsList" value="${cat}" class="bg-slate-800 border border-slate-700 rounded px-2 py-0.5 text-[10px] text-cyan-300 font-bold w-44"></div><div class="flex justify-between gap-2"><input type="text" id="shelfCountName_${idx}" value="${m ? m.name : it.name}" class="bg-transparent font-bold text-xs text-white flex-1 border-b border-purple-500"><input type="number" id="shelfCountQty_${idx}" value="${it.qty || 1}" class="w-14 bg-slate-800 border border-slate-700 rounded p-1 text-center font-black text-purple-300 text-xs"><input type="text" id="shelfCountUnit_${idx}" value="${m ? m.unit : (it.unit || 'szt.')}" class="w-12 bg-slate-800 border border-slate-700 rounded p-1 text-center text-xs text-slate-300"></div><select id="shelfCountMatch_${idx}" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-[11px] text-white w-full"><option value="" ${!m ? 'selected' : ''}>⭐ DODAJ JAKO NOWY TOWAR</option>${inventory.map(inv => `<option value="${inv.id}" ${m && m.id === inv.id ? 'selected' : ''}>🔗 Przypisz: ${inv.name} (Stan: ${inv.qty})</option>`).join('')}</select></div>`;
         }).join('');
         triggerScanFeedback();
       } catch (err) { alert("Błąd: " + err.message); hideModal('shelfCountModal'); }
@@ -1736,83 +1518,82 @@ Zwróć czysty JSON:
 
     async function confirmAndApplyShelfCount(mode) {
       for (let i = 0; i < currentShelfCountItems.length; i++) {
-        const name = el(`shelfCountName_${i}`).value.trim(), cid = el(`shelfCountMatch_${i}`).value, q = parseInt(el(`shelfCountQty_${i}`).value) || 0, u = el(`shelfCountUnit_${i}`).value.trim() || 'szt.';
-        if (q <= 0) continue;
+        const name = el(`shelfCountName_${i}`).value.trim(), cid = el(`shelfCountMatch_${i}`).value, q = parseInt(el(`shelfCountQty_${i}`).value) || 0, u = el(`shelfCountUnit_${i}`).value.trim() || 'szt.', cat = el(`shelfCountCat_${i}`)?.value.trim() || 'Napoje';
+        if (q <= 0 || !name) continue;
+        learnProductRule(name, cat, u);
         let m = cid ? inventory.find(x => String(x.id) === String(cid)) : findBestInventoryMatch(name);
         if (m) {
-          const old = m.qty; m.qty = (mode === 'ADD') ? (m.qty + q) : q;
-          recordStockLog(m.id, m.name, mode === 'ADD' ? 'Zliczenie (+)' : 'Inwentaryzacja', mode === 'ADD' ? q : (q - old), 'Ze zdjęcia');
-          if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${m.id}`, 'PATCH', { qty: m.qty, updated_at: new Date() }); } catch (e) {} }
+          const old = m.qty; m.qty = (mode === 'ADD') ? (m.qty + q) : q; m.category = cat;
+          recordStockLog(m.id, m.name, mode === 'ADD' ? 'Zliczenie (+)' : 'Inwentaryzacja', mode === 'ADD' ? q : (q - old), 'Ze zdjęcia/pliku');
+          if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${m.id}`, 'PATCH', { qty: m.qty, category: m.category, updated_at: new Date() }); } catch (e) {} }
         } else {
-          const smartCat = classifyProductSmartLocal(name) || 'Napoje • Pozostałe';
-          const ni = normalizeItem({ id: Date.now().toString() + '_' + i, barcode: 'RC-' + Math.floor(100000 + Math.random() * 900000), name, category: smartCat, location: 'Magazyn Główny', qty: q, inField: 0, unit: u, minQty: 3, price: 0 });
-          inventory.unshift(ni); recordStockLog(ni.id, ni.name, 'Nowy z Vision', q, 'Ze zdjęcia');
+          const ni = normalizeItem({ id: Date.now().toString() + '_' + i, barcode: 'RC-' + Math.floor(100000 + Math.random() * 900000), name, category: cat, location: 'Magazyn Główny', qty: q, inField: 0, unit: u, minQty: 3, price: 0 });
+          inventory.unshift(ni); recordStockLog(ni.id, ni.name, 'Nowy ze zdjęcia', q, 'Ze zdjęcia/pliku');
           if (isCloudOnline) { try { await apiRequest('/inventory', 'POST', toDbItem(ni)); } catch (e) {} }
         }
       }
-      safeSetLocal('magazyn_offline_items', inventory); hideModal('shelfCountModal'); renderInventory(); runOnlineAIClassifier(false); alert("Zaktualizowano stany magazynowe!");
+      safeSetLocal('magazyn_offline_items', inventory); hideModal('shelfCountModal'); renderInventory(); alert("Zaktualizowano stany i zapamiętano kategorie!");
     }
 
-    // --- FAKTURY NA 1 LUB 2 ZDJĘCIA ---
+    // --- FAKTURY Z PLIKÓW PDF / ZDJĘĆ Z MESSENGERA / APARATU ---
     function openInvoiceUploadModal() { resetInvoicePhotos(); showModal('invoiceCaptureModal'); }
     function closeInvoiceUploadModal() { hideModal('invoiceCaptureModal'); resetInvoicePhotos(); }
     function resetInvoicePhotos() {
-      invoicePhoto1 = null; invoicePhoto2 = null;
+      invoiceFilePart1 = null; invoiceFilePart2 = null;
       el('invoiceSlot1Empty').classList.remove('hidden'); el('invoiceSlot1Preview').classList.add('hidden'); el('invoiceSlot1Done').classList.add('hidden');
       el('invoiceSlot2Empty').classList.remove('hidden'); el('invoiceSlot2Preview').classList.add('hidden'); el('invoiceSlot2Done').classList.add('hidden');
       el('btnProcessInvoice').disabled = true;
     }
 
     async function handleInvoicePhotoSelected(event, slot) {
-      const file = event.target.files[0]; if (!file) return;
+      const files = Array.from(event.target.files || []); if (files.length === 0) return;
       try {
-        const comp = await compressImage(file, 950, 0.7);
-        if (slot === 1) { invoicePhoto1 = comp; el('invoiceSlot1Empty').classList.add('hidden'); el('invoiceSlot1Preview').src = comp; el('invoiceSlot1Preview').classList.remove('hidden'); el('invoiceSlot1Done').classList.remove('hidden'); }
-        else { invoicePhoto2 = comp; el('invoiceSlot2Empty').classList.add('hidden'); el('invoiceSlot2Preview').src = comp; el('invoiceSlot2Preview').classList.remove('hidden'); el('invoiceSlot2Done').classList.remove('hidden'); }
-        el('btnProcessInvoice').disabled = !invoicePhoto1; triggerScanFeedback();
+        if (slot === 1 && files.length >= 2) {
+          invoiceFilePart1 = await prepareFileForGemini(files[0]);
+          invoiceFilePart2 = await prepareFileForGemini(files[1]);
+          el('invoiceSlot1Empty').classList.add('hidden'); el('invoiceSlot1Done').classList.remove('hidden');
+          el('invoiceSlot2Empty').classList.add('hidden'); el('invoiceSlot2Done').classList.remove('hidden');
+        } else {
+          const prep = await prepareFileForGemini(files[0]);
+          if (slot === 1) {
+            invoiceFilePart1 = prep; el('invoiceSlot1Empty').classList.add('hidden'); el('invoiceSlot1Done').classList.remove('hidden');
+            if (!prep.isPdf) { el('invoiceSlot1Preview').src = prep.previewUrl; el('invoiceSlot1Preview').classList.remove('hidden'); }
+          } else {
+            invoiceFilePart2 = prep; el('invoiceSlot2Empty').classList.add('hidden'); el('invoiceSlot2Done').classList.remove('hidden');
+            if (!prep.isPdf) { el('invoiceSlot2Preview').src = prep.previewUrl; el('invoiceSlot2Preview').classList.remove('hidden'); }
+          }
+        }
+        el('btnProcessInvoice').disabled = !invoiceFilePart1; triggerScanFeedback();
       } catch (err) { alert(err.message); }
       event.target.value = '';
     }
 
     async function startMultiInvoiceProcessing() {
-      if (!invoicePhoto1) return;
-      const savedUrls = [invoicePhoto1], b64 = [invoicePhoto1.split(',')[1]];
-      if (invoicePhoto2) { savedUrls.push(invoicePhoto2); b64.push(invoicePhoto2.split(',')[1]); }
+      if (!invoiceFilePart1) return;
+      const savedUrls = [invoiceFilePart1.previewUrl], mediaParts = [invoiceFilePart1];
+      if (invoiceFilePart2) { savedUrls.push(invoiceFilePart2.previewUrl); mediaParts.push(invoiceFilePart2); }
       closeInvoiceUploadModal(); showModal('aiModal');
       el('aiLoadingState').classList.remove('hidden'); el('aiItemsContainer').classList.add('hidden'); el('aiModalActions').classList.add('hidden');
 
       try {
-        const prompt = `Przeanalizuj 1 lub 2 zdjęcia tej samej faktury.
-WAŻNE PRZY 2 ZDJĘCIACH: Jeśli ten sam wiersz jest widoczny na końcu Zdjęcia 1 i na początku Zdjęcia 2, zwróć go TYLKO JEDEN RAZ!
-JEDNOLITA REGUŁA CENY: Jeśli pod pozycją widnieje dopisek "Cena zaokrąglona za sztu", ZAWSZE podaj tę wartość jako unitPriceHint. Jako rawPrice podaj cenę netto "Po rabacie bez opłat".
-KATEGORYZACJA: Dla każdego produktu określ od razu jego kategorię (category) na podstawie wiedzy o markach (np. Ballantine's -> "Alkohole • Whisky", Wyborowa -> "Alkohole • Wódka", Bacardi -> "Alkohole • Rum", Wino -> "Alkohole • Wino / Prosecco", Coca-Cola/Fanta/Sprite/Kinley -> "Napoje • Gazowane / Soft", Burn -> "Napoje • Energetyk", Cisowianka -> "Napoje • Woda", Lunchbox/Menubox/Kubki/Serwetki -> "Jednorazówki • Opakowania / Lunchbox").
-Wyodrębnij:
-1. docNumber, 2. supplier, 3. totalGross, 4. receiverName,
-5. items: { "code": string, "name": string, "category": string, "rawQty": number, "rawPrice": number, "unitPriceHint": number },
-6. deposits: { "name": string, "category": "PET_CAN_050"|"BUTELKA_SZKLO"|"SKRZYNKA"|"PALETA_INNE", "netQty": number, "unitPrice": number }. Zwróć JSON.`;
-        const parsed = await queryGeminiAPI(prompt, b64);
+        const prompt = `Przeanalizuj dokument faktury/WZ (zdjęcia lub PDF). Jeśli wiersz powtarza się na styku 2 stron, zwróć go TYLKO RAZ!
+REGUŁA CENY: Jeśli pod pozycją jest "Cena zaokrąglona za sztu", podaj ją jako unitPriceHint. Jako rawPrice podaj cenę netto "Po rabacie bez opłat".
+KATEGORYZACJA: Przypisz category (np. Cisowianka Perlage -> "Napoje • Woda", Ballantine's -> "Alkohole • Whisky", Wyborowa -> "Alkohole • Wódka", Coca-Cola/Fanta/Sprite -> "Napoje • Gazowane / Soft", Lunchbox/Kubki -> "Jednorazówki • Opakowania / Lunchbox").
+Wyodrębnij: 1. docNumber, 2. supplier, 3. totalGross, 4. receiverName,
+5. items: [{ "code": string, "name": string, "category": string, "rawQty": number, "rawPrice": number, "unitPriceHint": number }],
+6. deposits: [{ "name": string, "category": "PET_CAN_050"|"BUTELKA_SZKLO"|"SKRZYNKA"|"PALETA_INNE", "netQty": number, "unitPrice": number }]. Zwróć JSON.`;
+        const parsed = await queryGeminiAPI(prompt, mediaParts);
 
         const seenInScan = new Map();
         for (const it of (parsed.items || [])) {
           const mult = detectPackMultiplier(it.name), rq = Number(it.rawQty) || 1, rp = Number(it.rawPrice) || 0;
-          const unitP = mult > 1
-            ? (it.unitPriceHint ? Number(it.unitPriceHint) : parseFloat((rp / mult).toFixed(2)))
-            : (it.unitPriceHint ? Number(it.unitPriceHint) : rp);
+          const unitP = mult > 1 ? (it.unitPriceHint ? Number(it.unitPriceHint) : parseFloat((rp / mult).toFixed(2))) : (it.unitPriceHint ? Number(it.unitPriceHint) : rp);
           const finalQ = mult > 1 ? rq * mult : rq;
           const smartCat = classifyProductSmartLocal(it.name, it.category) || it.category || 'Napoje • Gazowane / Soft';
-
           const spec = extractProductSpecs(it.name);
           const dedupKey = (it.code ? String(it.code).trim() : '') + '|' + cleanCanonicalKey(it.name) + '|' + (spec.caps[0] || '');
           if (!seenInScan.has(dedupKey)) {
-            seenInScan.set(dedupKey, {
-              name: it.name.trim(),
-              category: smartCat,
-              qty: finalQ,
-              netPrice: unitP,
-              unit: smartCat.startsWith('Jednorazówki') ? 'op.' : 'szt.',
-              packMultiplier: mult,
-              rawQty: rq
-            });
+            seenInScan.set(dedupKey, { name: it.name.trim(), category: smartCat, qty: finalQ, netPrice: unitP, unit: smartCat.startsWith('Jednorazówki') ? 'op.' : 'szt.', packMultiplier: mult, rawQty: rq });
           }
         }
 
@@ -1830,7 +1611,7 @@ Wyodrębnij:
       el('aiSupplierInput').value = delivery.supplier; el('aiDocNumInput').value = delivery.docNumber; el('aiReceiverInput').value = delivery.receiverName; el('aiTotalGrossInput').value = delivery.totalGross;
       el('aiItemsList').innerHTML = (delivery.items || []).map((it, idx) => {
         const m = findBestInventoryMatch(it.name);
-        return `<div class="bg-slate-900 border ${m ? 'border-emerald-600/70' : 'border-indigo-600/70'} rounded-xl p-3 space-y-2"><div class="flex justify-between flex-wrap gap-1"><span id="aiBadge_${idx}" class="text-[9px] font-bold px-2 py-0.5 rounded ${m ? 'bg-emerald-950 text-emerald-300' : 'bg-indigo-950 text-indigo-300'}">${m ? `✓ W bazie: ${m.name}` : '⭐ NOWY PRODUKT'}</span><span class="text-[9px] font-bold bg-slate-800 text-cyan-300 px-2 py-0.5 rounded border border-slate-700">${it.category || 'Napoje'}</span></div><div class="flex justify-between gap-2"><input type="text" id="aiItemName_${idx}" value="${it.name}" class="bg-transparent font-bold text-xs text-white flex-1 border-b border-indigo-500"><input type="number" step="0.01" id="aiItemPrice_${idx}" value="${Number(it.netPrice || 0).toFixed(2)}" class="w-16 bg-slate-800 border border-slate-700 rounded p-1 text-center font-bold text-emerald-400 text-xs"><input type="number" id="aiItemQty_${idx}" value="${it.qty || 1}" class="w-14 bg-slate-800 border border-slate-700 rounded p-1 text-center font-bold text-emerald-400 text-xs"><input type="text" id="aiItemUnit_${idx}" value="${it.unit || 'szt.'}" class="w-11 bg-slate-800 border border-slate-700 rounded p-1 text-center text-xs text-slate-300"></div><input type="hidden" id="aiItemCat_${idx}" value="${it.category || 'Napoje'}"><select id="aiSelectMatch_${idx}" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-[11px] text-white w-full"><option value="" ${!m ? 'selected' : ''}>⭐ DODAJ JAKO NOWY PRODUKT DO BAZY</option>${inventory.map(inv => `<option value="${inv.id}" ${m && m.id === inv.id ? 'selected' : ''}>🔗 Scal i zsumuj z: ${inv.name} (Stan: ${inv.qty} | ${Number(inv.price).toFixed(2)} zł)</option>`).join('')}</select></div>`;
+        return `<div class="bg-slate-900 border ${m ? 'border-emerald-600/70' : 'border-indigo-600/70'} rounded-xl p-3 space-y-2"><div class="flex justify-between items-center flex-wrap gap-1"><span id="aiBadge_${idx}" class="text-[9px] font-bold px-2 py-0.5 rounded ${m ? 'bg-emerald-950 text-emerald-300' : 'bg-indigo-950 text-indigo-300'}">${m ? `✓ W bazie: ${m.name}` : '⭐ NOWY PRODUKT'}</span><input type="text" id="aiItemCat_${idx}" list="categoryPresetsList" value="${m ? m.category : (it.category || 'Napoje')}" class="bg-slate-800 border border-slate-700 rounded px-2 py-0.5 text-[10px] text-cyan-300 font-bold w-48"></div><div class="flex justify-between gap-2"><input type="text" id="aiItemName_${idx}" value="${it.name}" class="bg-transparent font-bold text-xs text-white flex-1 border-b border-indigo-500"><input type="number" step="0.01" id="aiItemPrice_${idx}" value="${Number(it.netPrice || 0).toFixed(2)}" class="w-16 bg-slate-800 border border-slate-700 rounded p-1 text-center font-bold text-emerald-400 text-xs"><input type="number" id="aiItemQty_${idx}" value="${it.qty || 1}" class="w-14 bg-slate-800 border border-slate-700 rounded p-1 text-center font-bold text-emerald-400 text-xs"><input type="text" id="aiItemUnit_${idx}" value="${it.unit || 'szt.'}" class="w-11 bg-slate-800 border border-slate-700 rounded p-1 text-center text-xs text-slate-300"></div><select id="aiSelectMatch_${idx}" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-[11px] text-white w-full"><option value="" ${!m ? 'selected' : ''}>⭐ DODAJ JAKO NOWY PRODUKT DO BAZY</option>${inventory.map(inv => `<option value="${inv.id}" ${m && m.id === inv.id ? 'selected' : ''}>🔗 Scal i zsumuj z: ${inv.name} (Stan: ${inv.qty} | ${Number(inv.price).toFixed(2)} zł)</option>`).join('')}</select></div>`;
       }).join('');
       renderExtractedDepositsInModal();
     }
@@ -1839,7 +1620,6 @@ Wyodrębnij:
       const deps = currentExtractedDelivery?.deposits || [];
       el('aiDepositsList').innerHTML = deps.length === 0 ? `<p class="text-[11px] text-slate-500 italic">Brak kaucji.</p>` : deps.map((dp, idx) => `<div class="bg-cyan-950/30 border border-cyan-800/60 rounded-xl p-2.5 space-y-1.5 text-xs"><div class="flex justify-between gap-2"><input type="text" id="aiDepName_${idx}" value="${dp.name || 'Kaucja'}" class="bg-transparent font-bold text-cyan-200 flex-1 border-b border-cyan-800"><select id="aiDepCat_${idx}" class="bg-slate-800 border border-slate-700 rounded px-1.5 py-1 text-[10px] text-cyan-300"><option value="PET_CAN_050" ${dp.category === 'PET_CAN_050' ? 'selected' : ''}>PET/CAN 0,50zł</option><option value="BUTELKA_SZKLO" ${dp.category === 'BUTELKA_SZKLO' ? 'selected' : ''}>Szkło 1,00zł</option><option value="SKRZYNKA" ${dp.category === 'SKRZYNKA' ? 'selected' : ''}>Skrzynka</option><option value="PALETA_INNE" ${dp.category === 'PALETA_INNE' ? 'selected' : ''}>Paleta/Inne</option></select></div><div class="flex justify-between items-center pt-1"><span class="text-[10px] text-slate-400">Ilość i stawka:</span><div class="flex items-center gap-1.5"><input type="number" id="aiDepQty_${idx}" value="${dp.netQty !== undefined ? dp.netQty : 1}" class="w-16 bg-slate-800 border border-slate-700 rounded p-1 text-center font-bold text-cyan-400 text-xs"><span>×</span><input type="number" step="0.01" id="aiDepPrice_${idx}" value="${Number(dp.unitPrice || 0.50).toFixed(2)}" class="w-16 bg-slate-800 border border-slate-700 rounded p-1 text-center font-bold text-white text-xs"><span>zł</span></div></div></div>`).join('');
     }
-
     function addManualDepositRowToModal() { if (!currentExtractedDelivery) return; currentExtractedDelivery.deposits.push({ name: 'Kaucja zwrotna', category: 'BUTELKA_SZKLO', netQty: 12, unitPrice: 1.00 }); renderExtractedDepositsInModal(); }
 
     async function confirmAndApplyDelivery(mode = 'FULL_DELIVERY') {
@@ -1848,22 +1628,19 @@ Wyodrębnij:
       const finalItems = [], finalDeps = [];
       const rcv = el('aiReceiverInput').value.trim() || 'Magazyn', docNum = el('aiDocNumInput').value.trim(), sup = el('aiSupplierInput').value.trim();
       localStorage.setItem('magazyn_default_receiver', rcv);
-
       let addedCatalogCount = 0, mergedCount = 0;
 
       for (let i = 0; i < (currentExtractedDelivery.items || []).length; i++) {
         const name = el(`aiItemName_${i}`)?.value.trim(), cid = el(`aiSelectMatch_${i}`)?.value, q = parseInt(el(`aiItemQty_${i}`)?.value) || 0, u = el(`aiItemUnit_${i}`)?.value.trim() || 'szt.', p = parseFloat(el(`aiItemPrice_${i}`)?.value) || 0;
-        const aiCat = el(`aiItemCat_${i}`)?.value || '';
+        const userCat = el(`aiItemCat_${i}`)?.value.trim() || '';
         if (!name) continue;
         if (!isCatalogOnly && q <= 0) continue;
 
+        const resolvedCat = classifyProductSmartLocal(name, userCat) || userCat || 'Napoje • Gazowane / Soft';
+        learnProductRule(name, resolvedCat, u);
         finalItems.push({ name, qty: q, unit: u, netPrice: p });
 
-        let targetItem = cid
-          ? inventory.find(x => String(x.id) === String(cid))
-          : findBestInventoryMatch(name);
-
-        const resolvedCat = classifyProductSmartLocal(name, aiCat) || aiCat || 'Napoje • Gazowane / Soft';
+        let targetItem = cid ? inventory.find(x => String(x.id) === String(cid)) : findBestInventoryMatch(name);
 
         if (targetItem) {
           mergedCount++;
@@ -1881,8 +1658,7 @@ Wyodrębnij:
         } else {
           const initialQty = isCatalogOnly ? 0 : q;
           const ni = normalizeItem({ id: Date.now().toString() + '_' + i, barcode: 'RC-' + Math.floor(100000 + Math.random() * 900000), name, category: resolvedCat, location: 'Magazyn Główny', qty: initialQty, inField: 0, unit: u, minQty: 3, price: p });
-          inventory.unshift(ni);
-          addedCatalogCount++;
+          inventory.unshift(ni); addedCatalogCount++;
           recordStockLog(ni.id, ni.name, isCatalogOnly ? 'Dodano do bazy (Stara faktura)' : 'Nowy z Faktury', initialQty, `${docNum}`);
           if (isCloudOnline) { try { await apiRequest('/inventory', 'POST', toDbItem(ni)); } catch (e) {} }
         }
@@ -1895,48 +1671,19 @@ Wyodrębnij:
           finalDeps.push({ name: dn, category: dc, netQty: dq, unitPrice: dp });
           await upsertDepositEntry(dn, dc, dp, dq);
         }
-
         const dEntry = { id: Date.now().toString(), doc_number: docNum, supplier: sup, receiver_name: rcv, total_gross: el('aiTotalGrossInput').value.trim(), items_json: finalItems, deposits_json: finalDeps, image_url: JSON.stringify(currentExtractedDelivery.photos || []), created_at: new Date() };
-        deliveries.unshift(dEntry);
-        safeSetLocal('magazyn_offline_deliveries', deliveries);
+        deliveries.unshift(dEntry); safeSetLocal('magazyn_offline_deliveries', deliveries);
         if (isCloudOnline) { try { await apiRequest('/deliveries', 'POST', dEntry); } catch (e) {} }
       }
 
-      safeSetLocal('magazyn_offline_items', inventory);
-      safeSetLocal('magazyn_offline_price_alerts', priceAlerts);
+      safeSetLocal('magazyn_offline_items', inventory); safeSetLocal('magazyn_offline_price_alerts', priceAlerts);
       closeAiModal(); renderInventory(); renderDeposits(); renderDeliveries(); renderPriceAlerts();
-      runOnlineAIClassifier(false);
-
-      if (isCatalogOnly) {
-        alert(`📚 Baza zaktualizowana! Dodano ${addedCatalogCount} nowych produktów ze stanem 0 szt., a dla ${mergedCount} istniejących zaktualizowano cenę i kategorię.`);
-      } else {
-        alert(`📥 Dostawa przyjęta! Nowych pozycji: ${addedCatalogCount}, zsumowanych z istniejącymi: ${mergedCount}.`);
-      }
+      alert(isCatalogOnly ? `📚 Baza zaktualizowana! Nowych: ${addedCatalogCount}, zaktualizowanych: ${mergedCount}.` : `📥 Dostawa przyjęta! Nowych: ${addedCatalogCount}, zsumowanych: ${mergedCount}.`);
     }
 
     function closeAiModal() { hideModal('aiModal'); currentExtractedDelivery = null; }
 
-    async function queryGeminiAPI(promptText, imagesBase64 = []) {
-      const models = ['gemini-3.5-flash-lite', 'gemini-1.5-flash', 'gemini-3.8-flash'];
-      const parts = [{ text: promptText }, ...imagesBase64.map(d => ({ inline_data: { mime_type: 'image/jpeg', data: d } }))];
-      let lastErr = '';
-      for (const m of models) {
-        try {
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${GEMINI_API_KEY}`, {
-            method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_API_KEY },
-            body: JSON.stringify({ contents: [{ parts }], generationConfig: { response_mime_type: "application/json", temperature: 0.1 } })
-          });
-          const j = await res.json();
-          if (j.error) { lastErr = j.error.message; continue; }
-          if (j.candidates?.[0]?.content) {
-            return JSON.parse(j.candidates[0].content.parts[0].text.replace(/```json/g, '').replace(/```/g, '').trim());
-          }
-        } catch (e) { lastErr = e.message; }
-      }
-      throw new Error(lastErr || "Serwery AI zajęte.");
-    }
-
-    // --- EVENTY: SKANOWANIE WYDAŃ I ZWROTÓW ---
+    // --- EVENTY: SKANOWANIE Z PLIKÓW / ZDJĘĆ ---
     function triggerReturnProductsUpload(id) { currentActiveReturnEventId = id; el('eventReturnProductsInput').click(); }
     function triggerReturnSheetUpload(id) { currentActiveReturnEventId = id; el('eventReturnSheetInput').click(); }
     function triggerAutoReturnSheetUpload() { currentActiveReturnEventId = null; el('eventAutoReturnSheetInput').click(); }
@@ -1945,9 +1692,9 @@ Wyodrębnij:
       const file = event.target.files[0]; if (!file) return;
       showModal('eventDispatchModal'); el('eventDispatchLoading').classList.remove('hidden'); el('eventDispatchContent').classList.add('hidden'); el('eventDispatchActions').classList.add('hidden');
       try {
-        const comp = await compressImage(file, 950, 0.7);
-        const parsed = await queryGeminiAPI(`Odczytaj kartę wydania: eventNumber, eventName, dispatchDate, items: [{name, dispatched, unit}]. Zwróć JSON.`, [comp.split(',')[1]]);
-        currentExtractedEventDispatch = { eventNumber: parsed.eventNumber || '#EVENT', eventName: parsed.eventName || 'Realizacja', dispatchDate: parsed.dispatchDate || new Date().toLocaleDateString('pl-PL'), items: parsed.items || [], image: comp };
+        const prep = await prepareFileForGemini(file);
+        const parsed = await queryGeminiAPI(`Odczytaj kartę wydania: eventNumber, eventName, dispatchDate, items: [{name, dispatched, unit}]. Zwróć JSON.`, [prep]);
+        currentExtractedEventDispatch = { eventNumber: parsed.eventNumber || '#EVENT', eventName: parsed.eventName || 'Realizacja', dispatchDate: parsed.dispatchDate || new Date().toLocaleDateString('pl-PL'), items: parsed.items || [], image: prep.previewUrl };
         el('eventDispatchLoading').classList.add('hidden'); el('eventDispatchContent').classList.remove('hidden'); el('eventDispatchActions').classList.remove('hidden');
         el('evDispNum').value = currentExtractedEventDispatch.eventNumber; el('evDispName').value = currentExtractedEventDispatch.eventName; el('evDispDate').value = currentExtractedEventDispatch.dispatchDate;
         el('evDispItemsList').innerHTML = currentExtractedEventDispatch.items.map((it, idx) => `<div class="bg-slate-900 border border-slate-700 rounded-xl p-2.5 flex justify-between text-xs"><input type="text" id="evDispItemName_${idx}" value="${it.name}" class="font-bold text-white bg-transparent flex-1 mr-2"><input type="number" id="evDispItemQty_${idx}" value="${it.dispatched}" class="w-14 bg-slate-800 border border-slate-700 rounded p-1 text-center font-black text-amber-400"><input type="text" id="evDispItemUnit_${idx}" value="${it.unit || 'szt.'}" class="w-12 bg-slate-800 border border-slate-700 rounded p-1 text-center text-slate-300 ml-1"></div>`).join('');
@@ -1974,13 +1721,13 @@ Wyodrębnij:
       const file = event.target.files[0]; if (!file) return;
       showModal('eventReturnModal'); el('evReturnLoading').classList.remove('hidden'); el('evReturnContent').classList.add('hidden'); el('evReturnActions').classList.add('hidden');
       try {
-        const comp = await compressImage(file, 950, 0.72);
-        const parsed = await queryGeminiAPI(`Odczytaj kartę zwrotu: eventNumber, eventName, dispatchDate, returnDate, items: [{name, unit, dispatched, consumed, returned}]. Zwróć JSON.`, [comp.split(',')[1]]);
-        lastParsedReturnData = parsed; lastReturnImage = comp;
+        const prep = await prepareFileForGemini(file);
+        const parsed = await queryGeminiAPI(`Odczytaj kartę zwrotu: eventNumber, eventName, dispatchDate, returnDate, items: [{name, unit, dispatched, consumed, returned}]. Zwróć JSON.`, [prep]);
+        lastParsedReturnData = parsed; lastReturnImage = prep.previewUrl;
         const matched = findBestEventMatch(parsed.eventNumber, parsed.eventName);
         currentActiveReturnEventId = matched ? matched.id : 'NEW_FROM_SHEET';
         populateReturnEventSelector(currentActiveReturnEventId, parsed);
-        displayEventReturnModal(matched, parsed, comp);
+        displayEventReturnModal(matched, parsed, prep.previewUrl);
       } catch (err) { alert(err.message); hideModal('eventReturnModal'); }
       event.target.value = '';
     }
@@ -1997,16 +1744,16 @@ Wyodrębnij:
     }
 
     async function processEventReturnProductsImage(event) {
-      const file = event.target.files[0]; if (!file || !currentActiveReturnEventId) return;
+      const files = Array.from(event.target.files || []); if (files.length === 0 || !currentActiveReturnEventId) return;
       const ev = events.find(e => String(e.id) === String(currentActiveReturnEventId)); if (!ev) return;
       showModal('eventReturnModal'); el('evReturnLoading').classList.remove('hidden'); el('evReturnContent').classList.add('hidden'); el('evReturnActions').classList.add('hidden');
       try {
-        const comp = await compressImage(file, 1024, 0.72);
+        const mediaParts = await Promise.all(files.map(f => prepareFileForGemini(f, 1024, 0.72)));
         let disp = []; try { disp = typeof ev.items_json === 'string' ? JSON.parse(ev.items_json) : (ev.items_json || []); } catch (e) {}
         const expStr = disp.map(it => `- "${it.name}" (Wydano: ${it.dispatched})`).join('\n');
-        const parsed = await queryGeminiAPI(`Policz ze zdjęcia produkty zwrócone z eventu. Lista wydania:\n${expStr}\nDla każdej pozycji podaj returned (zwrócono) oraz consumed = Wydano - returned. Zwróć JSON: { "returnDate": "${new Date().toLocaleDateString('pl-PL')}", "items": [{ "name": string, "returned": number, "consumed": number }] }`, [comp.split(',')[1]]);
-        lastParsedReturnData = parsed; lastReturnImage = comp;
-        populateReturnEventSelector(ev.id, parsed); displayEventReturnModal(ev, parsed, comp);
+        const parsed = await queryGeminiAPI(`Policz ze zdjęcia produkty zwrócone z eventu. Lista wydania:\n${expStr}\nDla każdej pozycji podaj returned (zwrócono) oraz consumed = Wydano - returned. Zwróć JSON: { "returnDate": "${new Date().toLocaleDateString('pl-PL')}", "items": [{ "name": string, "returned": number, "consumed": number }] }`, mediaParts);
+        lastParsedReturnData = parsed; lastReturnImage = mediaParts[0].previewUrl;
+        populateReturnEventSelector(ev.id, parsed); displayEventReturnModal(ev, parsed, lastReturnImage);
       } catch (err) { alert(err.message); hideModal('eventReturnModal'); }
       event.target.value = '';
     }
@@ -2016,10 +1763,10 @@ Wyodrębnij:
       const ev = events.find(e => String(e.id) === String(currentActiveReturnEventId)); if (!ev) return;
       showModal('eventReturnModal'); el('evReturnLoading').classList.remove('hidden'); el('evReturnContent').classList.add('hidden'); el('evReturnActions').classList.add('hidden');
       try {
-        const comp = await compressImage(file, 950, 0.7);
-        const parsed = await queryGeminiAPI(`Odczytaj tabelę zwrotu: returnDate, items: [{name, dispatched, consumed, returned}]. Zwróć JSON.`, [comp.split(',')[1]]);
-        lastParsedReturnData = parsed; lastReturnImage = comp;
-        populateReturnEventSelector(ev.id, parsed); displayEventReturnModal(ev, parsed, comp);
+        const prep = await prepareFileForGemini(file);
+        const parsed = await queryGeminiAPI(`Odczytaj tabelę zwrotu: returnDate, items: [{name, dispatched, consumed, returned}]. Zwróć JSON.`, [prep]);
+        lastParsedReturnData = parsed; lastReturnImage = prep.previewUrl;
+        populateReturnEventSelector(ev.id, parsed); displayEventReturnModal(ev, parsed, prep.previewUrl);
       } catch (err) { alert(err.message); hideModal('eventReturnModal'); }
       event.target.value = '';
     }
@@ -2078,7 +1825,7 @@ Wyodrębnij:
       if (isCloudOnline) { try { await apiRequest(`/events?id=eq.${id}`, 'DELETE'); } catch (e) {} }
     }
 
-    // --- KARTOTEKA, SKANER I EDYCJA ---
+    // --- KARTOTEKA, SKANER I EDYCJA (Z NAUKĄ REGUŁ) ---
     function handleItemContextMenu(e, id) {
       e.preventDefault(); contextMenuItemId = id; selectedItemId = id;
       const m = el('customContextMenu'); m.classList.remove('hidden');
@@ -2089,7 +1836,6 @@ Wyodrębnij:
     function contextActionOpenStock() { hideContextMenu(); if (contextMenuItemId) openActionModal(contextMenuItemId); }
     function contextActionPrintQR() { hideContextMenu(); if (contextMenuItemId) { selectedItemId = contextMenuItemId; openPrintLabelModal(); } }
     function contextActionDelete() { hideContextMenu(); if (contextMenuItemId) { selectedItemId = contextMenuItemId; deleteCurrentItem(); } }
-
     function handleItemCardClick(e, id) { if (isSelectMode) { toggleSelectItem(id, !selectedItemIds.has(id)); renderInventory(); } else openActionModal(id); }
 
     function toggleSelectMode() {
@@ -2120,6 +1866,8 @@ Wyodrębnij:
       e.preventDefault();
       const it = inventory.find(i => String(i.id) === String(el('editItemId').value)); if (!it) return;
       it.barcode = el('editItemBarcode').value.trim(); it.name = el('editItemName').value.trim(); it.price = parseFloat(el('editItemPrice').value) || 0; it.category = el('editItemCategory').value.trim() || 'Napoje'; it.location = el('editItemLocation').value.trim() || '-'; it.unit = el('editItemUnit').value; it.minQty = parseInt(el('editItemMinQty').value) || 0;
+      // Aplikacja uczy się przypisanej ręcznie kategorii!
+      learnProductRule(it.name, it.category, it.unit);
       safeSetLocal('magazyn_offline_items', inventory); renderInventory(); hideModal('editItemModal');
       if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${it.id}`, 'PATCH', toDbItem(it)); } catch (err) {} }
     }
@@ -2159,19 +1907,19 @@ Wyodrębnij:
       e.preventDefault();
       const name = el('newName').value.trim();
       const existing = findBestInventoryMatch(name);
-      const q = parseInt(el('newQty').value) || 0, p = parseFloat(el('newPrice').value) || 0;
-      const chosenCat = classifyProductSmartLocal(name, el('newCategory').value.trim()) || el('newCategory').value.trim() || 'Napoje';
+      const q = parseInt(el('newQty').value) || 0, p = parseFloat(el('newPrice').value) || 0, u = el('newUnit').value;
+      const chosenCat = el('newCategory').value.trim() || classifyProductSmartLocal(name) || 'Napoje';
+      learnProductRule(name, chosenCat, u);
       if (existing && cleanCanonicalKey(existing.name) === cleanCanonicalKey(name)) {
         existing.qty += q; if (p > 0) existing.price = p; existing.category = chosenCat;
         safeSetLocal('magazyn_offline_items', inventory); renderInventory(); hideModal('newItemModal');
         if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${existing.id}`, 'PATCH', toDbItem(existing)); } catch (err) {} }
         return;
       }
-      const ni = normalizeItem({ id: Date.now().toString(), barcode: el('newBarcode').value.trim(), name, price: p, category: chosenCat, location: el('newLocation').value.trim() || '-', qty: q, inField: 0, unit: el('newUnit').value, minQty: parseInt(el('newMinQty').value) || 0 });
+      const ni = normalizeItem({ id: Date.now().toString(), barcode: el('newBarcode').value.trim(), name, price: p, category: chosenCat, location: el('newLocation').value.trim() || '-', qty: q, inField: 0, unit: u, minQty: parseInt(el('newMinQty').value) || 0 });
       inventory.unshift(ni); recordStockLog(ni.id, ni.name, 'Utworzenie pozycji', ni.qty);
       safeSetLocal('magazyn_offline_items', inventory); renderInventory(); hideModal('newItemModal');
       if (isCloudOnline) { try { await apiRequest('/inventory', 'POST', toDbItem(ni)); } catch (e) {} }
-      runOnlineAIClassifier(false);
     }
 
     function handleScannedCode(code) {
@@ -2183,10 +1931,10 @@ Wyodrębnij:
 
     function toggleCamera() {
       const c = el('cameraContainer'), b = el('btnToggleCamera');
-      if (isCameraRunning && html5QrCode) { html5QrCode.stop().then(() => { c.classList.add('hidden'); b.innerText = 'Włącz kamerę'; isCameraRunning = false; }); return; }
+      if (isCameraRunning && html5QrCode) { html5QrCode.stop().then(() => { c.classList.add('hidden'); b.innerText = 'Skaner QR/EAN'; isCameraRunning = false; }); return; }
       c.classList.remove('hidden'); b.innerText = 'Zatrzymaj';
       html5QrCode = new Html5Qrcode("reader");
-      html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 140 } }, (d) => { html5QrCode.stop().then(() => { c.classList.add('hidden'); b.innerText = 'Włącz kamerę'; isCameraRunning = false; handleScannedCode(d); }); }, () => {}).then(() => { isCameraRunning = true; }).catch(() => { alert("Błąd kamery."); c.classList.add('hidden'); b.innerText = 'Włącz kamerę'; });
+      html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 140 } }, (d) => { html5QrCode.stop().then(() => { c.classList.add('hidden'); b.innerText = 'Skaner QR/EAN'; isCameraRunning = false; handleScannedCode(d); }); }, () => {}).then(() => { isCameraRunning = true; }).catch(() => { alert("Błąd kamery."); c.classList.add('hidden'); b.innerText = 'Skaner QR/EAN'; });
     }
 
     function openPrintLabelModal() {
@@ -2194,18 +1942,6 @@ Wyodrębnij:
       el('printItemName').innerText = it.name; el('printItemCategory').innerText = `${it.category} • ${it.location}`; el('printItemBarcode').innerText = it.barcode;
       el('printQRCode').innerHTML = ''; new QRCode(el('printQRCode'), { text: it.barcode, width: 140, height: 140 });
       document.body.classList.remove('print-mode-sheet'); document.body.classList.add('print-mode-qr'); window.print();
-    }
-
-    function compressImage(file, maxW = 950, q = 0.7) {
-      return new Promise((res, rej) => {
-        const img = new Image();
-        img.onload = () => {
-          let w = img.width, h = img.height; if (w > maxW) { h = Math.round((h * maxW) / w); w = maxW; }
-          const cv = document.createElement('canvas'); cv.width = w; cv.height = h; cv.getContext('2d').drawImage(img, 0, 0, w, h);
-          res(cv.toDataURL('image/jpeg', q));
-        };
-        img.onerror = rej; img.src = URL.createObjectURL(file);
-      });
     }
 
     function exportCSV() {
