@@ -31,19 +31,18 @@
     <div class="flex items-center space-x-2">
       <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-base shadow">M</div>
       <div>
-        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v4.0 SMART-FILES</span></h1>
+        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v4.1 GUARD & ROLLBACK</span></h1>
         <p id="syncStatus" class="text-[10px] text-amber-400 font-medium leading-none mt-0.5">Inicjalizacja...</p>
       </div>
     </div>
     <div class="flex items-center gap-1">
       <button onclick="runOnlineAIClassifier(true)" class="bg-purple-950/90 hover:bg-purple-900 text-purple-300 text-xs px-2 py-1.5 rounded-lg font-bold flex items-center gap-1 border border-purple-700/60" title="Sprawdź i naucz kategorie online"><span>🧠</span> Ucz AI</button>
-      <button onclick="mergeExistingDuplicates()" class="bg-indigo-950/90 hover:bg-indigo-900 text-indigo-300 text-xs px-2 py-1.5 rounded-lg font-bold flex items-center gap-1 border border-indigo-700/60" title="Scal duplikaty"><span>🔗</span> Scal</button>
+      <button onclick="mergeExistingDuplicates()" class="bg-indigo-950/90 hover:bg-indigo-900 text-indigo-300 text-xs px-2 py-1.5 rounded-lg font-bold flex items-center gap-1 border border-indigo-700/60" title="Scal zduplikowane pozycje pod jeden kod RC"><span>🔗</span> Scal</button>
       <button onclick="copyLowStockWhatsApp()" class="bg-slate-700/80 hover:bg-slate-700 text-amber-300 text-xs px-2 py-1.5 rounded-lg font-medium flex items-center gap-1 border border-slate-600/50"><span>📲</span> Braki</button>
       <button onclick="exportCSV()" class="bg-slate-700/80 hover:bg-slate-700 text-slate-200 text-xs px-2 py-1.5 rounded-lg font-medium flex items-center gap-1 border border-slate-600/50"><span>📊</span> CSV</button>
     </div>
   </header>
 
-  <!-- INPUTY OBSŁUGUJĄCE ZARÓWNO APARAT, GALERIĘ (MESSENGER/SMS), JAK I PLIKI PDF Z MAILA -->
   <input type="file" id="shelfCountInput" accept="image/*,application/pdf" multiple class="hidden" onchange="processShelfCountImage(event)">
   <input type="file" id="eventDispatchInput" accept="image/*,application/pdf" class="hidden" onchange="processEventDispatchImage(event)">
   <input type="file" id="eventReturnProductsInput" accept="image/*,application/pdf" multiple class="hidden" onchange="processEventReturnProductsImage(event)">
@@ -167,7 +166,7 @@
       <div class="flex items-center justify-between gap-2 flex-wrap">
         <div>
           <h3 class="font-bold text-xs text-white">Archiwum Przyjętych Dostaw i Faktur</h3>
-          <p class="text-[10px] text-slate-400">Obsługa zdjęć oraz plików PDF z maila / Messengera</p>
+          <p class="text-[10px] text-slate-400">Usunięcie faktury automatycznie cofa jej towary i kaucje ze stanu magazynu</p>
         </div>
         <button onclick="openInvoiceUploadModal()" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-xs px-3 py-2 rounded-xl shadow transition flex items-center gap-1"><span>⚡</span> Dodaj Fakturę (Zdjęcie / PDF)</button>
       </div>
@@ -339,14 +338,14 @@
     </div>
   </div>
 
-  <!-- MODAL AI OCR: WERYFIKACJA FAKTURY -->
+  <!-- MODAL AI OCR: WERYFIKACJA FAKTURY (Z BLOKADĄ DUPLIKATÓW FAKTUR) -->
   <div id="aiModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 shadow-2xl my-4 max-h-[94vh] flex flex-col">
       <div class="flex justify-between items-start border-b border-slate-700 pb-2">
         <div>
-          <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50">Smart OCR & Self-Learning</span>
+          <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/50">Smart OCR & Anti-Duplicate Guard</span>
           <h3 class="text-sm font-bold text-white mt-1">Weryfikacja Odczytanych Produktów</h3>
-          <p id="aiDocInfo" class="text-[11px] text-slate-400 mt-0.5">Każda zmiana kategorii uczy system na przyszłość</p>
+          <p id="aiDocInfo" class="text-[11px] text-slate-400 mt-0.5">Automatyczna kontrola duplikatów faktur i kodów produktów</p>
         </div>
         <button onclick="closeAiModal()" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
       </div>
@@ -355,10 +354,16 @@
         <p class="text-sm text-slate-200 font-medium">Model Gemini analizuje dokument...</p>
       </div>
       <div id="aiItemsContainer" class="hidden flex-1 overflow-y-auto space-y-3 pr-1">
+        <!-- OSTRZEŻENIE O DUPLIKACIE FAKTURY -->
+        <div id="aiDuplicateWarningBanner" class="hidden bg-rose-950/90 border-2 border-rose-500 p-3 rounded-xl text-xs text-rose-200 space-y-1 shadow-lg">
+          <div class="font-black text-rose-400 flex items-center gap-1.5 text-sm"><span>⛔</span> WYKRYTO DUPLIKAT FAKTURY!</div>
+          <p id="aiDuplicateWarningText" class="text-[11px] leading-relaxed">Ta faktura została już wcześniej wprowadzona do systemu. Ponowne dodanie dostawy zostało zablokowane, aby nie podwoić stanów magazynowych.</p>
+        </div>
+
         <div class="bg-slate-900 border border-indigo-800/60 p-3 rounded-xl space-y-2 text-xs">
           <div class="grid grid-cols-2 gap-2">
-            <div><span class="text-[10px] text-slate-400 block">Dostawca:</span><input type="text" id="aiSupplierInput" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-white"></div>
-            <div><span class="text-[10px] text-slate-400 block">Nr Dokumentu:</span><input type="text" id="aiDocNumInput" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-mono text-amber-400"></div>
+            <div><span class="text-[10px] text-slate-400 block">Dostawca:</span><input type="text" id="aiSupplierInput" oninput="checkInvoiceDuplicateLive()" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-white"></div>
+            <div><span class="text-[10px] text-slate-400 block">Nr Dokumentu / Faktury:</span><input type="text" id="aiDocNumInput" oninput="checkInvoiceDuplicateLive()" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-mono text-amber-400"></div>
           </div>
           <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800">
             <div><span class="text-[10px] text-emerald-300 font-bold block">👤 Kto przyjmował:</span><input type="text" id="aiReceiverInput" class="w-full bg-slate-800 border border-emerald-700/60 rounded p-1.5 font-bold text-emerald-400"></div>
@@ -381,7 +386,7 @@
         <button onclick="closeAiModal()" class="px-3 py-2 rounded-xl text-xs text-slate-400 hover:bg-slate-700">Anuluj</button>
         <div class="flex flex-wrap gap-2 justify-end">
           <button onclick="confirmAndApplyDelivery('CATALOG_ONLY')" class="bg-purple-600 hover:bg-purple-500 text-white font-black px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow"><span>📚</span> Stara faktura: Tylko baza (Stan 0)</button>
-          <button onclick="confirmAndApplyDelivery('FULL_DELIVERY')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow"><span>📥</span> Nowa dostawa (+Stan i Faktura)</button>
+          <button id="btnConfirmFullDelivery" onclick="confirmAndApplyDelivery('FULL_DELIVERY')" class="bg-emerald-500 hover:bg-emerald-400 disabled:bg-rose-950 disabled:text-rose-400 disabled:border disabled:border-rose-700 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow"><span>📥</span> Nowa dostawa (+Stan i Faktura)</button>
         </div>
       </div>
     </div>
@@ -460,12 +465,12 @@
     </div>
   </div>
 
-  <!-- MODAL: ZLICZANIE ZE ZDJĘCIA / PLIKU (POJEDYNCZE I WIELE PRODUKTÓW) -->
+  <!-- MODAL: ZLICZANIE ZE ZDJĘCIA / PLIKU -->
   <div id="shelfCountModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 shadow-2xl my-4 max-h-[94vh] flex flex-col">
       <div class="flex justify-between items-start border-b border-slate-700 pb-2">
         <div>
-          <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-700/50">Wizyjne Nabijanie Stanu (1 lub wiele produktów)</span>
+          <span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-700/50">Wizyjne Nabijanie Stanu</span>
           <h3 class="text-sm font-bold text-white mt-1">Rozpoznane Produkty ze Zdjęcia / Pliku</h3>
         </div>
         <button onclick="hideModal('shelfCountModal')" class="text-slate-400 hover:text-white text-xl font-bold p-1">✕</button>
@@ -672,7 +677,6 @@
     const showModal = (id) => { const m = el(id); if (m) { m.classList.remove('hidden'); m.classList.add('flex'); } };
     const hideModal = (id) => { const m = el(id); if (m) { m.classList.add('hidden'); m.classList.remove('flex'); } };
 
-    // --- PAMIĘĆ UCZĄCA SIĘ APLIKACJI (SELF-LEARNING MEMORY) ---
     let learnedRules = {};
     try { learnedRules = JSON.parse(localStorage.getItem('magazyn_learned_rules')) || {}; } catch (e) { learnedRules = {}; }
 
@@ -684,36 +688,26 @@
       try { localStorage.setItem('magazyn_learned_rules', JSON.stringify(learnedRules)); } catch (e) {}
     }
 
-    // --- NAPRAWIONY KLASYFIKATOR (WODA I CISOWIANKA PERLAGE PRZED ALKOHOLAMI + PAMIĘĆ AI) ---
     function classifyProductSmartLocal(name, currentCategory = '') {
       const n = (name || '').toLowerCase();
       const key = cleanCanonicalKey(name);
 
-      // 0. Sprawdź pamięć nauczoną przez użytkownika/AI
       if (learnedRules[key]?.category) {
-        // Wyjątek naprawczy: jeśli wcześniej błędnie zapisano Cisowiankę jako alkohol, ignorujemy stary błąd
         if (!(/cisowianka|perlage|woda/.test(n) && learnedRules[key].category.includes('Alkohole'))) {
           return learnedRules[key].category;
         }
       }
 
-      // 1. WODA (Sprawdzana PRZED alkoholami, aby "Perlage" nigdy nie wpadło w piwo "Perła"!)
       if (/cisowianka|perlage|kropla beskidu|żywiec zdrój|zywiec zdroj|nałęczowianka|naleczowianka|muszynianka|kinga pienińska|pellegrino|perrier|acqua panna|polaris|\bwoda\b/.test(n)) {
         return 'Napoje • Woda';
       }
-
-      // 2. KAWA, HERBATA, MLEKO, SYROPY (Sprawdzane przed alkoholami z uwagi na np. Mleko 3,2%)
       if (/kawa|filcori|lavazza|illy|pellini|segafredo|dallmayr|tchibo|ziarn|mielona|espresso|herbata|lipton|dilmah|richmont|earl grey|mleko|bez laktozy|sojowe|owsiane|śmietank|cukier|syrop|monin|rioba|purée|puree/.test(n)) {
         return 'Napoje • Kawa / Herbata / Dodatki';
       }
-
-      // 3. JEDNORAZÓWKI & SERWIS
       if (/lunchbox|menubox|menu box|lunch box|pojemnik|kubek|kubki|kubeczk|wieczk|dekiel|talerz|sztuć|widelc|widelec|nóż|noże|nożyk|łyżk|łyżecz|mieszadeł|serwet|słomk|rurk|tacka|taca|folia|strecz|alumin|pergamin|rękawicz|worek|worki|wykałacz|szpadk|obrus|świecz|podgrzewacz|paliwo|chafing|czyściw|ręcznik/.test(n)) {
         if (/lunchbox|menubox|menu box|lunch box|pojemnik|wieczk|dekiel|tacka/.test(n)) return 'Jednorazówki • Opakowania / Lunchbox';
         return 'Jednorazówki • Kubki / Sztućce / Serwetki';
       }
-
-      // 4. ALKOHOLE (Z bezpiecznymi granicami słów \b)
       if (/ballantine|grant'?s|johnnie walker|jack daniel|jim beam|jameson|chivas|tullamore|bushmills|glen|monkey shoulder|maker'?s mark|bourbon|whisky|whiskey|scotch/.test(n)) {
         return 'Alkohole • Whisky';
       }
@@ -735,8 +729,6 @@
       if (/\b(1[1-9]|[2-8][0-9])([.,]\d+)?\s*%/.test(n)) {
         return 'Alkohole • Mocne';
       }
-
-      // 5. NAPOJE GAZOWANE, SOKI, ENERGETYKI
       if (/burn|red bull|redbull|monster|tiger|black energy|rockstar|oshee|energetyk/.test(n)) {
         return 'Napoje • Energetyk';
       }
@@ -749,7 +741,6 @@
       if (/\bcan\b|\brgb\b|\bpet\b|\b0\.25\b|\b0\.33\b|\b0\.5\b|\b0\.85\b/.test(n)) {
         return 'Napoje • Gazowane / Soft';
       }
-
       const c = (currentCategory || '').toLowerCase();
       if (c.includes('alko') || c.includes('jednoraz') || (c.includes('napoje') && c.includes('•'))) return currentCategory;
       return null;
@@ -818,7 +809,42 @@
 
     function triggerScanFeedback() { if (navigator.vibrate) { try { navigator.vibrate(50); } catch (e) {} } }
 
-    // --- UNIWERSALNY CZYTNIK PLIKÓW (ZDJĘCIA Z MESSENGERA/GALERII ORAZ PLIKI PDF Z MAILA) ---
+    // --- SPRAWDZANIE DUPLIKATU FAKTURY PO NUMERZE DOKUMENTU ---
+    function normalizeInvoiceNumberKey(docNum) {
+      return String(docNum || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    }
+
+    function findExistingDuplicateDelivery(docNum) {
+      const key = normalizeInvoiceNumberKey(docNum);
+      if (key.length < 3) return null;
+      return deliveries.find(d => normalizeInvoiceNumberKey(d.doc_number) === key) || null;
+    }
+
+    function checkInvoiceDuplicateLive() {
+      const docNum = el('aiDocNumInput')?.value || '';
+      const existing = findExistingDuplicateDelivery(docNum);
+      const banner = el('aiDuplicateWarningBanner');
+      const txt = el('aiDuplicateWarningText');
+      const btnFull = el('btnConfirmFullDelivery');
+
+      if (existing) {
+        const dDate = new Date(existing.created_at || Date.now()).toLocaleDateString('pl-PL');
+        if (banner) banner.classList.remove('hidden');
+        if (txt) txt.innerText = `Faktura nr "${existing.doc_number}" (${existing.supplier || 'Dostawca'}) została już przyjęta dnia ${dDate}. Przycisk nowej dostawy został zablokowany, aby nie zdublować towarów i kodów w magazynie!`;
+        if (btnFull) {
+          btnFull.disabled = true;
+          btnFull.innerHTML = `<span>⛔</span> Zablokowano dubel faktury`;
+        }
+      } else {
+        if (banner) banner.classList.add('hidden');
+        if (btnFull) {
+          btnFull.disabled = false;
+          btnFull.innerHTML = `<span>📥</span> Nowa dostawa (+Stan i Faktura)`;
+        }
+      }
+      return existing;
+    }
+
     function prepareFileForGemini(file, maxW = 950, q = 0.72) {
       return new Promise((res, rej) => {
         if (!file) return rej(new Error("Brak pliku"));
@@ -866,7 +892,6 @@
       throw new Error(lastErr || "Serwery AI zajęte.");
     }
 
-    // --- AUTOMATYCZNA KATEGORYZACJA I NAUKA ONLINE ---
     async function runOnlineAIClassifier(forceAll = false) {
       if (inventory.length === 0) return;
       const changedLocally = [];
@@ -900,7 +925,6 @@ Zwróć JSON: { "classified": [ { "id": string, "category": string, "suggestedUn
         for (const entry of (result.classified || [])) {
           const item = inventory.find(x => String(x.id) === String(entry.id));
           if (item && entry.category) {
-            // Zabezpieczenie przed błędem AI na wodzie Perlage
             const finalCat = /cisowianka|perlage|woda/i.test(item.name) ? 'Napoje • Woda' : entry.category;
             learnProductRule(item.name, finalCat, item.unit);
             if (item.category !== finalCat) {
@@ -917,13 +941,23 @@ Zwróć JSON: { "classified": [ { "id": string, "category": string, "suggestedUn
       }
     }
 
+    // --- UJEDNOLICONY KLUCZ KANONICZNY (USUWA APOSTROFY, PRZECINKI, MNOŻNIKI ZGRZEWEK) ---
     function cleanCanonicalKey(text) {
-      return (text || '').toLowerCase().replace(/,/g, '.').replace(/\bx\s*\d+\b/gi, ' ').replace(/\bders\b|\bdrs\b|\bop\b|\bszt\b/gi, ' ').replace(/[^a-z0-9ąćęłńóśźż.]/g, ' ').replace(/\s+/g, ' ').trim();
+      return (text || '').toLowerCase()
+        .replace(/['’`"´]/g, '') // Ballantine's -> ballantines
+        .replace(/,/g, '.')
+        .replace(/\b(\d+)\s*ml\b/gi, (_, ml) => (parseInt(ml, 10) / 1000).toString()) // 700ml -> 0.7, 300ml -> 0.3
+        .replace(/\b(0\.\d+|1\.5|1)\s*l\b/gi, '$1') // 0.7L -> 0.7
+        .replace(/\bx\s*\d+\b/gi, ' ')
+        .replace(/\bders\b|\bdrs\b|\bop\b|\bszt\b|\bbut\b/gi, ' ')
+        .replace(/[^a-z0-9ąćęłńóśźż.%]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
     }
 
     function extractProductSpecs(text) {
-      const s = (text || '').toLowerCase().replace(/,/g, '.');
-      const caps = (s.match(/\b0\.\d+\b|\b1\.5\b|\b1\s*l\b|\b0\.\d+l\b|\b\d{3}\s*ml\b/g) || []).map(c => c.includes('ml') ? (parseInt(c) / 1000).toString() : c.replace('l', '').trim());
+      const s = cleanCanonicalKey(text);
+      const caps = (s.match(/\b0\.\d+\b|\b1\.5\b|\b1\b/g) || []);
       const pack = [];
       if (/\bpet\b/.test(s)) pack.push('pet');
       if (/\brgb\b|\bszk[łl]/.test(s)) pack.push('rgb');
@@ -941,22 +975,39 @@ Zwróć JSON: { "classified": [ { "id": string, "category": string, "suggestedUn
       return true;
     }
 
+    function wordsMatchFuzzy(wA, wB) {
+      if (wA === wB) return true;
+      if (wA.length >= 5 && wB.length >= 5 && wA.slice(0, 5) === wB.slice(0, 5)) return true;
+      return false;
+    }
+
     function findBestInventoryMatch(targetName) {
       if (!targetName) return null;
       const targetKey = cleanCanonicalKey(targetName);
       if (targetKey.length < 3) return null;
-      for (const item of inventory) { if (cleanCanonicalKey(item.name) === targetKey && areSpecsCompatible(targetName, item.name)) return item; }
-      const ignore = new Set(['can', 'rgb', 'pet', 'drs', 'szt', 'but', 'zgrz', '0.25', '0.3', '0.33', '0.5', '0.7', '0.85', '1.0', '300ml']);
-      const tWords = targetKey.split(' ').filter(w => w.length >= 3 && !ignore.has(w));
+
+      for (const item of inventory) {
+        if (cleanCanonicalKey(item.name) === targetKey && areSpecsCompatible(targetName, item.name)) return item;
+      }
+
+      const ignore = new Set(['can', 'rgb', 'pet', 'drs', 'szt', 'but', 'zgrz', '0.25', '0.3', '0.33', '0.5', '0.7', '0.85', '1.0']);
+      const tWords = targetKey.split(' ').filter(w => w.length >= 3 && !ignore.has(w) && !w.includes('%'));
       if (tWords.length === 0) return null;
+
       let best = null, bestR = 0;
       for (const item of inventory) {
         if (!areSpecsCompatible(targetName, item.name)) continue;
-        const iWords = cleanCanonicalKey(item.name).split(' ').filter(w => w.length >= 3 && !ignore.has(w));
+        const iWords = cleanCanonicalKey(item.name).split(' ').filter(w => w.length >= 3 && !ignore.has(w) && !w.includes('%'));
         if (iWords.length === 0) continue;
-        let ov = 0; for (const w of tWords) { if (iWords.includes(w)) ov++; }
+
+        let ov = 0;
+        for (const tw of tWords) {
+          if (iWords.some(iw => wordsMatchFuzzy(tw, iw))) ov++;
+        }
         const r = ov / Math.max(tWords.length, iWords.length);
-        if ((ov >= 2 && r >= 0.65) || (ov >= 1 && tWords.length === 1 && iWords.length === 1)) { if (r > bestR) { bestR = r; best = item; } }
+        if ((ov >= 2 && r >= 0.6) || (ov >= 1 && tWords.length === 1 && iWords.length === 1)) {
+          if (r > bestR) { bestR = r; best = item; }
+        }
       }
       return best;
     }
@@ -964,24 +1015,28 @@ Zwróć JSON: { "classified": [ { "id": string, "category": string, "suggestedUn
     async function mergeExistingDuplicates() {
       const groups = new Map(), toDel = []; let count = 0;
       for (const item of inventory) {
-        const sp = extractProductSpecs(item.name);
-        const key = cleanCanonicalKey(item.name) + '|' + (sp.caps[0] || '') + '|' + (sp.pack[0] || '') + '|' + sp.variants.join(',');
-        if (!groups.has(key)) groups.set(key, item);
-        else {
-          const m = groups.get(key);
-          m.qty = (Number(m.qty) || 0) + (Number(item.qty) || 0);
-          m.inField = (Number(m.inField) || 0) + (Number(item.inField) || 0);
-          if (Number(item.price) > 0) m.price = Number(item.price);
+        let matchedMaster = null;
+        for (const master of groups.values()) {
+          if (cleanCanonicalKey(master.name) === cleanCanonicalKey(item.name) && areSpecsCompatible(master.name, item.name)) {
+            matchedMaster = master; break;
+          }
+        }
+        if (!matchedMaster) {
+          groups.set(item.id, item);
+        } else {
+          matchedMaster.qty = (Number(matchedMaster.qty) || 0) + (Number(item.qty) || 0);
+          matchedMaster.inField = (Number(matchedMaster.inField) || 0) + (Number(item.inField) || 0);
+          if (Number(item.price) > 0) matchedMaster.price = Number(item.price);
           toDel.push(item.id); count++;
         }
       }
-      if (count === 0) return alert("Brak duplikatów! Wszystkie pozycje są unikalne.");
+      if (count === 0) return alert("Brak duplikatów! Wszystkie pozycje w magazynie są unikalne.");
       inventory = Array.from(groups.values()); safeSetLocal('magazyn_offline_items', inventory); renderInventory();
       if (isCloudOnline) {
         for (const id of toDel) { try { await apiRequest(`/inventory?id=eq.${id}`, 'DELETE'); } catch (e) {} }
         for (const m of inventory) { try { await apiRequest(`/inventory?id=eq.${m.id}`, 'PATCH', toDbItem(m)); } catch (e) {} }
       }
-      alert(`🔗 Scalono ${count} zduplikowanych pozycji!`);
+      alert(`🔗 Scalono ${count} zduplikowanych pozycji pod wspólny kod wewnętrzny!`);
     }
 
     function normalizeText(t) { return (t || '').toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()\[\]]/g, ' ').replace(/\s+/g, ' ').trim(); }
@@ -1309,11 +1364,14 @@ Zwróć JSON: { "classified": [ { "id": string, "category": string, "suggestedUn
       if (ex) {
         ex.qty = Math.max(0, (Number(ex.qty) || 0) + qtyDelta);
         if (isCloudOnline) { try { await apiRequest(`/deposits?id=eq.${ex.id}`, 'PATCH', { qty: ex.qty, updated_at: new Date() }); } catch (e) {} }
+        safeSetLocal('magazyn_offline_deposits', deposits);
+        return ex.id;
       } else {
         const nd = { id: Date.now().toString() + '_' + Math.floor(Math.random() * 1000), name, category: category || 'BUTELKA_SZKLO', unit_price: Number(unitPrice) || 0.50, qty: Math.max(0, qtyDelta), updated_at: new Date() };
         deposits.unshift(nd); if (isCloudOnline) { try { await apiRequest('/deposits', 'POST', nd); } catch (e) {} }
+        safeSetLocal('magazyn_offline_deposits', deposits);
+        return nd.id;
       }
-      safeSetLocal('magazyn_offline_deposits', deposits);
     }
 
     function openNewDepositModal() { el('depModalId').value = ''; el('depModalName').value = ''; el('depModalCategory').value = 'PET_CAN_050'; el('depModalPrice').value = '0.50'; el('depModalQty').value = '10'; showModal('depositModal'); }
@@ -1343,18 +1401,113 @@ Zwróć JSON: { "classified": [ { "id": string, "category": string, "suggestedUn
       if (isCloudOnline) { try { await apiRequest(`/deposits?id=eq.${id}`, 'DELETE'); } catch (e) {} }
     }
 
-    // --- FAKTURY / DOSTAWY + EDYCJA ---
+    // --- FAKTURY / DOSTAWY + AUTOMATYCZNE WYCOFANIE TOWARÓW PRZY USUWANIU FAKTURY ---
     function renderDeliveries() {
       const list = el('deliveriesList'); if (!list) return;
       if (deliveries.length === 0) { list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak zarejestrowanych dostaw.</div>`; return; }
+
+      // Wykrywanie ewentualnych wcześniejszych duplikatów na liście faktur
+      const docCounts = {};
+      deliveries.forEach(d => {
+        const k = normalizeInvoiceNumberKey(d.doc_number);
+        if (k) docCounts[k] = (docCounts[k] || 0) + 1;
+      });
+
       list.innerHTML = deliveries.map(d => {
         let items = [], depItems = [];
         try { items = typeof d.items_json === 'string' ? JSON.parse(d.items_json) : (d.items_json || []); } catch (e) {}
         try { depItems = typeof d.deposits_json === 'string' ? JSON.parse(d.deposits_json) : (d.deposits_json || []); } catch (e) {}
         const photos = parseDeliveryImages(d.image_url);
         const rcv = d.receiver_name || 'Magazyn';
-        return `<div class="bg-slate-800 border border-slate-700 rounded-2xl p-3.5 space-y-3 shadow-md"><div class="flex justify-between items-start gap-2"><div><div class="flex items-center gap-2 flex-wrap"><span class="text-[11px] font-mono font-bold text-indigo-400">DOKUMENT: ${d.doc_number || '-'}</span><span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700/60">👤 Przyjął: ${rcv}</span></div><h4 class="font-bold text-sm text-white mt-1">${d.supplier || 'Dostawca'}</h4><p class="text-[10px] text-slate-400 mt-0.5">Data: ${new Date(d.created_at || Date.now()).toLocaleDateString('pl-PL')}</p></div><div class="text-right"><span class="text-xs font-black text-emerald-400 block">${d.total_gross ? d.total_gross + ' PLN' : ''}</span><div class="flex items-center justify-end gap-2 mt-1.5"><button type="button" onclick="openEditDeliveryModal('${d.id}')" class="text-[11px] bg-slate-700 text-indigo-300 font-bold px-2.5 py-1 rounded-lg border border-slate-600">✏️ Edytuj</button><button type="button" onclick="deleteDelivery('${d.id}')" class="text-[11px] text-rose-400 hover:underline px-1">🗑️ Usuń</button></div></div></div><div class="bg-slate-900/90 rounded-xl p-2.5 border border-slate-800 space-y-1"><span class="text-[10px] text-emerald-400 uppercase font-bold block">📦 Przyjęte produkty (${items.length}):</span><div class="space-y-1 max-h-44 overflow-y-auto pr-1">${items.map(it => `<div class="flex justify-between items-center text-xs text-slate-200 border-b border-slate-800/60 pb-0.5"><span class="truncate pr-2 text-[11px]">• ${it.name}</span><div class="flex items-center gap-2 whitespace-nowrap">${it.netPrice ? `<span class="text-slate-400 text-[10px]">${Number(it.netPrice).toFixed(2)} zł</span>` : ''}<span class="font-bold text-emerald-400 text-[11px]">+${it.qty} ${it.unit || 'szt.'}</span></div></div>`).join('')}</div></div>${depItems.length > 0 ? `<div class="bg-cyan-950/30 rounded-xl p-2.5 border border-cyan-900/50 space-y-1"><span class="text-[10px] text-cyan-300 uppercase font-bold block">♻️ Kaucje (${depItems.length}):</span>${depItems.map(dp => `<div class="flex justify-between text-[11px] text-cyan-100"><span>• ${dp.name} (${Number(dp.unitPrice).toFixed(2)} zł)</span><span class="font-bold text-cyan-400">${dp.netQty >= 0 ? '+' : ''}${dp.netQty} szt.</span></div>`).join('')}</div>` : ''}${photos.length > 0 ? `<div class="pt-1 border-t border-slate-700/80 space-y-1.5"><span class="text-[10px] text-slate-400 font-bold block">📎 Załączone dokumenty (${photos.length}):</span><div class="flex gap-2.5 overflow-x-auto pb-1">${photos.map((src, idx) => src.startsWith('data:application/pdf') ? `<a href="${src}" download="Faktura_${d.doc_number}_${idx+1}.pdf" class="border border-indigo-500/50 rounded-xl bg-slate-900 w-24 h-20 flex flex-col items-center justify-center text-xs text-indigo-300 font-bold">📄 PDF ${idx+1}</a>` : `<div onclick="openMediaPreview('${d.id}', 'DELIVERY', ${idx})" class="relative cursor-pointer border border-indigo-500/50 rounded-xl overflow-hidden bg-black w-24 h-20 flex-shrink-0"><img src="${src}" class="w-full h-full object-cover"><span class="absolute bottom-0 inset-x-0 bg-black/80 text-[9px] text-center text-indigo-300 font-bold py-0.5">🔍 Strona ${idx + 1}</span></div>`).join('')}</div></div>` : ''}</div>`;
+        const isDup = docCounts[normalizeInvoiceNumberKey(d.doc_number)] > 1;
+
+        return `<div class="bg-slate-800 border ${isDup ? 'border-rose-500' : 'border-slate-700'} rounded-2xl p-3.5 space-y-3 shadow-md">
+          ${isDup ? `<div class="bg-rose-950/80 border border-rose-600/60 px-2.5 py-1 rounded-lg text-[10px] font-bold text-rose-300 flex items-center justify-between"><span>⚠️ WYKRYTO DUBEL TEGO NUMERU FAKTURY</span><span>Kliknij "🗑️ Usuń i cofnij towary" na jednym z wpisów</span></div>` : ''}
+          <div class="flex justify-between items-start gap-2"><div><div class="flex items-center gap-2 flex-wrap"><span class="text-[11px] font-mono font-bold text-indigo-400">DOKUMENT: ${d.doc_number || '-'}</span><span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700/60">👤 Przyjął: ${rcv}</span></div><h4 class="font-bold text-sm text-white mt-1">${d.supplier || 'Dostawca'}</h4><p class="text-[10px] text-slate-400 mt-0.5">Data: ${new Date(d.created_at || Date.now()).toLocaleDateString('pl-PL')}</p></div><div class="text-right"><span class="text-xs font-black text-emerald-400 block">${d.total_gross ? d.total_gross + ' PLN' : ''}</span><div class="flex items-center justify-end gap-1.5 mt-1.5"><button type="button" onclick="openEditDeliveryModal('${d.id}')" class="text-[11px] bg-slate-700 text-indigo-300 font-bold px-2 py-1 rounded-lg border border-slate-600">✏️ Edytuj</button><button type="button" onclick="deleteDelivery('${d.id}')" class="text-[11px] bg-rose-950/90 hover:bg-rose-900 text-rose-300 font-bold px-2.5 py-1 rounded-lg border border-rose-700/60">🗑️ Usuń i cofnij towary</button></div></div></div><div class="bg-slate-900/90 rounded-xl p-2.5 border border-slate-800 space-y-1"><span class="text-[10px] text-emerald-400 uppercase font-bold block">📦 Przyjęte produkty (${items.length}):</span><div class="space-y-1 max-h-44 overflow-y-auto pr-1">${items.map(it => `<div class="flex justify-between items-center text-xs text-slate-200 border-b border-slate-800/60 pb-0.5"><span class="truncate pr-2 text-[11px]">• ${it.name}</span><div class="flex items-center gap-2 whitespace-nowrap">${it.netPrice ? `<span class="text-slate-400 text-[10px]">${Number(it.netPrice).toFixed(2)} zł</span>` : ''}<span class="font-bold text-emerald-400 text-[11px]">+${it.qty} ${it.unit || 'szt.'}</span></div></div>`).join('')}</div></div>${depItems.length > 0 ? `<div class="bg-cyan-950/30 rounded-xl p-2.5 border border-cyan-900/50 space-y-1"><span class="text-[10px] text-cyan-300 uppercase font-bold block">♻️ Kaucje (${depItems.length}):</span>${depItems.map(dp => `<div class="flex justify-between text-[11px] text-cyan-100"><span>• ${dp.name} (${Number(dp.unitPrice).toFixed(2)} zł)</span><span class="font-bold text-cyan-400">${dp.netQty >= 0 ? '+' : ''}${dp.netQty} szt.</span></div>`).join('')}</div>` : ''}${photos.length > 0 ? `<div class="pt-1 border-t border-slate-700/80 space-y-1.5"><span class="text-[10px] text-slate-400 font-bold block">📎 Załączone dokumenty (${photos.length}):</span><div class="flex gap-2.5 overflow-x-auto pb-1">${photos.map((src, idx) => src.startsWith('data:application/pdf') ? `<a href="${src}" download="Faktura_${d.doc_number}_${idx+1}.pdf" class="border border-indigo-500/50 rounded-xl bg-slate-900 w-24 h-20 flex flex-col items-center justify-center text-xs text-indigo-300 font-bold">📄 PDF ${idx+1}</a>` : `<div onclick="openMediaPreview('${d.id}', 'DELIVERY', ${idx})" class="relative cursor-pointer border border-indigo-500/50 rounded-xl overflow-hidden bg-black w-24 h-20 flex-shrink-0"><img src="${src}" class="w-full h-full object-cover"><span class="absolute bottom-0 inset-x-0 bg-black/80 text-[9px] text-center text-indigo-300 font-bold py-0.5">🔍 Strona ${idx + 1}</span></div>`).join('')}</div></div>` : ''}</div>`;
       }).join('');
+    }
+
+    // --- INTELIGENTNE USUWANIE FAKTURY WRAZ Z WYCOFANIEM JEJ PRODUKTÓW I KAUCJI ZE STANU ---
+    async function deleteDelivery(id) {
+      const d = deliveries.find(x => String(x.id) === String(id));
+      if (!d) return;
+
+      let items = [], depItems = [];
+      try { items = typeof d.items_json === 'string' ? JSON.parse(d.items_json) : (d.items_json || []); } catch (e) {}
+      try { depItems = typeof d.deposits_json === 'string' ? JSON.parse(d.deposits_json) : (d.deposits_json || []); } catch (e) {}
+
+      if (!confirm(`Czy usunąć fakturę "${d.doc_number || '-'}" (${d.supplier || 'Dostawca'})?\n\n🔄 Wszystkie produkty (${items.length} poz.) oraz kaucje przyjęte z tej faktury zostaną automatycznie odjęte ze stanu magazynu (a zdublowane lub puste pozycje utworzone przez tę fakturę zostaną usunięte z listy).`)) return;
+
+      let removedCardsCount = 0, revertedStockCount = 0;
+
+      // 1. Wycofanie produktów z magazynu
+      for (const it of items) {
+        const qToRemove = Number(it.qty) || 0;
+        if (qToRemove <= 0 && !it.wasCreatedNew) continue;
+
+        let target = null;
+        if (it.appliedItemId) {
+          target = inventory.find(x => String(x.id) === String(it.appliedItemId));
+        }
+        if (!target) {
+          // Jeśli było kilka duplikatów o tej samej nazwie (pod różnymi kodami RC-XXXXXX), wybieramy ten o dokładnej ilości z faktury lub najnowszy
+          const candidates = inventory.filter(x => cleanCanonicalKey(x.name) === cleanCanonicalKey(it.name) && areSpecsCompatible(x.name, it.name));
+          target = candidates.find(x => Number(x.qty) === qToRemove) || candidates[0] || findBestInventoryMatch(it.name);
+        }
+
+        if (target) {
+          target.qty = Math.max(0, (Number(target.qty) || 0) - qToRemove);
+          revertedStockCount++;
+
+          // Sprawdzamy, czy istnieje inna pozycja o tej samej nazwie lub czy pozycja spadła do 0 i nie jest w terenie
+          const otherSameItems = inventory.filter(x => x.id !== target.id && cleanCanonicalKey(x.name) === cleanCanonicalKey(target.name) && areSpecsCompatible(x.name, target.name));
+          const shouldDeleteCard = (target.qty <= 0 && (Number(target.inField) || 0) <= 0) && (it.wasCreatedNew !== false || otherSameItems.length > 0);
+
+          if (shouldDeleteCard) {
+            const delItemId = target.id;
+            inventory = inventory.filter(x => x.id !== delItemId);
+            removedCardsCount++;
+            if (isCloudOnline) {
+              try { await apiRequest(`/inventory?id=eq.${delItemId}`, 'DELETE'); } catch (e) {}
+            }
+          } else {
+            recordStockLog(target.id, target.name, 'Usunięcie Faktury (-)', -qToRemove, `Cofnięto ${d.doc_number}`);
+            if (isCloudOnline) {
+              try { await apiRequest(`/inventory?id=eq.${target.id}`, 'PATCH', { qty: target.qty, updated_at: new Date() }); } catch (e) {}
+            }
+          }
+        }
+      }
+
+      // 2. Wycofanie kaucji z tej faktury
+      for (const dp of depItems) {
+        const dq = Number(dp.netQty) || 0;
+        if (dq === 0) continue;
+        const matchDep = (dp.appliedDepositId ? deposits.find(x => String(x.id) === String(dp.appliedDepositId)) : null) || findBestDepositMatch(dp.name, dp.unitPrice);
+        if (matchDep) {
+          matchDep.qty = Math.max(0, (Number(matchDep.qty) || 0) - dq);
+          if (matchDep.qty <= 0) {
+            const delDepId = matchDep.id;
+            deposits = deposits.filter(x => x.id !== delDepId);
+            if (isCloudOnline) { try { await apiRequest(`/deposits?id=eq.${delDepId}`, 'DELETE'); } catch (e) {} }
+          } else if (isCloudOnline) {
+            try { await apiRequest(`/deposits?id=eq.${matchDep.id}`, 'PATCH', { qty: matchDep.qty, updated_at: new Date() }); } catch (e) {}
+          }
+        }
+      }
+
+      // 3. Usunięcie samej faktury
+      deliveries = deliveries.filter(x => String(x.id) !== String(id));
+      safeSetLocal('magazyn_offline_items', inventory);
+      safeSetLocal('magazyn_offline_deposits', deposits);
+      safeSetLocal('magazyn_offline_deliveries', deliveries);
+      renderInventory(); renderDeposits(); renderDeliveries(); triggerScanFeedback();
+
+      if (isCloudOnline) {
+        try { await apiRequest(`/deliveries?id=eq.${id}`, 'DELETE'); } catch (e) {}
+      }
+
+      alert(`🗑️ Faktura "${d.doc_number}" została usunięta!\nCofnięto stany dla ${revertedStockCount} pozycji (usunięto całkowicie ${removedCardsCount} kart produktów utworzonych przez tę fakturę).`);
     }
 
     function openEditDeliveryModal(deliveryId) {
@@ -1393,13 +1546,7 @@ Zwróć JSON: { "classified": [ { "id": string, "category": string, "suggestedUn
       if (isCloudOnline) { try { await apiRequest(`/deliveries?id=eq.${d.id}`, 'PATCH', { supplier: d.supplier, doc_number: d.doc_number, receiver_name: d.receiver_name, total_gross: d.total_gross, items_json: d.items_json, image_url: d.image_url }); } catch (err) {} }
     }
 
-    async function deleteDelivery(id) {
-      if (!confirm("Usunąć tę fakturę z rejestru?")) return;
-      deliveries = deliveries.filter(x => String(x.id) !== String(id)); safeSetLocal('magazyn_offline_deliveries', deliveries); renderDeliveries();
-      if (isCloudOnline) { try { await apiRequest(`/deliveries?id=eq.${id}`, 'DELETE'); } catch (e) {} }
-    }
-
-    // --- EVENTY (Z AUTOMATYCZNYM KOSZTEM ZUŻYCIA NETTO) ---
+    // --- EVENTY ---
     function renderEvents() {
       const list = el('eventsList'); if (!list) return;
       const activeCount = events.filter(e => e.status === 'W trakcie').length;
@@ -1496,20 +1643,20 @@ Zwróć JSON: { "classified": [ { "id": string, "category": string, "suggestedUn
       triggerScanFeedback();
     }
 
-    // --- ZLICZANIE ZE ZDJĘCIA LUB PLIKU (POJEDYNCZE I WIELE PRODUKTÓW) ---
+    // --- ZLICZANIE ZE ZDJĘCIA LUB PLIKU ---
     async function processShelfCountImage(event) {
       const files = Array.from(event.target.files || []); if (files.length === 0) return;
       showModal('shelfCountModal'); el('shelfCountLoading').classList.remove('hidden'); el('shelfCountContent').classList.add('hidden'); el('shelfCountActions').classList.add('hidden');
       try {
         const mediaParts = await Promise.all(files.map(f => prepareFileForGemini(f, 1024, 0.72)));
         const catNames = inventory.slice(0, 60).map(i => i.name).join(', ');
-        const parsed = await queryGeminiAPI(`Przeanalizuj zdjęcie/plik (może przedstawiać 1 pojedynczą butelkę/produkt lub wiele produktów na wózku/półce). Policz sztuki każdego towaru. Zgrzewki przelicz na sztuki. Jeśli rozpoznasz produkt z bazy (${catNames}), użyj jego dokładnej nazwy. Zwróć JSON: { "items": [ { "name": string, "qty": number, "unit": "szt.", "category": string } ] }`, mediaParts);
+        const parsed = await queryGeminiAPI(`Przeanalizuj zdjęcie/plik (1 lub wiele produktów). Policz sztuki każdego towaru. Zgrzewki przelicz na sztuki. Jeśli rozpoznasz produkt z bazy (${catNames}), użyj jego dokładnej nazwy. Zwróć JSON: { "items": [ { "name": string, "qty": number, "unit": "szt.", "category": string } ] }`, mediaParts);
         currentShelfCountItems = parsed.items || [];
         el('shelfCountLoading').classList.add('hidden'); el('shelfCountContent').classList.remove('hidden'); el('shelfCountActions').classList.remove('hidden');
         el('shelfCountItemsList').innerHTML = currentShelfCountItems.map((it, idx) => {
           const m = findBestInventoryMatch(it.name);
           const cat = m ? m.category : (classifyProductSmartLocal(it.name, it.category) || 'Napoje • Gazowane / Soft');
-          return `<div class="bg-slate-900 border ${m ? 'border-emerald-600/70' : 'border-purple-600/70'} rounded-xl p-3 space-y-2"><div class="flex justify-between items-center gap-2"><span class="text-[9px] font-bold px-2 py-0.5 rounded ${m ? 'bg-emerald-950 text-emerald-300' : 'bg-purple-950 text-purple-300'}">${m ? `✓ W bazie: ${m.name} (Stan: ${m.qty})` : '⭐ NOWY TOWAR'}</span><input type="text" id="shelfCountCat_${idx}" list="categoryPresetsList" value="${cat}" class="bg-slate-800 border border-slate-700 rounded px-2 py-0.5 text-[10px] text-cyan-300 font-bold w-44"></div><div class="flex justify-between gap-2"><input type="text" id="shelfCountName_${idx}" value="${m ? m.name : it.name}" class="bg-transparent font-bold text-xs text-white flex-1 border-b border-purple-500"><input type="number" id="shelfCountQty_${idx}" value="${it.qty || 1}" class="w-14 bg-slate-800 border border-slate-700 rounded p-1 text-center font-black text-purple-300 text-xs"><input type="text" id="shelfCountUnit_${idx}" value="${m ? m.unit : (it.unit || 'szt.')}" class="w-12 bg-slate-800 border border-slate-700 rounded p-1 text-center text-xs text-slate-300"></div><select id="shelfCountMatch_${idx}" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-[11px] text-white w-full"><option value="" ${!m ? 'selected' : ''}>⭐ DODAJ JAKO NOWY TOWAR</option>${inventory.map(inv => `<option value="${inv.id}" ${m && m.id === inv.id ? 'selected' : ''}>🔗 Przypisz: ${inv.name} (Stan: ${inv.qty})</option>`).join('')}</select></div>`;
+          return `<div class="bg-slate-900 border ${m ? 'border-emerald-600/70' : 'border-purple-600/70'} rounded-xl p-3 space-y-2"><div class="flex justify-between items-center gap-2"><span class="text-[9px] font-bold px-2 py-0.5 rounded ${m ? 'bg-emerald-950 text-emerald-300' : 'bg-purple-950 text-purple-300'}">${m ? `✓ W bazie (#${m.barcode}): ${m.name}` : '⭐ NOWY TOWAR'}</span><input type="text" id="shelfCountCat_${idx}" list="categoryPresetsList" value="${cat}" class="bg-slate-800 border border-slate-700 rounded px-2 py-0.5 text-[10px] text-cyan-300 font-bold w-44"></div><div class="flex justify-between gap-2"><input type="text" id="shelfCountName_${idx}" value="${m ? m.name : it.name}" class="bg-transparent font-bold text-xs text-white flex-1 border-b border-purple-500"><input type="number" id="shelfCountQty_${idx}" value="${it.qty || 1}" class="w-14 bg-slate-800 border border-slate-700 rounded p-1 text-center font-black text-purple-300 text-xs"><input type="text" id="shelfCountUnit_${idx}" value="${m ? m.unit : (it.unit || 'szt.')}" class="w-12 bg-slate-800 border border-slate-700 rounded p-1 text-center text-xs text-slate-300"></div><select id="shelfCountMatch_${idx}" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-[11px] text-white w-full"><option value="" ${!m ? 'selected' : ''}>⭐ DODAJ JAKO NOWY TOWAR</option>${inventory.map(inv => `<option value="${inv.id}" ${m && m.id === inv.id ? 'selected' : ''}>🔗 Przypisz (#${inv.barcode}): ${inv.name} (Stan: ${inv.qty})</option>`).join('')}</select></div>`;
         }).join('');
         triggerScanFeedback();
       } catch (err) { alert("Błąd: " + err.message); hideModal('shelfCountModal'); }
@@ -1535,7 +1682,7 @@ Zwróć JSON: { "classified": [ { "id": string, "category": string, "suggestedUn
       safeSetLocal('magazyn_offline_items', inventory); hideModal('shelfCountModal'); renderInventory(); alert("Zaktualizowano stany i zapamiętano kategorie!");
     }
 
-    // --- FAKTURY Z PLIKÓW PDF / ZDJĘĆ Z MESSENGERA / APARATU ---
+    // --- FAKTURY Z PLIKÓW PDF / ZDJĘĆ Z BLOKADĄ DUPLIKATÓW ---
     function openInvoiceUploadModal() { resetInvoicePhotos(); showModal('invoiceCaptureModal'); }
     function closeInvoiceUploadModal() { hideModal('invoiceCaptureModal'); resetInvoicePhotos(); }
     function resetInvoicePhotos() {
@@ -1579,7 +1726,7 @@ Zwróć JSON: { "classified": [ { "id": string, "category": string, "suggestedUn
         const prompt = `Przeanalizuj dokument faktury/WZ (zdjęcia lub PDF). Jeśli wiersz powtarza się na styku 2 stron, zwróć go TYLKO RAZ!
 REGUŁA CENY: Jeśli pod pozycją jest "Cena zaokrąglona za sztu", podaj ją jako unitPriceHint. Jako rawPrice podaj cenę netto "Po rabacie bez opłat".
 KATEGORYZACJA: Przypisz category (np. Cisowianka Perlage -> "Napoje • Woda", Ballantine's -> "Alkohole • Whisky", Wyborowa -> "Alkohole • Wódka", Coca-Cola/Fanta/Sprite -> "Napoje • Gazowane / Soft", Lunchbox/Kubki -> "Jednorazówki • Opakowania / Lunchbox").
-Wyodrębnij: 1. docNumber, 2. supplier, 3. totalGross, 4. receiverName,
+Wyodrębnij: 1. docNumber (dokładny numer faktury/dokumentu), 2. supplier, 3. totalGross, 4. receiverName,
 5. items: [{ "code": string, "name": string, "category": string, "rawQty": number, "rawPrice": number, "unitPriceHint": number }],
 6. deposits: [{ "name": string, "category": "PET_CAN_050"|"BUTELKA_SZKLO"|"SKRZYNKA"|"PALETA_INNE", "netQty": number, "unitPrice": number }]. Zwróć JSON.`;
         const parsed = await queryGeminiAPI(prompt, mediaParts);
@@ -1609,9 +1756,13 @@ Wyodrębnij: 1. docNumber, 2. supplier, 3. totalGross, 4. receiverName,
     function displayExtractedItems(delivery) {
       el('aiLoadingState').classList.add('hidden'); el('aiItemsContainer').classList.remove('hidden'); el('aiModalActions').classList.remove('hidden');
       el('aiSupplierInput').value = delivery.supplier; el('aiDocNumInput').value = delivery.docNumber; el('aiReceiverInput').value = delivery.receiverName; el('aiTotalGrossInput').value = delivery.totalGross;
+
+      // Sprawdzamy, czy faktura o tym numerze już istnieje w bazie!
+      checkInvoiceDuplicateLive();
+
       el('aiItemsList').innerHTML = (delivery.items || []).map((it, idx) => {
         const m = findBestInventoryMatch(it.name);
-        return `<div class="bg-slate-900 border ${m ? 'border-emerald-600/70' : 'border-indigo-600/70'} rounded-xl p-3 space-y-2"><div class="flex justify-between items-center flex-wrap gap-1"><span id="aiBadge_${idx}" class="text-[9px] font-bold px-2 py-0.5 rounded ${m ? 'bg-emerald-950 text-emerald-300' : 'bg-indigo-950 text-indigo-300'}">${m ? `✓ W bazie: ${m.name}` : '⭐ NOWY PRODUKT'}</span><input type="text" id="aiItemCat_${idx}" list="categoryPresetsList" value="${m ? m.category : (it.category || 'Napoje')}" class="bg-slate-800 border border-slate-700 rounded px-2 py-0.5 text-[10px] text-cyan-300 font-bold w-48"></div><div class="flex justify-between gap-2"><input type="text" id="aiItemName_${idx}" value="${it.name}" class="bg-transparent font-bold text-xs text-white flex-1 border-b border-indigo-500"><input type="number" step="0.01" id="aiItemPrice_${idx}" value="${Number(it.netPrice || 0).toFixed(2)}" class="w-16 bg-slate-800 border border-slate-700 rounded p-1 text-center font-bold text-emerald-400 text-xs"><input type="number" id="aiItemQty_${idx}" value="${it.qty || 1}" class="w-14 bg-slate-800 border border-slate-700 rounded p-1 text-center font-bold text-emerald-400 text-xs"><input type="text" id="aiItemUnit_${idx}" value="${it.unit || 'szt.'}" class="w-11 bg-slate-800 border border-slate-700 rounded p-1 text-center text-xs text-slate-300"></div><select id="aiSelectMatch_${idx}" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-[11px] text-white w-full"><option value="" ${!m ? 'selected' : ''}>⭐ DODAJ JAKO NOWY PRODUKT DO BAZY</option>${inventory.map(inv => `<option value="${inv.id}" ${m && m.id === inv.id ? 'selected' : ''}>🔗 Scal i zsumuj z: ${inv.name} (Stan: ${inv.qty} | ${Number(inv.price).toFixed(2)} zł)</option>`).join('')}</select></div>`;
+        return `<div class="bg-slate-900 border ${m ? 'border-emerald-600/70' : 'border-indigo-600/70'} rounded-xl p-3 space-y-2"><div class="flex justify-between items-center flex-wrap gap-1"><span id="aiBadge_${idx}" class="text-[9px] font-bold px-2 py-0.5 rounded ${m ? 'bg-emerald-950 text-emerald-300' : 'bg-indigo-950 text-indigo-300'}">${m ? `✓ W bazie (#${m.barcode}): ${m.name}` : '⭐ NOWY PRODUKT'}</span><input type="text" id="aiItemCat_${idx}" list="categoryPresetsList" value="${m ? m.category : (it.category || 'Napoje')}" class="bg-slate-800 border border-slate-700 rounded px-2 py-0.5 text-[10px] text-cyan-300 font-bold w-48"></div><div class="flex justify-between gap-2"><input type="text" id="aiItemName_${idx}" value="${m ? m.name : it.name}" class="bg-transparent font-bold text-xs text-white flex-1 border-b border-indigo-500"><input type="number" step="0.01" id="aiItemPrice_${idx}" value="${Number(it.netPrice || 0).toFixed(2)}" class="w-16 bg-slate-800 border border-slate-700 rounded p-1 text-center font-bold text-emerald-400 text-xs"><input type="number" id="aiItemQty_${idx}" value="${it.qty || 1}" class="w-14 bg-slate-800 border border-slate-700 rounded p-1 text-center font-bold text-emerald-400 text-xs"><input type="text" id="aiItemUnit_${idx}" value="${it.unit || 'szt.'}" class="w-11 bg-slate-800 border border-slate-700 rounded p-1 text-center text-xs text-slate-300"></div><select id="aiSelectMatch_${idx}" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-[11px] text-white w-full"><option value="" ${!m ? 'selected' : ''}>⭐ DODAJ JAKO NOWY PRODUKT DO BAZY</option>${inventory.map(inv => `<option value="${inv.id}" ${m && m.id === inv.id ? 'selected' : ''}>🔗 Scal pod kod #${inv.barcode}: ${inv.name} (Stan: ${inv.qty} | ${Number(inv.price).toFixed(2)} zł)</option>`).join('')}</select></div>`;
       }).join('');
       renderExtractedDepositsInModal();
     }
@@ -1625,9 +1776,19 @@ Wyodrębnij: 1. docNumber, 2. supplier, 3. totalGross, 4. receiverName,
     async function confirmAndApplyDelivery(mode = 'FULL_DELIVERY') {
       if (!currentExtractedDelivery) return;
       const isCatalogOnly = (mode === 'CATALOG_ONLY');
-      const finalItems = [], finalDeps = [];
       const rcv = el('aiReceiverInput').value.trim() || 'Magazyn', docNum = el('aiDocNumInput').value.trim(), sup = el('aiSupplierInput').value.trim();
+
+      // TWARDA BLOKADA PRZED DODANIEM ZDUBLOWANEJ FAKTURY JAKO NOWEJ DOSTAWY
+      if (!isCatalogOnly) {
+        const dup = findExistingDuplicateDelivery(docNum);
+        if (dup) {
+          alert(`⛔ ZABLOKOWANO DUBEL FAKTURY!\n\nFaktura o numerze "${docNum}" (${dup.supplier || ''}) znajduje się już w systemie.\nNie można dodać jej drugi raz jako dostawy, aby nie podwoić ilości towarów w magazynie.`);
+          return;
+        }
+      }
+
       localStorage.setItem('magazyn_default_receiver', rcv);
+      const finalItems = [], finalDeps = [];
       let addedCatalogCount = 0, mergedCount = 0;
 
       for (let i = 0; i < (currentExtractedDelivery.items || []).length; i++) {
@@ -1638,8 +1799,8 @@ Wyodrębnij: 1. docNumber, 2. supplier, 3. totalGross, 4. receiverName,
 
         const resolvedCat = classifyProductSmartLocal(name, userCat) || userCat || 'Napoje • Gazowane / Soft';
         learnProductRule(name, resolvedCat, u);
-        finalItems.push({ name, qty: q, unit: u, netPrice: p });
 
+        // Zawsze sprawdzamy też po kluczu kanonicznym, aby nigdy nie stworzyć drugiego kodu RC-XXXXXX dla istniejącego produktu!
         let targetItem = cid ? inventory.find(x => String(x.id) === String(cid)) : findBestInventoryMatch(name);
 
         if (targetItem) {
@@ -1654,11 +1815,14 @@ Wyodrębnij: 1. docNumber, 2. supplier, 3. totalGross, 4. receiverName,
           }
           if (p > 0) targetItem.price = p;
           targetItem.category = resolvedCat;
+          finalItems.push({ name: targetItem.name, qty: q, unit: u, netPrice: p, appliedItemId: targetItem.id, wasCreatedNew: false });
           if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${targetItem.id}`, 'PATCH', { qty: targetItem.qty, price: targetItem.price, category: targetItem.category, updated_at: new Date() }); } catch (e) {} }
         } else {
           const initialQty = isCatalogOnly ? 0 : q;
-          const ni = normalizeItem({ id: Date.now().toString() + '_' + i, barcode: 'RC-' + Math.floor(100000 + Math.random() * 900000), name, category: resolvedCat, location: 'Magazyn Główny', qty: initialQty, inField: 0, unit: u, minQty: 3, price: p });
+          const newId = Date.now().toString() + '_' + i;
+          const ni = normalizeItem({ id: newId, barcode: 'RC-' + Math.floor(100000 + Math.random() * 900000), name, category: resolvedCat, location: 'Magazyn Główny', qty: initialQty, inField: 0, unit: u, minQty: 3, price: p });
           inventory.unshift(ni); addedCatalogCount++;
+          finalItems.push({ name: ni.name, qty: q, unit: u, netPrice: p, appliedItemId: ni.id, wasCreatedNew: true });
           recordStockLog(ni.id, ni.name, isCatalogOnly ? 'Dodano do bazy (Stara faktura)' : 'Nowy z Faktury', initialQty, `${docNum}`);
           if (isCloudOnline) { try { await apiRequest('/inventory', 'POST', toDbItem(ni)); } catch (e) {} }
         }
@@ -1668,17 +1832,18 @@ Wyodrębnij: 1. docNumber, 2. supplier, 3. totalGross, 4. receiverName,
         for (let j = 0; j < (currentExtractedDelivery.deposits || []).length; j++) {
           const dn = el(`aiDepName_${j}`)?.value.trim(), dc = el(`aiDepCat_${j}`)?.value, dq = parseInt(el(`aiDepQty_${j}`)?.value, 10) || 0, dp = parseFloat(el(`aiDepPrice_${j}`)?.value) || 0.50;
           if (dq === 0 || !dn) continue;
-          finalDeps.push({ name: dn, category: dc, netQty: dq, unitPrice: dp });
-          await upsertDepositEntry(dn, dc, dp, dq);
+          const depId = await upsertDepositEntry(dn, dc, dp, dq);
+          finalDeps.push({ name: dn, category: dc, netQty: dq, unitPrice: dp, appliedDepositId: depId });
         }
         const dEntry = { id: Date.now().toString(), doc_number: docNum, supplier: sup, receiver_name: rcv, total_gross: el('aiTotalGrossInput').value.trim(), items_json: finalItems, deposits_json: finalDeps, image_url: JSON.stringify(currentExtractedDelivery.photos || []), created_at: new Date() };
         deliveries.unshift(dEntry); safeSetLocal('magazyn_offline_deliveries', deliveries);
         if (isCloudOnline) { try { await apiRequest('/deliveries', 'POST', dEntry); } catch (e) {} }
       }
 
-      safeSetLocal('magazyn_offline_items', inventory); safeSetLocal('magazyn_offline_price_alerts', priceAlerts);
+      safeSetLocal('magazyn_offline_items', inventory);
+      safeSetLocal('magazyn_offline_price_alerts', priceAlerts);
       closeAiModal(); renderInventory(); renderDeposits(); renderDeliveries(); renderPriceAlerts();
-      alert(isCatalogOnly ? `📚 Baza zaktualizowana! Nowych: ${addedCatalogCount}, zaktualizowanych: ${mergedCount}.` : `📥 Dostawa przyjęta! Nowych: ${addedCatalogCount}, zsumowanych: ${mergedCount}.`);
+      alert(isCatalogOnly ? `📚 Baza zaktualizowana! Nowych: ${addedCatalogCount}, połączonych pod wspólny kod: ${mergedCount}.` : `📥 Dostawa przyjęta! Nowych produktów: ${addedCatalogCount}, zsumowanych z istniejącymi kodami: ${mergedCount}.`);
     }
 
     function closeAiModal() { hideModal('aiModal'); currentExtractedDelivery = null; }
@@ -1825,7 +1990,7 @@ Wyodrębnij: 1. docNumber, 2. supplier, 3. totalGross, 4. receiverName,
       if (isCloudOnline) { try { await apiRequest(`/events?id=eq.${id}`, 'DELETE'); } catch (e) {} }
     }
 
-    // --- KARTOTEKA, SKANER I EDYCJA (Z NAUKĄ REGUŁ) ---
+    // --- KARTOTEKA, SKANER I EDYCJA ---
     function handleItemContextMenu(e, id) {
       e.preventDefault(); contextMenuItemId = id; selectedItemId = id;
       const m = el('customContextMenu'); m.classList.remove('hidden');
@@ -1866,7 +2031,6 @@ Wyodrębnij: 1. docNumber, 2. supplier, 3. totalGross, 4. receiverName,
       e.preventDefault();
       const it = inventory.find(i => String(i.id) === String(el('editItemId').value)); if (!it) return;
       it.barcode = el('editItemBarcode').value.trim(); it.name = el('editItemName').value.trim(); it.price = parseFloat(el('editItemPrice').value) || 0; it.category = el('editItemCategory').value.trim() || 'Napoje'; it.location = el('editItemLocation').value.trim() || '-'; it.unit = el('editItemUnit').value; it.minQty = parseInt(el('editItemMinQty').value) || 0;
-      // Aplikacja uczy się przypisanej ręcznie kategorii!
       learnProductRule(it.name, it.category, it.unit);
       safeSetLocal('magazyn_offline_items', inventory); renderInventory(); hideModal('editItemModal');
       if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${it.id}`, 'PATCH', toDbItem(it)); } catch (err) {} }
