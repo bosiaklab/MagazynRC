@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>MagazynRC - WMS v4.1</title>
+  <title>MagazynRC - WMS v4.2</title>
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#0f172a">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -30,7 +30,7 @@
     <div class="flex items-center space-x-2">
       <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-base shadow">M</div>
       <div>
-        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v4.1 COMPACT</span></h1>
+        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v4.2 LABEL-PRO</span></h1>
         <p id="syncStatus" class="text-[10px] text-amber-400 font-medium leading-none mt-0.5">Inicjalizacja...</p>
       </div>
     </div>
@@ -42,7 +42,9 @@
     </div>
   </header>
 
-  <input type="file" id="shelfCountInput" accept="image/*,application/pdf" multiple class="hidden" onchange="processShelfCountImage(event)">
+  <input type="file" id="shelfCountInput" accept="image/*,application/pdf" multiple class="hidden" onchange="processShelfCountImage(event, false)">
+  <input type="file" id="shelfCountAppendInput" accept="image/*,application/pdf" multiple class="hidden" onchange="processShelfCountImage(event, true)">
+  <input type="file" id="itemLabelPhotoInput" accept="image/*" class="hidden" onchange="handleItemLabelPhoto(event)">
   <input type="file" id="eventDispatchInput" accept="image/*,application/pdf" class="hidden" onchange="processEventDispatchImage(event)">
   <input type="file" id="eventReturnProductsInput" accept="image/*,application/pdf" multiple class="hidden" onchange="processEventReturnProductsImage(event)">
   <input type="file" id="eventReturnSheetInput" accept="image/*,application/pdf" class="hidden" onchange="processEventReturnSheetImage(event)">
@@ -53,7 +55,8 @@
 
   <datalist id="categoryPresetsList">
     <option value="Alkohole • Whisky"><option value="Alkohole • Wódka"><option value="Alkohole • Rum">
-    <option value="Alkohole • Gin / Likier / Aperitif"><option value="Alkohole • Wino / Prosecco"><option value="Alkohole • Piwo / Cydr">
+    <option value="Alkohole • Gin / Likier / Aperitif"><option value="Alkohole • Wino Czerwone"><option value="Alkohole • Wino Białe">
+    <option value="Alkohole • Wino Różowe / Prosecco"><option value="Alkohole • Piwo / Cydr">
     <option value="Napoje • Woda"><option value="Napoje • Gazowane / Soft"><option value="Napoje • Energetyk">
     <option value="Napoje • Soki / Nektary"><option value="Napoje • Kawa / Herbata / Dodatki">
     <option value="Jednorazówki • Opakowania / Lunchbox"><option value="Jednorazówki • Kubki / Sztućce / Serwetki">
@@ -79,7 +82,7 @@
     <section id="viewStock" class="space-y-3">
       <section class="bg-slate-800/90 border border-slate-700 rounded-2xl p-3.5 shadow-lg space-y-3">
         <div class="flex items-center justify-between flex-wrap gap-2">
-          <div><h2 class="font-bold text-xs text-white">📷 Skaner i Dodawanie ze Zdjęć / Plików</h2><p class="text-[11px] text-slate-400">Aparat, Galeria, Messenger lub plik PDF</p></div>
+          <div><h2 class="font-bold text-xs text-white">📷 Skaner i Rozpoznawanie Etykiet AI</h2><p class="text-[11px] text-slate-400">Rozróżnia szczepy win (np. Cabernet vs Sauvignon Blanc) i pojemności (0.187L)</p></div>
           <div class="flex gap-2">
             <button onclick="el('shelfCountInput').click()" class="bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow">👁️ Zlicz ze zdjęcia / pliku</button>
             <button id="btnToggleCamera" onclick="toggleCamera()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-1.5 rounded-xl shadow">Skaner QR/EAN</button>
@@ -102,7 +105,7 @@
       </div>
 
       <div class="flex flex-wrap gap-2 items-center justify-between">
-        <input type="text" id="searchFilter" oninput="renderInventory()" placeholder="Szukaj po nazwie, podkategorii (Woda, Whisky, Rum, Soft), kodzie..." class="flex-1 min-w-[220px] bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white" />
+        <input type="text" id="searchFilter" oninput="renderInventory()" placeholder="Szukaj po nazwie, szczepie (Cabernet, Sauvignon), pojemności (0.187L)..." class="flex-1 min-w-[220px] bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white" />
         <button id="btnToggleSelectMode" onclick="toggleSelectMode()" class="bg-amber-500/20 border border-amber-500/60 text-amber-300 text-xs px-3 py-2 rounded-xl font-bold">🚚 Wybierz na Event</button>
       </div>
 
@@ -255,7 +258,7 @@
     </div>
   </div>
 
-  <!-- MODAL AI OCR: WERYFIKACJA FAKTURY Z BLOKADĄ DUPLIKATÓW -->
+  <!-- MODAL AI OCR: WERYFIKACJA FAKTURY -->
   <div id="aiModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 max-h-[94vh] flex flex-col">
       <div class="flex justify-between items-start border-b border-slate-700 pb-2">
@@ -317,7 +320,7 @@
 
   <!-- MENU KONTEKSTOWE -->
   <div id="customContextMenu" class="fixed hidden z-50 bg-slate-800/95 border border-slate-700 rounded-xl shadow-2xl py-1.5 w-52">
-    <button onclick="contextActionEdit()" class="w-full text-left px-3.5 py-2 text-xs text-slate-200 hover:bg-slate-700">✏️ Edytuj dane i kategorię</button>
+    <button onclick="contextActionEdit()" class="w-full text-left px-3.5 py-2 text-xs text-slate-200 hover:bg-slate-700">✏️ Edytuj dane i zdjęcie</button>
     <button onclick="contextActionOpenStock()" class="w-full text-left px-3.5 py-2 text-xs text-slate-200 hover:bg-slate-700">⚡ Operacja stanu i historia</button>
     <button onclick="contextActionPrintQR()" class="w-full text-left px-3.5 py-2 text-xs text-slate-200 hover:bg-slate-700">🏷️ Drukuj etykietę QR</button>
     <div class="border-t border-slate-700 my-1"></div>
@@ -337,12 +340,24 @@
   <div id="printableSheet"></div>
   <div id="printArea"><div style="border:2px dashed #333;padding:15px;border-radius:8px;display:inline-block;width:300px;font-family:Arial,sans-serif;"><h2 id="printItemName" style="font-size:16px;font-weight:bold;margin:0 0 5px 0;color:black;"></h2><p id="printItemCategory" style="font-size:11px;margin:0 0 10px 0;color:#555;text-transform:uppercase;"></p><div id="printQRCode" style="display:flex;justify-content:center;margin:10px 0;"></div><p id="printItemBarcode" style="font-size:14px;font-family:monospace;font-weight:bold;margin:5px 0 0 0;color:black;"></p></div></div>
 
-  <!-- MODAL: ZLICZANIE ZE ZDJĘCIA / PLIKU -->
+  <!-- MODAL: ZLICZANIE ZE ZDJĘCIA / PLIKU (Z DOŁOŻENIEM ZBLIŻENIA ETYKIETY I ROZDZIELANIEM) -->
   <div id="shelfCountModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 max-h-[94vh] flex flex-col">
-      <div class="flex justify-between items-start border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">👁️ Zliczanie Produktów ze Zdjęcia / Pliku</h3><button onclick="hideModal('shelfCountModal')" class="text-slate-400 text-xl font-bold">✕</button></div>
-      <div id="shelfCountLoading" class="py-12 flex flex-col items-center justify-center space-y-3"><div class="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div><p class="text-sm text-slate-200">Rozpoznawanie produktów...</p></div>
-      <div id="shelfCountContent" class="hidden flex-1 overflow-y-auto space-y-3 pr-1"><div id="shelfCountItemsList" class="space-y-2.5"></div></div>
+      <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+        <div>
+          <h3 class="text-sm font-bold text-white">👁️ Zliczanie Produktów i Etykiet AI</h3>
+          <p class="text-[10px] text-slate-400">Możesz dołożyć kolejne zdjęcie (np. zbliżenie na małą etykietę 0.187L)</p>
+        </div>
+        <button onclick="hideModal('shelfCountModal')" class="text-slate-400 text-xl font-bold">✕</button>
+      </div>
+      <div id="shelfCountLoading" class="py-12 flex flex-col items-center justify-center space-y-3"><div class="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div><p class="text-sm text-slate-200">Analizowanie etykiet, szczepów i pojemności...</p></div>
+      <div id="shelfCountContent" class="hidden flex-1 overflow-y-auto space-y-3 pr-1">
+        <div class="flex justify-between items-center bg-slate-900/90 p-2 rounded-xl border border-purple-800/50">
+          <span class="text-[11px] text-purple-200 font-bold">Wykryte pozycje:</span>
+          <button type="button" onclick="el('shelfCountAppendInput').click()" class="bg-purple-600 hover:bg-purple-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg shadow flex items-center gap-1">➕ Доrzuć zbliżenie etykiety / kolejne zdjęcie</button>
+        </div>
+        <div id="shelfCountItemsList" class="space-y-2.5"></div>
+      </div>
       <div id="shelfCountActions" class="hidden pt-2.5 border-t border-slate-700 flex justify-end gap-2">
         <button onclick="hideModal('shelfCountModal')" class="px-3 py-1.5 rounded-xl text-xs text-slate-400">Anuluj</button>
         <button onclick="confirmAndApplyShelfCount('ADD')" class="bg-emerald-600 text-white font-bold px-4 py-1.5 rounded-xl text-xs">📥 Dodaj do stanu (+)</button>
@@ -354,7 +369,11 @@
   <!-- MODAL: SZYBKA AKCJA TOWARU -->
   <div id="actionModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3.5">
-      <div class="flex justify-between items-start"><div><span id="modalItemCategory" class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-slate-700 text-slate-300"></span><h3 id="modalItemName" class="text-base font-bold text-white mt-1"></h3><p id="modalItemBarcode" class="text-xs text-slate-400 font-mono"></p></div><button onclick="hideModal('actionModal')" class="text-slate-400 text-xl font-bold">✕</button></div>
+      <div class="flex justify-between items-start gap-2">
+        <img id="modalItemThumb" src="" class="hidden w-14 h-14 rounded-xl object-cover border border-slate-600 bg-black flex-shrink-0">
+        <div class="flex-1"><span id="modalItemCategory" class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-slate-700 text-slate-300"></span><h3 id="modalItemName" class="text-base font-bold text-white mt-1"></h3><p id="modalItemBarcode" class="text-xs text-slate-400 font-mono"></p></div>
+        <button onclick="hideModal('actionModal')" class="text-slate-400 text-xl font-bold">✕</button>
+      </div>
       <div class="grid grid-cols-3 gap-2 bg-slate-900 p-3 rounded-xl border border-slate-700 text-center">
         <div><span class="text-[10px] text-slate-400 block">Cena netto</span><span id="modalItemPrice" class="text-sm font-bold text-emerald-400"></span></div>
         <div><span class="text-[10px] text-slate-400 block">Magazyn</span><span id="modalItemQty" class="text-lg font-black text-emerald-400"></span> <span id="modalItemUnit" class="text-[10px] text-slate-400"></span></div>
@@ -373,7 +392,7 @@
         <button onclick="executeStockAction('TO_FIELD')" class="col-span-2 bg-amber-500 text-slate-950 font-black py-2.5 rounded-xl text-xs">🚚 Wydaj w teren (Kreator Karty)</button>
       </div>
       <div class="pt-2 border-t border-slate-700 space-y-1"><span class="text-[10px] text-slate-400 font-bold uppercase block">Historia operacji:</span><div id="modalItemLogsList" class="space-y-1 max-h-24 overflow-y-auto text-[11px]"></div></div>
-      <div class="flex gap-2"><button onclick="openEditModal(selectedItemId)" class="flex-1 bg-slate-700 text-slate-200 font-semibold py-2 rounded-xl text-xs">✏️ Edytuj</button><button onclick="openPrintLabelModal()" class="flex-1 bg-indigo-600 text-white font-bold py-2 rounded-xl text-xs">🏷️ Drukuj QR</button></div>
+      <div class="flex gap-2"><button onclick="openEditModal(selectedItemId)" class="flex-1 bg-slate-700 text-slate-200 font-semibold py-2 rounded-xl text-xs">✏️ Edytuj / Zdjęcie</button><button onclick="openPrintLabelModal()" class="flex-1 bg-indigo-600 text-white font-bold py-2 rounded-xl text-xs">🏷️ Drukuj QR</button></div>
       <div class="flex justify-between pt-2 border-t border-slate-700 text-xs"><button onclick="deleteCurrentItem()" class="text-rose-400 hover:underline">Usuń pozycję</button><button onclick="hideModal('actionModal')" class="text-slate-400">Zamknij</button></div>
     </div>
   </div>
@@ -411,13 +430,23 @@
     </div>
   </div>
 
-  <!-- MODAL: EDYCJA KARTOTEKI -->
-  <div id="editItemModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+  <!-- MODAL: EDYCJA KARTOTEKI (ZE ZDJĘCIEM WZORCOWYM I SKANEREM ETYKIETY AI) -->
+  <div id="editItemModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50 overflow-y-auto">
     <form onsubmit="saveEditedItem(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3">
-      <div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">✏️ Edycja kartoteki (Uczy AI)</h3><button type="button" onclick="hideModal('editItemModal')" class="text-slate-400">✕</button></div>
+      <div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">✏️ Edycja kartoteki i zdjęcia</h3><button type="button" onclick="hideModal('editItemModal')" class="text-slate-400">✕</button></div>
       <input type="hidden" id="editItemId">
+      <div class="bg-slate-900 border border-slate-700 p-2.5 rounded-xl flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5">
+          <img id="editItemPhotoPreview" src="" class="hidden w-12 h-12 rounded-lg object-cover border border-indigo-500">
+          <div>
+            <span class="text-[11px] font-bold text-indigo-300 block">📸 Zdjęcie etykiety produktu</span>
+            <span class="text-[9px] text-slate-400 block">AI odczyta szczep, kolor i pojemność</span>
+          </div>
+        </div>
+        <button type="button" onclick="triggerItemLabelPhoto('EDIT')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-lg shadow">Wgraj / Skanuj</button>
+      </div>
       <div><label class="text-[11px] text-slate-300 block mb-1">Kod kreskowy:</label><input type="text" id="editItemBarcode" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white font-mono"></div>
-      <div><label class="text-[11px] text-slate-300 block mb-1">Nazwa towaru *:</label><input type="text" id="editItemName" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold"></div>
+      <div><label class="text-[11px] text-slate-300 block mb-1">Pełna nazwa towaru (ze szczepem i pojemnością) *:</label><input type="text" id="editItemName" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold"></div>
       <div class="grid grid-cols-2 gap-2">
         <div><label class="text-[11px] text-slate-300 block mb-1">Cena netto (PLN):</label><input type="number" step="0.01" id="editItemPrice" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-emerald-400 font-bold"></div>
         <div><label class="text-[11px] text-slate-300 block mb-1">Jednostka:</label><select id="editItemUnit" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white"><option value="szt.">szt.</option><option value="op.">op.</option><option value="krt.">krt.</option><option value="kg">kg</option></select></div>
@@ -431,12 +460,22 @@
     </form>
   </div>
 
-  <!-- MODAL: NOWA POZYCJA -->
-  <div id="newItemModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+  <!-- MODAL: NOWA POZYCJA (ZE ZDJĘCIEM WZORCOWYM I SKANEREM ETYKIETY AI) -->
+  <div id="newItemModal" class="fixed inset-0 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-4 z-50 overflow-y-auto">
     <form onsubmit="saveNewItem(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3">
-      <div class="flex justify-between items-center"><h3 class="text-sm font-bold text-white">Nowa pozycja</h3><button type="button" onclick="hideModal('newItemModal')" class="text-slate-400">✕</button></div>
+      <div class="flex justify-between items-center"><h3 class="text-sm font-bold text-white">Nowa pozycja w magazynie</h3><button type="button" onclick="hideModal('newItemModal')" class="text-slate-400">✕</button></div>
+      <div class="bg-slate-900 border border-indigo-500/50 p-2.5 rounded-xl flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2.5">
+          <img id="newItemPhotoPreview" src="" class="hidden w-12 h-12 rounded-lg object-cover border border-indigo-500">
+          <div>
+            <span class="text-[11px] font-bold text-indigo-300 block">📸 Dodaj ze zdjęcia etykiety</span>
+            <span class="text-[9px] text-slate-400 block">Rozpoznaje szczep, kolor wina i pojemność</span>
+          </div>
+        </div>
+        <button type="button" onclick="triggerItemLabelPhoto('NEW')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-lg shadow">📷 Skanuj etykietę</button>
+      </div>
       <div class="flex gap-2"><input type="text" id="newBarcode" placeholder="Kod RC-001" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-white font-mono"><button type="button" onclick="generateRandomCode()" class="bg-slate-700 px-3 py-1.5 rounded-xl text-xs">Losuj</button></div>
-      <input type="text" id="newName" required oninput="autoPreviewNewItemCategory()" placeholder="Nazwa towaru *" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold">
+      <input type="text" id="newName" required oninput="autoPreviewNewItemCategory()" placeholder="Pełna nazwa (np. Roche Mazet Cabernet Sauvignon Czerwone 0.187L) *" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold">
       <div class="grid grid-cols-2 gap-2">
         <div><label class="text-[10px] text-slate-400 block">Cena netto:</label><input type="number" step="0.01" id="newPrice" value="0.00" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-emerald-400 font-bold"></div>
         <div><label class="text-[10px] text-slate-400 block">Jedn.:</label><select id="newUnit" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-1.5 text-xs text-white"><option value="szt.">szt.</option><option value="op.">op.</option><option value="krt.">krt.</option><option value="kg">kg</option></select></div>
@@ -460,11 +499,11 @@
 
     let learnedRules = {};
     try { learnedRules = JSON.parse(localStorage.getItem('magazyn_learned_rules')) || {}; } catch (e) {}
-    function learnProductRule(name, category, unit) {
+    function learnProductRule(name, category, unit, photo = '') {
       if (!name || !category) return;
       const key = cleanCanonicalKey(name);
       if (key.length < 2) return;
-      learnedRules[key] = { category, unit: unit || 'szt.' };
+      learnedRules[key] = { category, unit: unit || 'szt.', photo: photo || learnedRules[key]?.photo || '' };
       try { localStorage.setItem('magazyn_learned_rules', JSON.stringify(learnedRules)); } catch (e) {}
     }
 
@@ -481,7 +520,11 @@
       if (/bacardi|captain morgan|havana|malibu|kraken|diplomatico|bumba|\brum\b/.test(n)) return 'Alkohole • Rum';
       if (/wyborowa|finlandia|absolut|bocian|żubrówka|zubrowka|stoli|belvedere|chopin|baczewski|pan tadeusz|żołądkowa|zoladkowa|soplica|krupnik|stock|amundsen|smirnoff|nemiroff|ostoya|wódka|wodka|\bczysta\b/.test(n)) return 'Alkohole • Wódka';
       if (/lubuski|beefeater|bombay|tanqueray|hendrick|gordon'?s|\bgin\b|tequila|sierra|olmeca|jagermeister|jägermeister|aperol|campari|baileys|kahlua|cointreau|amaretto|limoncello|hennessy|metaxa|koniak|brandy|likier/.test(n)) return 'Alkohole • Gin / Likier / Aperitif';
-      if (/\bwino\b|\bwine\b|prosecco|\bcava\b|szampan|champagne|frizzante|martini|cinzano|carlo rossi|fresco|septimo|cero zero|cabernet|merlot|chardonnay|sauvignon|pinot|shiraz|riesling|primitivo|chianti|rioja|tokaj|vermouth/.test(n)) return 'Alkohole • Wino / Prosecco';
+      if (/\bwino\b|\bwine\b|prosecco|\bcava\b|szampan|champagne|frizzante|martini|cinzano|carlo rossi|fresco|septimo|cero zero|roche mazet|cabernet|merlot|chardonnay|sauvignon|pinot|shiraz|riesling|primitivo|chianti|rioja|tokaj|vermouth/.test(n)) {
+        if (/czerwone|cabernet|merlot|shiraz|syrah|primitivo|chianti|malbec|tempranillo|pinot noir|rouge/.test(n)) return 'Alkohole • Wino Czerwone';
+        if (/białe|biale|blanc|chardonnay|riesling|pinot grigio|sauvignon/.test(n) && !/cabernet/.test(n)) return 'Alkohole • Wino Białe';
+        return 'Alkohole • Wino / Prosecco';
+      }
       if (/\bpiwo\b|heineken|\blech\b|\bżywiec\b|\bzywiec\b|tyskie|\bperła\b|\bperla\b|carlsberg|desperados|corona|kormoran|książęce|ksiazece|zatecky|okocim|harnas|kasztelan|lomza|łomża|namysłów|paulaner|pilsner|guinness|somersby|\bcydr\b|radler/.test(n)) return 'Alkohole • Piwo / Cydr';
       if (/\b(1[1-9]|[2-8][0-9])([.,]\d+)?\s*%/.test(n)) return 'Alkohole • Mocne';
       if (/burn|red bull|redbull|monster|tiger|black energy|rockstar|oshee|energetyk/.test(n)) return 'Napoje • Energetyk';
@@ -515,13 +558,15 @@
     function normalizeItem(raw) {
       if (!raw) return null;
       const rc = String(raw.category || '');
+      const key = cleanCanonicalKey(raw.name);
       return {
         id: String(raw.id), barcode: String(raw.barcode || ''), name: String(raw.name || ''),
         category: classifyProductSmartLocal(raw.name, rc) || rc || 'Napoje • Pozostałe',
         location: String(raw.location || '-'), qty: Number(raw.qty) || 0,
         inField: Number(raw.inField !== undefined ? raw.inField : raw.in_field) || 0,
         minQty: Number(raw.minQty !== undefined ? raw.minQty : raw.min_qty) || 0,
-        unit: String(raw.unit || 'szt.'), price: Number(raw.price) || 0.00
+        unit: String(raw.unit || 'szt.'), price: Number(raw.price) || 0.00,
+        photo: raw.photo || learnedRules[key]?.photo || ''
       };
     }
     function toDbItem(it) {
@@ -542,6 +587,7 @@
     let lastParsedReturnData = null, lastReturnImage = '', currentShelfCountItems = [];
     let sheetCreatorMap = new Map(), currentPreviewSheetData = null, invoiceFilePart1 = null, invoiceFilePart2 = null;
     let selectedItemIds = new Set(), editingDeliveryItems = [], editingDeliveryPhotos = [];
+    let currentLabelPhotoTarget = 'NEW', tempNewItemPhoto = '', tempEditItemPhoto = '';
 
     function triggerScanFeedback() { if (navigator.vibrate) { try { navigator.vibrate(40); } catch (e) {} } }
     function normalizeInvoiceNumberKey(docNum) { return String(docNum || '').toLowerCase().replace(/[^a-z0-9]/g, ''); }
@@ -562,6 +608,44 @@
         if (btn) { btn.disabled = false; btn.innerHTML = `📥 Nowa dostawa (+Stan i Faktura)`; }
       }
       return ex;
+    }
+
+    // --- SKANOWANIE ETYKIETY POJEDYNCZEGO PRODUKTU (W NOWYM LUB EDYCJI) ---
+    function triggerItemLabelPhoto(mode) {
+      currentLabelPhotoTarget = mode;
+      el('itemLabelPhotoInput').click();
+    }
+
+    async function handleItemLabelPhoto(event) {
+      const file = event.target.files[0]; if (!file) return;
+      try {
+        const prep = await prepareFileForGemini(file, 800, 0.72);
+        if (currentLabelPhotoTarget === 'NEW') {
+          tempNewItemPhoto = prep.previewUrl;
+          el('newItemPhotoPreview').src = prep.previewUrl; el('newItemPhotoPreview').classList.remove('hidden');
+        } else {
+          tempEditItemPhoto = prep.previewUrl;
+          el('editItemPhotoPreview').src = prep.previewUrl; el('editItemPhotoPreview').classList.remove('hidden');
+        }
+        const parsed = await queryGeminiAPI(`Przeanalizuj zdjęcie etykiety produktu (np. butelki wina, alkoholu, napoju lub opakowania).
+UWAGA NA WINA I SZCZEPY: Przeczytaj dokładnie markę, pełny szczep (np. "Cabernet Sauvignon" vs "Sauvignon Blanc" vs "Merlot" vs "Chardonnay"), kolor/typ ("Czerwone", "Białe", "Różowe", "Wytrawne", "Półwytrawne") oraz dokładną pojemność z etykiety (np. "0.187L" dla małych butelek 187ml lub "0.75L").
+Zwróć JSON: { "fullName": string, "category": string, "unit": "szt."|"op." }`, [prep]);
+        if (parsed?.fullName) {
+          const smartCat = classifyProductSmartLocal(parsed.fullName, parsed.category) || parsed.category || 'Alkohole • Wino / Prosecco';
+          if (currentLabelPhotoTarget === 'NEW') {
+            el('newName').value = parsed.fullName;
+            el('newCategory').value = smartCat;
+            if (parsed.unit) el('newUnit').value = parsed.unit;
+          } else {
+            if (!el('editItemName').value || confirm(`Zaktualizować nazwę na odczytaną z etykiety:\n"${parsed.fullName}"?`)) {
+              el('editItemName').value = parsed.fullName;
+              el('editItemCategory').value = smartCat;
+            }
+          }
+        }
+        triggerScanFeedback();
+      } catch (err) { alert("Zdjęcie zapisane (błąd AI: " + err.message + ")"); }
+      event.target.value = '';
     }
 
     function prepareFileForGemini(file, maxW = 950, q = 0.72) {
@@ -617,13 +701,13 @@
       const toVerify = forceAll ? inventory : inventory.filter(it => !it.category.includes('•') || it.category.includes('Pozostałe'));
       if (toVerify.length === 0) { if (forceAll) alert(`✓ Wszystkie produkty (${inventory.length}) mają przypisane kategorie!`); return; }
       try {
-        const prompt = `Przypisz każdy produkt do JEDNEJ kategorii (Cisowianka Perlage to zawsze "Napoje • Woda"): "Alkohole • Whisky", "Alkohole • Wódka", "Alkohole • Rum", "Alkohole • Gin / Likier / Aperitif", "Alkohole • Wino / Prosecco", "Alkohole • Piwo / Cydr", "Napoje • Woda", "Napoje • Gazowane / Soft", "Napoje • Energetyk", "Napoje • Soki / Nektary", "Napoje • Kawa / Herbata / Dodatki", "Jednorazówki • Opakowania / Lunchbox", "Jednorazówki • Kubki / Sztućce / Serwetki". Produkty: ${JSON.stringify(toVerify.map(i => ({ id: i.id, name: i.name })))}. Zwróć JSON: { "classified": [{ "id": string, "category": string }] }`;
+        const prompt = `Przypisz każdy produkt do JEDNEJ kategorii (Cisowianka Perlage to zawsze "Napoje • Woda"): "Alkohole • Whisky", "Alkohole • Wódka", "Alkohole • Rum", "Alkohole • Gin / Likier / Aperitif", "Alkohole • Wino Czerwone", "Alkohole • Wino Białe", "Alkohole • Wino Różowe / Prosecco", "Alkohole • Piwo / Cydr", "Napoje • Woda", "Napoje • Gazowane / Soft", "Napoje • Energetyk", "Napoje • Soki / Nektary", "Napoje • Kawa / Herbata / Dodatki", "Jednorazówki • Opakowania / Lunchbox", "Jednorazówki • Kubki / Sztućce / Serwetki". Produkty: ${JSON.stringify(toVerify.map(i => ({ id: i.id, name: i.name })))}. Zwróć JSON: { "classified": [{ "id": string, "category": string }] }`;
         const res = await queryGeminiAPI(prompt, []);
         for (const c of (res.classified || [])) {
           const item = inventory.find(x => String(x.id) === String(c.id));
           if (item && c.category) {
             const fc = /cisowianka|perlage|woda/i.test(item.name) ? 'Napoje • Woda' : c.category;
-            learnProductRule(item.name, fc, item.unit);
+            learnProductRule(item.name, fc, item.unit, item.photo);
             if (item.category !== fc) { item.category = fc; if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${item.id}`, 'PATCH', { category: fc, updated_at: new Date() }); } catch (e) {} } }
           }
         }
@@ -632,9 +716,26 @@
       } catch (e) {}
     }
 
+    // --- UJEDNOLICONY KLUCZ KANONICZNY I ŚCISŁA OCHRONA SZCZEPÓW WIN (CABERNET != SAUVIGNON BLANC) ---
     function cleanCanonicalKey(text) {
-      return (text || '').toLowerCase().replace(/['’`"´]/g, '').replace(/,/g, '.').replace(/\b(\d+)\s*ml\b/gi, (_, ml) => (parseInt(ml, 10) / 1000).toString()).replace(/\b(0\.\d+|1\.5|1)\s*l\b/gi, '$1').replace(/\bx\s*\d+\b/gi, ' ').replace(/\bders\b|\bdrs\b|\bop\b|\bszt\b|\bbut\b/gi, ' ').replace(/[^a-z0-9ąćęłńóśźż.%]/g, ' ').replace(/\s+/g, ' ').trim();
+      return (text || '').toLowerCase()
+        .replace(/['’`"´]/g, '')
+        .replace(/,/g, '.')
+        .replace(/\b(\d+)\s*ml\b/gi, (_, ml) => (parseInt(ml, 10) / 1000).toString()) // 187ml -> 0.187, 300ml -> 0.3
+        .replace(/\b(0\.\d+|1\.5|1)\s*l\b/gi, '$1') // 0.187L -> 0.187
+        .replace(/\bx\s*\d+\b/gi, ' ')
+        .replace(/\bders\b|\bdrs\b|\bop\b|\bszt\b|\bbut\b/gi, ' ')
+        .replace(/[^a-z0-9ąćęłńóśźż.%]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
     }
+
+    // Lista słów, które bezwzględnie odróżniają produkty tej samej marki (np. szczepy win, kolory, smaki)
+    const STRICT_VARIETALS_AND_FLAVORS = [
+      'cabernet', 'merlot', 'chardonnay', 'pinot', 'grigio', 'noir', 'shiraz', 'syrah', 'primitivo', 'tempranillo', 'riesling', 'malbec', 'carmenere', 'chianti', 'prosecco', 'cava', 'frizzante', 'muscat', 'moscato',
+      'zero', 'light', 'max', 'bez laktozy', 'sojowe', 'owsiane', 'perlage', 'niegaz',
+      'jabłk', 'apple', 'pomarańcz', 'orange', 'cytryn', 'lemon', 'lime', 'grejpfrut', 'porzeczk', 'malin', 'truskawk', 'mango', 'brzoskwin', 'peach', 'berry', 'aromatic', 'tonic', 'tonik', 'ginger'
+    ];
 
     function extractProductSpecs(text) {
       const s = cleanCanonicalKey(text);
@@ -643,16 +744,29 @@
       if (/\bpet\b/.test(s)) pack.push('pet');
       if (/\brgb\b|\bszk[łl]/.test(s)) pack.push('rgb');
       if (/\bcan\b|\bpusz/.test(s)) pack.push('can');
-      const variants = [];
-      ['zero', 'light', 'bez laktozy', 'sojowe', 'białe', 'czerwone', 'perlage', 'gaz', 'niegaz', 'jabłk', 'pomarańcz', 'cytryn'].forEach(v => { if (s.includes(v)) variants.push(v); });
-      return { caps, pack, variants };
+
+      // Wykrywanie koloru wina (czerwone vs białe vs różowe)
+      let wineColor = '';
+      if (/czerwone|rouge|\bred\b|cabernet|merlot|shiraz|syrah|primitivo|malbec|chianti/.test(s)) wineColor = 'red';
+      else if (/białe|biale|blanc|\bwhite\b|chardonnay|riesling|grigio/.test(s)) wineColor = 'white';
+      else if (/różowe|rozowe|\brose\b|rosato/.test(s)) wineColor = 'rose';
+
+      const strictTokens = STRICT_VARIETALS_AND_FLAVORS.filter(v => s.includes(v));
+      return { caps, pack, wineColor, strictTokens };
     }
 
     function areSpecsCompatible(nameA, nameB) {
       const a = extractProductSpecs(nameA), b = extractProductSpecs(nameB);
+      // 1. Różna pojemność (np. 0.187 vs 0.75) -> blokada
       if (a.caps.length > 0 && b.caps.length > 0 && a.caps[0] !== b.caps[0]) return false;
+      // 2. Różne opakowanie (PET vs RGB vs CAN) -> blokada
       if (a.pack.length > 0 && b.pack.length > 0 && a.pack[0] !== b.pack[0]) return false;
-      for (const v of ['zero', 'bez laktozy', 'sojowe', 'białe', 'czerwone']) { if (a.variants.includes(v) !== b.variants.includes(v)) return false; }
+      // 3. Różny kolor wina (np. Czerwone Cabernet vs Białe Sauvignon) -> blokada
+      if (a.wineColor && b.wineColor && a.wineColor !== b.wineColor) return false;
+      // 4. Różny szczep wina lub smak (np. "Cabernet Sauvignon" ma 'cabernet', a "Sauvignon" nie ma 'cabernet'!) -> TWARDA BLOKADA!
+      for (const token of STRICT_VARIETALS_AND_FLAVORS) {
+        if (a.strictTokens.includes(token) !== b.strictTokens.includes(token)) return false;
+      }
       return true;
     }
 
@@ -660,8 +774,10 @@
       if (!targetName) return null;
       const targetKey = cleanCanonicalKey(targetName);
       if (targetKey.length < 3) return null;
-      for (const item of inventory) { if (cleanCanonicalKey(item.name) === targetKey && areSpecsCompatible(targetName, item.name)) return item; }
-      const ignore = new Set(['can', 'rgb', 'pet', 'drs', 'szt', 'but', 'zgrz', '0.25', '0.3', '0.33', '0.5', '0.7', '0.85', '1.0']);
+      for (const item of inventory) {
+        if (cleanCanonicalKey(item.name) === targetKey && areSpecsCompatible(targetName, item.name)) return item;
+      }
+      const ignore = new Set(['can', 'rgb', 'pet', 'drs', 'szt', 'but', 'zgrz', 'wino', 'wine', '0.187', '0.25', '0.3', '0.33', '0.5', '0.7', '0.75', '0.85', '1.0']);
       const tWords = targetKey.split(' ').filter(w => w.length >= 3 && !ignore.has(w) && !w.includes('%'));
       if (tWords.length === 0) return null;
       let best = null, bestR = 0;
@@ -672,7 +788,7 @@
         let ov = 0;
         for (const tw of tWords) { if (iWords.some(iw => iw === tw || (iw.length >= 5 && tw.length >= 5 && iw.slice(0, 5) === tw.slice(0, 5)))) ov++; }
         const r = ov / Math.max(tWords.length, iWords.length);
-        if ((ov >= 2 && r >= 0.6) || (ov >= 1 && tWords.length === 1 && iWords.length === 1)) { if (r > bestR) { bestR = r; best = item; } }
+        if ((ov >= 2 && r >= 0.65) || (ov >= 1 && tWords.length === 1 && iWords.length === 1)) { if (r > bestR) { bestR = r; best = item; } }
       }
       return best;
     }
@@ -689,6 +805,7 @@
           master.qty = (Number(master.qty) || 0) + (Number(item.qty) || 0);
           master.inField = (Number(master.inField) || 0) + (Number(item.inField) || 0);
           if (Number(item.price) > 0) master.price = Number(item.price);
+          if (item.photo && !master.photo) master.photo = item.photo;
           toDel.push(item.id); count++;
         }
       }
@@ -851,7 +968,7 @@
         const itemVal = ((item.qty || 0) * (item.price || 0)).toFixed(2);
         const grp = getMainCategoryGroup(item);
         const badgeColor = grp === 'ALCOHOL' ? 'bg-amber-950 text-amber-300 border border-amber-700/50' : (grp === 'DISPOSABLES' ? 'bg-purple-950 text-purple-300 border border-purple-700/50' : 'bg-sky-950 text-sky-300 border border-sky-700/50');
-        return `<div oncontextmenu="handleItemContextMenu(event, '${item.id}')" onclick="handleItemCardClick(event, '${item.id}')" class="bg-slate-800 border ${isChecked ? 'border-amber-400' : (isLow ? 'border-rose-500/60' : 'border-slate-700/80')} rounded-xl p-3 flex items-center justify-between cursor-pointer">${isSelectMode ? `<div class="pr-2.5" onclick="event.stopPropagation()"><input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSelectItem('${item.id}', this.checked)" class="w-4 h-4 rounded"></div>` : ''}<div class="space-y-1 pr-2 flex-1"><div class="flex items-center gap-1.5 flex-wrap"><span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${badgeColor}">${item.category || 'Napoje'}</span><span class="text-[11px] text-slate-400">📍 ${item.location || '-'}</span><span class="text-[11px] text-slate-500 font-mono">#${item.barcode}</span></div><h4 class="font-bold text-xs text-white">${item.name}</h4><div class="flex items-center gap-2 text-[10px]"><span class="text-emerald-400 font-bold">${Number(item.price || 0).toFixed(2)} zł / ${item.unit || 'szt.'}</span><span class="text-slate-500">(${itemVal} zł)</span>${isLow ? `<span class="text-rose-400 font-medium">${item.qty === 0 ? '⚪ Stan 0 (Baza)' : `⚠️ Min: ${item.minQty}`}</span>` : ''}</div></div><div class="text-right flex items-center gap-2">${item.inField > 0 ? `<div class="bg-amber-950/60 border border-amber-700/50 px-2 py-0.5 rounded-lg text-center"><span class="text-[9px] text-amber-300 block">Teren</span><span class="font-bold text-xs text-amber-400">${item.inField}</span></div>` : ''}<div class="bg-slate-900 px-2.5 py-1 rounded-xl border border-slate-700 min-w-[56px] text-center"><span class="text-[9px] text-slate-400 block">Magazyn</span><span class="font-black text-sm ${isLow ? 'text-rose-400' : 'text-emerald-400'}">${item.qty}</span><span class="text-[9px] text-slate-400">${item.unit || 'szt.'}</span></div></div></div>`;
+        return `<div oncontextmenu="handleItemContextMenu(event, '${item.id}')" onclick="handleItemCardClick(event, '${item.id}')" class="bg-slate-800 border ${isChecked ? 'border-amber-400' : (isLow ? 'border-rose-500/60' : 'border-slate-700/80')} rounded-xl p-3 flex items-center justify-between cursor-pointer gap-2.5">${isSelectMode ? `<div onclick="event.stopPropagation()"><input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSelectItem('${item.id}', this.checked)" class="w-4 h-4 rounded"></div>` : ''}${item.photo ? `<img src="${item.photo}" class="w-11 h-11 rounded-lg object-cover border border-slate-600 bg-black flex-shrink-0">` : ''}<div class="space-y-1 flex-1 min-w-0"><div class="flex items-center gap-1.5 flex-wrap"><span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${badgeColor}">${item.category || 'Napoje'}</span><span class="text-[11px] text-slate-400">📍 ${item.location || '-'}</span><span class="text-[11px] text-slate-500 font-mono">#${item.barcode}</span></div><h4 class="font-bold text-xs text-white truncate">${item.name}</h4><div class="flex items-center gap-2 text-[10px]"><span class="text-emerald-400 font-bold">${Number(item.price || 0).toFixed(2)} zł / ${item.unit || 'szt.'}</span><span class="text-slate-500">(${itemVal} zł)</span>${isLow ? `<span class="text-rose-400 font-medium">${item.qty === 0 ? '⚪ Stan 0 (Baza)' : `⚠️ Min: ${item.minQty}`}</span>` : ''}</div></div><div class="text-right flex items-center gap-2 flex-shrink-0">${item.inField > 0 ? `<div class="bg-amber-950/60 border border-amber-700/50 px-2 py-0.5 rounded-lg text-center"><span class="text-[9px] text-amber-300 block">Teren</span><span class="font-bold text-xs text-amber-400">${item.inField}</span></div>` : ''}<div class="bg-slate-900 px-2.5 py-1 rounded-xl border border-slate-700 min-w-[56px] text-center"><span class="text-[9px] text-slate-400 block">Magazyn</span><span class="font-black text-sm ${isLow ? 'text-rose-400' : 'text-emerald-400'}">${item.qty}</span><span class="text-[9px] text-slate-400">${item.unit || 'szt.'}</span></div></div></div>`;
       }).join('');
     }
 
@@ -1009,7 +1126,6 @@
       if (isCloudOnline) { try { await apiRequest(`/deposits?id=eq.${id}`, 'DELETE'); } catch (e) {} }
     }
 
-    // --- FAKTURY + USUWANIE FAKTURY WRAZ Z JEJ TOWARAMI (SMART ROLLBACK) ---
     function renderDeliveries() {
       const list = el('deliveriesList'); if (!list) return;
       if (deliveries.length === 0) { list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak zarejestrowanych dostaw.</div>`; return; }
@@ -1036,7 +1152,6 @@
       let items = [], depItems = [];
       try { items = typeof d.items_json === 'string' ? JSON.parse(d.items_json) : (d.items_json || []); } catch (e) {}
       try { depItems = typeof d.deposits_json === 'string' ? JSON.parse(d.deposits_json) : (d.deposits_json || []); } catch (e) {}
-
       if (!confirm(`Usunąć fakturę "${d.doc_number || '-'}"?\n\nWszystkie produkty (${items.length} poz.) oraz kaucje z tej faktury zostaną automatycznie odjęte/usunięte z magazynu.`)) return;
 
       let removedCards = 0, revertedStock = 0;
@@ -1061,7 +1176,6 @@
           }
         }
       }
-
       for (const dp of depItems) {
         const dq = Number(dp.netQty) || 0; if (dq === 0) continue;
         const mDep = (dp.appliedDepositId ? deposits.find(x => String(x.id) === String(dp.appliedDepositId)) : null) || findBestDepositMatch(dp.name, dp.unitPrice);
@@ -1075,7 +1189,6 @@
           }
         }
       }
-
       deliveries = deliveries.filter(x => String(x.id) !== String(id));
       safeSetLocal('magazyn_offline_items', inventory); safeSetLocal('magazyn_offline_deposits', deposits); safeSetLocal('magazyn_offline_deliveries', deliveries);
       renderInventory(); renderDeposits(); renderDeliveries();
@@ -1132,6 +1245,9 @@
       else if (type === 'EVENT_RETURN') { const ev = events.find(x => String(x.id) === String(itemId)); if (ev?.return_image) photos = [ev.return_image]; }
       if (photos.length === 0) return alert("Brak podglądu.");
       el('imagePreviewTitle').innerText = title; el('imagePreviewElement').src = photos[photoIdx] || photos[0];
+      const tc = el('imagePreviewTabs');
+      if (photos.length > 1) { tc.classList.remove('hidden'); tc.innerHTML = photos.map((s, idx) => `<button onclick="el('imagePreviewElement').src='${s}'" class="bg-slate-800 text-xs text-white font-bold px-3 py-1 rounded-lg border border-slate-700">📄 Strona ${idx + 1}</button>`).join(''); }
+      else { tc.classList.add('hidden'); tc.innerHTML = ''; }
       showModal('imagePreviewModal');
     }
     function closeImagePreviewModal() { hideModal('imagePreviewModal'); el('imagePreviewElement').src = ''; }
@@ -1156,43 +1272,90 @@
       if (el(`tab${name}HeaderBtn`)) el(`tab${name}HeaderBtn`).className = `pb-2 border-b-2 border-${col}-500 text-${col}-400 font-bold whitespace-nowrap`;
       if (el(`navBtn${name}`)) el(`navBtn${name}`).className = `flex flex-col items-center gap-1 text-${col}-400 py-1 px-2`;
       if (tab === 'stock') renderInventory(); else if (tab === 'deliveries') renderDeliveries(); else if (tab === 'deposits') renderDeposits(); else if (tab === 'events') renderEvents(); else renderPriceAlerts();
+      triggerScanFeedback();
     }
 
-    async function processShelfCountImage(event) {
+    // --- ZLICZANIE ZE ZDJĘCIA / PLIKU (Z OPCJĄ DOŁOŻENIA ZDJĘCIA I ROZDZIELENIA WIERSZA) ---
+    async function processShelfCountImage(event, appendMode = false) {
       const files = Array.from(event.target.files || []); if (files.length === 0) return;
       showModal('shelfCountModal'); el('shelfCountLoading').classList.remove('hidden'); el('shelfCountContent').classList.add('hidden'); el('shelfCountActions').classList.add('hidden');
       try {
         const mediaParts = await Promise.all(files.map(f => prepareFileForGemini(f, 1024, 0.72)));
         const catNames = inventory.slice(0, 60).map(i => i.name).join(', ');
-        const parsed = await queryGeminiAPI(`Policz sztuki każdego towaru ze zdjęcia/pliku. Zgrzewki przelicz na sztuki. Jeśli rozpoznasz produkt z bazy (${catNames}), użyj jego nazwy. Zwróć JSON: { "items": [{ "name": string, "qty": number, "unit": "szt.", "category": string }] }`, mediaParts);
-        currentShelfCountItems = parsed.items || [];
+        const parsed = await queryGeminiAPI(`Przeanalizuj zdjęcie/plik towaru.
+UWAGA NA PODOBNE BUTELKI I ETYKIETY (szczególnie wina tej samej marki, np. Roche Mazet Cabernet Sauvignon Czerwone vs Roche Mazet Sauvignon Blanc Białe, lub małe butelki 0.187L / 187ml):
+1. ZAWSZE czytaj z etykiety pełny szczep (np. Cabernet Sauvignon vs Sauvignon Blanc vs Merlot vs Chardonnay), kolor wina (Czerwone, Białe, Różowe) oraz dokładną pojemność (np. 0.187L).
+2. NIGDY nie łącz czerwonego i białego wina ani różnych szczepów w jedną pozycję!
+3. Jeśli produkt odpowiada pozycji z naszej bazy (${catNames}) i zgadza się jego szczep oraz pojemność, użyj nazwy z bazy.
+Zwróć JSON: { "items": [{ "name": string, "qty": number, "unit": "szt.", "category": string }] }`, mediaParts);
+
+        const newItems = (parsed.items || []).map(it => ({ ...it, photo: mediaParts[0]?.previewUrl || '' }));
+        currentShelfCountItems = appendMode ? [...currentShelfCountItems, ...newItems] : newItems;
+
         el('shelfCountLoading').classList.add('hidden'); el('shelfCountContent').classList.remove('hidden'); el('shelfCountActions').classList.remove('hidden');
-        el('shelfCountItemsList').innerHTML = currentShelfCountItems.map((it, idx) => {
-          const m = findBestInventoryMatch(it.name);
-          const cat = m ? m.category : (classifyProductSmartLocal(it.name, it.category) || 'Napoje • Gazowane / Soft');
-          return `<div class="bg-slate-900 border ${m ? 'border-emerald-600' : 'border-purple-600'} rounded-xl p-3 space-y-2"><div class="flex justify-between items-center"><span class="text-[9px] font-bold px-2 py-0.5 rounded ${m ? 'bg-emerald-950 text-emerald-300' : 'bg-purple-950 text-purple-300'}">${m ? `✓ W bazie (#${m.barcode})` : '⭐ NOWY TOWAR'}</span><input type="text" id="shelfCountCat_${idx}" list="categoryPresetsList" value="${cat}" class="bg-slate-800 border border-slate-700 rounded px-2 py-0.5 text-[10px] text-cyan-300 font-bold w-44"></div><div class="flex gap-2"><input type="text" id="shelfCountName_${idx}" value="${m ? m.name : it.name}" class="bg-transparent font-bold text-xs text-white flex-1 border-b border-purple-500"><input type="number" id="shelfCountQty_${idx}" value="${it.qty || 1}" class="w-14 bg-slate-800 rounded p-1 text-center font-black text-purple-300 text-xs"><input type="text" id="shelfCountUnit_${idx}" value="${m ? m.unit : (it.unit || 'szt.')}" class="w-12 bg-slate-800 rounded p-1 text-center text-xs text-slate-300"></div><select id="shelfCountMatch_${idx}" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-[11px] text-white w-full"><option value="" ${!m ? 'selected' : ''}>⭐ DODAJ JAKO NOWY TOWAR</option>${inventory.map(inv => `<option value="${inv.id}" ${m && m.id === inv.id ? 'selected' : ''}>🔗 Scal pod #${inv.barcode}: ${inv.name} (Stan: ${inv.qty})</option>`).join('')}</select></div>`;
-        }).join('');
+        renderShelfCountModalItems();
+        triggerScanFeedback();
       } catch (err) { alert("Błąd: " + err.message); hideModal('shelfCountModal'); }
       event.target.value = '';
+    }
+
+    function renderShelfCountModalItems() {
+      el('shelfCountItemsList').innerHTML = currentShelfCountItems.map((it, idx) => {
+        const m = findBestInventoryMatch(it.name);
+        const cat = m ? m.category : (classifyProductSmartLocal(it.name, it.category) || 'Napoje • Gazowane / Soft');
+        return `<div class="bg-slate-900 border ${m ? 'border-emerald-600' : 'border-purple-600'} rounded-xl p-3 space-y-2">
+          <div class="flex justify-between items-center gap-1 flex-wrap">
+            <span class="text-[9px] font-bold px-2 py-0.5 rounded ${m ? 'bg-emerald-950 text-emerald-300' : 'bg-purple-950 text-purple-300'}">${m ? `✓ W bazie (#${m.barcode})` : '⭐ NOWY PRODUKT'}</span>
+            <div class="flex items-center gap-1">
+              <button type="button" onclick="splitShelfCountRow(${idx})" class="bg-slate-800 hover:bg-slate-700 text-amber-300 border border-amber-700/50 px-2 py-0.5 rounded text-[9px] font-bold" title="Rozdziel na 2 osobne warianty (np. Czerwone i Białe)">🔀 Rozdziel</button>
+              <input type="text" id="shelfCountCat_${idx}" list="categoryPresetsList" value="${cat}" oninput="currentShelfCountItems[${idx}].category=this.value" class="bg-slate-800 border border-slate-700 rounded px-2 py-0.5 text-[10px] text-cyan-300 font-bold w-40">
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <input type="text" id="shelfCountName_${idx}" value="${m ? m.name : it.name}" oninput="currentShelfCountItems[${idx}].name=this.value" class="bg-transparent font-bold text-xs text-white flex-1 border-b border-purple-500">
+            <input type="number" id="shelfCountQty_${idx}" value="${it.qty || 1}" oninput="currentShelfCountItems[${idx}].qty=parseInt(this.value)||1" class="w-14 bg-slate-800 rounded p-1 text-center font-black text-purple-300 text-xs">
+            <input type="text" id="shelfCountUnit_${idx}" value="${m ? m.unit : (it.unit || 'szt.')}" class="w-12 bg-slate-800 rounded p-1 text-center text-xs text-slate-300">
+          </div>
+          <select id="shelfCountMatch_${idx}" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-[11px] text-white w-full">
+            <option value="" ${!m ? 'selected' : ''}>⭐ UTWÓRZ JAKO NOWY OSOBNY PRODUKT</option>
+            ${inventory.map(inv => `<option value="${inv.id}" ${m && m.id === inv.id ? 'selected' : ''}>🔗 Scal pod #${inv.barcode}: ${inv.name} (Stan: ${inv.qty})</option>`).join('')}
+          </select>
+        </div>`;
+      }).join('');
+    }
+
+    function splitShelfCountRow(idx) {
+      const orig = currentShelfCountItems[idx]; if (!orig) return;
+      const half = Math.max(1, Math.floor((Number(orig.qty) || 2) / 2));
+      orig.qty = Math.max(1, (Number(orig.qty) || 2) - half);
+      currentShelfCountItems.splice(idx + 1, 0, {
+        name: orig.name + ' (Wariant 2)',
+        qty: half,
+        unit: orig.unit || 'szt.',
+        category: orig.category || 'Alkohole • Wino Białe',
+        photo: orig.photo || ''
+      });
+      renderShelfCountModalItems();
     }
 
     async function confirmAndApplyShelfCount(mode) {
       for (let i = 0; i < currentShelfCountItems.length; i++) {
         const name = el(`shelfCountName_${i}`).value.trim(), cid = el(`shelfCountMatch_${i}`).value, q = parseInt(el(`shelfCountQty_${i}`).value) || 0, u = el(`shelfCountUnit_${i}`).value.trim() || 'szt.', cat = el(`shelfCountCat_${i}`)?.value.trim() || 'Napoje';
+        const photo = currentShelfCountItems[i]?.photo || '';
         if (q <= 0 || !name) continue;
-        learnProductRule(name, cat, u);
+        learnProductRule(name, cat, u, photo);
         let m = cid ? inventory.find(x => String(x.id) === String(cid)) : findBestInventoryMatch(name);
         if (m) {
-          const old = m.qty; m.qty = (mode === 'ADD') ? (m.qty + q) : q; m.category = cat;
+          const old = m.qty; m.qty = (mode === 'ADD') ? (m.qty + q) : q; m.category = cat; if (photo && !m.photo) m.photo = photo;
           recordStockLog(m.id, m.name, mode === 'ADD' ? 'Zliczenie (+)' : 'Inwentaryzacja', mode === 'ADD' ? q : (q - old), 'Ze zdjęcia');
           if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${m.id}`, 'PATCH', { qty: m.qty, category: m.category, updated_at: new Date() }); } catch (e) {} }
         } else {
-          const ni = normalizeItem({ id: Date.now().toString() + '_' + i, barcode: 'RC-' + Math.floor(100000 + Math.random() * 900000), name, category: cat, location: 'Magazyn Główny', qty: q, inField: 0, unit: u, minQty: 3, price: 0 });
+          const ni = normalizeItem({ id: Date.now().toString() + '_' + i, barcode: 'RC-' + Math.floor(100000 + Math.random() * 900000), name, category: cat, location: 'Magazyn Główny', qty: q, inField: 0, unit: u, minQty: 3, price: 0, photo });
           inventory.unshift(ni); recordStockLog(ni.id, ni.name, 'Nowy ze zdjęcia', q, 'Ze zdjęcia');
           if (isCloudOnline) { try { await apiRequest('/inventory', 'POST', toDbItem(ni)); } catch (e) {} }
         }
       }
-      safeSetLocal('magazyn_offline_items', inventory); hideModal('shelfCountModal'); renderInventory(); alert("Zaktualizowano stany!");
+      safeSetLocal('magazyn_offline_items', inventory); hideModal('shelfCountModal'); renderInventory(); alert("Zaktualizowano stany i zapamiętano etykiety!");
     }
 
     function openInvoiceUploadModal() { resetInvoicePhotos(); showModal('invoiceCaptureModal'); }
@@ -1229,7 +1392,7 @@
       el('aiLoadingState').classList.remove('hidden'); el('aiItemsContainer').classList.add('hidden'); el('aiModalActions').classList.add('hidden');
 
       try {
-        const prompt = `Przeanalizuj fakturę/WZ. Jeśli wiersz powtarza się na 2 zdjęciach, zwróć go TYLKO RAZ! Jeśli jest "Cena zaokrąglona za sztu", podaj ją jako unitPriceHint. Przypisz category (Cisowianka Perlage to "Napoje • Woda"). Wyodrębnij: 1. docNumber, 2. supplier, 3. totalGross, 4. receiverName, 5. items: [{ "code": string, "name": string, "category": string, "rawQty": number, "rawPrice": number, "unitPriceHint": number }], 6. deposits: [{ "name": string, "category": "PET_CAN_050"|"BUTELKA_SZKLO"|"SKRZYNKA"|"PALETA_INNE", "netQty": number, "unitPrice": number }]. Zwróć JSON.`;
+        const prompt = `Przeanalizuj fakturę/WZ. Jeśli wiersz powtarza się na 2 zdjęciach, zwróć go TYLKO RAZ! Jeśli jest "Cena zaokrąglona za sztu", podaj ją jako unitPriceHint. Przypisz category (Cisowianka Perlage to "Napoje • Woda"). Wyodrębnij: 1. docNumber (dokładny numer faktury/dokumentu), 2. supplier, 3. totalGross, 4. receiverName, 5. items: [{ "code": string, "name": string, "category": string, "rawQty": number, "rawPrice": number, "unitPriceHint": number }], 6. deposits: [{ "name": string, "category": "PET_CAN_050"|"BUTELKA_SZKLO"|"SKRZYNKA"|"PALETA_INNE", "netQty": number, "unitPrice": number }]. Zwróć JSON.`;
         const parsed = await queryGeminiAPI(prompt, mediaParts);
         const seenInScan = new Map();
         for (const it of (parsed.items || [])) {
@@ -1238,7 +1401,7 @@
           const finalQ = mult > 1 ? rq * mult : rq;
           const smartCat = classifyProductSmartLocal(it.name, it.category) || it.category || 'Napoje • Gazowane / Soft';
           const spec = extractProductSpecs(it.name);
-          const dedupKey = (it.code ? String(it.code).trim() : '') + '|' + cleanCanonicalKey(it.name) + '|' + (spec.caps[0] || '');
+          const dedupKey = (it.code ? String(it.code).trim() : '') + '|' + cleanCanonicalKey(it.name) + '|' + (spec.caps[0] || '') + '|' + spec.strictTokens.join(',');
           if (!seenInScan.has(dedupKey)) {
             seenInScan.set(dedupKey, { name: it.name.trim(), category: smartCat, qty: finalQ, netPrice: unitP, unit: smartCat.startsWith('Jednorazówki') ? 'op.' : 'szt.', packMultiplier: mult, rawQty: rq });
           }
@@ -1258,7 +1421,7 @@
       checkInvoiceDuplicateLive();
       el('aiItemsList').innerHTML = (delivery.items || []).map((it, idx) => {
         const m = findBestInventoryMatch(it.name);
-        return `<div class="bg-slate-900 border ${m ? 'border-emerald-600/70' : 'border-indigo-600/70'} rounded-xl p-3 space-y-2"><div class="flex justify-between items-center flex-wrap gap-1"><span class="text-[9px] font-bold px-2 py-0.5 rounded ${m ? 'bg-emerald-950 text-emerald-300' : 'bg-indigo-950 text-indigo-300'}">${m ? `✓ W bazie (#${m.barcode})` : '⭐ NOWY PRODUKT'}</span><input type="text" id="aiItemCat_${idx}" list="categoryPresetsList" value="${m ? m.category : (it.category || 'Napoje')}" class="bg-slate-800 border border-slate-700 rounded px-2 py-0.5 text-[10px] text-cyan-300 font-bold w-48"></div><div class="flex justify-between gap-2"><input type="text" id="aiItemName_${idx}" value="${m ? m.name : it.name}" class="bg-transparent font-bold text-xs text-white flex-1 border-b border-indigo-500"><input type="number" step="0.01" id="aiItemPrice_${idx}" value="${Number(it.netPrice || 0).toFixed(2)}" class="w-16 bg-slate-800 rounded p-1 text-center font-bold text-emerald-400 text-xs"><input type="number" id="aiItemQty_${idx}" value="${it.qty || 1}" class="w-14 bg-slate-800 rounded p-1 text-center font-bold text-emerald-400 text-xs"><input type="text" id="aiItemUnit_${idx}" value="${it.unit || 'szt.'}" class="w-11 bg-slate-800 rounded p-1 text-center text-xs text-slate-300"></div><select id="aiSelectMatch_${idx}" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-[11px] text-white w-full"><option value="" ${!m ? 'selected' : ''}>⭐ DODAJ JAKO NOWY PRODUKT DO BAZY</option>${inventory.map(inv => `<option value="${inv.id}" ${m && m.id === inv.id ? 'selected' : ''}>🔗 Scal pod #${inv.barcode}: ${inv.name} (Stan: ${inv.qty})</option>`).join('')}</select></div>`;
+        return `<div class="bg-slate-900 border ${m ? 'border-emerald-600/70' : 'border-indigo-600/70'} rounded-xl p-3 space-y-2"><div class="flex justify-between items-center flex-wrap gap-1"><span id="aiBadge_${idx}" class="text-[9px] font-bold px-2 py-0.5 rounded ${m ? 'bg-emerald-950 text-emerald-300' : 'bg-indigo-950 text-indigo-300'}">${m ? `✓ W bazie (#${m.barcode})` : '⭐ NOWY PRODUKT'}</span><input type="text" id="aiItemCat_${idx}" list="categoryPresetsList" value="${m ? m.category : (it.category || 'Napoje')}" class="bg-slate-800 border border-slate-700 rounded px-2 py-0.5 text-[10px] text-cyan-300 font-bold w-48"></div><div class="flex justify-between gap-2"><input type="text" id="aiItemName_${idx}" value="${m ? m.name : it.name}" class="bg-transparent font-bold text-xs text-white flex-1 border-b border-indigo-500"><input type="number" step="0.01" id="aiItemPrice_${idx}" value="${Number(it.netPrice || 0).toFixed(2)}" class="w-16 bg-slate-800 rounded p-1 text-center font-bold text-emerald-400 text-xs"><input type="number" id="aiItemQty_${idx}" value="${it.qty || 1}" class="w-14 bg-slate-800 rounded p-1 text-center font-bold text-emerald-400 text-xs"><input type="text" id="aiItemUnit_${idx}" value="${it.unit || 'szt.'}" class="w-11 bg-slate-800 rounded p-1 text-center text-xs text-slate-300"></div><select id="aiSelectMatch_${idx}" class="bg-slate-800 border border-slate-700 rounded px-2 py-1 text-[11px] text-white w-full"><option value="" ${!m ? 'selected' : ''}>⭐ DODAJ JAKO NOWY PRODUKT DO BAZY</option>${inventory.map(inv => `<option value="${inv.id}" ${m && m.id === inv.id ? 'selected' : ''}>🔗 Scal pod #${inv.barcode}: ${inv.name} (Stan: ${inv.qty})</option>`).join('')}</select></div>`;
       }).join('');
       renderExtractedDepositsInModal();
     }
@@ -1331,7 +1494,7 @@
 
       safeSetLocal('magazyn_offline_items', inventory); safeSetLocal('magazyn_offline_price_alerts', priceAlerts);
       closeAiModal(); renderInventory(); renderDeposits(); renderDeliveries(); renderPriceAlerts();
-      alert(isCatalogOnly ? `📚 Baza zaktualizowana! Nowych: ${addedCatalogCount}, scalonych: ${mergedCount}.` : `📥 Dostawa przyjęta! Nowych: ${addedCatalogCount}, zsumowanych: ${mergedCount}.`);
+      alert(isCatalogOnly ? `📚 Baza zaktualizowana! Nowych: ${addedCatalogCount}, połączonych: ${mergedCount}.` : `📥 Dostawa przyjęta! Nowych: ${addedCatalogCount}, zsumowanych: ${mergedCount}.`);
     }
 
     function closeAiModal() { hideModal('aiModal'); currentExtractedDelivery = null; }
@@ -1436,7 +1599,7 @@
       el('evReturnDateInput').value = parsedReturn.returnDate || new Date().toLocaleDateString('pl-PL');
       const base = (ev && ev.items_json?.length > 0) ? ev.items_json : (parsedReturn.items || []).map(it => ({ name: it.name, dispatched: Number(it.dispatched) || (Number(it.returned || 0) + Number(it.consumed || 0)), unit: it.unit || 'szt.' }));
       el('evReturnItemsList').innerHTML = base.map((dispItem, idx) => {
-        const m = (parsedReturn.items || []).find(it => normalizeText(it.name).includes(normalizeText(dispItem.name)) || normalizeText(dispItem.name).includes(normalizeText(it.name)));
+        const m = (parsedReturn.items || []).find(it => areSpecsCompatible(it.name, dispItem.name) && (normalizeText(it.name).includes(normalizeText(dispItem.name)) || normalizeText(dispItem.name).includes(normalizeText(it.name))));
         const dq = Number(dispItem.dispatched) || 0;
         let rq = 0, cq = dq;
         if (m) {
@@ -1508,6 +1671,9 @@
     function openEditModal(id) {
       const it = inventory.find(i => String(i.id) === String(id)); if (!it) return;
       hideModal('actionModal');
+      tempEditItemPhoto = it.photo || '';
+      if (tempEditItemPhoto) { el('editItemPhotoPreview').src = tempEditItemPhoto; el('editItemPhotoPreview').classList.remove('hidden'); }
+      else el('editItemPhotoPreview').classList.add('hidden');
       el('editItemId').value = it.id; el('editItemBarcode').value = it.barcode; el('editItemName').value = it.name; el('editItemPrice').value = Number(it.price || 0).toFixed(2); el('editItemCategory').value = it.category || 'Napoje'; el('editItemLocation').value = it.location || '-'; el('editItemUnit').value = it.unit || 'szt.'; el('editItemMinQty').value = it.minQty || 0;
       showModal('editItemModal');
     }
@@ -1516,7 +1682,8 @@
       e.preventDefault();
       const it = inventory.find(i => String(i.id) === String(el('editItemId').value)); if (!it) return;
       it.barcode = el('editItemBarcode').value.trim(); it.name = el('editItemName').value.trim(); it.price = parseFloat(el('editItemPrice').value) || 0; it.category = el('editItemCategory').value.trim() || 'Napoje'; it.location = el('editItemLocation').value.trim() || '-'; it.unit = el('editItemUnit').value; it.minQty = parseInt(el('editItemMinQty').value) || 0;
-      learnProductRule(it.name, it.category, it.unit);
+      if (tempEditItemPhoto) it.photo = tempEditItemPhoto;
+      learnProductRule(it.name, it.category, it.unit, it.photo);
       safeSetLocal('magazyn_offline_items', inventory); renderInventory(); hideModal('editItemModal');
       if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${it.id}`, 'PATCH', toDbItem(it)); } catch (err) {} }
     }
@@ -1524,6 +1691,7 @@
     function openActionModal(id) {
       const it = inventory.find(i => String(i.id) === String(id)); if (!it) return;
       selectedItemId = it.id;
+      if (it.photo) { el('modalItemThumb').src = it.photo; el('modalItemThumb').classList.remove('hidden'); } else el('modalItemThumb').classList.add('hidden');
       el('modalItemCategory').innerText = `${it.category || 'Napoje'} • ${it.location || '-'}`; el('modalItemName').innerText = it.name; el('modalItemBarcode').innerText = `KOD: ${it.barcode}`; el('modalItemPrice').innerText = `${Number(it.price || 0).toFixed(2)} zł`; el('modalItemQty').innerText = it.qty; el('modalItemUnit').innerText = it.unit || 'szt.'; el('modalItemInField').innerText = it.inField || 0; el('modalStepQty').value = 1;
       const logs = stockLogs.filter(l => String(l.item_id) === String(it.id)).slice(0, 10);
       el('modalItemLogsList').innerHTML = logs.length === 0 ? `<span class="text-slate-500 italic">Brak historii.</span>` : logs.map(l => `<div class="flex justify-between text-slate-300 border-b border-slate-800/60 pb-0.5"><span>${l.action_type} ${l.note ? `(${l.note})` : ''}</span><span class="font-bold ${l.qty_change > 0 ? 'text-emerald-400' : 'text-rose-400'}">${l.qty_change > 0 ? '+' : ''}${l.qty_change}</span></div>`).join('');
@@ -1550,7 +1718,10 @@
     }
 
     function generateRandomCode() { el('newBarcode').value = 'RC-' + Math.floor(100000 + Math.random() * 900000); }
-    function openNewItemModal(p) { el('newBarcode').value = p || ('RC-' + Math.floor(100000 + Math.random() * 900000)); el('newName').value = ''; el('newPrice').value = '0.00'; el('newCategory').value = 'Napoje • Gazowane / Soft'; el('newUnit').value = 'szt.'; el('newLocation').value = ''; el('newQty').value = 1; showModal('newItemModal'); }
+    function openNewItemModal(p) {
+      tempNewItemPhoto = ''; el('newItemPhotoPreview').classList.add('hidden');
+      el('newBarcode').value = p || ('RC-' + Math.floor(100000 + Math.random() * 900000)); el('newName').value = ''; el('newPrice').value = '0.00'; el('newCategory').value = 'Napoje • Gazowane / Soft'; el('newUnit').value = 'szt.'; el('newLocation').value = ''; el('newQty').value = 1; showModal('newItemModal');
+    }
 
     async function saveNewItem(e) {
       e.preventDefault();
@@ -1558,14 +1729,15 @@
       const existing = findBestInventoryMatch(name);
       const q = parseInt(el('newQty').value) || 0, p = parseFloat(el('newPrice').value) || 0, u = el('newUnit').value;
       const chosenCat = el('newCategory').value.trim() || classifyProductSmartLocal(name) || 'Napoje';
-      learnProductRule(name, chosenCat, u);
+      learnProductRule(name, chosenCat, u, tempNewItemPhoto);
       if (existing && cleanCanonicalKey(existing.name) === cleanCanonicalKey(name)) {
         existing.qty += q; if (p > 0) existing.price = p; existing.category = chosenCat;
+        if (tempNewItemPhoto) existing.photo = tempNewItemPhoto;
         safeSetLocal('magazyn_offline_items', inventory); renderInventory(); hideModal('newItemModal');
         if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${existing.id}`, 'PATCH', toDbItem(existing)); } catch (err) {} }
         return;
       }
-      const ni = normalizeItem({ id: Date.now().toString(), barcode: el('newBarcode').value.trim(), name, price: p, category: chosenCat, location: el('newLocation').value.trim() || '-', qty: q, inField: 0, unit: u, minQty: parseInt(el('newMinQty').value) || 0 });
+      const ni = normalizeItem({ id: Date.now().toString(), barcode: el('newBarcode').value.trim(), name, price: p, category: chosenCat, location: el('newLocation').value.trim() || '-', qty: q, inField: 0, unit: u, minQty: parseInt(el('newMinQty').value) || 0, photo: tempNewItemPhoto });
       inventory.unshift(ni); recordStockLog(ni.id, ni.name, 'Utworzenie pozycji', ni.qty);
       safeSetLocal('magazyn_offline_items', inventory); renderInventory(); hideModal('newItemModal');
       if (isCloudOnline) { try { await apiRequest('/inventory', 'POST', toDbItem(ni)); } catch (e) {} }
