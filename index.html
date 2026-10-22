@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>MagazynRC - WMS v4.5</title>
+  <title>MagazynRC - WMS v4.6</title>
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#0f172a">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -31,7 +31,7 @@
     <div class="flex items-center space-x-2">
       <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-base shadow">M</div>
       <div>
-        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v4.5 EXPO-MM</span></h1>
+        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v4.6 STABLE</span></h1>
         <p id="syncStatus" class="text-[10px] text-amber-400 font-medium leading-none mt-0.5">Inicjalizacja...</p>
       </div>
     </div>
@@ -43,6 +43,7 @@
     </div>
   </header>
 
+  <!-- UKRYTE INPUTY PLIKÓW -->
   <input type="file" id="shelfCountInput" accept="image/*,application/pdf" multiple class="hidden" onchange="processShelfCountImage(event, false)">
   <input type="file" id="shelfCountAppendInput" accept="image/*,application/pdf" multiple class="hidden" onchange="processShelfCountImage(event, true)">
   <input type="file" id="itemLabelPhotoInput" accept="image/*" class="hidden" onchange="handleItemLabelPhoto(event)">
@@ -64,11 +65,28 @@
   </datalist>
 
   <main class="max-w-4xl mx-auto p-3.5 space-y-4">
-    <div class="grid grid-cols-4 gap-2">
-      <div class="bg-slate-800/80 border border-slate-700/70 p-2 rounded-xl text-center"><p class="text-[10px] text-slate-400">W bazie</p><p id="statTotalItems" class="text-base font-bold text-white mt-0.5">0</p></div>
-      <div class="bg-slate-800/80 border border-slate-700/70 p-2 rounded-xl text-center"><p class="text-[10px] text-slate-400">Wartość magazynu</p><p id="statTotalValue" class="text-xs font-black text-emerald-400 mt-1">0 zł</p></div>
-      <div onclick="switchMainTab('expo')" class="bg-slate-800/80 border border-amber-800/70 p-2 rounded-xl text-center cursor-pointer hover:bg-slate-800 transition"><p class="text-[10px] text-amber-300 font-semibold">🍺 Na EXPO XXI</p><p id="statExpoTotalVal" class="text-xs font-black text-amber-400 mt-1">0.00 zł</p></div>
-      <div onclick="switchMainTab('events')" class="bg-slate-800/80 border border-blue-800/60 p-2 rounded-xl text-center cursor-pointer hover:bg-slate-800 transition"><p class="text-[10px] text-blue-300 font-semibold">🚚 W terenie (Eventy)</p><p id="statInField" class="text-base font-bold text-blue-400 mt-0.5">0</p></div>
+    <!-- 5 KAFELKÓW PODSUMOWANIA (PRZYWRÓCONA KAUCJA) -->
+    <div class="grid grid-cols-5 gap-1.5 text-center">
+      <div class="bg-slate-800/80 border border-slate-700/70 p-2 rounded-xl">
+        <p class="text-[9px] text-slate-400">W bazie</p>
+        <p id="statTotalItems" class="text-sm font-bold text-white mt-0.5">0</p>
+      </div>
+      <div class="bg-slate-800/80 border border-slate-700/70 p-2 rounded-xl">
+        <p class="text-[9px] text-slate-400">Magazyn</p>
+        <p id="statTotalValue" class="text-[11px] font-black text-emerald-400 mt-1 truncate">0 zł</p>
+      </div>
+      <div onclick="switchMainTab('deposits')" class="bg-slate-800/80 border border-cyan-800/60 p-2 rounded-xl cursor-pointer hover:bg-slate-800 transition">
+        <p class="text-[9px] text-cyan-300 font-semibold">♻️ Kaucje</p>
+        <p id="statTotalDeposits" class="text-[11px] font-black text-cyan-400 mt-1 truncate">0.00 zł</p>
+      </div>
+      <div onclick="switchMainTab('expo')" class="bg-slate-800/80 border border-amber-800/70 p-2 rounded-xl cursor-pointer hover:bg-slate-800 transition">
+        <p class="text-[9px] text-amber-300 font-semibold">🍺 EXPO XXI</p>
+        <p id="statExpoTotalVal" class="text-[11px] font-black text-amber-400 mt-1 truncate">0.00 zł</p>
+      </div>
+      <div onclick="switchMainTab('events')" class="bg-slate-800/80 border border-blue-800/60 p-2 rounded-xl cursor-pointer hover:bg-slate-800 transition">
+        <p class="text-[9px] text-blue-300 font-semibold">🚚 W terenie</p>
+        <p id="statInField" class="text-sm font-bold text-blue-400 mt-0.5">0</p>
+      </div>
     </div>
 
     <!-- ZAKŁADKI GŁÓWNE -->
@@ -104,6 +122,7 @@
         <button onclick="setCategoryPill('BEVERAGE')" id="pillCat_BEVERAGE" class="bg-slate-800 text-slate-300 border border-slate-700 px-3 py-1.5 rounded-xl whitespace-nowrap">🥤 Napoje & Kawa <span id="countCat_BEVERAGE" class="text-[10px]">(0)</span></button>
         <button onclick="setCategoryPill('DISPOSABLES')" id="pillCat_DISPOSABLES" class="bg-slate-800 text-slate-300 border border-slate-700 px-3 py-1.5 rounded-xl whitespace-nowrap">🍽️ Jednorazówki <span id="countCat_DISPOSABLES" class="text-[10px]">(0)</span></button>
         <button onclick="setCategoryPill('LOW')" id="pillCat_LOW" class="bg-slate-800 text-rose-400 border border-slate-700 px-3 py-1.5 rounded-xl whitespace-nowrap">⚠️ Braki <span id="countCat_LOW" class="text-[10px]">(0)</span></button>
+        <button onclick="setCategoryPill('FIELD')" id="pillCat_FIELD" class="bg-slate-800 text-blue-400 border border-slate-700 px-3 py-1.5 rounded-xl whitespace-nowrap">🚚 W terenie <span id="countCat_FIELD" class="text-[10px]">(0)</span></button>
       </div>
 
       <div class="flex flex-wrap gap-2 items-center justify-between">
@@ -138,7 +157,7 @@
       <div id="eventsList" class="space-y-3"></div>
     </section>
 
-    <!-- WIDOK 3: BAR EXPO XXI (NOWOŚĆ - PRZESUNIĘCIA MM) -->
+    <!-- WIDOK 3: BAR EXPO XXI -->
     <section id="viewExpo" class="hidden space-y-3">
       <div class="bg-gradient-to-r from-slate-800 to-amber-950/60 border border-amber-600/60 rounded-2xl p-3.5 space-y-3 shadow-md">
         <div class="flex justify-between items-start gap-2 flex-wrap">
@@ -180,6 +199,12 @@
           <div class="bg-slate-900 border border-slate-700 p-2 rounded-xl text-center"><span class="text-[9px] text-slate-400 block">Skrzynki / Palety</span><span id="depStatCratesQty" class="text-sm font-black text-amber-400">0 szt.</span><span id="depStatCratesVal" class="text-[10px] text-slate-400 block">0.00 zł</span></div>
         </div>
       </div>
+      <div class="flex gap-1.5 overflow-x-auto pb-1 text-[11px]">
+        <button onclick="quickAddPresetDeposit('Kaucja PET / Puszka 0,50 zł', 'PET_CAN_050', 0.50)" class="bg-slate-800 border border-slate-700 text-cyan-300 px-2.5 py-1.5 rounded-xl whitespace-nowrap">⚡ + PET/Puszka (0,50)</button>
+        <button onclick="quickAddPresetDeposit('Butelka Szklana Zwrotna 1,00 zł', 'BUTELKA_SZKLO', 1.00)" class="bg-slate-800 border border-slate-700 text-emerald-300 px-2.5 py-1.5 rounded-xl whitespace-nowrap">⚡ + Szkło (1,00)</button>
+        <button onclick="quickAddPresetDeposit('Skrzynka plastikowa (Transporter)', 'SKRZYNKA', 14.40)" class="bg-slate-800 border border-slate-700 text-amber-300 px-2.5 py-1.5 rounded-xl whitespace-nowrap">⚡ + Skrzynka CC (14,40)</button>
+        <button onclick="quickAddPresetDeposit('Paleta EURO', 'PALETA_INNE', 50.00)" class="bg-slate-800 border border-slate-700 text-purple-300 px-2.5 py-1.5 rounded-xl whitespace-nowrap">⚡ + Paleta EURO</button>
+      </div>
       <div id="depositsList" class="space-y-2.5"></div>
     </section>
 
@@ -190,7 +215,7 @@
     </section>
   </main>
 
-  <!-- MODAL: KREATOR PRZESUNIĘCIA MM NA BAR EXPO XXI (NOWOŚĆ) -->
+  <!-- MODAL: KREATOR PRZESUNIĘCIA MM NA BAR EXPO XXI -->
   <div id="expoTransferModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-4 space-y-3 max-h-[94vh] flex flex-col shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-700 pb-2">
@@ -203,7 +228,7 @@
       <div class="grid grid-cols-2 gap-2 text-xs">
         <div><label class="text-[10px] text-slate-400 block">Nr dokumentu MM:</label><input type="text" id="expoTransferNum" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 font-mono font-bold text-amber-400"></div>
         <div><label class="text-[10px] text-slate-400 block">Data wydania:</label><input type="text" id="expoTransferDate" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-slate-200"></div>
-        <div class="col-span-2"><label class="text-[10px] text-slate-400 block">Nazwa targów / Opis (opcjonalnie):</label><input type="text" id="expoTransferName" placeholder="Np. Targi Prądzyńskiego / Bar Główny" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 font-bold text-white"></div>
+        <div class="col-span-2"><label class="text-[10px] text-slate-400 block">Nazwa targów / Opis:</label><input type="text" id="expoTransferName" placeholder="Np. Targi Prądzyńskiego / Bar Główny" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 font-bold text-white"></div>
       </div>
       <div class="bg-slate-900 border border-slate-700 p-2.5 rounded-xl flex gap-1.5">
         <select id="expoTransferAddSelect" class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white"></select>
@@ -1009,37 +1034,51 @@
 
     function setCategoryPill(catKey) {
       currentCategoryPill = catKey;
-      ['ALL', 'ALCOHOL', 'BEVERAGE', 'DISPOSABLES', 'LOW'].forEach(k => {
+      ['ALL', 'ALCOHOL', 'BEVERAGE', 'DISPOSABLES', 'LOW', 'FIELD'].forEach(k => {
         const b = el(`pillCat_${k}`);
         if (b) b.className = (k === catKey) ? "bg-emerald-600 text-slate-950 font-black px-3 py-1.5 rounded-xl whitespace-nowrap" : "bg-slate-800 text-slate-300 border border-slate-700 px-3 py-1.5 rounded-xl whitespace-nowrap";
       });
       renderInventory(); triggerScanFeedback();
     }
 
+    // --- BEZBŁĘDNY RENDER INVENTORY (Z INICJALIZACJĄ CFIELD I OBLICZANIEM KAUCJI) ---
     function renderInventory() {
       const search = String(el('searchFilter')?.value || '').toLowerCase();
       const list = el('inventoryList'); if (!list) return;
-      el('statTotalItems').innerText = inventory.length;
-      el('statInField').innerText = inventory.reduce((s, i) => s + (Number(i.inField) || 0), 0);
-      const totalVal = inventory.reduce((s, i) => s + ((Number(i.qty) || 0) * (Number(i.price) || 0)), 0);
-      el('statTotalValue').innerText = `${totalVal.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} zł`;
 
-      let cAlco = 0, cBev = 0, cDisp = 0, cLow = 0;
+      let cAlco = 0, cBev = 0, cDisp = 0, cLow = 0, cField = 0;
+      let totalMagVal = 0, totalFieldQty = 0;
+
       inventory.forEach(it => {
         const g = getMainCategoryGroup(it);
         if (g === 'ALCOHOL') cAlco++; else if (g === 'DISPOSABLES') cDisp++; else cBev++;
         if ((Number(it.qty) || 0) <= (Number(it.minQty) || 0)) cLow++;
+        if ((Number(it.inField) || 0) > 0) cField++;
+
+        totalMagVal += ((Number(it.qty) || 0) * (Number(it.price) || 0));
+        totalFieldQty += (Number(it.inField) || 0);
       });
+
+      el('statTotalItems').innerText = inventory.length;
+      el('statInField').innerText = totalFieldQty;
+      el('statTotalValue').innerText = `${totalMagVal.toLocaleString('pl-PL', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} zł`;
+
+      // Aktualizacja licznika kaucji
+      const totalDepVal = deposits.reduce((sum, d) => sum + ((Number(d.qty) || 0) * (Number(d.unit_price) || 0)), 0);
+      if (el('statTotalDeposits')) el('statTotalDeposits').innerText = `${totalDepVal.toFixed(2)} zł`;
+
       if (el('countCat_ALL')) el('countCat_ALL').innerText = `(${inventory.length})`;
       if (el('countCat_ALCOHOL')) el('countCat_ALCOHOL').innerText = `(${cAlco})`;
       if (el('countCat_BEVERAGE')) el('countCat_BEVERAGE').innerText = `(${cBev})`;
       if (el('countCat_DISPOSABLES')) el('countCat_DISPOSABLES').innerText = `(${cDisp})`;
       if (el('countCat_LOW')) el('countCat_LOW').innerText = `(${cLow})`;
+      if (el('countCat_FIELD')) el('countCat_FIELD').innerText = `(${cField})`;
 
       const filtered = inventory.filter(item => {
         const n = String(item.name || '').toLowerCase(), b = String(item.barcode || '').toLowerCase(), c = String(item.category || '').toLowerCase(), l = String(item.location || '').toLowerCase();
         if (!(n.includes(search) || b.includes(search) || c.includes(search) || l.includes(search))) return false;
         if (currentCategoryPill === 'LOW') return (Number(item.qty) || 0) <= (Number(item.minQty) || 0);
+        if (currentCategoryPill === 'FIELD') return (Number(item.inField) || 0) > 0;
         if (currentCategoryPill === 'ALCOHOL') return getMainCategoryGroup(item) === 'ALCOHOL';
         if (currentCategoryPill === 'BEVERAGE') return getMainCategoryGroup(item) === 'BEVERAGE';
         if (currentCategoryPill === 'DISPOSABLES') return getMainCategoryGroup(item) === 'DISPOSABLES';
@@ -1128,7 +1167,6 @@
         totalNetVal += rowVal;
         payload.push({ itemId: it.id, name: it.name, transferredQty: qty, returnedQty: 0, unit: it.unit || 'szt.', netPrice: p, rowNet: rowVal });
 
-        // NATYCHMIAST ZDEJMUJEMY ZE STANU GŁÓWNEGO MAGANYZU (inField nie dotykamy!)
         it.qty = Math.max(0, it.qty - qty);
         recordStockLog(it.id, it.name, 'Przesunięcie MM (EXPO XXI)', -qty, `${mmNum} • ${mmName}`);
         if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${it.id}`, 'PATCH', { qty: it.qty, updated_at: new Date() }); } catch (e) {} }
@@ -1205,7 +1243,6 @@
       }).join('');
     }
 
-    // --- ZWROT NADWYŻKI TOWARU Z BARU EXPO XXI NA MAGAZYN GŁÓWNY ---
     async function returnGoodsFromExpo(transferId) {
       const tr = expoTransfers.find(x => String(x.id) === String(transferId)); if (!tr) return;
       let items = []; try { items = typeof tr.items_json === 'string' ? JSON.parse(tr.items_json) : (tr.items_json || []); } catch (e) {}
@@ -1225,7 +1262,6 @@
 
       itemToReturn.returnedQty = (itemToReturn.returnedQty || 0) + retQty;
 
-      // PRZYJMUJEMY Z POWROTEM NA MAGAZYN GŁÓWNY
       const targetInv = itemToReturn.itemId ? inventory.find(x => String(x.id) === String(itemToReturn.itemId)) : findBestInventoryMatch(itemToReturn.name);
       if (targetInv) {
         targetInv.qty += retQty;
@@ -1352,9 +1388,9 @@
       if (!currentPreviewSheetData) return;
       const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"></head><body>${buildRoyalCateringSheetHTML(currentPreviewSheetData)}</body></html>`;
       const blob = new Blob(['\uFEFF' + html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
-      const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-      a.download = `${(currentPreviewSheetData.isExpoMM ? 'Dokument_MM_' : (currentPreviewSheetData.isReturn ? 'Rozliczenie_' : 'Karta_Wydania_')) + currentPreviewSheetData.eventNumber}.xls`.replace(/[^a-zA-Z0-9._-]/g, '_');
-      a.click();
+      const link = document.createElement('a'); link.href = URL.createObjectURL(blob);
+      link.download = `${(currentPreviewSheetData.isExpoMM ? 'Dokument_MM_' : (currentPreviewSheetData.isReturn ? 'Rozliczenie_' : 'Karta_Wydania_')) + currentPreviewSheetData.eventNumber}.xls`.replace(/[^a-zA-Z0-9._-]/g, '_');
+      link.click();
     }
     function printEventSheet(eventId, type) {
       const ev = events.find(e => String(e.id) === String(eventId)); if (!ev) return;
@@ -1362,203 +1398,43 @@
       openSheetPreviewModal({ eventNumber: ev.event_number || '#EVENT', eventName: ev.event_name || '', dispatchDate: ev.dispatch_date || '-', returnDate: ev.return_date || '-', isReturn: (type === 'RETURN'), isExpoMM: false, items });
     }
 
-    function renderDeposits() {
-      const list = el('depositsList'); if (!list) return;
-      let petQ = 0, petV = 0, glQ = 0, glV = 0, crQ = 0, crV = 0;
-      deposits.forEach(d => {
-        const q = Number(d.qty) || 0, p = Number(d.unit_price) || 0, v = q * p;
-        if (d.category === 'PET_CAN_050') { petQ += q; petV += v; } else if (d.category === 'BUTELKA_SZKLO') { glQ += q; glV += v; } else { crQ += q; crV += v; }
+    // --- POPRAWIONA I ODPORNA NA BŁĘDY NAWIGACJA switchMainTab ---
+    function switchMainTab(tab) {
+      const allTabs = ['Stock', 'Events', 'Expo', 'Deliveries', 'Deposits', 'Alerts'];
+      allTabs.forEach(t => {
+        const v = el(`view${t}`);
+        if (v) v.classList.add('hidden');
+        const hb = el(`tab${t}HeaderBtn`);
+        if (hb) hb.className = 'pb-2 border-b-2 border-transparent text-slate-400 whitespace-nowrap font-bold';
+        const nb = el(`navBtn${t}`);
+        if (nb) nb.className = 'flex flex-col items-center gap-1 text-slate-400 py-1 px-2';
       });
-      el('statTotalDeposits').innerText = `${(petV + glV + crV).toFixed(2)} zł`;
-      const badge = el('depositsCountBadge');
-      if (badge) { if (deposits.length > 0) { badge.innerText = deposits.length; badge.classList.remove('hidden'); } else badge.classList.add('hidden'); }
-      el('depStatPetQty').innerText = `${petQ} szt.`; el('depStatPetVal').innerText = `${petV.toFixed(2)} zł`;
-      el('depStatGlassQty').innerText = `${glQ} szt.`; el('depStatGlassVal').innerText = `${glV.toFixed(2)} zł`;
-      el('depStatCratesQty').innerText = `${crQ} szt.`; el('depStatCratesVal').innerText = `${crV.toFixed(2)} zł`;
-      if (deposits.length === 0) { list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak zarejestrowanych kaucji.</div>`; return; }
-      list.innerHTML = deposits.map((dep, idx) => `<div class="bg-slate-800 border border-slate-700 rounded-2xl p-3.5 flex flex-col gap-2"><div class="flex justify-between"><div><h4 class="font-bold text-xs text-white"><span class="text-cyan-400 font-mono mr-1">Lp. ${idx + 1}</span> ${dep.name}</h4><p class="text-[11px] text-slate-400">Stawka (Netto=Brutto): <strong class="text-cyan-400">${Number(dep.unit_price).toFixed(2)} zł</strong> • Razem: <strong class="text-white">${((Number(dep.qty)||0)*(Number(dep.unit_price)||0)).toFixed(2)} zł</strong></p></div><div class="bg-slate-900 border border-slate-700 px-3 py-1 rounded-xl text-center"><span class="text-base font-black text-cyan-400">${dep.qty}</span></div></div><div class="flex justify-between pt-2 border-t border-slate-700 text-xs"><div class="flex gap-1.5"><button onclick="adjustDepositQty('${dep.id}', 1)" class="bg-slate-700 text-emerald-400 font-bold px-2.5 py-1 rounded-lg">+1</button><button onclick="returnDepositToDriver('${dep.id}')" class="bg-amber-600 text-slate-950 font-black px-2.5 py-1 rounded-lg">🚚 Oddaj kierowcy</button></div><div class="flex gap-2"><button onclick="openEditDepositModal('${dep.id}')" class="text-slate-300">✏️ Edytuj</button><button onclick="deleteDepositItem('${dep.id}')" class="text-rose-400">🗑️ Usuń</button></div></div></div>`).join('');
-    }
 
-    async function adjustDepositQty(depId, delta) {
-      const dep = deposits.find(d => String(d.id) === String(depId)); if (!dep) return;
-      dep.qty = Math.max(0, (Number(dep.qty) || 0) + delta); safeSetLocal('magazyn_offline_deposits', deposits); renderDeposits();
-      if (isCloudOnline) { try { await apiRequest(`/deposits?id=eq.${dep.id}`, 'PATCH', { qty: dep.qty, updated_at: new Date() }); } catch (e) {} }
-    }
-    async function returnDepositToDriver(depId) {
-      const dep = deposits.find(d => String(d.id) === String(depId)); if (!dep) return;
-      const s = prompt(`Ile sztuk "${dep.name}" oddajesz kierowcy?`, dep.qty); if (s === null) return;
-      const amt = parseInt(s, 10); if (isNaN(amt) || amt <= 0) return;
-      dep.qty = Math.max(0, (Number(dep.qty) || 0) - amt); safeSetLocal('magazyn_offline_deposits', deposits); renderDeposits();
-      if (isCloudOnline) { try { await apiRequest(`/deposits?id=eq.${dep.id}`, 'PATCH', { qty: dep.qty, updated_at: new Date() }); } catch (e) {} }
-    }
-    async function quickAddPresetDeposit(name, category, price) {
-      const s = prompt(`Ilość sztuk dla "${name}":`, "12"); if (s === null) return;
-      const q = parseInt(s, 10); if (isNaN(q) || q <= 0) return;
-      await upsertDepositEntry(name, category, price, q); renderDeposits();
-    }
-    async function upsertDepositEntry(name, category, unitPrice, qtyDelta) {
-      let ex = findBestDepositMatch(name, unitPrice);
-      if (ex) {
-        ex.qty = Math.max(0, (Number(ex.qty) || 0) + qtyDelta);
-        if (isCloudOnline) { try { await apiRequest(`/deposits?id=eq.${ex.id}`, 'PATCH', { qty: ex.qty, updated_at: new Date() }); } catch (e) {} }
-        safeSetLocal('magazyn_offline_deposits', deposits); return ex.id;
-      } else {
-        const nd = { id: Date.now().toString() + '_' + Math.floor(Math.random() * 1000), name, category: category || 'BUTELKA_SZKLO', unit_price: Number(unitPrice) || 0.50, qty: Math.max(0, qtyDelta), updated_at: new Date() };
-        deposits.unshift(nd); if (isCloudOnline) { try { await apiRequest('/deposits', 'POST', nd); } catch (e) {} }
-        safeSetLocal('magazyn_offline_deposits', deposits); return nd.id;
-      }
-    }
-    function openNewDepositModal() { el('depModalId').value = ''; el('depModalName').value = ''; el('depModalCategory').value = 'PET_CAN_050'; el('depModalPrice').value = '0.50'; el('depModalQty').value = '10'; showModal('depositModal'); }
-    function openEditDepositModal(id) {
-      const dep = deposits.find(d => String(d.id) === String(id)); if (!dep) return;
-      el('depModalId').value = dep.id; el('depModalName').value = dep.name; el('depModalCategory').value = dep.category || 'BUTELKA_SZKLO'; el('depModalPrice').value = Number(dep.unit_price).toFixed(2); el('depModalQty').value = dep.qty; showModal('depositModal');
-    }
-    function handleDepCategoryPreset() {
-      const c = el('depModalCategory').value, p = el('depModalPrice');
-      if (c === 'PET_CAN_050') p.value = '0.50'; else if (c === 'BUTELKA_SZKLO') p.value = '1.00'; else if (c === 'SKRZYNKA') p.value = '14.40';
-    }
-    async function saveDepositModal(e) {
-      e.preventDefault();
-      const id = el('depModalId').value, name = el('depModalName').value.trim(), category = el('depModalCategory').value, price = parseFloat(el('depModalPrice').value) || 0.50, qty = parseInt(el('depModalQty').value, 10) || 0;
-      if (id) {
-        const dep = deposits.find(d => String(d.id) === String(id));
-        if (dep) { dep.name = name; dep.category = category; dep.unit_price = price; dep.qty = qty; if (isCloudOnline) { try { await apiRequest(`/deposits?id=eq.${dep.id}`, 'PATCH', { name, category, unit_price: price, qty, updated_at: new Date() }); } catch (err) {} } }
-      } else {
-        const nd = { id: Date.now().toString(), name, category, unit_price: price, qty, updated_at: new Date() };
-        deposits.unshift(nd); if (isCloudOnline) { try { await apiRequest('/deposits', 'POST', nd); } catch (err) {} }
-      }
-      safeSetLocal('magazyn_offline_deposits', deposits); renderDeposits(); hideModal('depositModal');
-    }
-    async function deleteDepositItem(id) {
-      if (!confirm("Usunąć kaucję?")) return;
-      deposits = deposits.filter(d => String(d.id) !== String(id)); safeSetLocal('magazyn_offline_deposits', deposits); renderDeposits();
-      if (isCloudOnline) { try { await apiRequest(`/deposits?id=eq.${id}`, 'DELETE'); } catch (e) {} }
-    }
+      const map = {
+        stock: ['Stock', 'emerald'],
+        events: ['Events', 'blue'],
+        expo: ['Expo', 'amber'],
+        deliveries: ['Deliveries', 'indigo'],
+        deposits: ['Deposits', 'cyan'],
+        alerts: ['Alerts', 'rose']
+      };
+      const [ name, col ] = map[tab] || map.stock;
+      const targetView = el(`view${name}`);
+      if (targetView) targetView.classList.remove('hidden');
 
-    // --- ARCHIWUM FAKTUR ---
-    function renderDeliveries() {
-      const list = el('deliveriesList'); if (!list) return;
-      if (deliveries.length === 0) { list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak zarejestrowanych dostaw.</div>`; return; }
-      const docCounts = {};
-      deliveries.forEach(d => { const k = normalizeInvoiceNumberKey(d.doc_number); if (k) docCounts[k] = (docCounts[k] || 0) + 1; });
+      const hb = el(`tab${name}HeaderBtn`);
+      if (hb) hb.className = `pb-2 border-b-2 border-${col}-500 text-${col}-400 font-bold whitespace-nowrap`;
+      const nb = el(`navBtn${name}`);
+      if (nb) nb.className = `flex flex-col items-center gap-1 text-${col}-400 py-1 px-2`;
 
-      list.innerHTML = deliveries.map(d => {
-        let items = [], depItems = [];
-        try { items = typeof d.items_json === 'string' ? JSON.parse(d.items_json) : (d.items_json || []); } catch (e) {}
-        try { depItems = typeof d.deposits_json === 'string' ? JSON.parse(d.deposits_json) : (d.deposits_json || []); } catch (e) {}
-        const photos = parseDeliveryImages(d.image_url);
-        const isDup = docCounts[normalizeInvoiceNumberKey(d.doc_number)] > 1;
+      if (tab === 'stock') renderInventory();
+      else if (tab === 'events') renderEvents();
+      else if (tab === 'expo') renderExpoTransfers();
+      else if (tab === 'deliveries') renderDeliveries();
+      else if (tab === 'deposits') renderDeposits();
+      else if (tab === 'alerts') renderPriceAlerts();
 
-        const calcProdNet = items.reduce((acc, it) => acc + ((Number(it.qty) || 0) * (Number(it.netPrice) || 0)), 0);
-        const calcDepNet = depItems.reduce((acc, dp) => acc + ((Number(dp.netQty) || 0) * (Number(dp.unitPrice) || 0)), 0);
-        const dispProdNet = d.total_net ? Number(d.total_net).toFixed(2) : calcProdNet.toFixed(2);
-        const dispNetWithDep = d.total_net_with_dep ? Number(d.total_net_with_dep).toFixed(2) : (parseFloat(dispProdNet) + calcDepNet).toFixed(2);
-
-        return `<div class="bg-slate-800 border ${isDup ? 'border-rose-500' : 'border-slate-700'} rounded-2xl p-3.5 space-y-3">
-          ${isDup ? `<div class="bg-rose-950/90 border border-rose-600 px-2.5 py-1 rounded-lg text-[10px] font-bold text-rose-300 flex justify-between"><span>⚠️ WYKRYTO DUBEL TEGO NUMERU FAKTURY</span><span>Usuń jeden wpis poniżej</span></div>` : ''}
-          <div class="flex justify-between items-start gap-2 flex-wrap">
-            <div>
-              <span class="text-[11px] font-mono font-bold text-indigo-400">DOKUMENT: ${d.doc_number || '-'}</span>
-              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 ml-1">👤 ${d.receiver_name || 'Magazyn'}</span>
-              <h4 class="font-bold text-sm text-white mt-1">${d.supplier || 'Dostawca'}</h4>
-            </div>
-            <div class="text-right space-y-0.5">
-              <div class="flex flex-wrap gap-1.5 justify-end text-[11px]">
-                <span class="bg-slate-900 border border-emerald-700/50 px-2 py-0.5 rounded text-emerald-400 font-bold">📦 Netto prod. (bez kaucji): ${dispProdNet} zł</span>
-                <span class="bg-slate-900 border border-cyan-700/50 px-2 py-0.5 rounded text-cyan-300 font-bold">♻️ Kaucje: ${calcDepNet.toFixed(2)} zł</span>
-                <span class="bg-slate-900 border border-amber-500/60 px-2 py-0.5 rounded text-amber-300 font-black">💰 Netto z kaucją: ${dispNetWithDep} zł</span>
-              </div>
-              ${d.total_gross ? `<span class="text-[11px] font-bold text-slate-300 block">🧾 Suma Brutto faktury: ${d.total_gross} PLN</span>` : ''}
-              <div class="flex gap-1.5 pt-1 justify-end"><button onclick="openEditDeliveryModal('${d.id}')" class="text-[11px] bg-slate-700 text-indigo-300 font-bold px-2 py-1 rounded-lg">✏️ Edytuj</button><button onclick="deleteDelivery('${d.id}')" class="text-[11px] bg-rose-950 text-rose-300 font-bold px-2.5 py-1 rounded-lg border border-rose-700">🗑️ Usuń i cofnij towary</button></div>
-            </div>
-          </div>
-          <div class="bg-slate-900 rounded-xl p-2.5 border border-slate-800 space-y-1 max-h-48 overflow-y-auto">
-            <span class="text-[10px] text-emerald-400 uppercase font-bold block mb-1">📦 Pozycje towarowe (${items.length}):</span>
-            ${items.map((it, idx) => `<div class="flex justify-between items-center text-[11px] text-slate-200 border-b border-slate-800/60 pb-0.5 gap-2"><span class="truncate"><strong class="text-indigo-400 font-mono mr-1">Lp. ${it.lp || (idx + 1)}</strong> ${it.name} ${it.discountPercent > 0 ? `<span class="text-amber-300 text-[9px] font-bold">(rabat -${it.discountPercent}% z ${Number(it.basePrice||0).toFixed(2)} zł)</span>` : ''}</span><span class="font-bold text-emerald-400 whitespace-nowrap">${it.netPrice ? Number(it.netPrice).toFixed(2)+' zł/szt. | ' : ''}+${it.qty} ${it.unit||'szt.'}</span></div>`).join('')}
-          </div>
-          ${depItems.length > 0 ? `<div class="bg-cyan-950/30 rounded-xl p-2.5 border border-cyan-900/50 space-y-1"><span class="text-[10px] text-cyan-300 uppercase font-bold block">♻️ Kaucje z faktury (Netto = Brutto, ${depItems.length} poz.):</span>${depItems.map((dp, idx) => `<div class="flex justify-between text-[11px] text-cyan-100"><span><strong class="text-cyan-400 font-mono mr-1">Lp. ${idx + 1}</strong> ${dp.name} (${Number(dp.unitPrice).toFixed(2)} zł/szt.)</span><span class="font-bold text-cyan-400">${dp.netQty >= 0 ? '+' : ''}${dp.netQty} szt. (${(Number(dp.netQty||0)*Number(dp.unitPrice||0)).toFixed(2)} zł)</span></div>`).join('')}</div>` : ''}
-          ${photos.length > 0 ? `<div class="flex gap-2 overflow-x-auto pt-1">${photos.map((src, idx) => src.startsWith('data:application/pdf') ? `<a href="${src}" download="Faktura_${idx+1}.pdf" class="border border-indigo-500 rounded-xl bg-slate-900 px-3 py-2 text-xs text-indigo-300 font-bold">📄 PDF ${idx+1}</a>` : `<img src="${src}" onclick="openMediaPreview('${d.id}','DELIVERY',${idx})" class="w-16 h-16 object-cover rounded-xl border border-indigo-500 cursor-pointer">`).join('')}</div>` : ''}
-        </div>`;
-      }).join('');
-    }
-
-    async function deleteDelivery(id) {
-      const d = deliveries.find(x => String(x.id) === String(id)); if (!d) return;
-      let items = [], depItems = [];
-      try { items = typeof d.items_json === 'string' ? JSON.parse(d.items_json) : (d.items_json || []); } catch (e) {}
-      try { depItems = typeof d.deposits_json === 'string' ? JSON.parse(d.deposits_json) : (d.deposits_json || []); } catch (e) {}
-      if (!confirm(`Usunąć fakturę "${d.doc_number || '-'}"?\n\nWszystkie produkty (${items.length} poz.) oraz kaucje z tej faktury zostaną automatycznie odjęte/usunięte z magazynu.`)) return;
-
-      let removedCards = 0, revertedStock = 0;
-      for (const it of items) {
-        const qToRemove = Number(it.qty) || 0;
-        let target = it.appliedItemId ? inventory.find(x => String(x.id) === String(it.appliedItemId)) : null;
-        if (!target) {
-          const cands = inventory.filter(x => cleanCanonicalKey(x.name) === cleanCanonicalKey(it.name) && areSpecsCompatible(x.name, it.name));
-          target = cands.find(x => Number(x.qty) === qToRemove) || cands[0] || findBestInventoryMatch(it.name);
-        }
-        if (target) {
-          target.qty = Math.max(0, (Number(target.qty) || 0) - qToRemove);
-          revertedStock++;
-          const otherSame = inventory.filter(x => x.id !== target.id && cleanCanonicalKey(x.name) === cleanCanonicalKey(target.name) && areSpecsCompatible(x.name, target.name));
-          if (target.qty <= 0 && (Number(target.inField) || 0) <= 0 && (it.wasCreatedNew !== false || otherSame.length > 0)) {
-            const delId = target.id;
-            inventory = inventory.filter(x => x.id !== delId);
-            removedCards++;
-            if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${delId}`, 'DELETE'); } catch (e) {} }
-          } else if (isCloudOnline) {
-            try { await apiRequest(`/inventory?id=eq.${target.id}`, 'PATCH', { qty: target.qty, updated_at: new Date() }); } catch (e) {}
-          }
-        }
-      }
-      for (const dp of depItems) {
-        const dq = Number(dp.netQty) || 0; if (dq === 0) continue;
-        const mDep = (dp.appliedDepositId ? deposits.find(x => String(x.id) === String(dp.appliedDepositId)) : null) || findBestDepositMatch(dp.name, dp.unitPrice);
-        if (mDep) {
-          mDep.qty = Math.max(0, (Number(mDep.qty) || 0) - dq);
-          if (mDep.qty <= 0) {
-            deposits = deposits.filter(x => x.id !== mDep.id);
-            if (isCloudOnline) { try { await apiRequest(`/deposits?id=eq.${mDep.id}`, 'DELETE'); } catch (e) {} }
-          } else if (isCloudOnline) {
-            try { await apiRequest(`/deposits?id=eq.${mDep.id}`, 'PATCH', { qty: mDep.qty, updated_at: new Date() }); } catch (e) {}
-          }
-        }
-      }
-      deliveries = deliveries.filter(x => String(x.id) !== String(id));
-      safeSetLocal('magazyn_offline_items', inventory); safeSetLocal('magazyn_offline_deposits', deposits); safeSetLocal('magazyn_offline_deliveries', deliveries);
-      renderInventory(); renderDeposits(); renderDeliveries();
-      if (isCloudOnline) { try { await apiRequest(`/deliveries?id=eq.${id}`, 'DELETE'); } catch (e) {} }
-      alert(`🗑️ Faktura usunięta! Cofnięto stany dla ${revertedStock} pozycji (usunięto ${removedCards} kart towarów).`);
-    }
-
-    function openEditDeliveryModal(deliveryId) {
-      const d = deliveries.find(x => String(x.id) === String(deliveryId)); if (!d) return;
-      el('editDelivId').value = d.id; el('editDelivSupplier').value = d.supplier || ''; el('editDelivDocNum').value = d.doc_number || ''; el('editDelivReceiver').value = d.receiver_name || 'Bartek';
-      el('editDelivTotalNet').value = d.total_net || ''; el('editDelivTotalNetWithDep').value = d.total_net_with_dep || ''; el('editDelivTotalGross').value = d.total_gross || '';
-      try { editingDeliveryItems = JSON.parse(JSON.stringify(typeof d.items_json === 'string' ? JSON.parse(d.items_json) : (d.items_json || []))); } catch (e) { editingDeliveryItems = []; }
-      editingDeliveryPhotos = [...parseDeliveryImages(d.image_url)];
-      renderEditDeliveryItems(); renderEditDeliveryPhotos(); showModal('editDeliveryModal');
-    }
-    function renderEditDeliveryItems() {
-      el('editDelivItemsList').innerHTML = editingDeliveryItems.map((it, idx) => `<div class="bg-slate-900 border border-slate-700 rounded-lg p-2 flex items-center gap-1.5"><span class="bg-indigo-950 text-indigo-300 border border-indigo-700/60 px-1.5 py-0.5 rounded font-mono font-bold text-[10px]">Lp.${it.lp || (idx + 1)}</span><input type="text" value="${it.name || ''}" oninput="editingDeliveryItems[${idx}].name=this.value" class="bg-slate-800 rounded p-1 text-white font-bold flex-1 text-xs"><input type="number" step="0.01" value="${Number(it.netPrice || 0).toFixed(2)}" oninput="editingDeliveryItems[${idx}].netPrice=parseFloat(this.value)||0" class="w-16 bg-slate-800 rounded p-1 text-center text-emerald-400 font-bold text-xs"><input type="number" value="${it.qty || 1}" oninput="editingDeliveryItems[${idx}].qty=parseInt(this.value)||0" class="w-14 bg-slate-800 rounded p-1 text-center text-amber-400 font-bold text-xs"><button type="button" onclick="editingDeliveryItems.splice(${idx},1);renderEditDeliveryItems()" class="text-rose-400 font-bold px-1.5">✕</button></div>`).join('');
-    }
-    function addEditDeliveryItemRow() { editingDeliveryItems.push({ lp: editingDeliveryItems.length + 1, name: '', netPrice: 0.00, qty: 1, unit: 'szt.' }); renderEditDeliveryItems(); }
-    function renderEditDeliveryPhotos() {
-      el('editDelivPhotosList').innerHTML = editingDeliveryPhotos.map((src, idx) => `<div class="relative w-16 h-16 rounded-xl overflow-hidden border border-slate-600 bg-black flex items-center justify-center">${src.startsWith('data:application/pdf') ? `<span class="text-[10px] font-bold text-indigo-300">PDF</span>` : `<img src="${src}" class="w-full h-full object-cover">`}<button type="button" onclick="editingDeliveryPhotos.splice(${idx},1);renderEditDeliveryPhotos()" class="absolute top-0.5 right-0.5 bg-rose-600 text-white rounded-full w-4 h-4 text-[9px] font-black">✕</button></div>`).join('');
-    }
-    async function handleEditDeliveryAddPhoto(event) {
-      const file = event.target.files[0]; if (!file) return;
-      try { const prep = await prepareFileForGemini(file); editingDeliveryPhotos.push(prep.previewUrl); renderEditDeliveryPhotos(); } catch (err) { alert(err.message); }
-      event.target.value = '';
-    }
-    async function saveEditedDelivery(e) {
-      e.preventDefault();
-      const d = deliveries.find(x => String(x.id) === String(el('editDelivId').value)); if (!d) return;
-      d.supplier = el('editDelivSupplier').value.trim(); d.doc_number = el('editDelivDocNum').value.trim(); d.receiver_name = el('editDelivReceiver').value.trim() || 'Magazyn';
-      d.total_net = el('editDelivTotalNet').value.trim(); d.total_net_with_dep = el('editDelivTotalNetWithDep').value.trim(); d.total_gross = el('editDelivTotalGross').value.trim();
-      d.items_json = editingDeliveryItems.filter(it => it.name && it.name.trim().length > 0); d.image_url = JSON.stringify(editingDeliveryPhotos);
-      safeSetLocal('magazyn_offline_deliveries', deliveries); renderDeliveries(); hideModal('editDeliveryModal');
-      if (isCloudOnline) { try { await apiRequest(`/deliveries?id=eq.${d.id}`, 'PATCH', { supplier: d.supplier, doc_number: d.doc_number, receiver_name: d.receiver_name, total_gross: d.total_gross, items_json: d.items_json, image_url: d.image_url }); } catch (err) {} }
+      triggerScanFeedback();
     }
 
     function handleItemContextMenu(e, id) {
