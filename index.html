@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>MagazynRC - WMS v4.3</title>
+  <title>MagazynRC - WMS v4.4</title>
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#0f172a">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -31,7 +31,7 @@
     <div class="flex items-center space-x-2">
       <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-base shadow">M</div>
       <div>
-        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v4.3 DRAG & PACK-PRO</span></h1>
+        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v4.4 LP & KAUCJE-NETTO</span></h1>
         <p id="syncStatus" class="text-[10px] text-amber-400 font-medium leading-none mt-0.5">Inicjalizacja...</p>
       </div>
     </div>
@@ -81,7 +81,7 @@
 
     <!-- MAGAZYN -->
     <section id="viewStock" class="space-y-3">
-      <section id="mainDropZone" ondragover="handleDragOver(event, this)" ondragleave="handleDragLeave(event, this)" ondrop="handleDropFiles(event, 'SHELF')" class="bg-slate-800/90 border-2 border-dashed border-slate-700 rounded-2xl p-3.5 shadow-lg space-y-3 transition">
+      <section ondragover="handleDragOver(event, this)" ondragleave="handleDragLeave(event, this)" ondrop="handleDropFiles(event, 'SHELF')" class="bg-slate-800/90 border-2 border-dashed border-slate-700 rounded-2xl p-3.5 shadow-lg space-y-3 transition">
         <div class="flex items-center justify-between flex-wrap gap-2">
           <div>
             <h2 class="font-bold text-xs text-white">📷 Skaner, Zdjęcia i Przeciągnij-Upuść (Drag & Drop)</h2>
@@ -144,7 +144,7 @@
       <div ondragover="handleDragOver(event, this)" ondragleave="handleDragLeave(event, this)" ondrop="handleDropFiles(event, 'INVOICE')" class="bg-slate-800/80 border-2 border-dashed border-indigo-500/60 rounded-2xl p-3.5 flex items-center justify-between gap-2 flex-wrap transition">
         <div>
           <h3 class="font-bold text-xs text-white">📑 Archiwum Przyjętych Dostaw i Faktur (Przeciągnij i upuść fakturę tutaj)</h3>
-          <p class="text-[10px] text-slate-400">Rozpoznaje zgrzewki ("zgrz"), rabaty %, ceny przed/po rabacie oraz sumę netto po rabacie</p>
+          <p class="text-[10px] text-slate-400">Numeracja Lp., przelicznik zgrzewek ("zgrz"), rabaty %, suma netto bez kaucji oraz z kaucją</p>
         </div>
         <button onclick="openInvoiceUploadModal()" class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-xs px-3 py-2 rounded-xl shadow">⚡ Dodaj Fakturę (Zdjęcie / PDF)</button>
       </div>
@@ -155,7 +155,7 @@
     <section id="viewDeposits" class="hidden space-y-3.5">
       <div class="bg-gradient-to-r from-slate-800 to-cyan-950/60 border border-cyan-700/50 rounded-2xl p-3.5 space-y-3">
         <div class="flex items-center justify-between">
-          <div><h3 class="font-bold text-xs text-white">♻️ Bilans Kaucji i Opakowań Zwrotnych</h3><p class="text-[11px] text-slate-300">PET/CAN (0,50 zł), szkło (1,00 zł), skrzynki i palety</p></div>
+          <div><h3 class="font-bold text-xs text-white">♻️ Bilans Kaucji i Opakowań Zwrotnych</h3><p class="text-[11px] text-slate-300">PET/CAN (0,50 zł), szkło (1,00 zł), skrzynki i palety (Netto = Brutto)</p></div>
           <button onclick="openNewDepositModal()" class="bg-cyan-500 text-slate-950 font-black text-xs px-3 py-2 rounded-xl">+ Dodaj kaucję</button>
         </div>
         <div class="grid grid-cols-3 gap-2">
@@ -186,17 +186,16 @@
       <div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">✏️ Edytuj Fakturę</h3><button type="button" onclick="hideModal('editDeliveryModal')" class="text-slate-400 text-xl font-bold">✕</button></div>
       <input type="hidden" id="editDelivId">
       <div class="flex-1 overflow-y-auto space-y-3 pr-1 text-xs">
-        <div class="bg-slate-900 border border-slate-700 p-3 rounded-xl grid grid-cols-2 gap-2">
+        <div class="bg-slate-900 border border-slate-700 p-3 rounded-xl grid grid-cols-2 sm:grid-cols-3 gap-2">
           <div><label class="text-[10px] text-slate-400 block">Dostawca:</label><input type="text" id="editDelivSupplier" required class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-white"></div>
           <div><label class="text-[10px] text-slate-400 block">Nr Faktury:</label><input type="text" id="editDelivDocNum" required class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-mono text-amber-400"></div>
           <div><label class="text-[10px] text-emerald-300 font-bold block">👤 Przyjął:</label><input type="text" id="editDelivReceiver" class="w-full bg-slate-800 border border-emerald-700/60 rounded p-1.5 font-bold text-emerald-400"></div>
-          <div class="grid grid-cols-2 gap-1">
-            <div><label class="text-[10px] text-cyan-300 block">Netto po rab.:</label><input type="text" id="editDelivTotalNet" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-cyan-300"></div>
-            <div><label class="text-[10px] text-slate-400 block">Brutto:</label><input type="text" id="editDelivTotalGross" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-slate-200"></div>
-          </div>
+          <div><label class="text-[10px] text-emerald-400 block">Netto prod. (bez kaucji):</label><input type="text" id="editDelivTotalNet" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-emerald-400"></div>
+          <div><label class="text-[10px] text-cyan-300 block">Netto z kaucją:</label><input type="text" id="editDelivTotalNetWithDep" class="w-full bg-slate-800 border border-cyan-700/60 rounded p-1.5 font-bold text-cyan-300"></div>
+          <div><label class="text-[10px] text-slate-400 block">Suma Brutto:</label><input type="text" id="editDelivTotalGross" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-slate-200"></div>
         </div>
         <div class="space-y-1.5">
-          <div class="flex justify-between items-center"><span class="text-[10px] text-slate-300 font-bold uppercase">Pozycje:</span><button type="button" onclick="addEditDeliveryItemRow()" class="text-[10px] bg-indigo-950 text-indigo-300 border border-indigo-700 px-2 py-0.5 rounded-lg font-bold">+ Wiersz</button></div>
+          <div class="flex justify-between items-center"><span class="text-[10px] text-slate-300 font-bold uppercase">Pozycje (według Lp. na fakturze):</span><button type="button" onclick="addEditDeliveryItemRow()" class="text-[10px] bg-indigo-950 text-indigo-300 border border-indigo-700 px-2 py-0.5 rounded-lg font-bold">+ Wiersz</button></div>
           <div id="editDelivItemsList" class="space-y-1.5"></div>
         </div>
         <div class="space-y-1.5 pt-2 border-t border-slate-700">
@@ -244,7 +243,7 @@
     </div>
   </div>
 
-  <!-- MODAL: WYBÓR PLIKÓW FAKTURY (Z DRAG & DROP Z KOMPUTERA) -->
+  <!-- MODAL: WYBÓR PLIKÓW FAKTURY -->
   <div id="invoiceCaptureModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div ondragover="handleDragOver(event, this)" ondragleave="handleDragLeave(event, this)" ondrop="handleDropFiles(event, 'INVOICE')" class="bg-slate-800 border-2 border-dashed border-slate-600 rounded-2xl max-w-md w-full p-4 space-y-3 transition">
       <div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">⚡ Wgraj lub Przeciągnij Fakturę (Zdjęcie / PDF)</h3><button onclick="closeInvoiceUploadModal()" class="text-slate-400 text-xl font-bold">✕</button></div>
@@ -268,29 +267,47 @@
     </div>
   </div>
 
-  <!-- MODAL AI OCR: WERYFIKACJA FAKTURY (Z PRZELICZNIKIEM "ZGRZ" ORAZ RABATAMI %) -->
+  <!-- MODAL AI OCR: WERYFIKACJA FAKTURY (LP., ZGRZEWKI, RABATY, NETTO BEZ KAUCJI I Z KAUCJĄ) -->
   <div id="aiModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-2xl w-full p-4 space-y-3 max-h-[95vh] flex flex-col">
       <div class="flex justify-between items-start border-b border-slate-700 pb-2">
-        <div><span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300">Smart OCR • Zgrzewki & Rabaty %</span><h3 class="text-sm font-bold text-white mt-1">Weryfikacja Dostawy, Zgrzewek i Rabatów</h3></div>
-        <button onclick="closeAiModal()" class="text-slate-400 text-xl font-bold">✕</button>
-      </div>
-      <div id="aiLoadingState" class="py-12 flex flex-col items-center justify-center space-y-3"><div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div><p class="text-sm text-slate-200">Analizowanie pozycji, jednostek "zgrz", cen bez rabatu i po rabacie...</p></div>
+        <div><span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300">Smart OCR • Lp., Zgrzewki, Rabaty & Kaucje (Netto=Brutto)</span><h3 class="text-sm font-bold text-white mt-1">Weryfikacja Dostawy według Kolejności na Fakturze (Lp.)</h3></div>
+        <button onclick="closeAiModal()" class="text-slate-400 text-xl font-bold">✕</button></div>
+      <div id="aiLoadingState" class="py-12 flex flex-col items-center justify-center space-y-3"><div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div><p class="text-sm text-slate-200">Analizowanie Lp., jednostek "zgrz", rabatów i kaucji...</p></div>
       <div id="aiItemsContainer" class="hidden flex-1 overflow-y-auto space-y-3 pr-1">
         <div id="aiDuplicateWarningBanner" class="hidden bg-rose-950/90 border-2 border-rose-500 p-3 rounded-xl text-xs text-rose-200 space-y-1">
           <div class="font-black text-rose-400 text-sm">⛔ WYKRYTO DUPLIKAT FAKTURY!</div>
           <p id="aiDuplicateWarningText" class="text-[11px]"></p>
         </div>
-        <div class="bg-slate-900 border border-indigo-800/60 p-3 rounded-xl grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
-          <div><span class="text-[10px] text-slate-400 block">Dostawca:</span><input type="text" id="aiSupplierInput" oninput="checkInvoiceDuplicateLive()" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-white"></div>
-          <div><span class="text-[10px] text-slate-400 block">Nr Faktury:</span><input type="text" id="aiDocNumInput" oninput="checkInvoiceDuplicateLive()" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-mono text-amber-400"></div>
-          <div><span class="text-[10px] text-emerald-300 font-bold block">👤 Przyjął:</span><input type="text" id="aiReceiverInput" class="w-full bg-slate-800 border border-emerald-700/60 rounded p-1.5 font-bold text-emerald-400"></div>
-          <div class="col-span-2 sm:col-span-2"><span class="text-[10px] text-cyan-300 font-bold block">💰 Suma Wartości Netto (po rabacie):</span><input type="text" id="aiTotalNetInput" class="w-full bg-slate-800 border border-cyan-700/60 rounded p-1.5 font-black text-cyan-300"></div>
-          <div><span class="text-[10px] text-slate-400 block">Suma Brutto:</span><input type="text" id="aiTotalGrossInput" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-slate-200"></div>
+        <div class="bg-slate-900 border border-indigo-800/60 p-3 rounded-xl space-y-2 text-xs">
+          <div class="grid grid-cols-3 gap-2">
+            <div><span class="text-[10px] text-slate-400 block">Dostawca:</span><input type="text" id="aiSupplierInput" oninput="checkInvoiceDuplicateLive()" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-white"></div>
+            <div><span class="text-[10px] text-slate-400 block">Nr Faktury:</span><input type="text" id="aiDocNumInput" oninput="checkInvoiceDuplicateLive()" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-mono text-amber-400"></div>
+            <div><span class="text-[10px] text-emerald-300 font-bold block">👤 Przyjął:</span><input type="text" id="aiReceiverInput" class="w-full bg-slate-800 border border-emerald-700/60 rounded p-1.5 font-bold text-emerald-400"></div>
+          </div>
+          <!-- ROZBICIE SUM NETTO: BEZ KAUCJI, KAUCJE (NETTO=BRUTTO), NETTO Z KAUCJĄ, BRUTTO -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-800">
+            <div class="bg-slate-950/80 p-1.5 rounded-lg border border-emerald-700/50">
+              <span class="text-[9px] text-emerald-300 font-bold block">📦 Netto prod. (bez kaucji):</span>
+              <input type="text" id="aiTotalNetInput" class="w-full bg-transparent font-black text-emerald-400 text-xs focus:outline-none">
+            </div>
+            <div class="bg-slate-950/80 p-1.5 rounded-lg border border-cyan-700/50">
+              <span class="text-[9px] text-cyan-300 font-bold block">♻️ Kaucje (Netto=Brutto):</span>
+              <input type="text" id="aiTotalDepositsSumInput" readonly class="w-full bg-transparent font-black text-cyan-400 text-xs focus:outline-none">
+            </div>
+            <div class="bg-slate-950/80 p-1.5 rounded-lg border border-amber-500/70">
+              <span class="text-[9px] text-amber-300 font-bold block">💰 Netto z kaucją (Razem):</span>
+              <input type="text" id="aiTotalNetWithDepInput" class="w-full bg-transparent font-black text-amber-300 text-xs focus:outline-none">
+            </div>
+            <div class="bg-slate-950/80 p-1.5 rounded-lg border border-slate-700">
+              <span class="text-[9px] text-slate-400 font-bold block">🧾 Suma Brutto faktury:</span>
+              <input type="text" id="aiTotalGrossInput" class="w-full bg-transparent font-black text-white text-xs focus:outline-none">
+            </div>
+          </div>
         </div>
-        <div class="space-y-2"><p class="text-[11px] font-bold text-emerald-400 uppercase">📦 1. Produkty (Sprawdź mnożnik dla pozycji "zgrz" oraz ceny po rabacie):</p><div id="aiItemsList" class="space-y-2.5"></div></div>
+        <div class="space-y-2"><p class="text-[11px] font-bold text-emerald-400 uppercase">📦 1. Pozycje Towarowe (według Lp. z faktury):</p><div id="aiItemsList" class="space-y-2.5"></div></div>
         <div class="space-y-2 pt-2 border-t border-slate-700">
-          <div class="flex items-center justify-between"><p class="text-[11px] font-bold text-cyan-400 uppercase">♻️ 2. Kaucje:</p><button type="button" onclick="addManualDepositRowToModal()" class="text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-700 px-2 py-0.5 rounded-lg font-bold">+ Kaucja</button></div>
+          <div class="flex items-center justify-between"><p class="text-[11px] font-bold text-cyan-400 uppercase">♻️ 2. Kaucje i Opakowania (Netto = Brutto):</p><button type="button" onclick="addManualDepositRowToModal()" class="text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-700 px-2 py-0.5 rounded-lg font-bold">+ Kaucja</button></div>
           <div id="aiDepositsList" class="space-y-2"></div>
         </div>
       </div>
@@ -510,35 +527,21 @@
       const key = cleanCanonicalKey(name);
       if (key.length < 2) return;
       const prev = learnedRules[key] || {};
-      learnedRules[key] = {
-        category,
-        unit: unit || prev.unit || 'szt.',
-        photo: photo || prev.photo || '',
-        packSize: packSize > 1 ? packSize : (prev.packSize || 0)
-      };
+      learnedRules[key] = { category, unit: unit || prev.unit || 'szt.', photo: photo || prev.photo || '', packSize: packSize > 1 ? packSize : (prev.packSize || 0) };
       try { localStorage.setItem('magazyn_learned_rules', JSON.stringify(learnedRules)); } catch (e) {}
     }
 
-    // --- OBSŁUGA PRZECIĄGNIJ I UPUŚĆ (DRAG & DROP) ORAZ WKLEJANIA (CTRL+V) NA KOMPUTERZE ---
-    function handleDragOver(e, zoneEl) {
-      e.preventDefault(); e.stopPropagation();
-      if (zoneEl) zoneEl.classList.add('drag-over');
-    }
-    function handleDragLeave(e, zoneEl) {
-      e.preventDefault(); e.stopPropagation();
-      if (zoneEl) zoneEl.classList.remove('drag-over');
-    }
+    function handleDragOver(e, zoneEl) { e.preventDefault(); e.stopPropagation(); if (zoneEl) zoneEl.classList.add('drag-over'); }
+    function handleDragLeave(e, zoneEl) { e.preventDefault(); e.stopPropagation(); if (zoneEl) zoneEl.classList.remove('drag-over'); }
     async function handleDropFiles(e, targetMode) {
       e.preventDefault(); e.stopPropagation();
       document.querySelectorAll('.drag-over').forEach(z => z.classList.remove('drag-over'));
       const files = Array.from(e.dataTransfer?.files || []);
-      if (files.length === 0) return;
-      await routeIncomingFiles(files, targetMode);
+      if (files.length > 0) await routeIncomingFiles(files, targetMode);
     }
 
     window.addEventListener('paste', async (e) => {
-      const items = Array.from(e.clipboardData?.items || []);
-      const files = items.filter(it => it.kind === 'file').map(it => it.getAsFile()).filter(Boolean);
+      const files = Array.from(e.clipboardData?.items || []).filter(it => it.kind === 'file').map(it => it.getAsFile()).filter(Boolean);
       if (files.length === 0) return;
       if (!el('invoiceCaptureModal').classList.contains('hidden')) await routeIncomingFiles(files, 'INVOICE');
       else if (!el('shelfCountModal').classList.contains('hidden')) await routeIncomingFiles(files, 'SHELF_APPEND');
@@ -551,21 +554,12 @@
       if (targetMode === 'INVOICE' || targetMode === 'INVOICE_SLOT_1') {
         if (el('invoiceCaptureModal').classList.contains('hidden')) openInvoiceUploadModal();
         await handleInvoicePhotoSelected({ target: { files, value: '' } }, 1);
-      } else if (targetMode === 'INVOICE_SLOT_2') {
-        await handleInvoicePhotoSelected({ target: { files, value: '' } }, 2);
-      } else if (targetMode === 'SHELF') {
-        await processShelfCountImage({ target: { files, value: '' } }, false);
-      } else if (targetMode === 'SHELF_APPEND') {
-        await processShelfCountImage({ target: { files, value: '' } }, true);
-      } else if (targetMode === 'EVENT_AUTO_RETURN') {
-        await processAutoEventReturnSheetImage({ target: { files, value: '' } });
-      } else if (targetMode === 'LABEL_NEW') {
-        currentLabelPhotoTarget = 'NEW';
-        await handleItemLabelPhoto({ target: { files, value: '' } });
-      } else if (targetMode === 'LABEL_EDIT') {
-        currentLabelPhotoTarget = 'EDIT';
-        await handleItemLabelPhoto({ target: { files, value: '' } });
-      }
+      } else if (targetMode === 'INVOICE_SLOT_2') await handleInvoicePhotoSelected({ target: { files, value: '' } }, 2);
+      else if (targetMode === 'SHELF') await processShelfCountImage({ target: { files, value: '' } }, false);
+      else if (targetMode === 'SHELF_APPEND') await processShelfCountImage({ target: { files, value: '' } }, true);
+      else if (targetMode === 'EVENT_AUTO_RETURN') await processAutoEventReturnSheetImage({ target: { files, value: '' } });
+      else if (targetMode === 'LABEL_NEW') { currentLabelPhotoTarget = 'NEW'; await handleItemLabelPhoto({ target: { files, value: '' } }); }
+      else if (targetMode === 'LABEL_EDIT') { currentLabelPhotoTarget = 'EDIT'; await handleItemLabelPhoto({ target: { files, value: '' } }); }
     }
 
     function classifyProductSmartLocal(name, currentCategory = '') {
@@ -627,8 +621,7 @@
         inField: Number(raw.inField !== undefined ? raw.inField : raw.in_field) || 0,
         minQty: Number(raw.minQty !== undefined ? raw.minQty : raw.min_qty) || 0,
         unit: String(raw.unit || 'szt.'), price: Number(raw.price) || 0.00,
-        basePrice: Number(raw.basePrice) || 0.00,
-        discountPercent: Number(raw.discountPercent) || 0,
+        basePrice: Number(raw.basePrice) || 0.00, discountPercent: Number(raw.discountPercent) || 0,
         photo: raw.photo || learnedRules[key]?.photo || ''
       };
     }
@@ -680,11 +673,9 @@
       try {
         const prep = await prepareFileForGemini(file, 800, 0.72);
         if (currentLabelPhotoTarget === 'NEW') {
-          tempNewItemPhoto = prep.previewUrl;
-          el('newItemPhotoPreview').src = prep.previewUrl; el('newItemPhotoPreview').classList.remove('hidden');
+          tempNewItemPhoto = prep.previewUrl; el('newItemPhotoPreview').src = prep.previewUrl; el('newItemPhotoPreview').classList.remove('hidden');
         } else {
-          tempEditItemPhoto = prep.previewUrl;
-          el('editItemPhotoPreview').src = prep.previewUrl; el('editItemPhotoPreview').classList.remove('hidden');
+          tempEditItemPhoto = prep.previewUrl; el('editItemPhotoPreview').src = prep.previewUrl; el('editItemPhotoPreview').classList.remove('hidden');
         }
         const parsed = await queryGeminiAPI(`Przeanalizuj zdjęcie etykiety produktu. Przeczytaj dokładnie markę, pełny szczep (np. Cabernet Sauvignon vs Sauvignon Blanc), kolor wina (Czerwone/Białe/Różowe) oraz pojemność (np. 0.187L). Zwróć JSON: { "fullName": string, "category": string, "unit": "szt."|"op." }`, [prep]);
         if (parsed?.fullName) {
@@ -769,16 +760,7 @@
     }
 
     function cleanCanonicalKey(text) {
-      return (text || '').toLowerCase()
-        .replace(/['’`"´]/g, '')
-        .replace(/,/g, '.')
-        .replace(/\b(\d+)\s*ml\b/gi, (_, ml) => (parseInt(ml, 10) / 1000).toString())
-        .replace(/\b(0\.\d+|1\.5|1)\s*l\b/gi, '$1')
-        .replace(/\bx\s*\d+\b/gi, ' ')
-        .replace(/\bzgrz\b|\bders\b|\bdrs\b|\bop\b|\bszt\b|\bbut\b/gi, ' ')
-        .replace(/[^a-z0-9ąćęłńóśźż.%]/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
+      return (text || '').toLowerCase().replace(/['’`"´]/g, '').replace(/,/g, '.').replace(/\b(\d+)\s*ml\b/gi, (_, ml) => (parseInt(ml, 10) / 1000).toString()).replace(/\b(0\.\d+|1\.5|1)\s*l\b/gi, '$1').replace(/\bx\s*\d+\b/gi, ' ').replace(/\bzgrz\b|\bders\b|\bdrs\b|\bop\b|\bszt\b|\bbut\b/gi, ' ').replace(/[^a-z0-9ąćęłńóśźż.%]/g, ' ').replace(/\s+/g, ' ').trim();
     }
 
     const STRICT_VARIETALS_AND_FLAVORS = [
@@ -858,7 +840,7 @@
         for (const id of toDel) { try { await apiRequest(`/inventory?id=eq.${id}`, 'DELETE'); } catch (e) {} }
         for (const m of inventory) { try { await apiRequest(`/inventory?id=eq.${m.id}`, 'PATCH', toDbItem(m)); } catch (e) {} }
       }
-      alert(`🔗 Scalono ${count} zduplikowanych pozycji pod wspólny kod wewnętrzny!`);
+      alert(`🔗 Scalono ${count} zduplikowanych pozycji!`);
     }
 
     function normalizeText(t) { return (t || '').toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()\[\]]/g, ' ').replace(/\s+/g, ' ').trim(); }
@@ -897,32 +879,20 @@
       return null;
     }
 
-    // --- INTELIGENTNE WYKRYWANIE MNOŻNIKA ZGRZEWKI ("ZGRZ", X12, X24, X6) ---
     function detectSmartPackMultiplier(name, rawUnit = '', inferredPackSize = 0, rawPackPrice = 0) {
       const key = cleanCanonicalKey(name);
       if (learnedRules[key]?.packSize > 1) return learnedRules[key].packSize;
-
-      // 1. Szukamy jawnego zapisu w nazwie (np. X12, X24, 6szt)
       if (name) {
         const m = name.match(/\bX\s*(\d+)\b/i) || name.match(/[\s(]X\s*(\d+)/i) || name.match(/\b(\d+)\s*X\b/i) || name.match(/\((\d+)\s*(?:szt|can|rgb|pet|pusz|but)?\)/i) || name.match(/\b(\d+)\s*szt\b/i);
-        if (m && m[1]) {
-          const val = parseInt(m[1], 10);
-          if (val > 1 && val <= 100) return val;
-        }
+        if (m && m[1]) { const val = parseInt(m[1], 10); if (val > 1 && val <= 100) return val; }
       }
-
-      // 2. Jeśli jednostka na fakturze to "zgrz" lub w nazwie jest "zgrz" bez podanej liczby sztuk:
       const isZgrz = /zgrz/i.test(rawUnit) || /\bzgrz/i.test(name);
       if (isZgrz) {
         if (inferredPackSize > 1 && inferredPackSize <= 48) return inferredPackSize;
         const s = cleanCanonicalKey(name);
-        // Heurystyka gastronomiczna po pojemności butelki i cenie zgrzewki:
-        if (/\b1\.5\b|\b1\b/.test(s)) return 6; // Wody/napoje 1L - 1.5L w zgrzewkach po 6 szt.
-        if (/\b0\.5\b|\b0\.33\b|\b0\.3\b|\b0\.25\b|\b0\.2\b/.test(s)) {
-          if (rawPackPrice > 45) return 24;
-          return 12;
-        }
-        return 6; // Domyślna zgrzewka (6 szt.), którą użytkownik może zmienić 1 kliknięciem w oknie weryfikacji
+        if (/\b1\.5\b|\b1\b/.test(s)) return 6;
+        if (/\b0\.5\b|\b0\.33\b|\b0\.3\b|\b0\.25\b|\b0\.2\b/.test(s)) return rawPackPrice > 45 ? 24 : 12;
+        return 6;
       }
       return 1;
     }
@@ -1060,9 +1030,9 @@
     function renderSheetCreatorItems() {
       const list = el('genSheetItemsList');
       if (sheetCreatorMap.size === 0) { list.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs">Wybierz towar powyżej i kliknij "+ Dodaj".</div>`; return; }
-      list.innerHTML = Array.from(sheetCreatorMap.entries()).map(([id, qty]) => {
+      list.innerHTML = Array.from(sheetCreatorMap.entries()).map(([id, qty], idx) => {
         const it = inventory.find(x => String(x.id) === String(id)); if (!it) return '';
-        return `<div class="bg-slate-900 border border-slate-700 rounded-xl p-2.5 flex items-center justify-between text-xs gap-2"><div class="flex-1 truncate"><span class="font-bold text-white block truncate">${it.name}</span><span class="text-[10px] text-slate-400">Stan: ${it.qty} ${it.unit}</span></div><div class="flex items-center gap-1.5"><input type="number" value="${qty}" min="1" oninput="sheetCreatorMap.set('${it.id}', Math.max(1, parseInt(this.value)||1))" class="w-16 bg-slate-800 border border-amber-500/70 rounded-lg p-1.5 text-center font-black text-amber-400 text-xs"><button type="button" onclick="sheetCreatorMap.delete('${it.id}');renderSheetCreatorItems()" class="text-rose-400 font-bold px-1.5">✕</button></div></div>`;
+        return `<div class="bg-slate-900 border border-slate-700 rounded-xl p-2.5 flex items-center justify-between text-xs gap-2"><div class="flex-1 truncate"><span class="font-bold text-white block truncate">${idx + 1}. ${it.name}</span><span class="text-[10px] text-slate-400">Stan: ${it.qty} ${it.unit}</span></div><div class="flex items-center gap-1.5"><input type="number" value="${qty}" min="1" oninput="sheetCreatorMap.set('${it.id}', Math.max(1, parseInt(this.value)||1))" class="w-16 bg-slate-800 border border-amber-500/70 rounded-lg p-1.5 text-center font-black text-amber-400 text-xs"><button type="button" onclick="sheetCreatorMap.delete('${it.id}');renderSheetCreatorItems()" class="text-rose-400 font-bold px-1.5">✕</button></div></div>`;
       }).join('');
     }
 
@@ -1135,7 +1105,7 @@
       el('depStatGlassQty').innerText = `${glQ} szt.`; el('depStatGlassVal').innerText = `${glV.toFixed(2)} zł`;
       el('depStatCratesQty').innerText = `${crQ} szt.`; el('depStatCratesVal').innerText = `${crV.toFixed(2)} zł`;
       if (deposits.length === 0) { list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak zarejestrowanych kaucji.</div>`; return; }
-      list.innerHTML = deposits.map(dep => `<div class="bg-slate-800 border border-slate-700 rounded-2xl p-3.5 flex flex-col gap-2"><div class="flex justify-between"><div><h4 class="font-bold text-xs text-white">${dep.name}</h4><p class="text-[11px] text-slate-400">Stawka: <strong class="text-cyan-400">${Number(dep.unit_price).toFixed(2)} zł</strong> • Razem: <strong class="text-white">${((Number(dep.qty)||0)*(Number(dep.unit_price)||0)).toFixed(2)} zł</strong></p></div><div class="bg-slate-900 border border-slate-700 px-3 py-1 rounded-xl text-center"><span class="text-base font-black text-cyan-400">${dep.qty}</span></div></div><div class="flex justify-between pt-2 border-t border-slate-700 text-xs"><div class="flex gap-1.5"><button onclick="adjustDepositQty('${dep.id}', 1)" class="bg-slate-700 text-emerald-400 font-bold px-2.5 py-1 rounded-lg">+1</button><button onclick="returnDepositToDriver('${dep.id}')" class="bg-amber-600 text-slate-950 font-black px-2.5 py-1 rounded-lg">🚚 Oddaj kierowcy</button></div><div class="flex gap-2"><button onclick="openEditDepositModal('${dep.id}')" class="text-slate-300">✏️ Edytuj</button><button onclick="deleteDepositItem('${dep.id}')" class="text-rose-400">🗑️ Usuń</button></div></div></div>`).join('');
+      list.innerHTML = deposits.map((dep, idx) => `<div class="bg-slate-800 border border-slate-700 rounded-2xl p-3.5 flex flex-col gap-2"><div class="flex justify-between"><div><h4 class="font-bold text-xs text-white"><span class="text-cyan-400 font-mono mr-1">Lp. ${idx + 1}</span> ${dep.name}</h4><p class="text-[11px] text-slate-400">Stawka (Netto=Brutto): <strong class="text-cyan-400">${Number(dep.unit_price).toFixed(2)} zł</strong> • Razem: <strong class="text-white">${((Number(dep.qty)||0)*(Number(dep.unit_price)||0)).toFixed(2)} zł</strong></p></div><div class="bg-slate-900 border border-slate-700 px-3 py-1 rounded-xl text-center"><span class="text-base font-black text-cyan-400">${dep.qty}</span></div></div><div class="flex justify-between pt-2 border-t border-slate-700 text-xs"><div class="flex gap-1.5"><button onclick="adjustDepositQty('${dep.id}', 1)" class="bg-slate-700 text-emerald-400 font-bold px-2.5 py-1 rounded-lg">+1</button><button onclick="returnDepositToDriver('${dep.id}')" class="bg-amber-600 text-slate-950 font-black px-2.5 py-1 rounded-lg">🚚 Oddaj kierowcy</button></div><div class="flex gap-2"><button onclick="openEditDepositModal('${dep.id}')" class="text-slate-300">✏️ Edytuj</button><button onclick="deleteDepositItem('${dep.id}')" class="text-rose-400">🗑️ Usuń</button></div></div></div>`).join('');
     }
 
     async function adjustDepositQty(depId, delta) {
@@ -1194,6 +1164,7 @@
       if (isCloudOnline) { try { await apiRequest(`/deposits?id=eq.${id}`, 'DELETE'); } catch (e) {} }
     }
 
+    // --- ARCHIWUM FAKTUR (Z LP., SUMĄ NETTO BEZ KAUCJI, KAUCJĄ I NETTO Z KAUCJĄ) ---
     function renderDeliveries() {
       const list = el('deliveriesList'); if (!list) return;
       if (deliveries.length === 0) { list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak zarejestrowanych dostaw.</div>`; return; }
@@ -1206,8 +1177,11 @@
         try { depItems = typeof d.deposits_json === 'string' ? JSON.parse(d.deposits_json) : (d.deposits_json || []); } catch (e) {}
         const photos = parseDeliveryImages(d.image_url);
         const isDup = docCounts[normalizeInvoiceNumberKey(d.doc_number)] > 1;
-        const calcNetSum = items.reduce((acc, it) => acc + ((Number(it.qty) || 0) * (Number(it.netPrice) || 0)), 0).toFixed(2);
-        const dispNet = d.total_net || calcNetSum;
+
+        const calcProdNet = items.reduce((acc, it) => acc + ((Number(it.qty) || 0) * (Number(it.netPrice) || 0)), 0);
+        const calcDepNet = depItems.reduce((acc, dp) => acc + ((Number(dp.netQty) || 0) * (Number(dp.unitPrice) || 0)), 0);
+        const dispProdNet = d.total_net ? Number(d.total_net).toFixed(2) : calcProdNet.toFixed(2);
+        const dispNetWithDep = d.total_net_with_dep ? Number(d.total_net_with_dep).toFixed(2) : (parseFloat(dispProdNet) + calcDepNet).toFixed(2);
 
         return `<div class="bg-slate-800 border ${isDup ? 'border-rose-500' : 'border-slate-700'} rounded-2xl p-3.5 space-y-3">
           ${isDup ? `<div class="bg-rose-950/90 border border-rose-600 px-2.5 py-1 rounded-lg text-[10px] font-bold text-rose-300 flex justify-between"><span>⚠️ WYKRYTO DUBEL TEGO NUMERU FAKTURY</span><span>Usuń jeden wpis poniżej</span></div>` : ''}
@@ -1217,13 +1191,21 @@
               <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 ml-1">👤 ${d.receiver_name || 'Magazyn'}</span>
               <h4 class="font-bold text-sm text-white mt-1">${d.supplier || 'Dostawca'}</h4>
             </div>
-            <div class="text-right">
-              <span class="text-xs font-black text-cyan-300 block">Suma Netto (po rabacie): ${dispNet} PLN</span>
-              ${d.total_gross ? `<span class="text-[11px] font-bold text-slate-400 block">Brutto: ${d.total_gross} PLN</span>` : ''}
-              <div class="flex gap-1.5 mt-1.5 justify-end"><button onclick="openEditDeliveryModal('${d.id}')" class="text-[11px] bg-slate-700 text-indigo-300 font-bold px-2 py-1 rounded-lg">✏️ Edytuj</button><button onclick="deleteDelivery('${d.id}')" class="text-[11px] bg-rose-950 text-rose-300 font-bold px-2.5 py-1 rounded-lg border border-rose-700">🗑️ Usuń i cofnij towary</button></div>
+            <div class="text-right space-y-0.5">
+              <div class="flex flex-wrap gap-1.5 justify-end text-[11px]">
+                <span class="bg-slate-900 border border-emerald-700/50 px-2 py-0.5 rounded text-emerald-400 font-bold">📦 Netto prod. (bez kaucji): ${dispProdNet} zł</span>
+                <span class="bg-slate-900 border border-cyan-700/50 px-2 py-0.5 rounded text-cyan-300 font-bold">♻️ Kaucje: ${calcDepNet.toFixed(2)} zł</span>
+                <span class="bg-slate-900 border border-amber-500/60 px-2 py-0.5 rounded text-amber-300 font-black">💰 Netto z kaucją: ${dispNetWithDep} zł</span>
+              </div>
+              ${d.total_gross ? `<span class="text-[11px] font-bold text-slate-300 block">🧾 Suma Brutto faktury: ${d.total_gross} PLN</span>` : ''}
+              <div class="flex gap-1.5 pt-1 justify-end"><button onclick="openEditDeliveryModal('${d.id}')" class="text-[11px] bg-slate-700 text-indigo-300 font-bold px-2 py-1 rounded-lg">✏️ Edytuj</button><button onclick="deleteDelivery('${d.id}')" class="text-[11px] bg-rose-950 text-rose-300 font-bold px-2.5 py-1 rounded-lg border border-rose-700">🗑️ Usuń i cofnij towary</button></div>
             </div>
           </div>
-          <div class="bg-slate-900 rounded-xl p-2.5 border border-slate-800 space-y-1 max-h-44 overflow-y-auto">${items.map(it => `<div class="flex justify-between items-center text-[11px] text-slate-200 border-b border-slate-800/60 pb-0.5 gap-2"><span class="truncate">• ${it.name} ${it.discountPercent > 0 ? `<span class="text-amber-300 text-[9px] font-bold">(rabat -${it.discountPercent}% z ${Number(it.basePrice||0).toFixed(2)} zł)</span>` : ''}</span><span class="font-bold text-emerald-400 whitespace-nowrap">${it.netPrice ? Number(it.netPrice).toFixed(2)+' zł/szt. | ' : ''}+${it.qty} ${it.unit||'szt.'}</span></div>`).join('')}</div>
+          <div class="bg-slate-900 rounded-xl p-2.5 border border-slate-800 space-y-1 max-h-48 overflow-y-auto">
+            <span class="text-[10px] text-emerald-400 uppercase font-bold block mb-1">📦 Pozycje towarowe (${items.length}):</span>
+            ${items.map((it, idx) => `<div class="flex justify-between items-center text-[11px] text-slate-200 border-b border-slate-800/60 pb-0.5 gap-2"><span class="truncate"><strong class="text-indigo-400 font-mono mr-1">Lp. ${it.lp || (idx + 1)}</strong> ${it.name} ${it.discountPercent > 0 ? `<span class="text-amber-300 text-[9px] font-bold">(rabat -${it.discountPercent}% z ${Number(it.basePrice||0).toFixed(2)} zł)</span>` : ''}</span><span class="font-bold text-emerald-400 whitespace-nowrap">${it.netPrice ? Number(it.netPrice).toFixed(2)+' zł/szt. | ' : ''}+${it.qty} ${it.unit||'szt.'}</span></div>`).join('')}
+          </div>
+          ${depItems.length > 0 ? `<div class="bg-cyan-950/30 rounded-xl p-2.5 border border-cyan-900/50 space-y-1"><span class="text-[10px] text-cyan-300 uppercase font-bold block">♻️ Kaucje z faktury (Netto = Brutto, ${depItems.length} poz.):</span>${depItems.map((dp, idx) => `<div class="flex justify-between text-[11px] text-cyan-100"><span><strong class="text-cyan-400 font-mono mr-1">Lp. ${idx + 1}</strong> ${dp.name} (${Number(dp.unitPrice).toFixed(2)} zł/szt.)</span><span class="font-bold text-cyan-400">${dp.netQty >= 0 ? '+' : ''}${dp.netQty} szt. (${(Number(dp.netQty||0)*Number(dp.unitPrice||0)).toFixed(2)} zł)</span></div>`).join('')}</div>` : ''}
           ${photos.length > 0 ? `<div class="flex gap-2 overflow-x-auto pt-1">${photos.map((src, idx) => src.startsWith('data:application/pdf') ? `<a href="${src}" download="Faktura_${idx+1}.pdf" class="border border-indigo-500 rounded-xl bg-slate-900 px-3 py-2 text-xs text-indigo-300 font-bold">📄 PDF ${idx+1}</a>` : `<img src="${src}" onclick="openMediaPreview('${d.id}','DELIVERY',${idx})" class="w-16 h-16 object-cover rounded-xl border border-indigo-500 cursor-pointer">`).join('')}</div>` : ''}
         </div>`;
       }).join('');
@@ -1280,15 +1262,16 @@
 
     function openEditDeliveryModal(deliveryId) {
       const d = deliveries.find(x => String(x.id) === String(deliveryId)); if (!d) return;
-      el('editDelivId').value = d.id; el('editDelivSupplier').value = d.supplier || ''; el('editDelivDocNum').value = d.doc_number || ''; el('editDelivReceiver').value = d.receiver_name || 'Bartek'; el('editDelivTotalNet').value = d.total_net || ''; el('editDelivTotalGross').value = d.total_gross || '';
+      el('editDelivId').value = d.id; el('editDelivSupplier').value = d.supplier || ''; el('editDelivDocNum').value = d.doc_number || ''; el('editDelivReceiver').value = d.receiver_name || 'Bartek';
+      el('editDelivTotalNet').value = d.total_net || ''; el('editDelivTotalNetWithDep').value = d.total_net_with_dep || ''; el('editDelivTotalGross').value = d.total_gross || '';
       try { editingDeliveryItems = JSON.parse(JSON.stringify(typeof d.items_json === 'string' ? JSON.parse(d.items_json) : (d.items_json || []))); } catch (e) { editingDeliveryItems = []; }
       editingDeliveryPhotos = [...parseDeliveryImages(d.image_url)];
       renderEditDeliveryItems(); renderEditDeliveryPhotos(); showModal('editDeliveryModal');
     }
     function renderEditDeliveryItems() {
-      el('editDelivItemsList').innerHTML = editingDeliveryItems.map((it, idx) => `<div class="bg-slate-900 border border-slate-700 rounded-lg p-2 flex gap-1.5"><input type="text" value="${it.name || ''}" oninput="editingDeliveryItems[${idx}].name=this.value" class="bg-slate-800 rounded p-1 text-white font-bold flex-1 text-xs"><input type="number" step="0.01" value="${Number(it.netPrice || 0).toFixed(2)}" oninput="editingDeliveryItems[${idx}].netPrice=parseFloat(this.value)||0" class="w-16 bg-slate-800 rounded p-1 text-center text-emerald-400 font-bold text-xs"><input type="number" value="${it.qty || 1}" oninput="editingDeliveryItems[${idx}].qty=parseInt(this.value)||0" class="w-14 bg-slate-800 rounded p-1 text-center text-amber-400 font-bold text-xs"><button type="button" onclick="editingDeliveryItems.splice(${idx},1);renderEditDeliveryItems()" class="text-rose-400 font-bold px-1.5">✕</button></div>`).join('');
+      el('editDelivItemsList').innerHTML = editingDeliveryItems.map((it, idx) => `<div class="bg-slate-900 border border-slate-700 rounded-lg p-2 flex items-center gap-1.5"><span class="bg-indigo-950 text-indigo-300 border border-indigo-700/60 px-1.5 py-0.5 rounded font-mono font-bold text-[10px]">Lp.${it.lp || (idx + 1)}</span><input type="text" value="${it.name || ''}" oninput="editingDeliveryItems[${idx}].name=this.value" class="bg-slate-800 rounded p-1 text-white font-bold flex-1 text-xs"><input type="number" step="0.01" value="${Number(it.netPrice || 0).toFixed(2)}" oninput="editingDeliveryItems[${idx}].netPrice=parseFloat(this.value)||0" class="w-16 bg-slate-800 rounded p-1 text-center text-emerald-400 font-bold text-xs"><input type="number" value="${it.qty || 1}" oninput="editingDeliveryItems[${idx}].qty=parseInt(this.value)||0" class="w-14 bg-slate-800 rounded p-1 text-center text-amber-400 font-bold text-xs"><button type="button" onclick="editingDeliveryItems.splice(${idx},1);renderEditDeliveryItems()" class="text-rose-400 font-bold px-1.5">✕</button></div>`).join('');
     }
-    function addEditDeliveryItemRow() { editingDeliveryItems.push({ name: '', netPrice: 0.00, qty: 1, unit: 'szt.' }); renderEditDeliveryItems(); }
+    function addEditDeliveryItemRow() { editingDeliveryItems.push({ lp: editingDeliveryItems.length + 1, name: '', netPrice: 0.00, qty: 1, unit: 'szt.' }); renderEditDeliveryItems(); }
     function renderEditDeliveryPhotos() {
       el('editDelivPhotosList').innerHTML = editingDeliveryPhotos.map((src, idx) => `<div class="relative w-16 h-16 rounded-xl overflow-hidden border border-slate-600 bg-black flex items-center justify-center">${src.startsWith('data:application/pdf') ? `<span class="text-[10px] font-bold text-indigo-300">PDF</span>` : `<img src="${src}" class="w-full h-full object-cover">`}<button type="button" onclick="editingDeliveryPhotos.splice(${idx},1);renderEditDeliveryPhotos()" class="absolute top-0.5 right-0.5 bg-rose-600 text-white rounded-full w-4 h-4 text-[9px] font-black">✕</button></div>`).join('');
     }
@@ -1300,7 +1283,8 @@
     async function saveEditedDelivery(e) {
       e.preventDefault();
       const d = deliveries.find(x => String(x.id) === String(el('editDelivId').value)); if (!d) return;
-      d.supplier = el('editDelivSupplier').value.trim(); d.doc_number = el('editDelivDocNum').value.trim(); d.receiver_name = el('editDelivReceiver').value.trim() || 'Magazyn'; d.total_net = el('editDelivTotalNet').value.trim(); d.total_gross = el('editDelivTotalGross').value.trim();
+      d.supplier = el('editDelivSupplier').value.trim(); d.doc_number = el('editDelivDocNum').value.trim(); d.receiver_name = el('editDelivReceiver').value.trim() || 'Magazyn';
+      d.total_net = el('editDelivTotalNet').value.trim(); d.total_net_with_dep = el('editDelivTotalNetWithDep').value.trim(); d.total_gross = el('editDelivTotalGross').value.trim();
       d.items_json = editingDeliveryItems.filter(it => it.name && it.name.trim().length > 0); d.image_url = JSON.stringify(editingDeliveryPhotos);
       safeSetLocal('magazyn_offline_deliveries', deliveries); renderDeliveries(); hideModal('editDeliveryModal');
       if (isCloudOnline) { try { await apiRequest(`/deliveries?id=eq.${d.id}`, 'PATCH', { supplier: d.supplier, doc_number: d.doc_number, receiver_name: d.receiver_name, total_gross: d.total_gross, items_json: d.items_json, image_url: d.image_url }); } catch (err) {} }
@@ -1316,7 +1300,7 @@
         const isPending = ev.status === 'W trakcie';
         let items = []; try { items = typeof ev.items_json === 'string' ? JSON.parse(ev.items_json) : (ev.items_json || []); } catch (e) {}
         let cost = 0; items.forEach(it => { if (it.consumed) { const m = findBestInventoryMatch(it.name); if (m?.price) cost += Number(it.consumed) * Number(m.price); } });
-        return `<div class="bg-slate-800 border ${isPending ? 'border-amber-500/80' : 'border-slate-700'} rounded-2xl p-3.5 space-y-2.5"><div class="flex justify-between items-start gap-2 flex-wrap"><div><div class="flex items-center gap-2 flex-wrap"><span class="font-mono text-xs font-black text-amber-400">${ev.event_number || '#EVENT'}</span><span class="text-[9px] font-bold px-2 py-0.5 rounded ${isPending ? 'bg-amber-950 text-amber-300' : 'bg-emerald-950 text-emerald-300'}">${isPending ? '🚚 W TERENIE' : '✓ ROZLICZONA'}</span>${cost > 0 ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-900 text-emerald-400">Zużycie: ${cost.toFixed(2)} zł</span>` : ''}</div><h4 class="font-bold text-sm text-white mt-1">${ev.event_name}</h4></div><div class="flex gap-1.5"><button onclick="triggerReturnProductsUpload('${ev.id}')" class="bg-emerald-500 text-slate-950 font-black text-xs px-3 py-1.5 rounded-xl">🍾 Zdjęcie/Plik zwrotu</button><button onclick="openManualEventReturn('${ev.id}')" class="bg-slate-700 text-slate-200 font-bold text-xs px-2.5 py-1.5 rounded-xl">✍️ Ręcznie</button><button onclick="triggerReturnSheetUpload('${ev.id}')" class="bg-slate-700 text-slate-300 font-bold text-xs px-2 py-1.5 rounded-xl">📋</button></div></div><div class="bg-slate-900 rounded-xl p-2.5 text-xs space-y-1"><div class="grid grid-cols-12 text-[10px] text-slate-400 font-bold border-b border-slate-800 pb-1"><span class="col-span-6">Asortyment</span><span class="col-span-2 text-center">Wydano</span><span class="col-span-2 text-center">Zwrot</span><span class="col-span-2 text-right">Zeszło</span></div>${items.map(it => `<div class="grid grid-cols-12 text-[11px] text-slate-200"><span class="col-span-6 truncate">${it.name}</span><span class="col-span-2 text-center font-bold text-amber-400">${it.dispatched}</span><span class="col-span-2 text-center font-bold text-emerald-400">${it.returned !== undefined ? it.returned : '-'}</span><span class="col-span-2 text-right font-bold text-indigo-300">${it.consumed !== undefined ? it.consumed : '-'}</span></div>`).join('')}</div><div class="flex justify-between items-center pt-1 text-xs"><div class="flex gap-2"><button onclick="printEventSheet('${ev.id}', 'DISPATCH')" class="bg-amber-500/90 text-slate-950 font-black px-2.5 py-1 rounded-lg">📥 Karta Wydania</button><button onclick="printEventSheet('${ev.id}', 'RETURN')" class="bg-emerald-500/90 text-slate-950 font-black px-2.5 py-1 rounded-lg">📥 Rozliczenie</button></div><button onclick="deleteEvent('${ev.id}')" class="text-rose-400 text-[11px]">🗑️ Usuń</button></div></div>`;
+        return `<div class="bg-slate-800 border ${isPending ? 'border-amber-500/80' : 'border-slate-700'} rounded-2xl p-3.5 space-y-2.5"><div class="flex justify-between items-start gap-2 flex-wrap"><div><div class="flex items-center gap-2 flex-wrap"><span class="font-mono text-xs font-black text-amber-400">${ev.event_number || '#EVENT'}</span><span class="text-[9px] font-bold px-2 py-0.5 rounded ${isPending ? 'bg-amber-950 text-amber-300' : 'bg-emerald-950 text-emerald-300'}">${isPending ? '🚚 W TERENIE' : '✓ ROZLICZONA'}</span>${cost > 0 ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-900 text-emerald-400">Zużycie: ${cost.toFixed(2)} zł</span>` : ''}</div><h4 class="font-bold text-sm text-white mt-1">${ev.event_name}</h4></div><div class="flex gap-1.5"><button onclick="triggerReturnProductsUpload('${ev.id}')" class="bg-emerald-500 text-slate-950 font-black text-xs px-3 py-1.5 rounded-xl">🍾 Zdjęcie/Plik zwrotu</button><button onclick="openManualEventReturn('${ev.id}')" class="bg-slate-700 text-slate-200 font-bold text-xs px-2.5 py-1.5 rounded-xl">✍️ Ręcznie</button><button onclick="triggerReturnSheetUpload('${ev.id}')" class="bg-slate-700 text-slate-300 font-bold text-xs px-2 py-1.5 rounded-xl">📋</button></div></div><div class="bg-slate-900 rounded-xl p-2.5 text-xs space-y-1"><div class="grid grid-cols-12 text-[10px] text-slate-400 font-bold border-b border-slate-800 pb-1"><span class="col-span-6">Lp. / Asortyment</span><span class="col-span-2 text-center">Wydano</span><span class="col-span-2 text-center">Zwrot</span><span class="col-span-2 text-right">Zeszło</span></div>${items.map((it, idx) => `<div class="grid grid-cols-12 text-[11px] text-slate-200"><span class="col-span-6 truncate"><strong class="text-slate-400 mr-1">${idx + 1}.</strong>${it.name}</span><span class="col-span-2 text-center font-bold text-amber-400">${it.dispatched}</span><span class="col-span-2 text-center font-bold text-emerald-400">${it.returned !== undefined ? it.returned : '-'}</span><span class="col-span-2 text-right font-bold text-indigo-300">${it.consumed !== undefined ? it.consumed : '-'}</span></div>`).join('')}</div><div class="flex justify-between items-center pt-1 text-xs"><div class="flex gap-2"><button onclick="printEventSheet('${ev.id}', 'DISPATCH')" class="bg-amber-500/90 text-slate-950 font-black px-2.5 py-1 rounded-lg">📥 Karta Wydania</button><button onclick="printEventSheet('${ev.id}', 'RETURN')" class="bg-emerald-500/90 text-slate-950 font-black px-2.5 py-1 rounded-lg">📥 Rozliczenie</button></div><button onclick="deleteEvent('${ev.id}')" class="text-rose-400 text-[11px]">🗑️ Usuń</button></div></div>`;
       }).join('');
     }
 
@@ -1378,7 +1362,7 @@
         const cat = m ? m.category : (classifyProductSmartLocal(it.name, it.category) || 'Napoje • Gazowane / Soft');
         return `<div class="bg-slate-900 border ${m ? 'border-emerald-600' : 'border-purple-600'} rounded-xl p-3 space-y-2">
           <div class="flex justify-between items-center gap-1 flex-wrap">
-            <span class="text-[9px] font-bold px-2 py-0.5 rounded ${m ? 'bg-emerald-950 text-emerald-300' : 'bg-purple-950 text-purple-300'}">${m ? `✓ W bazie (#${m.barcode})` : '⭐ NOWY PRODUKT'}</span>
+            <span class="text-[9px] font-bold px-2 py-0.5 rounded ${m ? 'bg-emerald-950 text-emerald-300' : 'bg-purple-950 text-purple-300'}">Lp. ${idx + 1} • ${m ? `✓ W bazie (#${m.barcode})` : '⭐ NOWY PRODUKT'}</span>
             <div class="flex items-center gap-1">
               <button type="button" onclick="splitShelfCountRow(${idx})" class="bg-slate-800 text-amber-300 border border-amber-700/50 px-2 py-0.5 rounded text-[9px] font-bold">🔀 Rozdziel</button>
               <input type="text" id="shelfCountCat_${idx}" list="categoryPresetsList" value="${cat}" oninput="currentShelfCountItems[${idx}].category=this.value" class="bg-slate-800 border border-slate-700 rounded px-2 py-0.5 text-[10px] text-cyan-300 font-bold w-40">
@@ -1425,7 +1409,7 @@
       safeSetLocal('magazyn_offline_items', inventory); hideModal('shelfCountModal'); renderInventory(); alert("Zaktualizowano stany!");
     }
 
-    // --- FAKTURY Z OBSŁUGĄ "ZGRZ", RABATÓW % ORAZ SUMY NETTO PO RABACIE ---
+    // --- FAKTURY Z LP., "ZGRZ", RABATAMI % ORAZ PODZIAŁEM NETTO BEZ KAUCJI VS NETTO Z KAUCJĄ ---
     function openInvoiceUploadModal() { resetInvoicePhotos(); showModal('invoiceCaptureModal'); }
     function closeInvoiceUploadModal() { hideModal('invoiceCaptureModal'); resetInvoicePhotos(); }
     function resetInvoicePhotos() {
@@ -1460,32 +1444,35 @@
       el('aiLoadingState').classList.remove('hidden'); el('aiItemsContainer').classList.add('hidden'); el('aiModalActions').classList.add('hidden');
 
       try {
-        const prompt = `Przeanalizuj dokładnie fakturę/WZ (zdjęcia lub PDF). Jeśli wiersz powtarza się na 2 zdjęciach, zwróć go TYLKO RAZ!
-ZWRÓĆ SZCZEGÓLNĄ UWAGĘ NA JEDNOSTKI "zgrz" ORAZ RABATY:
-1. rawUnit: jednostka miary z kolumny J.m. (np. "zgrz", "szt", "op", "krt"). Jeśli w nazwie lub w kolumnie J.m. jest "zgrz" (zgrzewka), podaj rawUnit: "zgrz" oraz oszacuj inferredPackSize (ile butelek/puszek jest w tej zgrzewce, np. 6 dla wody 1.5L, 12 dla wody/napojów 0.5L, 24 dla puszek/małych butelek).
-2. CENY I RABATY:
-   - basePriceNet: Cena netto BEZ rabatu (100% cena cennikowa netto za jednostkę z faktury). Jeśli brak osobnej kolumny bez rabatu, podaj to samo co rawPrice.
-   - discountPercent: Procent rabatu z kolumny "% rabatu" / "Rabat" (liczba np. 15 dla 15%, lub 0 jeśli brak rabatu).
-   - rawPrice: Cena jednostkowa netto PO RABACIE (zrabatowana cena netto za jednostkę z faktury, np. za 1 zgrz lub 1 szt).
+        const prompt = `Przeanalizuj dokładnie fakturę/WZ (zdjęcia lub PDF) zachowując DOKŁADNĄ KOLEJNOŚĆ pozycji z faktury (Lp. 1, 2, 3...). Jeśli wiersz o tym samym numerze Lp. powtarza się na 2 zdjęciach, zwróć go TYLKO RAZ!
+ZWRÓĆ SZCZEGÓLNĄ UWAGĘ NA LP., JEDNOSTKI "zgrz", RABATY ORAZ KAUCJE (dla kaucji Netto = Brutto):
+1. lp: numer porządkowy wiersza z kolumny Lp. na fakturze (1, 2, 3...).
+2. rawUnit: jednostka miary z kolumny J.m. (np. "zgrz", "szt", "op", "krt"). Jeśli w nazwie lub w kolumnie J.m. jest "zgrz", podaj rawUnit: "zgrz" oraz oszacuj inferredPackSize (np. 6 dla 1.5L, 12 dla 0.5L, 24 dla 0.25L/0.33L).
+3. CENY I RABATY:
+   - basePriceNet: Cena netto BEZ rabatu (100% cena cennikowa netto za jednostkę z faktury).
+   - discountPercent: Procent rabatu z kolumny "% rabatu" (liczba np. 15 dla 15%, lub 0).
+   - rawPrice: Cena jednostkowa netto PO RABACIE (za jednostkę z faktury).
    - unitPriceHint: Jeśli pod pozycją widnieje dopisek "Cena zaokrąglona za sztu", podaj tę liczbę, inaczej null.
-   - rowNetValue: Wartość netto pozycji PO RABACIE (z kolumny Wartość netto).
-3. NAGŁÓWEK I PODSUMOWANIE:
-   - docNumber (numer faktury), supplier (sprzedawca), receiverName (odbiorca),
-   - totalNet: Suma wartości netto wszystkich produktów PO RABACIE,
+   - rowNetValue: Wartość netto pozycji PO RABACIE (z kolumny Wartość netto, bez kaucji).
+4. NAGŁÓWEK I PODSUMOWANIE:
+   - docNumber, supplier, receiverName,
+   - totalNetProductsOnly: Suma wartości netto samych produktów PO RABACIE (bez kaucji),
    - totalGross: Suma brutto dokumentu.
-4. deposits: kaucje i opakowania zwrotne { "name": string, "category": "PET_CAN_050"|"BUTELKA_SZKLO"|"SKRZYNKA"|"PALETA_INNE", "netQty": number, "unitPrice": number }.
+5. deposits: kaucje i opakowania zwrotne (dla których netto = brutto) { "name": string, "category": "PET_CAN_050"|"BUTELKA_SZKLO"|"SKRZYNKA"|"PALETA_INNE", "netQty": number, "unitPrice": number }.
 
 Zwróć czysty JSON:
 {
-  "docNumber": string, "supplier": string, "receiverName": string, "totalNet": string, "totalGross": string,
-  "items": [{ "code": string, "name": string, "category": string, "rawUnit": string, "rawQty": number, "inferredPackSize": number, "basePriceNet": number, "discountPercent": number, "rawPrice": number, "unitPriceHint": number, "rowNetValue": number }],
+  "docNumber": string, "supplier": string, "receiverName": string, "totalNetProductsOnly": string, "totalGross": string,
+  "items": [{ "lp": number, "code": string, "name": string, "category": string, "rawUnit": string, "rawQty": number, "inferredPackSize": number, "basePriceNet": number, "discountPercent": number, "rawPrice": number, "unitPriceHint": number, "rowNetValue": number }],
   "deposits": []
 }`;
         const parsed = await queryGeminiAPI(prompt, mediaParts);
         const seenInScan = new Map();
-        let calculatedTotalNetSum = 0;
+        let calcProductsNetSum = 0;
 
-        for (const it of (parsed.items || [])) {
+        for (let idx = 0; idx < (parsed.items || []).length; idx++) {
+          const it = parsed.items[idx];
+          const lpNum = Number(it.lp) || (idx + 1);
           const rq = Number(it.rawQty) || 1;
           const rpDiscounted = Number(it.rawPrice) || 0;
           const rpBase = Number(it.basePriceNet) || rpDiscounted;
@@ -1501,11 +1488,12 @@ Zwróć czysty JSON:
 
           const smartCat = classifyProductSmartLocal(it.name, it.category) || it.category || 'Napoje • Gazowane / Soft';
           const spec = extractProductSpecs(it.name);
-          const dedupKey = (it.code ? String(it.code).trim() : '') + '|' + cleanCanonicalKey(it.name) + '|' + (spec.caps[0] || '') + '|' + spec.strictTokens.join(',');
+          const dedupKey = lpNum + '|' + (it.code ? String(it.code).trim() : '') + '|' + cleanCanonicalKey(it.name) + '|' + (spec.caps[0] || '');
 
           if (!seenInScan.has(dedupKey)) {
-            calculatedTotalNetSum += rowNet;
+            calcProductsNetSum += rowNet;
             seenInScan.set(dedupKey, {
+              lp: lpNum,
               name: it.name.trim(),
               category: smartCat,
               rawUnit: it.rawUnit || 'szt.',
@@ -1523,24 +1511,29 @@ Zwróć czysty JSON:
           }
         }
 
+        const sortedItems = Array.from(seenInScan.values()).sort((a, b) => (a.lp || 0) - (b.lp || 0));
+        const depositsArr = parsed.deposits || [];
+        const calcDepositsSum = depositsArr.reduce((acc, d) => acc + ((Number(d.netQty) || 0) * (Number(d.unitPrice) || 0)), 0);
+        const prodNetVal = parsed.totalNetProductsOnly ? parseFloat(String(parsed.totalNetProductsOnly).replace(',', '.')) || calcProductsNetSum : calcProductsNetSum;
+
         currentExtractedDelivery = {
           docNumber: parsed.docNumber || 'FA/' + Date.now().toString().slice(-6),
           supplier: parsed.supplier || 'Dostawca',
-          totalNet: parsed.totalNet || calculatedTotalNetSum.toFixed(2),
+          totalNet: prodNetVal.toFixed(2),
+          totalDepositsSum: calcDepositsSum.toFixed(2),
+          totalNetWithDep: (prodNetVal + calcDepositsSum).toFixed(2),
           totalGross: parsed.totalGross || '',
           receiverName: parsed.receiverName || localStorage.getItem('magazyn_default_receiver') || 'Bartek',
-          items: Array.from(seenInScan.values()),
-          deposits: parsed.deposits || [],
+          items: sortedItems,
+          deposits: depositsArr,
           photos: savedUrls
         };
         displayExtractedItems(currentExtractedDelivery);
       } catch (err) { alert("Błąd odczytu: " + err.message); closeAiModal(); }
     }
 
-    // --- DYNAMICZNE PRZELICZANIE ZGRZEWKI ("ZGRZ") W OKNIE WERYFIKACJI ---
     function setInvoiceItemPackMultiplier(idx, newMult) {
-      const it = currentExtractedDelivery?.items?.[idx];
-      if (!it) return;
+      const it = currentExtractedDelivery?.items?.[idx]; if (!it) return;
       const m = Math.max(1, parseInt(newMult, 10) || 1);
       it.packMultiplier = m;
       it.qty = it.rawQty * m;
@@ -1555,39 +1548,56 @@ Zwróć czysty JSON:
       triggerScanFeedback();
     }
 
+    // --- PRZELICZANIE NA ŻYWO: NETTO PRODUKTÓW (BEZ KAUCJI) + KAUCJE (NETTO=BRUTTO) = NETTO Z KAUCJĄ ---
     function recalcInvoiceTotalNetLive() {
-      if (!currentExtractedDelivery?.items) return;
-      let sum = 0;
-      currentExtractedDelivery.items.forEach((it, idx) => {
+      if (!currentExtractedDelivery) return;
+      let prodNetSum = 0;
+      (currentExtractedDelivery.items || []).forEach((it, idx) => {
         const q = parseFloat(el(`aiItemQty_${idx}`)?.value) || 0;
         const p = parseFloat(el(`aiItemPrice_${idx}`)?.value) || 0;
-        sum += q * p;
+        const rowVal = q * p;
+        prodNetSum += rowVal;
+        if (el(`aiRowNetLabel_${idx}`)) el(`aiRowNetLabel_${idx}`).innerText = `Wartość netto poz.: ${rowVal.toFixed(2)} zł`;
       });
-      if (el('aiTotalNetInput')) el('aiTotalNetInput').value = sum.toFixed(2);
+
+      let depSum = 0;
+      (currentExtractedDelivery.deposits || []).forEach((dp, idx) => {
+        const dq = parseFloat(el(`aiDepQty_${idx}`)?.value) || 0;
+        const dpPrice = parseFloat(el(`aiDepPrice_${idx}`)?.value) || 0;
+        depSum += dq * dpPrice;
+      });
+
+      if (el('aiTotalNetInput')) el('aiTotalNetInput').value = prodNetSum.toFixed(2);
+      if (el('aiTotalDepositsSumInput')) el('aiTotalDepositsSumInput').value = depSum.toFixed(2);
+      if (el('aiTotalNetWithDepInput')) el('aiTotalNetWithDepInput').value = (prodNetSum + depSum).toFixed(2);
     }
 
     function displayExtractedItems(delivery) {
       el('aiLoadingState').classList.add('hidden'); el('aiItemsContainer').classList.remove('hidden'); el('aiModalActions').classList.remove('hidden');
       el('aiSupplierInput').value = delivery.supplier; el('aiDocNumInput').value = delivery.docNumber; el('aiReceiverInput').value = delivery.receiverName;
-      el('aiTotalNetInput').value = delivery.totalNet || ''; el('aiTotalGrossInput').value = delivery.totalGross || '';
+      el('aiTotalNetInput').value = delivery.totalNet || '0.00';
+      el('aiTotalDepositsSumInput').value = delivery.totalDepositsSum || '0.00';
+      el('aiTotalNetWithDepInput').value = delivery.totalNetWithDep || '0.00';
+      el('aiTotalGrossInput').value = delivery.totalGross || '';
       checkInvoiceDuplicateLive();
 
       el('aiItemsList').innerHTML = (delivery.items || []).map((it, idx) => {
         const m = findBestInventoryMatch(it.name);
         const isZgrz = /zgrz/i.test(it.rawUnit) || /\bzgrz/i.test(it.name) || it.packMultiplier > 1;
         const hasDiscount = it.discountPercent > 0 || (it.basePrice > it.netPrice + 0.01);
+        const lpVal = it.lp || (idx + 1);
 
         return `<div class="bg-slate-900 border ${m ? 'border-emerald-600/70' : 'border-indigo-600/70'} rounded-xl p-3 space-y-2">
           <div class="flex justify-between items-center flex-wrap gap-1">
             <div class="flex items-center gap-1.5 flex-wrap">
+              <span class="bg-indigo-600 text-white font-mono font-black text-[10px] px-2 py-0.5 rounded shadow">Lp. ${lpVal}</span>
               <span class="text-[9px] font-bold px-2 py-0.5 rounded ${m ? 'bg-emerald-950 text-emerald-300' : 'bg-indigo-950 text-indigo-300'}">${m ? `✓ W bazie (#${m.barcode})` : '⭐ NOWY PRODUKT'}</span>
-              ${hasDiscount ? `<span class="text-[9px] font-bold px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-700/60">🏷️ Zrabatowana -${it.discountPercent}% (100%: <strong id="aiItemBasePriceLabel_${idx}">${Number(it.basePrice).toFixed(2)} zł</strong>)</span>` : `<span class="text-[9px] px-2 py-0.5 rounded bg-slate-800 text-slate-400">Cena bez rabatu (0%)</span>`}
-              <span class="text-[9px] text-cyan-300 font-mono">Wartość netto poz.: ${Number(it.rowNetValue).toFixed(2)} zł</span>
+              ${hasDiscount ? `<span class="text-[9px] font-bold px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-700/60">🏷️ Rabat -${it.discountPercent}% (100%: <strong id="aiItemBasePriceLabel_${idx}">${Number(it.basePrice).toFixed(2)} zł</strong>)</span>` : `<span class="text-[9px] px-2 py-0.5 rounded bg-slate-800 text-slate-400">Bez rabatu (0%)</span>`}
+              <span id="aiRowNetLabel_${idx}" class="text-[9px] text-emerald-300 font-mono font-bold">Wartość netto poz.: ${Number(it.rowNetValue).toFixed(2)} zł</span>
             </div>
             <input type="text" id="aiItemCat_${idx}" list="categoryPresetsList" value="${m ? m.category : (it.category || 'Napoje')}" class="bg-slate-800 border border-slate-700 rounded px-2 py-0.5 text-[10px] text-cyan-300 font-bold w-44">
           </div>
 
-          <!-- PRZELICZNIK ZGRZEWEK ("ZGRZ") NA SZTUKI -->
           <div class="bg-slate-950/80 border ${isZgrz ? 'border-amber-500/70' : 'border-slate-800'} rounded-lg px-2.5 py-1.5 flex items-center justify-between flex-wrap gap-2 text-[11px]">
             <span class="text-slate-300">Na fakturze: <strong class="text-amber-300">${it.rawQty} ${it.rawUnit}</strong> (${Number(it.rawPackDiscountedPrice).toFixed(2)} zł/${it.rawUnit})</span>
             <div class="flex items-center gap-1">
@@ -1610,11 +1620,13 @@ Zwróć czysty JSON:
         </div>`;
       }).join('');
       renderExtractedDepositsInModal();
+      recalcInvoiceTotalNetLive();
     }
 
     function renderExtractedDepositsInModal() {
       const deps = currentExtractedDelivery?.deposits || [];
-      el('aiDepositsList').innerHTML = deps.length === 0 ? `<p class="text-[11px] text-slate-500 italic">Brak kaucji.</p>` : deps.map((dp, idx) => `<div class="bg-cyan-950/30 border border-cyan-800/60 rounded-xl p-2.5 space-y-1.5 text-xs"><div class="flex justify-between gap-2"><input type="text" id="aiDepName_${idx}" value="${dp.name || 'Kaucja'}" class="bg-transparent font-bold text-cyan-200 flex-1 border-b border-cyan-800"><select id="aiDepCat_${idx}" class="bg-slate-800 rounded px-1.5 py-1 text-[10px] text-cyan-300"><option value="PET_CAN_050" ${dp.category === 'PET_CAN_050' ? 'selected' : ''}>PET/CAN 0,50</option><option value="BUTELKA_SZKLO" ${dp.category === 'BUTELKA_SZKLO' ? 'selected' : ''}>Szkło 1,00</option><option value="SKRZYNKA" ${dp.category === 'SKRZYNKA' ? 'selected' : ''}>Skrzynka</option><option value="PALETA_INNE" ${dp.category === 'PALETA_INNE' ? 'selected' : ''}>Paleta/Inne</option></select></div><div class="flex justify-between items-center pt-1"><span class="text-[10px] text-slate-400">Ilość i stawka:</span><div class="flex items-center gap-1.5"><input type="number" id="aiDepQty_${idx}" value="${dp.netQty !== undefined ? dp.netQty : 1}" class="w-16 bg-slate-800 rounded p-1 text-center font-bold text-cyan-400 text-xs"><span>×</span><input type="number" step="0.01" id="aiDepPrice_${idx}" value="${Number(dp.unitPrice || 0.50).toFixed(2)}" class="w-16 bg-slate-800 rounded p-1 text-center font-bold text-white text-xs"><span>zł</span></div></div></div>`).join('');
+      el('aiDepositsList').innerHTML = deps.length === 0 ? `<p class="text-[11px] text-slate-500 italic">Brak kaucji na tej fakturze.</p>` : deps.map((dp, idx) => `<div class="bg-cyan-950/30 border border-cyan-800/60 rounded-xl p-2.5 space-y-1.5 text-xs"><div class="flex justify-between gap-2 items-center"><span class="bg-cyan-900 text-cyan-200 font-mono font-bold text-[10px] px-1.5 py-0.5 rounded">Kaucja #${idx + 1}</span><input type="text" id="aiDepName_${idx}" value="${dp.name || 'Kaucja'}" class="bg-transparent font-bold text-cyan-200 flex-1 border-b border-cyan-800"><select id="aiDepCat_${idx}" class="bg-slate-800 rounded px-1.5 py-1 text-[10px] text-cyan-300"><option value="PET_CAN_050" ${dp.category === 'PET_CAN_050' ? 'selected' : ''}>PET/CAN 0,50</option><option value="BUTELKA_SZKLO" ${dp.category === 'BUTELKA_SZKLO' ? 'selected' : ''}>Szkło 1,00</option><option value="SKRZYNKA" ${dp.category === 'SKRZYNKA' ? 'selected' : ''}>Skrzynka</option><option value="PALETA_INNE" ${dp.category === 'PALETA_INNE' ? 'selected' : ''}>Paleta/Inne</option></select></div><div class="flex justify-between items-center pt-1"><span class="text-[10px] text-slate-400">Ilość × stawka (Netto = Brutto):</span><div class="flex items-center gap-1.5"><input type="number" id="aiDepQty_${idx}" value="${dp.netQty !== undefined ? dp.netQty : 1}" oninput="recalcInvoiceTotalNetLive()" class="w-16 bg-slate-800 rounded p-1 text-center font-bold text-cyan-400 text-xs"><span>×</span><input type="number" step="0.01" id="aiDepPrice_${idx}" value="${Number(dp.unitPrice || 0.50).toFixed(2)}" oninput="recalcInvoiceTotalNetLive()" class="w-16 bg-slate-800 rounded p-1 text-center font-bold text-white text-xs"><span>zł</span></div></div></div>`).join('');
+      recalcInvoiceTotalNetLive();
     }
     function addManualDepositRowToModal() { if (!currentExtractedDelivery) return; currentExtractedDelivery.deposits.push({ name: 'Kaucja zwrotna', category: 'BUTELKA_SZKLO', netQty: 12, unitPrice: 1.00 }); renderExtractedDepositsInModal(); }
 
@@ -1634,6 +1646,7 @@ Zwróć czysty JSON:
 
       for (let i = 0; i < (currentExtractedDelivery.items || []).length; i++) {
         const srcIt = currentExtractedDelivery.items[i];
+        const lpVal = srcIt.lp || (i + 1);
         const name = el(`aiItemName_${i}`)?.value.trim(), cid = el(`aiSelectMatch_${i}`)?.value, q = parseInt(el(`aiItemQty_${i}`)?.value) || 0, u = el(`aiItemUnit_${i}`)?.value.trim() || 'szt.', p = parseFloat(el(`aiItemPrice_${i}`)?.value) || 0;
         const mult = parseInt(el(`aiItemMult_${i}`)?.value) || srcIt.packMultiplier || 1;
         const userCat = el(`aiItemCat_${i}`)?.value.trim() || '';
@@ -1651,21 +1664,21 @@ Zwróć czysty JSON:
           }
           if (!isCatalogOnly) {
             targetItem.qty = (Number(targetItem.qty) || 0) + q;
-            recordStockLog(targetItem.id, targetItem.name, 'Przyjęcie Faktura', q, `${docNum} • ${rcv}`);
+            recordStockLog(targetItem.id, targetItem.name, 'Przyjęcie Faktura', q, `${docNum} • Lp.${lpVal}`);
           }
           if (p > 0) targetItem.price = p;
           targetItem.basePrice = srcIt.basePrice || p;
           targetItem.discountPercent = srcIt.discountPercent || 0;
           targetItem.category = resolvedCat;
-          finalItems.push({ name: targetItem.name, qty: q, unit: u, netPrice: p, basePrice: targetItem.basePrice, discountPercent: targetItem.discountPercent, appliedItemId: targetItem.id, wasCreatedNew: false });
+          finalItems.push({ lp: lpVal, name: targetItem.name, qty: q, unit: u, netPrice: p, basePrice: targetItem.basePrice, discountPercent: targetItem.discountPercent, appliedItemId: targetItem.id, wasCreatedNew: false });
           if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${targetItem.id}`, 'PATCH', { qty: targetItem.qty, price: targetItem.price, category: targetItem.category, updated_at: new Date() }); } catch (e) {} }
         } else {
           const initialQty = isCatalogOnly ? 0 : q;
           const newId = Date.now().toString() + '_' + i;
           const ni = normalizeItem({ id: newId, barcode: 'RC-' + Math.floor(100000 + Math.random() * 900000), name, category: resolvedCat, location: 'Magazyn Główny', qty: initialQty, inField: 0, unit: u, minQty: 3, price: p, basePrice: srcIt.basePrice || p, discountPercent: srcIt.discountPercent || 0 });
-          inventory.unshift(ni); addedCatalogCount++;
-          finalItems.push({ name: ni.name, qty: q, unit: u, netPrice: p, basePrice: ni.basePrice, discountPercent: ni.discountPercent, appliedItemId: ni.id, wasCreatedNew: true });
-          recordStockLog(ni.id, ni.name, isCatalogOnly ? 'Baza (Stara faktura)' : 'Nowy z Faktury', initialQty, `${docNum}`);
+          inventory.push(ni); addedCatalogCount++;
+          finalItems.push({ lp: lpVal, name: ni.name, qty: q, unit: u, netPrice: p, basePrice: ni.basePrice, discountPercent: ni.discountPercent, appliedItemId: ni.id, wasCreatedNew: true });
+          recordStockLog(ni.id, ni.name, isCatalogOnly ? 'Baza (Stara faktura)' : 'Nowy z Faktury', initialQty, `${docNum} • Lp.${lpVal}`);
           if (isCloudOnline) { try { await apiRequest('/inventory', 'POST', toDbItem(ni)); } catch (e) {} }
         }
       }
@@ -1675,9 +1688,16 @@ Zwróć czysty JSON:
           const dn = el(`aiDepName_${j}`)?.value.trim(), dc = el(`aiDepCat_${j}`)?.value, dq = parseInt(el(`aiDepQty_${j}`)?.value, 10) || 0, dp = parseFloat(el(`aiDepPrice_${j}`)?.value) || 0.50;
           if (dq === 0 || !dn) continue;
           const depId = await upsertDepositEntry(dn, dc, dp, dq);
-          finalDeps.push({ name: dn, category: dc, netQty: dq, unitPrice: dp, appliedDepositId: depId });
+          finalDeps.push({ lp: j + 1, name: dn, category: dc, netQty: dq, unitPrice: dp, appliedDepositId: depId });
         }
-        const dEntry = { id: Date.now().toString(), doc_number: docNum, supplier: sup, receiver_name: rcv, total_net: el('aiTotalNetInput').value.trim(), total_gross: el('aiTotalGrossInput').value.trim(), items_json: finalItems, deposits_json: finalDeps, image_url: JSON.stringify(currentExtractedDelivery.photos || []), created_at: new Date() };
+        const dEntry = {
+          id: Date.now().toString(), doc_number: docNum, supplier: sup, receiver_name: rcv,
+          total_net: el('aiTotalNetInput').value.trim(),
+          total_net_with_dep: el('aiTotalNetWithDepInput').value.trim(),
+          total_gross: el('aiTotalGrossInput').value.trim(),
+          items_json: finalItems, deposits_json: finalDeps,
+          image_url: JSON.stringify(currentExtractedDelivery.photos || []), created_at: new Date()
+        };
         deliveries.unshift(dEntry); safeSetLocal('magazyn_offline_deliveries', deliveries);
         if (isCloudOnline) { try { await apiRequest('/deliveries', 'POST', dEntry); } catch (e) {} }
       }
@@ -1702,7 +1722,7 @@ Zwróć czysty JSON:
         currentExtractedEventDispatch = { eventNumber: parsed.eventNumber || '#EVENT', eventName: parsed.eventName || 'Realizacja', dispatchDate: parsed.dispatchDate || new Date().toLocaleDateString('pl-PL'), items: parsed.items || [], image: prep.previewUrl };
         el('eventDispatchLoading').classList.add('hidden'); el('eventDispatchContent').classList.remove('hidden'); el('eventDispatchActions').classList.remove('hidden');
         el('evDispNum').value = currentExtractedEventDispatch.eventNumber; el('evDispName').value = currentExtractedEventDispatch.eventName; el('evDispDate').value = currentExtractedEventDispatch.dispatchDate;
-        el('evDispItemsList').innerHTML = currentExtractedEventDispatch.items.map((it, idx) => `<div class="bg-slate-900 border border-slate-700 rounded-xl p-2.5 flex justify-between text-xs"><input type="text" id="evDispItemName_${idx}" value="${it.name}" class="font-bold text-white bg-transparent flex-1 mr-2"><input type="number" id="evDispItemQty_${idx}" value="${it.dispatched}" class="w-14 bg-slate-800 rounded p-1 text-center font-black text-amber-400"><input type="text" id="evDispItemUnit_${idx}" value="${it.unit || 'szt.'}" class="w-12 bg-slate-800 rounded p-1 text-center text-slate-300 ml-1"></div>`).join('');
+        el('evDispItemsList').innerHTML = currentExtractedEventDispatch.items.map((it, idx) => `<div class="bg-slate-900 border border-slate-700 rounded-xl p-2.5 flex justify-between text-xs"><span class="text-amber-400 font-mono font-bold mr-2">${idx + 1}.</span><input type="text" id="evDispItemName_${idx}" value="${it.name}" class="font-bold text-white bg-transparent flex-1 mr-2"><input type="number" id="evDispItemQty_${idx}" value="${it.dispatched}" class="w-14 bg-slate-800 rounded p-1 text-center font-black text-amber-400"><input type="text" id="evDispItemUnit_${idx}" value="${it.unit || 'szt.'}" class="w-12 bg-slate-800 rounded p-1 text-center text-slate-300 ml-1"></div>`).join('');
       } catch (err) { alert(err.message); hideModal('eventDispatchModal'); }
       event.target.value = '';
     }
@@ -1796,7 +1816,7 @@ Zwróć czysty JSON:
           if (m.returned !== undefined && m.returned !== null) { rq = Number(m.returned); cq = (m.consumed !== undefined && m.consumed !== null) ? Number(m.consumed) : Math.max(0, dq - rq); }
           else if (m.consumed !== undefined && m.consumed !== null) { cq = Number(m.consumed); rq = Math.max(0, dq - cq); }
         }
-        return `<div class="bg-slate-900 border border-slate-700 rounded-xl p-3 space-y-2"><div class="flex justify-between"><h5 class="font-bold text-xs text-white">${dispItem.name}</h5><span class="text-[10px] text-amber-400">Wydano: <strong>${dq}</strong></span></div><div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800"><div><span class="text-[10px] text-emerald-400 font-bold block">🍾 Zwrócono:</span><input type="number" id="evRetQty_${idx}" value="${rq}" min="0" oninput="el('evConsQty_${idx}').value=Math.max(0,${dq}-(parseInt(this.value)||0))" class="w-full bg-slate-800 border border-emerald-600/70 rounded p-1.5 text-center font-black text-emerald-400 text-xs"></div><div><span class="text-[10px] text-slate-400 block">Konsumpcja (zeszło):</span><input type="number" id="evConsQty_${idx}" value="${cq}" min="0" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-center font-bold text-indigo-300 text-xs"></div></div><input type="hidden" id="evRetImageHolder" value="${image}"></div>`;
+        return `<div class="bg-slate-900 border border-slate-700 rounded-xl p-3 space-y-2"><div class="flex justify-between"><h5 class="font-bold text-xs text-white"><span class="text-emerald-400 font-mono mr-1">Lp. ${idx + 1}</span> ${dispItem.name}</h5><span class="text-[10px] text-amber-400">Wydano: <strong>${dq}</strong></span></div><div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800"><div><span class="text-[10px] text-emerald-400 font-bold block">🍾 Zwrócono:</span><input type="number" id="evRetQty_${idx}" value="${rq}" min="0" oninput="el('evConsQty_${idx}').value=Math.max(0,${dq}-(parseInt(this.value)||0))" class="w-full bg-slate-800 border border-emerald-600/70 rounded p-1.5 text-center font-black text-emerald-400 text-xs"></div><div><span class="text-[10px] text-slate-400 block">Konsumpcja (zeszło):</span><input type="number" id="evConsQty_${idx}" value="${cq}" min="0" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-center font-bold text-indigo-300 text-xs"></div></div><input type="hidden" id="evRetImageHolder" value="${image}"></div>`;
       }).join('');
     }
 
@@ -1963,8 +1983,8 @@ Zwróć czysty JSON:
     }
 
     function exportCSV() {
-      const h = ['Kod', 'Nazwa', 'Cena Netto po rabacie', 'Cena 100% bez rabatu', 'Rabat %', 'Kategoria', 'Lokalizacja', 'Magazyn', 'W terenie', 'Jednostka', 'Min'];
-      const r = inventory.map(i => [`"${i.barcode}"`, `"${i.name.replace(/"/g, '""')}"`, Number(i.price || 0).toFixed(2), Number(i.basePrice || i.price || 0).toFixed(2), Number(i.discountPercent || 0), `"${i.category}"`, `"${i.location}"`, i.qty, i.inField || 0, `"${i.unit}"`, i.minQty]);
+      const h = ['Lp.', 'Kod', 'Nazwa', 'Cena Netto po rabacie', 'Cena 100% bez rabatu', 'Rabat %', 'Kategoria', 'Lokalizacja', 'Magazyn', 'W terenie', 'Jednostka', 'Min'];
+      const r = inventory.map((i, idx) => [idx + 1, `"${i.barcode}"`, `"${i.name.replace(/"/g, '""')}"`, Number(i.price || 0).toFixed(2), Number(i.basePrice || i.price || 0).toFixed(2), Number(i.discountPercent || 0), `"${i.category}"`, `"${i.location}"`, i.qty, i.inField || 0, `"${i.unit}"`, i.minQty]);
       const blob = new Blob(['\uFEFF' + [h.join(';'), ...r.map(x => x.join(';'))].join('\n')], { type: 'text/csv;charset=utf-8;' });
       const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `magazyn_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
     }
