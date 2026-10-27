@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>MagazynRC - WMS v5.4</title>
+  <title>MagazynRC - WMS v5.6</title>
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#0f172a">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -25,7 +25,7 @@
     }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen pb-32 font-sans select-none print-mode-sheet" onclick="hideContextMenu()">
+<body class="bg-slate-900 text-slate-100 min-h-screen pb-32 font-sans select-none print-mode-sheet" onclick="hideContextMenu(); hideToolsMenu()">
 
   <!-- OBSZARY DRUKU -->
   <div id="printableSheet"></div>
@@ -55,21 +55,31 @@
   </div>
 
   <!-- NAGŁÓWEK -->
-  <header class="bg-slate-800/90 backdrop-blur border-b border-slate-700/80 sticky top-0 z-30 px-3 py-2.5 flex items-center justify-between shadow-md">
+  <header class="bg-slate-800/90 backdrop-blur border-b border-slate-700/80 sticky top-0 z-30 px-3 py-2 flex items-center justify-between shadow-md">
     <div class="flex items-center space-x-2">
       <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-base shadow">M</div>
       <div>
-        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v5.4 PRO</span></h1>
+        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v5.6</span></h1>
         <p id="syncStatus" class="text-[10px] text-amber-400 font-medium leading-none mt-0.5">Inicjalizacja...</p>
       </div>
     </div>
-    <div class="flex items-center gap-1">
-      <button onclick="exportBackup()" class="bg-slate-700 text-sky-300 text-xs px-2 py-1.5 rounded-lg font-bold border border-slate-600" title="Zapisz kopię bazy">💾 Zapisz</button>
-      <button onclick="triggerImport()" class="bg-slate-700 text-rose-300 text-xs px-2 py-1.5 rounded-lg font-bold border border-slate-600" title="Wczytaj z pliku">📂 Wczytaj</button>
+    <div class="flex items-center gap-1.5 relative">
+      <button onclick="runOnlineAIClassifier(true)" class="bg-purple-950 text-purple-300 text-xs px-2.5 py-1.5 rounded-lg font-bold border border-purple-700/60 shadow hover:bg-purple-900 transition" title="Klasyfikacja AI">🧠 Ucz AI</button>
+      <button onclick="mergeExistingDuplicates()" class="bg-indigo-950 text-indigo-300 text-xs px-2.5 py-1.5 rounded-lg font-bold border border-indigo-700/60 shadow hover:bg-indigo-900 transition" title="Scal zduplikowane towary">🔗 Scal</button>
+      <button onclick="openInventoryAuditModal()" class="bg-cyan-950 text-cyan-300 text-xs px-2.5 py-1.5 rounded-lg font-bold border border-cyan-700/60 shadow hover:bg-cyan-900 transition" title="Spis z natury">📋 Spis</button>
+      
+      <!-- MENU NARZĘDZIOWE (WIĘCEJ) -->
+      <button onclick="toggleToolsMenu(event)" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs px-2.5 py-1.5 rounded-lg font-black border border-slate-600 shadow transition" title="Więcej narzędzi">⚙️</button>
+      <div id="toolsMenuDropdown" class="hidden absolute right-0 top-9 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl py-1.5 w-52 z-50 text-xs">
+        <button onclick="copyLowStockWhatsApp()" class="w-full text-left px-3.5 py-2 text-amber-300 hover:bg-slate-700 flex items-center gap-2">📲 Kopiuj braki (WhatsApp)</button>
+        <button onclick="exportCSV()" class="w-full text-left px-3.5 py-2 text-slate-200 hover:bg-slate-700 flex items-center gap-2">📊 Eksport do Excel (CSV)</button>
+        <div class="border-t border-slate-700 my-1"></div>
+        <button onclick="exportBackup()" class="w-full text-left px-3.5 py-2 text-sky-300 hover:bg-slate-700 flex items-center gap-2">💾 Kopia bazy (Zapisz JSON)</button>
+        <button onclick="triggerImport()" class="w-full text-left px-3.5 py-2 text-amber-400 hover:bg-slate-700 flex items-center gap-2">📂 Przywróć bazę (Wczytaj JSON)</button>
+        <div class="border-t border-slate-700 my-1"></div>
+        <button onclick="lockApp()" class="w-full text-left px-3.5 py-2 text-rose-400 font-bold hover:bg-slate-700 flex items-center gap-2">🔒 Zablokuj ekran</button>
+      </div>
       <input type="file" id="backupInput" accept=".json" class="hidden" onchange="importBackup(event)">
-      <button onclick="copyLowStockWhatsApp()" class="bg-slate-700 text-amber-300 text-xs px-2 py-1.5 rounded-lg font-medium border border-slate-600" title="Kopiuj braki">📲 Braki</button>
-      <button onclick="exportCSV()" class="bg-slate-700 text-slate-200 text-xs px-2 py-1.5 rounded-lg font-medium border border-slate-600" title="Eksport CSV">📊 CSV</button>
-      <button onclick="lockApp()" class="bg-slate-700 text-rose-300 text-xs px-2 py-1.5 rounded-lg font-medium border border-slate-600" title="Zablokuj ekran">🔒</button>
     </div>
   </header>
 
@@ -127,7 +137,6 @@
           <div><h2 class="font-bold text-xs text-white">📷 Skaner, Zdjęcia i Przeciągnij-Upuść</h2><p class="text-[11px] text-slate-400">Upuść plik z komputera, wklej (Ctrl+V) lub użyj aparatu</p></div>
           <div class="flex gap-2">
             <button onclick="el('shelfCountInput').click()" class="bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow">👁️ Zlicz ze zdjęcia</button>
-            <button onclick="openInventoryAuditModal()" class="bg-cyan-700 hover:bg-cyan-600 text-white text-xs font-bold px-3 py-1.5 rounded-xl shadow">📋 Inwentaryzacja</button>
             <button id="btnToggleCamera" onclick="toggleCamera()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-1.5 rounded-xl shadow">Skaner QR</button>
           </div>
         </div>
@@ -333,7 +342,7 @@
   </div>
 
   <!-- MODAL: EDYCJA TOWARU -->
-  <div id="editItemModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-3 z-50 overflow-y-auto">
+  <div id="editItemModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <form onsubmit="saveEditedItem(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">✏️ Edycja Towaru</h3><button type="button" onclick="hideModal('editItemModal')" class="text-slate-400 text-lg font-bold">✕</button></div>
       <input type="hidden" id="editItemId">
@@ -494,6 +503,9 @@
     }
     function lockApp() { localStorage.removeItem('magazyn_auth_pin'); el('authPin').value = ''; checkAuth(); }
     checkAuth();
+
+    function toggleToolsMenu(e) { e.stopPropagation(); el('toolsMenuDropdown').classList.toggle('hidden'); }
+    function hideToolsMenu() { el('toolsMenuDropdown')?.classList.add('hidden'); }
 
     let learnedRules = {};
     try { learnedRules = JSON.parse(localStorage.getItem('magazyn_learned_rules')) || {}; } catch (e) {}
@@ -700,8 +712,33 @@
             if (item.category !== fc) { item.category = fc; if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${item.id}`, 'PATCH', { category: fc }); } catch (e) {} } }
           }
         }
-        safeSetLocal('magazyn_offline_items', inventory); renderInventory(); if (forceAll) alert(`🧠 Zaktualizowano!`);
+        safeSetLocal('magazyn_offline_items', inventory); renderInventory(); if (forceAll) alert(`🧠 Zaktualizowano kategorie!`);
       } catch (e) {}
+    }
+
+    async function mergeExistingDuplicates() {
+      const groups = new Map(), toDel = []; let count = 0;
+      for (const item of inventory) {
+        let master = null;
+        for (const m of groups.values()) {
+          if (cleanCanonicalKey(m.name) === cleanCanonicalKey(item.name) && areSpecsCompatible(m.name, item.name)) { master = m; break; }
+        }
+        if (!master) groups.set(item.id, item);
+        else {
+          master.qty = (Number(master.qty) || 0) + (Number(item.qty) || 0);
+          master.inField = (Number(master.inField) || 0) + (Number(item.inField) || 0);
+          if (Number(item.price) > 0) master.price = Number(item.price);
+          if (item.photo && !master.photo) master.photo = item.photo;
+          toDel.push(item.id); count++;
+        }
+      }
+      if (count === 0) return alert("Brak duplikatów! Wszystkie pozycje w magazynie są unikalne.");
+      inventory = Array.from(groups.values()); safeSetLocal('magazyn_offline_items', inventory); renderInventory();
+      if (isCloudOnline) {
+        for (const id of toDel) { try { await apiRequest(`/inventory?id=eq.${id}`, 'DELETE'); } catch (e) {} }
+        for (const m of inventory) { try { await apiRequest(`/inventory?id=eq.${m.id}`, 'PATCH', toDbItem(m)); } catch (e) {} }
+      }
+      alert(`🔗 Scalono ${count} zduplikowanych pozycji!`);
     }
 
     function cleanCanonicalKey(text) { return (text || '').toLowerCase().replace(/['’`"´]/g, '').replace(/,/g, '.').replace(/\b(\d+)\s*ml\b/gi, (_, ml) => (parseInt(ml, 10) / 1000).toString()).replace(/\b(0\.\d+|1\.5|1)\s*l\b/gi, '$1').replace(/\bx\s*\d+\b/gi, ' ').replace(/\bzgrz\b|\bders\b|\bdrs\b|\bop\b|\bszt\b|\bbut\b/gi, ' ').replace(/[^a-z0-9ąćęłńóśźż.%]/g, ' ').replace(/\s+/g, ' ').trim(); }
@@ -1247,6 +1284,158 @@
       const r = inventory.map((i, idx) => [idx + 1, `"${i.barcode}"`, `"${i.name.replace(/"/g, '""')}"`, Number(i.price || 0).toFixed(2), Number(i.basePrice || i.price || 0).toFixed(2), Number(i.discountPercent || 0), `"${i.category}"`, `"${i.location}"`, i.qty, i.inField || 0, `"${i.unit}"`, i.minQty]);
       const blob = new Blob(['\uFEFF' + [h.join(';'), ...r.map(x => x.join(';'))].join('\n')], { type: 'text/csv;charset=utf-8;' });
       const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `magazyn_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+    }
+
+    function openRwTransferModal(allowEmpty = false) {
+      if (!allowEmpty && selectedItemIds.size === 0 && rwCreatorMap.size === 0) return alert("Zaznacz pozycje na liście.");
+      selectedItemIds.forEach(id => { if (!rwCreatorMap.has(String(id))) { const it = inventory.find(x => String(x.id) === String(id)); rwCreatorMap.set(String(id), Math.min(it?.qty || 1, 1) || 1); } });
+      el('rwTransferNum').value = 'RW-' + String(rwTransfers.length + 1).padStart(2, '0') + '/' + new Date().getFullYear().toString().slice(-2);
+      el('rwTransferDate').value = new Date().toLocaleDateString('pl-PL'); el('rwTransferDestination').value = '';
+      el('rwTransferAddSelect').innerHTML = `<option value="">-- Wybierz towar (${inventory.length}) --</option>` + inventory.map(it => `<option value="${it.id}">[${it.category}] ${it.name} (Stan: ${it.qty} ${it.unit})</option>`).join('');
+      renderRwCreatorItems(); showModal('rwTransferModal');
+    }
+    function addItemToRwCreator() {
+      const id = el('rwTransferAddSelect').value; if (!id) return;
+      const it = inventory.find(x => String(x.id) === String(id)); if (!it) return;
+      rwCreatorMap.set(String(id), (rwCreatorMap.get(String(id)) || 0) + 1);
+      el('rwTransferAddSelect').value = ''; renderRwCreatorItems();
+    }
+    function renderRwCreatorItems() {
+      const list = el('rwTransferItemsList');
+      if (rwCreatorMap.size === 0) { list.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs">Lista jest pusta. Wybierz towar powyżej.</div>`; el('rwTransferTotalValLabel').innerText = '0.00 zł netto'; return; }
+      let sum = 0;
+      list.innerHTML = Array.from(rwCreatorMap.entries()).map(([id, qty], idx) => {
+        const it = inventory.find(x => String(x.id) === String(id)); if (!it) return '';
+        const rowVal = qty * (Number(it.price) || 0); sum += rowVal;
+        return `<div class="bg-slate-900 border border-slate-700 rounded-xl p-2.5 flex items-center justify-between text-xs gap-2"><div class="flex-1 truncate"><span class="font-bold text-white block truncate">${idx + 1}. ${it.name}</span><span class="text-[10px] text-slate-400">Magazyn: ${it.qty} ${it.unit} • Koszt: ${Number(it.price).toFixed(2)} zł</span></div><div class="flex items-center gap-1.5"><span class="text-[10px] text-amber-300 font-bold">${rowVal.toFixed(2)} zł</span><input type="number" value="${qty}" min="1" max="${it.qty || 9999}" oninput="rwCreatorMap.set('${it.id}', Math.max(1, parseInt(this.value)||1)); renderRwCreatorItems();" class="w-16 bg-slate-800 border border-amber-500/70 rounded-lg p-1.5 text-center font-black text-amber-400 text-xs"><button type="button" onclick="rwCreatorMap.delete('${it.id}'); renderRwCreatorItems();" class="text-rose-400 font-bold px-1.5">✕</button></div></div>`;
+      }).join('');
+      el('rwTransferTotalValLabel').innerText = sum.toFixed(2) + ' zł netto';
+    }
+    async function finalizeRwTransfer() {
+      if (rwCreatorMap.size === 0) return alert("Dodaj przynajmniej jedną pozycję do RW.");
+      const rwNum = el('rwTransferNum').value.trim() || 'RW', rwDate = el('rwTransferDate').value.trim() || new Date().toLocaleDateString('pl-PL'), rwDest = el('rwTransferDestination').value.trim() || 'Biuro / Baza';
+      const payload = []; let totalNetVal = 0;
+      for (const [id, qty] of rwCreatorMap.entries()) {
+        const it = inventory.find(x => String(x.id) === String(id)); if (!it) continue;
+        const p = Number(it.price) || 0; const rowVal = qty * p; totalNetVal += rowVal;
+        payload.push({ itemId: it.id, name: it.name, transferredQty: qty, returnedQty: 0, unit: it.unit || 'szt.', netPrice: p, rowNet: rowVal });
+        it.qty = Math.max(0, it.qty - qty); recordStockLog(it.id, it.name, 'Rozchód RW', -qty, `${rwNum} • ${rwDest}`);
+        if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${it.id}`, 'PATCH', { qty: it.qty, updated_at: new Date() }); } catch (e) {} }
+      }
+      const newTransfer = { id: Date.now().toString(), transfer_number: rwNum, destination: rwDest, transfer_date: rwDate, total_net_value: totalNetVal.toFixed(2), items_json: payload, created_at: new Date() };
+      rwTransfers.unshift(newTransfer); safeSetLocal('magazyn_offline_items', inventory); safeSetLocal('magazyn_offline_rw_transfers', rwTransfers);
+      rwCreatorMap.clear(); hideModal('rwTransferModal'); if (isSelectMode) toggleSelectMode();
+      renderInventory(); renderRwTransfers(); switchMainTab('rw'); printRwTransferSheet(newTransfer.id); alert(`🏢 Zarejestrowano RW (${rwDest})!`);
+    }
+    function renderRwTransfers() {
+      const list = el('rwTransfersList'); if (!list) return;
+      const totalRwNet = rwTransfers.reduce((acc, t) => acc + (Number(t.total_net_value) || 0), 0);
+      if (el('statRwTotalVal')) el('statRwTotalVal').innerText = totalRwNet.toFixed(2) + ' zł';
+      if (el('rwTotalNetBanner')) el('rwTotalNetBanner').innerText = totalRwNet.toFixed(2) + ' zł netto';
+      const badge = el('rwTransfersBadge'); if (badge) { if (rwTransfers.length > 0) { badge.innerText = rwTransfers.length; badge.classList.remove('hidden'); } else badge.classList.add('hidden'); }
+      if (rwTransfers.length === 0) { list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak rozchodów wewnętrznych (RW).</div>`; return; }
+      list.innerHTML = rwTransfers.map(tr => {
+        let items = []; try { items = typeof tr.items_json === 'string' ? JSON.parse(tr.items_json) : (tr.items_json || []); } catch (e) {}
+        const destTitle = tr.destination || tr.fair_name || 'Użycie Własne';
+        return `<div class="bg-slate-800 border border-amber-600/70 rounded-2xl p-3.5 space-y-2.5 shadow-md"><div class="flex justify-between items-start gap-2 flex-wrap"><div><div class="flex items-center gap-2"><span class="font-mono text-xs font-black text-amber-400">${tr.transfer_number || 'RW'}</span><span class="text-[9px] font-bold px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-700/60">ROZCHÓD WEWNĘTRZNY</span><span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-900 text-cyan-300">Koszt: ${tr.total_net_value || '0.00'} zł netto</span></div><h4 class="font-bold text-sm text-white mt-1">${destTitle}</h4><p class="text-[10px] text-slate-400">Data wydania: ${tr.transfer_date || '-'}</p></div><div class="flex gap-1.5"><button onclick="returnGoodsFromRw('${tr.id}')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-2.5 py-1.5 rounded-xl shadow flex items-center gap-1"><span>↩️</span> Zwrot (+)</button><button onclick="printRwTransferSheet('${tr.id}')" class="bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold text-xs px-2.5 py-1.5 rounded-xl shadow">📥 Drukuj RW</button><button onclick="deleteRwTransfer('${tr.id}')" class="text-rose-400 hover:underline text-[11px] px-1">🗑️</button></div></div><div class="bg-slate-900 rounded-xl p-2.5 text-xs space-y-1 max-h-48 overflow-y-auto"><div class="grid grid-cols-12 text-[10px] text-slate-400 font-bold border-b border-slate-800 pb-1"><span class="col-span-6">Surowiec / Towar</span><span class="col-span-2 text-center">Wydano</span><span class="col-span-2 text-center">Zwrócono</span><span class="col-span-2 text-right">Koszt netto</span></div>${items.map((it, idx) => `<div class="grid grid-cols-12 text-[11px] text-slate-200 items-center border-b border-slate-800/40 py-0.5"><span class="col-span-6 truncate"><strong class="text-amber-400 mr-1">${idx + 1}.</strong>${it.name}</span><span class="col-span-2 text-center font-bold text-white">${it.transferredQty} ${it.unit}</span><span class="col-span-2 text-center font-bold text-emerald-400">${it.returnedQty || 0}</span><span class="col-span-2 text-right font-bold text-cyan-300">${Number(it.rowNet || (it.transferredQty * it.netPrice)).toFixed(2)} zł</span></div>`).join('')}</div></div>`;
+      }).join('');
+    }
+    async function returnGoodsFromRw(transferId) {
+      const tr = rwTransfers.find(x => String(x.id) === String(transferId)); if (!tr) return;
+      let items = []; try { items = typeof tr.items_json === 'string' ? JSON.parse(tr.items_json) : (tr.items_json || []); } catch (e) {}
+      const promptMsg = items.map((it, i) => `${i + 1}. ${it.name} (Wyd: ${it.transferredQty}, zwrócono: ${it.returnedQty || 0})`).join('\n');
+      const idxStr = prompt(`Wybierz numer pozycji do zwrotu:\n\n${promptMsg}`); if (!idxStr) return; const idx = parseInt(idxStr, 10) - 1;
+      if (isNaN(idx) || idx < 0 || idx >= items.length) return alert("Błąd wyboru.");
+      const itemToReturn = items[idx]; const maxRet = Math.max(0, itemToReturn.transferredQty - (itemToReturn.returnedQty || 0));
+      const qtyStr = prompt(`Ile szt. "${itemToReturn.name}" wraca? (Max: ${maxRet})`, maxRet); if (!qtyStr) return; const retQty = parseInt(qtyStr, 10);
+      if (isNaN(retQty) || retQty <= 0 || retQty > maxRet) return alert("Błędna ilość.");
+      itemToReturn.returnedQty = (itemToReturn.returnedQty || 0) + retQty;
+      const targetInv = itemToReturn.itemId ? inventory.find(x => String(x.id) === String(itemToReturn.itemId)) : findBestInventoryMatch(itemToReturn.name);
+      if (targetInv) {
+        targetInv.qty += retQty; recordStockLog(targetInv.id, targetInv.name, 'Zwrot z RW (+)', retQty, `${tr.transfer_number}`);
+        if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${targetInv.id}`, 'PATCH', { qty: targetInv.qty, updated_at: new Date() }); } catch (e) {} }
+      }
+      safeSetLocal('magazyn_offline_items', inventory); safeSetLocal('magazyn_offline_rw_transfers', rwTransfers);
+      renderInventory(); renderRwTransfers(); triggerScanFeedback(); alert(`✓ Zwrócono ${retQty} szt.`);
+    }
+    async function deleteRwTransfer(id) { if (!confirm("Usunąć ten dokument RW?")) return; rwTransfers = rwTransfers.filter(x => String(x.id) !== String(id)); safeSetLocal('magazyn_offline_rw_transfers', rwTransfers); renderRwTransfers(); }
+    function printRwTransferSheet(transferId) {
+      const tr = rwTransfers.find(x => String(x.id) === String(transferId)); if (!tr) return;
+      let items = []; try { items = typeof tr.items_json === 'string' ? JSON.parse(tr.items_json) : (tr.items_json || []); } catch (e) {}
+      openSheetPreviewModal({ eventNumber: tr.transfer_number || 'RW', eventName: tr.destination || 'Użycie Własne', dispatchDate: tr.transfer_date || '-', returnDate: '', isReturn: false, isRwDoc: true, items: items.map(it => ({ name: it.name, unit: it.unit, dispatched: it.transferredQty, netPrice: it.netPrice, rowNet: it.rowNet })) });
+    }
+
+    function openCreatorFromEventsTab() { sheetCreatorMap.clear(); openGenerateSheetModal(true); }
+    function openGenerateSheetModal(allowEmpty = false) {
+      selectedItemIds.forEach(id => { if (!sheetCreatorMap.has(String(id))) { const it = inventory.find(x => String(x.id) === String(id)); sheetCreatorMap.set(String(id), Math.min(it?.qty || 12, 12) || 1); } });
+      if (!allowEmpty && sheetCreatorMap.size === 0) return alert("Wybierz pozycje z listy.");
+      el('genSheetNum').value = '#' + Math.floor(100 + Math.random() * 899);
+      el('genSheetDate').value = new Date().toLocaleDateString('pl-PL'); el('genSheetName').value = '';
+      el('genSheetAddSelect').innerHTML = `<option value="">-- Wybierz towar (${inventory.length}) --</option>` + inventory.map(it => `<option value="${it.id}">[${it.category}] ${it.name} (Stan: ${it.qty})</option>`).join('');
+      renderSheetCreatorItems(); showModal('generateSheetModal');
+    }
+    function addItemToSheetCreator() {
+      const id = el('genSheetAddSelect').value; if (!id) return;
+      const it = inventory.find(x => String(x.id) === String(id)); if (!it) return;
+      sheetCreatorMap.set(String(id), (sheetCreatorMap.get(String(id)) || 0) + (Math.min(it.qty, 6) || 1));
+      el('genSheetAddSelect').value = ''; renderSheetCreatorItems();
+    }
+    function renderSheetCreatorItems() {
+      const list = el('genSheetItemsList');
+      if (sheetCreatorMap.size === 0) { list.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs">Wybierz towar powyżej.</div>`; return; }
+      list.innerHTML = Array.from(sheetCreatorMap.entries()).map(([id, qty], idx) => {
+        const it = inventory.find(x => String(x.id) === String(id)); if (!it) return '';
+        return `<div class="bg-slate-900 border border-slate-700 rounded-xl p-2.5 flex items-center justify-between text-xs gap-2"><div class="flex-1 truncate"><span class="font-bold text-white block truncate">${idx + 1}. ${it.name}</span><span class="text-[10px] text-slate-400">Stan: ${it.qty} ${it.unit}</span></div><div class="flex items-center gap-1.5"><input type="number" value="${qty}" min="1" oninput="sheetCreatorMap.set('${it.id}', Math.max(1, parseInt(this.value)||1))" class="w-16 bg-slate-800 border border-amber-500/70 rounded-lg p-1.5 text-center font-black text-amber-400 text-xs"><button type="button" onclick="sheetCreatorMap.delete('${it.id}');renderSheetCreatorItems()" class="text-rose-400 font-bold px-1.5">✕</button></div></div>`;
+      }).join('');
+    }
+    async function finalizeSheetCreator(createEvent = true) {
+      if (sheetCreatorMap.size === 0) return alert("Dodaj przynajmniej jedną pozycję.");
+      const evNum = el('genSheetNum').value.trim() || '#EVENT', evDate = el('genSheetDate').value.trim() || new Date().toLocaleDateString('pl-PL'), evName = el('genSheetName').value.trim() || 'Realizacja Cateringowa';
+      const payload = [];
+      for (const [id, qty] of sheetCreatorMap.entries()) {
+        const it = inventory.find(x => String(x.id) === String(id)); if (!it) continue;
+        payload.push({ name: it.name, dispatched: qty, unit: it.unit || 'szt.', netPrice: it.price || 0 });
+        if (createEvent) {
+          it.qty = Math.max(0, it.qty - qty); it.inField = (it.inField || 0) + qty;
+          recordStockLog(it.id, it.name, 'Event Wyjazd', -qty, `${evNum} ${evName}`);
+          if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${it.id}`, 'PATCH', { qty: it.qty, in_field: it.inField, updated_at: new Date() }); } catch (e) {} }
+        }
+      }
+      if (createEvent) {
+        const newEv = { id: Date.now().toString(), event_number: evNum, event_name: evName, dispatch_date: evDate, return_date: '', status: 'W trakcie', items_json: payload, dispatch_image: '', return_image: '', created_at: new Date() };
+        events.unshift(newEv); safeSetLocal('magazyn_offline_items', inventory); safeSetLocal('magazyn_offline_events', events);
+        if (isCloudOnline) { try { await apiRequest('/events', 'POST', newEv); } catch (e) {} }
+      }
+      sheetCreatorMap.clear(); hideModal('generateSheetModal'); if (isSelectMode) toggleSelectMode();
+      renderInventory(); renderEvents(); openSheetPreviewModal({ eventNumber: evNum, eventName: evName, dispatchDate: evDate, returnDate: '', isReturn: false, items: payload });
+    }
+    function buildRoyalCateringSheetHTML(data) {
+      const isRw = data.isRwDoc;
+      const title = isRw ? "DOKUMENT RW<br>ROZCHÓD WEWNĘTRZNY / KOSZTY" : (data.isReturn ? "ROZLICZENIE ZWROTU<br>I KONSUMPCJI<br>Z REALIZACJI" : "WYDANIE NAPOJÓW<br>I ALKOHOLU<br>NA REALIZACJĘ");
+      const items = data.items || [];
+      let rows = items.map((it, idx) => `<tr style="height:24px;text-align:center;"><td style="border:1px solid #000;font-weight:bold;">${idx + 1}</td><td style="border:1px solid #000;text-align:left;padding-left:6px;font-weight:bold;">${it.name}</td><td style="border:1px solid #000;">${it.unit || 'szt.'}</td><td style="border:1px solid #000;font-weight:bold;font-size:12px;">${it.dispatched !== undefined ? it.dispatched : ''}</td>${isRw ? `<td style="border:1px solid #000;font-weight:bold;">${it.netPrice ? Number(it.netPrice).toFixed(2)+' zł' : '-'}</td><td colspan="5" style="border:1px solid #000;font-weight:bold;text-align:right;padding-right:8px;">${it.rowNet ? Number(it.rowNet).toFixed(2)+' zł' : '-'}</td>` : `<td style="border:1px solid #000;">&nbsp;</td><td style="border:1px solid #000;background:#d9ead3;">&nbsp;</td><td style="border:1px solid #000;background:#d9ead3;font-weight:bold;">${data.isReturn && it.consumed !== undefined ? it.consumed : ''}</td><td style="border:1px solid #000;background:#d9ead3;font-weight:bold;">${data.isReturn && it.returned !== undefined ? it.returned : ''}</td><td style="border:1px solid #000;background:#d9ead3;">&nbsp;</td><td style="border:1px solid #000;">&nbsp;</td>`}</tr>`).join('');
+      for (let i = 0; i < Math.max(0, 15 - items.length); i++) { rows += `<tr style="height:24px;text-align:center;"><td style="border:1px solid #000;">${items.length + i + 1}</td><td style="border:1px solid #000;">&nbsp;</td><td style="border:1px solid #000;">&nbsp;</td><td style="border:1px solid #000;">&nbsp;</td>${isRw ? '<td colspan="6" style="border:1px solid #000;">&nbsp;</td>' : '<td style="border:1px solid #000;">&nbsp;</td><td style="border:1px solid #000;background:#d9ead3;">&nbsp;</td><td style="border:1px solid #000;background:#d9ead3;">&nbsp;</td><td style="border:1px solid #000;background:#d9ead3;">&nbsp;</td><td style="border:1px solid #000;background:#d9ead3;">&nbsp;</td><td style="border:1px solid #000;">&nbsp;</td>'}</tr>`; }
+      return `<div style="border:2px solid #000;width:100%;box-sizing:border-box;background:white;color:black;font-family:Arial,sans-serif;"><table style="width:100%;border-collapse:collapse;text-align:center;font-size:11px;"><tr><td rowspan="4" style="width:20%;border:2px solid #000;font-size:15px;font-weight:bold;padding:4px;">ROYAL CATERING</td><td colspan="2" style="background:#ffff00;font-weight:bold;border:1px solid #000;padding:4px;">DATA WYDANIA:</td><td rowspan="4" style="width:30%;background:#ffff00;font-size:12px;font-weight:900;border:2px solid #000;padding:5px;">${title}</td><td colspan="2" style="background:#ffff00;font-weight:bold;border:1px solid #000;padding:4px;">CEL / ODBIORCA:</td></tr><tr><td colspan="2" style="border:1px solid #000;font-weight:bold;padding:4px;">${data.dispatchDate || '-'}</td><td colspan="2" style="border:1px solid #000;padding:4px;font-weight:bold;">${isRw ? (data.eventName || 'Użytek wewnętrzny') : (data.returnDate || '-')}</td></tr><tr><td colspan="2" style="background:#ffff00;font-weight:bold;border:1px solid #000;padding:4px;">DOKUMENT, #NUMER:</td><td colspan="2" style="border:1px solid #000;padding:4px;">&nbsp;</td></tr><tr><td colspan="2" style="border:1px solid #000;font-weight:bold;padding:4px;">${data.eventNumber || ''} ${isRw ? '' : data.eventName}</td><td colspan="2" style="border:1px solid #000;padding:4px;">&nbsp;</td></tr></table><table style="width:100%;border-collapse:collapse;font-size:10px;"><thead><tr style="background:#ffff00;font-weight:bold;text-align:center;"><th style="border:1px solid #000;width:4%;padding:4px;">Nr</th><th style="border:1px solid #000;width:36%;padding:4px;text-align:left;">NAZWA</th><th style="border:1px solid #000;width:6%;padding:4px;">Jedn.</th><th style="border:1px solid #000;width:8%;padding:4px;">Ilość</th>${isRw ? '<th style="border:1px solid #000;width:12%;padding:4px;">Cena netto</th><th colspan="5" style="border:1px solid #000;width:34%;padding:4px;">Wartość netto</th>' : '<th style="border:1px solid #000;width:9%;padding:4px;">Podpis Magazyn</th><th style="border:1px solid #000;width:9%;background:#d9ead3;padding:4px;">Sprawdzenie</th><th style="border:1px solid #000;width:9%;background:#d9ead3;padding:4px;">Konsumpcja</th><th style="border:1px solid #000;width:7%;background:#d9ead3;padding:4px;">Zwrot</th><th style="border:1px solid #000;width:6%;background:#d9ead3;padding:4px;">Podpis</th><th style="border:1px solid #000;width:6%;padding:4px;">Odbiór</th>'}</tr></thead><tbody>${rows}</tbody></table></div>`;
+    }
+    function openSheetPreviewModal(sheetData) {
+      currentPreviewSheetData = sheetData;
+      const html = buildRoyalCateringSheetHTML(sheetData);
+      el('sheetPreviewModalTitle').innerText = `${sheetData.isRwDoc ? 'Dokument RW' : (sheetData.isReturn ? 'Rozliczenie' : 'Karta Wydania')}: ${sheetData.eventNumber} ${sheetData.eventName}`;
+      el('sheetPreviewContainer').innerHTML = html; el('printableSheet').innerHTML = html; showModal('sheetPreviewModal');
+    }
+    function triggerBrowserPrintSheet() { document.body.classList.remove('print-mode-qr'); document.body.classList.add('print-mode-sheet'); window.print(); }
+    function downloadCurrentSheetAsExcel() {
+      if (!currentPreviewSheetData) return;
+      const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"></head><body>${buildRoyalCateringSheetHTML(currentPreviewSheetData)}</body></html>`;
+      const blob = new Blob(['\uFEFF' + html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+      const link = document.createElement('a'); link.href = URL.createObjectURL(blob);
+      link.download = `${(currentPreviewSheetData.isRwDoc ? 'Dokument_RW_' : (currentPreviewSheetData.isReturn ? 'Rozliczenie_' : 'Karta_Wydania_')) + currentPreviewSheetData.eventNumber}.xls`.replace(/[^a-zA-Z0-9._-]/g, '_');
+      link.click();
+    }
+    function printEventSheet(eventId, type) {
+      const ev = events.find(e => String(e.id) === String(eventId)); if (!ev) return;
+      let items = []; try { items = typeof ev.items_json === 'string' ? JSON.parse(ev.items_json) : (ev.items_json || []); } catch (e) {}
+      openSheetPreviewModal({ eventNumber: ev.event_number || '#EVENT', eventName: ev.event_name || '', dispatchDate: ev.dispatch_date || '-', returnDate: ev.return_date || '-', isReturn: (type === 'RETURN'), isRwDoc: false, items });
     }
 
     fetchAllData();
