@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>MagazynRC - WMS v5.6 PRO</title>
+  <title>MagazynRC - WMS v5.7 TURBO</title>
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#0f172a">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -35,7 +35,7 @@
     <div id="printItemBarcode" class="font-mono font-bold text-sm mt-1"></div>
   </div>
 
-  <!-- EKRAN BLOKADY PIN -->
+  <!-- BLOKADA PIN -->
   <div id="authOverlay" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-[9999] flex flex-col items-center justify-center p-4">
     <div class="bg-slate-800 border border-slate-700 p-8 rounded-3xl shadow-2xl max-w-sm w-full text-center space-y-6">
       <div class="w-16 h-16 bg-emerald-500 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
@@ -58,15 +58,16 @@
     <div class="flex items-center space-x-2">
       <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-base shadow">M</div>
       <div>
-        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v5.6 PRO</span></h1>
+        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v5.7 TURBO</span></h1>
         <p id="syncStatus" class="text-[10px] text-amber-400 font-medium leading-none mt-0.5">Inicjalizacja...</p>
       </div>
     </div>
     <div class="flex items-center gap-1.5 relative">
-      <button onclick="runOnlineAIClassifier(true)" class="bg-purple-950 text-purple-300 text-xs px-2.5 py-1.5 rounded-lg font-bold border border-purple-700/60 shadow hover:bg-purple-900 transition">🧠 Ucz AI</button>
-      <button onclick="mergeExistingDuplicates()" class="bg-indigo-950 text-indigo-300 text-xs px-2.5 py-1.5 rounded-lg font-bold border border-indigo-700/60 shadow hover:bg-indigo-900 transition">🔗 Scal</button>
-      <button onclick="openInventoryAuditModal()" class="bg-cyan-950 text-cyan-300 text-xs px-2.5 py-1.5 rounded-lg font-bold border border-cyan-700/60 shadow hover:bg-cyan-900 transition">📋 Spis</button>
-      <button onclick="toggleToolsMenu(event)" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs px-2.5 py-1.5 rounded-lg font-black border border-slate-600 shadow transition">⚙️</button>
+      <button onclick="runOnlineAIClassifier(true)" class="bg-purple-950 text-purple-300 text-xs px-2.5 py-1.5 rounded-lg font-bold border border-purple-700/60 shadow hover:bg-purple-900 transition" title="Klasyfikacja AI">🧠 Ucz AI</button>
+      <button onclick="mergeExistingDuplicates()" class="bg-indigo-950 text-indigo-300 text-xs px-2.5 py-1.5 rounded-lg font-bold border border-indigo-700/60 shadow hover:bg-indigo-900 transition" title="Scal zduplikowane towary">🔗 Scal</button>
+      <button onclick="openInventoryAuditModal()" class="bg-cyan-950 text-cyan-300 text-xs px-2.5 py-1.5 rounded-lg font-bold border border-cyan-700/60 shadow hover:bg-cyan-900 transition" title="Spis z natury">📋 Spis</button>
+      
+      <button onclick="toggleToolsMenu(event)" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs px-2.5 py-1.5 rounded-lg font-black border border-slate-600 shadow transition" title="Więcej narzędzi">⚙️</button>
       <div id="toolsMenuDropdown" class="hidden absolute right-0 top-9 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl py-1.5 w-52 z-50 text-xs">
         <button onclick="copyLowStockWhatsApp()" class="w-full text-left px-3.5 py-2 text-amber-300 hover:bg-slate-700 flex items-center gap-2">📲 Kopiuj braki (WhatsApp)</button>
         <button onclick="exportCSV()" class="w-full text-left px-3.5 py-2 text-slate-200 hover:bg-slate-700 flex items-center gap-2">📊 Eksport do Excel (CSV)</button>
@@ -244,7 +245,7 @@
     </section>
   </main>
 
-  <!-- MODAL: OPERACJA NA TOWARZE (ACTION MODAL) -->
+  <!-- MODAL: OPERACJA NA TOWARZE -->
   <div id="actionModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl">
       <div class="flex justify-between items-start border-b border-slate-700 pb-2 gap-2">
@@ -290,7 +291,7 @@
     </div>
   </div>
 
-  <!-- MODAL: INWENTARYZACJA -->
+  <!-- MODAL: INWENTARYZACJA (SPIS Z NATURY) -->
   <div id="inventoryAuditModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-2xl w-full p-4 space-y-3 max-h-[95vh] flex flex-col">
       <div class="flex justify-between items-center border-b border-slate-700 pb-2">
@@ -433,188 +434,6 @@
       </div>
     </div>
   </div>
-
-  <!-- MODAL: WGRYWANIE FAKTURY Z DRAG & DROP NA KAFELKACH -->
-  <div id="invoiceCaptureModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
-    <div ondragover="handleDragOver(event, this)" ondragleave="handleDragLeave(event, this)" ondrop="handleDropFiles(event, 'INVOICE')" class="bg-slate-800 border-2 border-dashed border-slate-600 rounded-2xl max-w-md w-full p-4 space-y-3 transition">
-      <div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">⚡ Wgraj Fakturę (Zdjęcie / PDF)</h3><button onclick="closeInvoiceUploadModal()" class="text-slate-400 text-xl font-bold">✕</button></div>
-      <p class="text-xs text-slate-300">Przeciągnij pliki myszką lub kliknij kafelki:</p>
-      <div class="grid grid-cols-2 gap-2.5">
-        <div onclick="el('invoicePhotoInput1').click()" ondragover="handleDragOver(event, this)" ondragleave="handleDragLeave(event, this)" ondrop="handleDropFiles(event, 'INVOICE_SLOT_1')" class="border-2 border-dashed border-indigo-500/70 bg-slate-900 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer min-h-[110px] text-center transition">
-          <div id="invoiceSlot1Empty"><span class="text-2xl block mb-1">📂</span><span class="text-[11px] font-bold text-indigo-300 block">Plik 1 / Góra</span><span class="text-[9px] text-slate-400 block">Upuść lub kliknij</span></div>
-          <img id="invoiceSlot1Preview" src="" class="hidden max-h-20 w-auto rounded object-contain mb-1">
-          <span id="invoiceSlot1Done" class="hidden text-[10px] text-emerald-400 font-bold">✓ Gotowy</span>
-        </div>
-        <div onclick="el('invoicePhotoInput2').click()" ondragover="handleDragOver(event, this)" ondragleave="handleDragLeave(event, this)" ondrop="handleDropFiles(event, 'INVOICE_SLOT_2')" class="border-2 border-dashed border-slate-600 bg-slate-900 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer min-h-[110px] text-center transition">
-          <div id="invoiceSlot2Empty"><span class="text-2xl block mb-1">➕</span><span class="text-[11px] font-bold text-slate-300 block">Plik 2 / Dół</span><span class="text-[9px] text-slate-400 block">(opcjonalnie)</span></div>
-          <img id="invoiceSlot2Preview" src="" class="hidden max-h-20 w-auto rounded object-contain mb-1">
-          <span id="invoiceSlot2Done" class="hidden text-[10px] text-emerald-400 font-bold">✓ Gotowy</span>
-        </div>
-      </div>
-      <div class="flex justify-between items-center pt-2 border-t border-slate-700">
-        <button onclick="resetInvoicePhotos()" class="text-xs text-slate-400">Wyczyść</button>
-        <button id="btnProcessInvoice" onclick="startMultiInvoiceProcessing()" disabled class="bg-indigo-600 disabled:bg-slate-700 text-white font-bold px-4 py-2 rounded-xl text-xs">🚀 Odczytaj Dokument</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: AI WERYFIKACJA FAKTURY -->
-  <div id="aiModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
-    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-2xl w-full p-4 space-y-3 max-h-[95vh] flex flex-col">
-      <div class="flex justify-between items-start border-b border-slate-700 pb-2">
-        <div><span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300">Smart OCR</span><h3 class="text-sm font-bold text-white mt-1">Weryfikacja Dostawy</h3></div>
-        <button onclick="closeAiModal()" class="text-slate-400 text-xl font-bold">✕</button>
-      </div>
-      <div id="aiLoadingState" class="py-12 flex flex-col items-center justify-center space-y-3"><div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div><p class="text-sm text-slate-200">Analizowanie faktury przez AI...</p></div>
-      <div id="aiItemsContainer" class="hidden flex-1 overflow-y-auto space-y-3 pr-1">
-        <div id="aiDuplicateWarningBanner" class="hidden bg-rose-950/90 border-2 border-rose-500 p-3 rounded-xl text-xs text-rose-200 space-y-1">
-          <div class="font-black text-rose-400 text-sm">⛔ WYKRYTO DUPLIKAT FAKTURY!</div><p id="aiDuplicateWarningText" class="text-[11px]"></p>
-        </div>
-        <div class="bg-slate-900 border border-indigo-800/60 p-3 rounded-xl space-y-2 text-xs">
-          <div class="grid grid-cols-3 gap-2">
-            <div><span class="text-[10px] text-slate-400 block">Dostawca:</span><input type="text" id="aiSupplierInput" oninput="checkInvoiceDuplicateLive()" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-white"></div>
-            <div><span class="text-[10px] text-slate-400 block">Nr Faktury:</span><input type="text" id="aiDocNumInput" oninput="checkInvoiceDuplicateLive()" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-mono text-amber-400"></div>
-            <div><span class="text-[10px] text-emerald-300 font-bold block">👤 Przyjął:</span><input type="text" id="aiReceiverInput" placeholder="Imię" class="w-full bg-slate-800 border border-emerald-700/60 rounded p-1.5 font-bold text-emerald-400"></div>
-          </div>
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-800">
-            <div class="bg-slate-950/80 p-1.5 rounded-lg border border-emerald-700/50"><span class="text-[9px] text-emerald-300 font-bold block">📦 Netto prod.:</span><input type="text" id="aiTotalNetInput" class="w-full bg-transparent font-black text-emerald-400 text-xs focus:outline-none"></div>
-            <div class="bg-slate-950/80 p-1.5 rounded-lg border border-cyan-700/50"><span class="text-[9px] text-cyan-300 font-bold block">♻️ Kaucje:</span><input type="text" id="aiTotalDepositsSumInput" readonly class="w-full bg-transparent font-black text-cyan-400 text-xs focus:outline-none"></div>
-            <div class="bg-slate-950/80 p-1.5 rounded-lg border border-amber-500/70"><span class="text-[9px] text-amber-300 font-bold block">💰 Netto + kaucja:</span><input type="text" id="aiTotalNetWithDepInput" class="w-full bg-transparent font-black text-amber-300 text-xs focus:outline-none"></div>
-            <div class="bg-slate-950/80 p-1.5 rounded-lg border border-slate-700"><span class="text-[9px] text-slate-400 font-bold block">🧾 Brutto:</span><input type="text" id="aiTotalGrossInput" class="w-full bg-transparent font-black text-white text-xs focus:outline-none"></div>
-          </div>
-        </div>
-        <div class="space-y-2"><p class="text-[11px] font-bold text-emerald-400 uppercase">📦 1. Pozycje Towarowe:</p><div id="aiItemsList" class="space-y-2.5"></div></div>
-        <div class="space-y-2 pt-2 border-t border-slate-700"><div class="flex items-center justify-between"><p class="text-[11px] font-bold text-cyan-400 uppercase">♻️ 2. Kaucje:</p><button type="button" onclick="addManualDepositRowToModal()" class="text-[10px] bg-cyan-950 text-cyan-300 border border-cyan-700 px-2 py-0.5 rounded-lg font-bold">+ Kaucja</button></div><div id="aiDepositsList" class="space-y-2"></div></div>
-      </div>
-      <div id="aiModalActions" class="hidden pt-2.5 border-t border-slate-700 flex flex-wrap justify-between gap-2">
-        <button onclick="closeAiModal()" class="px-3 py-2 rounded-xl text-xs text-slate-400">Anuluj</button>
-        <div class="flex flex-wrap gap-2">
-          <button onclick="confirmAndApplyDelivery('CATALOG_ONLY')" class="bg-purple-600 text-white font-black px-3.5 py-2.5 rounded-xl text-xs">📚 Tylko baza</button>
-          <button id="btnConfirmFullDelivery" onclick="confirmAndApplyDelivery('FULL_DELIVERY')" class="bg-emerald-500 disabled:bg-rose-950 disabled:text-rose-300 text-slate-950 font-black px-4 py-2.5 rounded-xl text-xs">📥 Nowa dostawa</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: PODGLĄD ARKUSZA DO DRUKU -->
-  <div id="sheetPreviewModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-2.5 z-50 overflow-y-auto">
-    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-3xl w-full p-4 space-y-3 max-h-[95vh] flex flex-col">
-      <div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 id="sheetPreviewModalTitle" class="text-sm font-bold text-white">Podgląd Dokumentu</h3><button onclick="hideModal('sheetPreviewModal')" class="text-slate-400 text-xl font-bold">✕</button></div>
-      <div class="flex-1 overflow-auto bg-white p-2 rounded-xl border border-slate-600 text-black"><div id="sheetPreviewContainer"></div></div>
-      <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-700">
-        <button onclick="hideModal('sheetPreviewModal')" class="px-3 py-2 rounded-xl text-xs text-slate-300">Zamknij</button>
-        <div class="flex gap-2">
-          <button onclick="downloadCurrentSheetAsExcel()" class="bg-emerald-500 text-slate-950 font-black px-4 py-2 rounded-xl text-xs">📥 Pobierz plik (.xls)</button>
-          <button onclick="triggerBrowserPrintSheet()" class="bg-amber-500 text-slate-950 font-black px-4 py-2 rounded-xl text-xs">🖨️ Drukuj / PDF</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL: PODGLĄD SKANÓW -->
-  <div id="imagePreviewModal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
-    <div class="max-w-xl w-full bg-slate-900 border border-slate-700 rounded-2xl p-3 flex flex-col items-center">
-      <div class="w-full flex justify-between items-center border-b border-slate-800 pb-2 mb-2"><h4 id="imagePreviewTitle" class="text-xs font-bold text-white truncate">Podgląd</h4><button onclick="closeImagePreviewModal()" class="text-slate-400 text-xl font-black">✕</button></div>
-      <div id="imagePreviewTabs" class="w-full flex gap-2 mb-2 hidden"></div>
-      <div class="w-full flex items-center justify-center max-h-[75vh] overflow-auto bg-black/60 rounded-xl p-1"><img id="imagePreviewElement" src="" class="max-w-full max-h-[72vh] object-contain rounded-lg"></div>
-      <div class="w-full flex justify-end pt-2"><button onclick="closeImagePreviewModal()" class="bg-slate-800 text-white font-bold px-4 py-2 rounded-xl text-xs">Zamknij</button></div>
-    </div>
-  </div>
-
-  <!-- MODAL: KAUCJA -->
-  <div id="depositModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-    <form onsubmit="saveDepositModal(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3">
-      <div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">♻️ Pozycja Kaucyjna</h3><button type="button" onclick="hideModal('depositModal')" class="text-slate-400">✕</button></div>
-      <input type="hidden" id="depModalId">
-      <div><label class="text-[11px] text-slate-300 block mb-1">Nazwa kaucji *:</label><input type="text" id="depModalName" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold"></div>
-      <div class="grid grid-cols-2 gap-2">
-        <div><label class="text-[11px] text-slate-300 block mb-1">Rodzaj:</label><select id="depModalCategory" onchange="handleDepCategoryPreset()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white"><option value="PET_CAN_050">PET / Puszka (0,50)</option><option value="BUTELKA_SZKLO">Szkło (1,00)</option><option value="SKRZYNKA">Skrzynka</option><option value="PALETA_INNE">Paleta / Inne</option></select></div>
-        <div><label class="text-[11px] text-slate-300 block mb-1">Stawka (PLN):</label><input type="number" step="0.01" id="depModalPrice" value="0.50" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-cyan-400 font-bold text-center"></div>
-      </div>
-      <div><label class="text-[11px] text-slate-300 block mb-1">Ilość (szt.):</label><input type="number" id="depModalQty" value="1" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold text-center"></div>
-      <div class="flex justify-end gap-2 pt-2 border-t border-slate-700"><button type="button" onclick="hideModal('depositModal')" class="px-3 py-1.5 rounded-xl text-xs text-slate-300">Anuluj</button><button type="submit" class="bg-cyan-500 text-slate-950 font-black px-4 py-1.5 rounded-xl text-xs">Zapisz</button></div>
-    </form>
-  </div>
-
-  <!-- MODAL: WYJAZD Z KARTY OCR -->
-  <div id="eventDispatchModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
-    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 max-h-[94vh] flex flex-col">
-      <div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">Rejestracja Wyjazdu z Karty</h3><button onclick="hideModal('eventDispatchModal')" class="text-slate-400 text-xl font-bold">✕</button></div>
-      <div id="eventDispatchLoading" class="py-12 flex flex-col items-center"><div class="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div></div>
-      <div id="eventDispatchContent" class="hidden flex-1 overflow-y-auto space-y-3 pr-1">
-        <div class="bg-slate-900 p-2.5 rounded-xl grid grid-cols-2 gap-2 text-xs">
-          <div><span class="text-[10px] text-slate-400 block">Numer:</span><input type="text" id="evDispNum" class="w-full bg-slate-800 border border-slate-700 rounded p-1 font-mono font-bold text-amber-400"></div>
-          <div><span class="text-[10px] text-slate-400 block">Data:</span><input type="text" id="evDispDate" class="w-full bg-slate-800 border border-slate-700 rounded p-1 text-slate-200"></div>
-          <div class="col-span-2"><span class="text-[10px] text-slate-400 block">Nazwa:</span><input type="text" id="evDispName" class="w-full bg-slate-800 border border-slate-700 rounded p-1 font-bold text-white"></div>
-        </div>
-        <div id="evDispItemsList" class="space-y-2"></div>
-      </div>
-      <div id="eventDispatchActions" class="hidden pt-2.5 border-t border-slate-700 flex justify-end gap-2"><button onclick="hideModal('eventDispatchModal')" class="px-4 py-2 rounded-xl text-xs text-slate-400">Anuluj</button><button onclick="confirmAndApplyEventDispatch()" class="bg-blue-600 text-white font-black px-5 py-2 rounded-xl text-xs">🚚 Zatwierdź</button></div>
-    </div>
-  </div>
-
-  <!-- MODAL: ROZLICZENIE ZWROTU -->
-  <div id="eventReturnModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
-    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 max-h-[94vh] flex flex-col">
-      <div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 id="evReturnModalTitle" class="text-sm font-bold text-white">Rozliczenie Zwrotu</h3><button onclick="hideModal('eventReturnModal')" class="text-slate-400 text-xl font-bold">✕</button></div>
-      <div id="evReturnLoading" class="py-12 flex flex-col items-center"><div class="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div></div>
-      <div id="evReturnContent" class="hidden flex-1 overflow-y-auto space-y-3 pr-1">
-        <div class="bg-slate-900 border border-emerald-700/60 p-2.5 rounded-xl space-y-2 text-xs">
-          <div class="flex justify-between items-center"><span class="text-[10px] text-emerald-300 font-bold">🎯 Realizacja:</span><input type="text" id="evReturnDateInput" class="bg-slate-800 border border-slate-700 rounded px-2 py-0.5 text-xs text-emerald-400 font-mono w-24 text-center"></div>
-          <select id="evReturnEventSelect" onchange="handleReturnEventSelectChange()" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white font-bold"></select>
-        </div>
-        <div id="evReturnItemsList" class="space-y-2.5"></div>
-      </div>
-      <div id="evReturnActions" class="hidden pt-2.5 border-t border-slate-700 flex justify-end gap-2"><button onclick="hideModal('eventReturnModal')" class="px-4 py-2 rounded-xl text-xs text-slate-400">Anuluj</button><button onclick="confirmAndApplyEventReturn()" class="bg-emerald-500 text-slate-950 font-black px-5 py-2 rounded-xl text-xs">✓ Zatwierdź Zwrot</button></div>
-    </div>
-  </div>
-
-  <!-- MODAL: EDYCJA FAKTURY -->
-  <div id="editDeliveryModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
-    <form onsubmit="saveEditedDelivery(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 max-h-[94vh] flex flex-col">
-      <div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">✏️ Edytuj Fakturę</h3><button type="button" onclick="hideModal('editDeliveryModal')" class="text-slate-400 text-xl font-bold">✕</button></div>
-      <input type="hidden" id="editDelivId">
-      <div class="flex-1 overflow-y-auto space-y-3 pr-1 text-xs">
-        <div class="bg-slate-900 border border-slate-700 p-3 rounded-xl grid grid-cols-2 sm:grid-cols-3 gap-2">
-          <div><label class="text-[10px] text-slate-400 block">Dostawca:</label><input type="text" id="editDelivSupplier" required class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-white"></div>
-          <div><label class="text-[10px] text-slate-400 block">Nr Faktury:</label><input type="text" id="editDelivDocNum" required class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-mono text-amber-400"></div>
-          <div><label class="text-[10px] text-emerald-300 font-bold block">👤 Przyjął:</label><input type="text" id="editDelivReceiver" class="w-full bg-slate-800 border border-emerald-700/60 rounded p-1.5 font-bold text-emerald-400"></div>
-          <div><label class="text-[10px] text-emerald-400 block">Netto prod.:</label><input type="text" id="editDelivTotalNet" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-emerald-400"></div>
-          <div><label class="text-[10px] text-cyan-300 block">Netto z kaucją:</label><input type="text" id="editDelivTotalNetWithDep" class="w-full bg-slate-800 border border-cyan-700/60 rounded p-1.5 font-bold text-cyan-300"></div>
-          <div><label class="text-[10px] text-slate-400 block">Suma Brutto:</label><input type="text" id="editDelivTotalGross" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-slate-200"></div>
-        </div>
-        <div class="space-y-1.5">
-          <div class="flex justify-between items-center"><span class="text-[10px] text-slate-300 font-bold uppercase">Pozycje:</span><button type="button" onclick="addEditDeliveryItemRow()" class="text-[10px] bg-indigo-950 text-indigo-300 border border-indigo-700 px-2 py-0.5 rounded-lg font-bold">+ Wiersz</button></div>
-          <div id="editDelivItemsList" class="space-y-1.5"></div>
-        </div>
-        <div class="space-y-1.5 pt-2 border-t border-slate-700">
-          <div class="flex justify-between items-center"><span class="text-[10px] text-slate-300 font-bold uppercase">📎 Załączniki:</span><button type="button" onclick="el('editDelivPhotoInput').click()" class="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-700 px-2.5 py-1 rounded-lg font-bold">📂 + Plik/Zdjęcie</button></div>
-          <div id="editDelivPhotosList" class="flex gap-2.5 overflow-x-auto py-1"></div>
-        </div>
-      </div>
-      <div class="flex justify-end gap-2 pt-2 border-t border-slate-700"><button type="button" onclick="hideModal('editDeliveryModal')" class="px-3 py-2 rounded-xl text-xs text-slate-400">Anuluj</button><button type="submit" class="bg-indigo-600 text-white font-black px-5 py-2 rounded-xl text-xs">Zapisz zmiany</button></div>
-    </form>
-  </div>
-
-  <!-- MENU KONTEKSTOWE DLA KARTY TOWARU -->
-  <div id="customContextMenu" class="fixed hidden z-50 bg-slate-800/95 border border-slate-700 rounded-xl shadow-2xl py-1.5 w-56">
-    <button onclick="contextActionEdit()" class="w-full text-left px-3.5 py-2 text-xs text-slate-200 hover:bg-slate-700">✏️ Edytuj dane i zdjęcie</button>
-    <button onclick="contextActionOpenStock()" class="w-full text-left px-3.5 py-2 text-xs text-slate-200 hover:bg-slate-700">⚡ Operacja stanu i historia</button>
-    <button onclick="contextActionPrintQR()" class="w-full text-left px-3.5 py-2 text-xs text-slate-200 hover:bg-slate-700">🏷️ Drukuj etykietę QR</button>
-    <div class="border-t border-slate-700 my-1"></div>
-    <button onclick="contextActionDelete()" class="w-full text-left px-3.5 py-2 text-xs text-rose-400 font-bold">🗑️ Usuń tę pozycję</button>
-  </div>
-
-  <!-- DOLNA NAWIGACJA -->
-  <nav class="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 border-t border-slate-800 px-2 py-2 flex items-center justify-around shadow-2xl">
-    <button onclick="switchMainTab('stock')" id="navBtnStock" class="flex flex-col items-center gap-1 text-emerald-400 py-1 px-2"><span class="text-lg">📦</span><span class="text-[10px] font-bold">Magazyn</span></button>
-    <button onclick="switchMainTab('events')" id="navBtnEvents" class="flex flex-col items-center gap-1 text-slate-400 hover:text-blue-400 py-1 px-2"><span class="text-lg">🎉</span><span class="text-[10px] font-bold">Eventy</span></button>
-    <button onclick="switchMainTab('rw')" id="navBtnRw" class="flex flex-col items-center gap-1 text-slate-400 hover:text-amber-400 py-1 px-2"><span class="text-lg">🏢</span><span class="text-[10px] font-bold">RW</span></button>
-    <button onclick="openInvoiceUploadModal()" class="flex flex-col items-center justify-center -mt-5 bg-gradient-to-tr from-indigo-600 to-purple-600 text-white w-14 h-14 rounded-full shadow-lg border-2 border-slate-900"><span class="text-xl">⚡</span><span class="text-[9px] font-black">AI FAKT</span></button>
-    <button onclick="switchMainTab('deposits')" id="navBtnDeposits" class="flex flex-col items-center gap-1 text-slate-400 hover:text-cyan-400 py-1 px-2"><span class="text-lg">♻️</span><span class="text-[10px] font-bold">Kaucje</span></button>
-    <button onclick="switchMainTab('logs')" id="navBtnLogs" class="flex flex-col items-center gap-1 text-slate-400 hover:text-purple-400 py-1 px-2"><span class="text-lg">📜</span><span class="text-[10px] font-bold">Dziennik</span></button>
-    <button onclick="openNewItemModal('')" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 py-1 px-2"><span class="text-lg">➕</span><span class="text-[10px] font-bold">Nowy</span></button>
-  </nav>
 
   <script>
     const VALID_PINS = ['1114', '2026', 'Royal2026'];
@@ -784,26 +603,11 @@
       else { b?.classList.add('hidden'); if (btn) { btn.disabled = false; btn.innerHTML = `📥 Nowa dostawa`; } } return ex;
     }
 
-    function triggerItemLabelPhoto(mode) { currentLabelPhotoTarget = mode; el('itemLabelPhotoInput').click(); }
-    async function handleItemLabelPhoto(event) {
-      const file = event.target.files[0]; if (!file) return;
-      try {
-        const prep = await prepareFileForGemini(file, 800, 0.72);
-        if (currentLabelPhotoTarget === 'NEW') { tempNewItemPhoto = prep.previewUrl; el('newItemPhotoPreview').src = prep.previewUrl; el('newItemPhotoPreview').classList.remove('hidden'); }
-        else { tempEditItemPhoto = prep.previewUrl; el('editItemPhotoPreview').src = prep.previewUrl; el('editItemPhotoPreview').classList.remove('hidden'); }
-        const parsed = await queryGeminiAPI(`Przeanalizuj etykietę. Zwróć JSON: { "fullName": string, "category": string, "unit": "szt."|"op." }`, [prep]);
-        if (parsed?.fullName) {
-          const smartCat = classifyProductSmartLocal(parsed.fullName, parsed.category) || parsed.category || 'Alkohole • Wino Różowe / Prosecco';
-          if (currentLabelPhotoTarget === 'NEW') { el('newName').value = parsed.fullName; el('newCategory').value = smartCat; if (parsed.unit) el('newUnit').value = parsed.unit; }
-          else if (!el('editItemName').value || confirm(`Aktualizować nazwę na:\n"${parsed.fullName}"?`)) { el('editItemName').value = parsed.fullName; el('editItemCategory').value = smartCat; }
-        }
-      } catch (err) { alert("Zdjęcie zapisane lokalnie."); } event.target.value = '';
-    }
-
-    function prepareFileForGemini(file, maxW = 1100, q = 0.75) {
+    // --- ZOPTYMALIZOWANY ODCZYT PLIKÓW I FLASH API ---
+    function prepareFileForGemini(file, maxW = 950, q = 0.65) {
       return new Promise((res, rej) => {
         if (!file) return rej(new Error("Brak pliku"));
-        if (file.name?.toLowerCase().endsWith('.xls') || file.name?.toLowerCase().endsWith('.xlsx')) return rej(new Error("Zapisz Excel jako PDF/Screen."));
+        if (file.name?.toLowerCase().endsWith('.xls') || file.name?.toLowerCase().endsWith('.xlsx')) return rej(new Error("Zapisz Excel jako PDF lub zrzut ekranu."));
         if (file.type === 'application/pdf' || file.name?.toLowerCase().endsWith('.pdf')) {
           const r = new FileReader(); r.onload = () => res({ mimeType: 'application/pdf', base64: r.result.split(',')[1], previewUrl: r.result, isPdf: true }); r.onerror = rej; r.readAsDataURL(file);
         } else {
@@ -817,17 +621,44 @@
     }
 
     async function queryGeminiAPI(promptText, mediaParts = []) {
-      const models = ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.5-flash-lite'];
+      const models = ['gemini-3.5-flash-lite', 'gemini-3.8-flash', 'gemini-3.6-flash'];
       const parts = [{ text: promptText }, ...mediaParts.map(m => typeof m === 'string' ? { inline_data: { mime_type: 'image/jpeg', data: m } } : { inline_data: { mime_type: m.mimeType || 'image/jpeg', data: m.base64 } })];
       let lastErr = '';
       for (const m of models) {
         try {
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${GEMINI_API_KEY}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ contents: [{ parts }], generationConfig: { response_mime_type: "application/json", temperature: 0.1 } }) });
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${GEMINI_API_KEY}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts }],
+              generationConfig: {
+                response_mime_type: "application/json",
+                temperature: 0.1,
+                thinkingConfig: { thinkingBudget: 0 }
+              }
+            })
+          });
           const j = await res.json(); if (j.error) { lastErr = j.error.message; continue; }
           if (j.candidates?.[0]?.content) return JSON.parse(j.candidates[0].content.parts[0].text.replace(/```json/g, '').replace(/```/g, '').trim());
         } catch (e) { lastErr = e.message; }
       }
       throw new Error(lastErr || "Serwery AI są zajęte.");
+    }
+
+    function triggerItemLabelPhoto(mode) { currentLabelPhotoTarget = mode; el('itemLabelPhotoInput').click(); }
+    async function handleItemLabelPhoto(event) {
+      const file = event.target.files[0]; if (!file) return;
+      try {
+        const prep = await prepareFileForGemini(file, 800, 0.70);
+        if (currentLabelPhotoTarget === 'NEW') { tempNewItemPhoto = prep.previewUrl; el('newItemPhotoPreview').src = prep.previewUrl; el('newItemPhotoPreview').classList.remove('hidden'); }
+        else { tempEditItemPhoto = prep.previewUrl; el('editItemPhotoPreview').src = prep.previewUrl; el('editItemPhotoPreview').classList.remove('hidden'); }
+        const parsed = await queryGeminiAPI(`Przeanalizuj etykietę. Zwróć JSON: { "fullName": string, "category": string, "unit": "szt."|"op." }`, [prep]);
+        if (parsed?.fullName) {
+          const smartCat = classifyProductSmartLocal(parsed.fullName, parsed.category) || parsed.category || 'Alkohole • Wino Różowe / Prosecco';
+          if (currentLabelPhotoTarget === 'NEW') { el('newName').value = parsed.fullName; el('newCategory').value = smartCat; if (parsed.unit) el('newUnit').value = parsed.unit; }
+          else if (!el('editItemName').value || confirm(`Aktualizować nazwę na:\n"${parsed.fullName}"?`)) { el('editItemName').value = parsed.fullName; el('editItemCategory').value = smartCat; }
+        }
+      } catch (err) { alert("Zdjęcie zapisane lokalnie."); } event.target.value = '';
     }
 
     async function runOnlineAIClassifier(forceAll = false) {
@@ -865,7 +696,7 @@
           toDel.push(item.id); count++;
         }
       }
-      if (count === 0) return alert("Brak duplikatów! Wszystkie pozycje w magazynie są unikalne.");
+      if (count === 0) return alert("Brak duplikatów! Wszystkie pozycje są unikalne.");
       inventory = Array.from(groups.values()); safeSetLocal('magazyn_offline_items', inventory); renderInventory();
       if (isCloudOnline) {
         for (const id of toDel) { try { await apiRequest(`/inventory?id=eq.${id}`, 'DELETE'); } catch (e) {} }
