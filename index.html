@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>MagazynRC - WMS v5.3</title>
+  <title>MagazynRC - WMS v5.4</title>
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#0f172a">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -59,7 +59,7 @@
     <div class="flex items-center space-x-2">
       <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-base shadow">M</div>
       <div>
-        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v5.3 PRO</span></h1>
+        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v5.4 PRO</span></h1>
         <p id="syncStatus" class="text-[10px] text-amber-400 font-medium leading-none mt-0.5">Inicjalizacja...</p>
       </div>
     </div>
@@ -430,7 +430,7 @@
     </div>
   </div>
 
-  <!-- MODAL: WGRYWANIE FAKTURY (Z POPRAWIONYM DRAG & DROP NA KAFELKACH) -->
+  <!-- MODAL: WGRYWANIE FAKTURY -->
   <div id="invoiceCaptureModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
     <div ondragover="handleDragOver(event, this)" ondragleave="handleDragLeave(event, this)" ondrop="handleDropFiles(event, 'INVOICE')" class="bg-slate-800 border-2 border-dashed border-slate-600 rounded-2xl max-w-md w-full p-4 space-y-3 transition">
       <div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">⚡ Wgraj Fakturę (Zdjęcie / PDF)</h3><button onclick="closeInvoiceUploadModal()" class="text-slate-400 text-xl font-bold">✕</button></div>
@@ -672,7 +672,7 @@
     }
 
     async function queryGeminiAPI(promptText, mediaParts = []) {
-      const models = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-2.0-flash'];
+      const models = ['gemini-3.8-flash', 'gemini-3.6-flash', 'gemini-3.5-flash-lite'];
       const parts = [{ text: promptText }, ...mediaParts.map(m => typeof m === 'string' ? { inline_data: { mime_type: 'image/jpeg', data: m } } : { inline_data: { mime_type: m.mimeType || 'image/jpeg', data: m.base64 } })];
       let lastErr = '';
       for (const m of models) {
