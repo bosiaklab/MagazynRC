@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>MagazynRC - WMS v6.2</title>
+  <title>MagazynRC - WMS v6.3</title>
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#0f172a">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -28,12 +28,7 @@
 <body class="bg-slate-900 text-slate-100 min-h-screen pb-32 font-sans select-none print-mode-sheet" onclick="hideContextMenu(); hideToolsMenu()">
 
   <div id="printableSheet"></div>
-  <div id="printArea" class="p-4">
-    <div id="printItemName" class="font-black text-base mb-1"></div>
-    <div id="printItemCategory" class="text-xs mb-2"></div>
-    <div id="printQRCode" class="flex justify-center my-2"></div>
-    <div id="printItemBarcode" class="font-mono font-bold text-sm mt-1"></div>
-  </div>
+  <div id="printArea" class="p-4"><div id="printItemName" class="font-black text-base mb-1"></div><div id="printItemCategory" class="text-xs mb-2"></div><div id="printQRCode" class="flex justify-center my-2"></div><div id="printItemBarcode" class="font-mono font-bold text-sm mt-1"></div></div>
 
   <!-- BLOKADA PIN -->
   <div id="authOverlay" class="fixed inset-0 bg-slate-950/95 backdrop-blur-md z-[9999] flex flex-col items-center justify-center p-4">
@@ -52,17 +47,13 @@
   <header class="bg-slate-800/90 backdrop-blur border-b border-slate-700/80 sticky top-0 z-30 px-3 py-2 flex items-center justify-between shadow-md">
     <div class="flex items-center space-x-2">
       <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-base shadow">M</div>
-      <div>
-        <h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v6.2</span></h1>
-        <p id="syncStatus" class="text-[10px] text-amber-400 font-medium leading-none mt-0.5">Inicjalizacja...</p>
-      </div>
+      <div><h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v6.3</span></h1><p id="syncStatus" class="text-[10px] text-amber-400 font-medium leading-none mt-0.5">Inicjalizacja...</p></div>
     </div>
     <div class="flex items-center gap-1.5 relative">
-      <button onclick="runOnlineAIClassifier(true)" class="bg-purple-950 text-purple-300 text-xs px-2.5 py-1.5 rounded-lg font-bold border border-purple-700/60 shadow hover:bg-purple-900 transition" title="Klasyfikacja AI">🧠 Ucz AI</button>
-      <button onclick="mergeExistingDuplicates()" class="bg-indigo-950 text-indigo-300 text-xs px-2.5 py-1.5 rounded-lg font-bold border border-indigo-700/60 shadow hover:bg-indigo-900 transition" title="Scal zduplikowane towary">🔗 Scal</button>
-      <button onclick="openInventoryAuditModal()" class="bg-cyan-950 text-cyan-300 text-xs px-2.5 py-1.5 rounded-lg font-bold border border-cyan-700/60 shadow hover:bg-cyan-900 transition" title="Spis z natury">📋 Spis</button>
-      
-      <button onclick="toggleToolsMenu(event)" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs px-2.5 py-1.5 rounded-lg font-black border border-slate-600 shadow transition" title="Więcej narzędzi">⚙️</button>
+      <button onclick="runOnlineAIClassifier(true)" class="bg-purple-950 text-purple-300 text-xs px-2.5 py-1.5 rounded-lg font-bold border border-purple-700/60 shadow hover:bg-purple-900 transition">🧠 Ucz AI</button>
+      <button onclick="mergeExistingDuplicates()" class="bg-indigo-950 text-indigo-300 text-xs px-2.5 py-1.5 rounded-lg font-bold border border-indigo-700/60 shadow hover:bg-indigo-900 transition">🔗 Scal</button>
+      <button onclick="openInventoryAuditModal()" class="bg-cyan-950 text-cyan-300 text-xs px-2.5 py-1.5 rounded-lg font-bold border border-cyan-700/60 shadow hover:bg-cyan-900 transition">📋 Spis</button>
+      <button onclick="toggleToolsMenu(event)" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs px-2.5 py-1.5 rounded-lg font-black border border-slate-600 shadow transition">⚙️</button>
       
       <div id="toolsMenuDropdown" class="hidden absolute right-0 top-9 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl py-1.5 w-52 z-50 text-xs">
         <button onclick="copyLowStockWhatsApp()" class="w-full text-left px-3.5 py-2 text-amber-300 hover:bg-slate-700 flex items-center gap-2">📲 Braki (WhatsApp)</button>
@@ -88,11 +79,9 @@
   <input type="file" id="editDelivPhotoInput" accept="image/*,application/pdf" class="hidden" onchange="handleEditDeliveryAddPhoto(event)">
 
   <datalist id="categoryPresetsList">
-    <option value="Alkohole • Whisky"><option value="Alkohole • Wódka"><option value="Alkohole • Rum">
-    <option value="Alkohole • Gin / Likier / Aperitif"><option value="Alkohole • Wino Czerwone"><option value="Alkohole • Wino Białe">
-    <option value="Alkohole • Wino Różowe / Prosecco"><option value="Alkohole • Piwo / Cydr">
-    <option value="Napoje • Woda"><option value="Napoje • Gazowane / Soft"><option value="Napoje • Energetyk">
-    <option value="Napoje • Soki / Nektary"><option value="Napoje • Kawa / Herbata / Dodatki">
+    <option value="Alkohole • Whisky"><option value="Alkohole • Wódka"><option value="Alkohole • Rum"><option value="Alkohole • Gin / Likier / Aperitif">
+    <option value="Alkohole • Wino Czerwone"><option value="Alkohole • Wino Białe"><option value="Alkohole • Wino Różowe / Prosecco"><option value="Alkohole • Piwo / Cydr">
+    <option value="Napoje • Woda"><option value="Napoje • Gazowane / Soft"><option value="Napoje • Energetyk"><option value="Napoje • Soki / Nektary"><option value="Napoje • Kawa / Herbata / Dodatki">
     <option value="Jednorazówki • Opakowania / Lunchbox"><option value="Jednorazówki • Kubki / Sztućce / Serwetki">
   </datalist>
 
@@ -228,10 +217,10 @@
     </section>
   </main>
 
-  <!-- MODAL WGRYWANIA FAKTURY (DRAG & DROP) -->
+  <!-- MODAL WGRYWANIA FAKTURY -->
   <div id="invoiceCaptureModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50">
     <div ondragover="handleDragOver(event, this)" ondragleave="handleDragLeave(event, this)" ondrop="handleDropFiles(event, 'INVOICE')" class="bg-slate-800 border-2 border-dashed border-slate-600 rounded-2xl max-w-md w-full p-4 space-y-3">
-      <div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">⚡ Wgraj Fakturę (Zdjęcie / PDF)</h3><button onclick="closeInvoiceUploadModal()" class="text-slate-400 text-xl font-bold">✕</button></div>
+      <div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">⚡ Wgraj Fakturę</h3><button onclick="closeInvoiceUploadModal()" class="text-slate-400 text-xl font-bold">✕</button></div>
       <p class="text-xs text-slate-300">Przeciągnij plik lub kliknij pole:</p>
       <div class="grid grid-cols-2 gap-2.5">
         <div onclick="document.getElementById('invoicePhotoInput1').click()" ondragover="handleDragOver(event, this)" ondragleave="handleDragLeave(event, this)" ondrop="handleDropFiles(event, 'INVOICE_SLOT_1')" class="border-2 border-dashed border-indigo-500/70 bg-slate-900 rounded-xl p-3 flex flex-col items-center justify-center cursor-pointer min-h-[110px] text-center">
@@ -247,16 +236,15 @@
       </div>
       <div class="flex justify-between items-center pt-2 border-t border-slate-700">
         <button onclick="resetInvoicePhotos()" class="text-xs text-slate-400">Wyczyść</button>
-        <button id="btnProcessInvoice" onclick="startMultiInvoiceProcessing()" disabled class="bg-indigo-600 disabled:bg-slate-700 text-white font-bold px-4 py-2 rounded-xl text-xs">🚀 Odczytaj Dokument</button>
+        <button id="btnProcessInvoice" onclick="startMultiInvoiceProcessing()" disabled class="bg-indigo-600 disabled:bg-slate-700 text-white font-bold px-4 py-2 rounded-xl text-xs">🚀 Odczytaj</button>
       </div>
     </div>
   </div>
 
-  <!-- INNE MODALE (AI, KARTA, AKCJA) -->
   <div id="aiModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-2xl w-full p-4 space-y-3 max-h-[95vh] flex flex-col">
       <div class="flex justify-between items-start border-b border-slate-700 pb-2"><div><span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300">Smart OCR</span><h3 class="text-sm font-bold text-white mt-1">Weryfikacja Dostawy</h3></div><button onclick="closeAiModal()" class="text-slate-400 text-xl font-bold">✕</button></div>
-      <div id="aiLoadingState" class="py-12 flex flex-col items-center justify-center space-y-3"><div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div><p class="text-sm text-slate-200">Przetwarzanie przez AI...</p></div>
+      <div id="aiLoadingState" class="py-12 flex flex-col items-center justify-center space-y-3"><div class="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div><p class="text-sm text-slate-200" id="aiLoadingText">Przetwarzanie przez AI...</p></div>
       <div id="aiItemsContainer" class="hidden flex-1 overflow-y-auto space-y-3 pr-1">
         <div id="aiDuplicateWarningBanner" class="hidden bg-rose-950/90 border-2 border-rose-500 p-3 rounded-xl text-xs text-rose-200 space-y-1"><div class="font-black text-rose-400 text-sm">⛔ DUPLIKAT FAKTURY!</div><p id="aiDuplicateWarningText" class="text-[11px]"></p></div>
         <div class="bg-slate-900 border border-indigo-800/60 p-3 rounded-xl space-y-2 text-xs">
@@ -288,13 +276,7 @@
   <div id="actionModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-3 z-50">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl">
       <div class="flex justify-between items-start border-b border-slate-700 pb-2 gap-2">
-        <div class="flex items-center gap-2.5 min-w-0">
-          <img id="modalItemThumb" src="" class="hidden w-12 h-12 rounded-xl object-cover border border-slate-600 bg-black">
-          <div class="min-w-0">
-            <span id="modalItemCategory" class="text-[10px] font-bold text-emerald-400 uppercase block truncate"></span>
-            <h3 id="modalItemName" class="text-sm font-bold text-white truncate"></h3>
-          </div>
-        </div>
+        <div class="flex items-center gap-2.5 min-w-0"><img id="modalItemThumb" src="" class="hidden w-12 h-12 rounded-xl object-cover border border-slate-600 bg-black"><div class="min-w-0"><span id="modalItemCategory" class="text-[10px] font-bold text-emerald-400 uppercase block truncate"></span><h3 id="modalItemName" class="text-sm font-bold text-white truncate"></h3></div></div>
         <button onclick="hideModal('actionModal')" class="text-slate-400 text-lg font-bold">✕</button>
       </div>
       <div class="grid grid-cols-3 gap-2 text-center bg-slate-900 p-2.5 rounded-xl border border-slate-700">
@@ -316,87 +298,39 @@
       </div>
       <div class="flex justify-between items-center pt-2 border-t border-slate-700 text-xs">
         <button onclick="deleteCurrentItem()" class="text-rose-400 font-bold px-2 py-1">🗑️ Usuń z bazy</button>
-        <div class="flex gap-2">
-          <button onclick="openPrintLabelModal()" class="bg-slate-700 px-3 py-1.5 rounded-xl font-bold">🏷️ QR</button>
-          <button onclick="openEditModal(selectedItemId)" class="bg-indigo-600 text-white px-3.5 py-1.5 rounded-xl font-bold">✏️ Edytuj</button>
-        </div>
+        <div class="flex gap-2"><button onclick="openPrintLabelModal()" class="bg-slate-700 px-3 py-1.5 rounded-xl font-bold">🏷️ QR</button><button onclick="openEditModal(selectedItemId)" class="bg-indigo-600 text-white px-3.5 py-1.5 rounded-xl font-bold">✏️ Edytuj</button></div>
       </div>
     </div>
   </div>
 
-  <div id="newItemModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50">
-    <form onsubmit="saveNewItem(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl">
-      <div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">➕ Nowy Towar</h3><button type="button" onclick="hideModal('newItemModal')" class="text-slate-400 text-lg">✕</button></div>
-      <div class="flex items-center gap-3">
-        <img id="newItemPhotoPreview" src="" class="hidden w-14 h-14 rounded-xl object-cover bg-black">
-        <button type="button" onclick="document.getElementById('itemLabelPhotoInput').click(); currentLabelPhotoTarget = 'NEW';" class="flex-1 bg-indigo-950 border border-indigo-600 text-indigo-300 text-xs font-bold py-2 px-3 rounded-xl">📷 Zdjęcie etykiety (AI)</button>
-      </div>
-      <div class="grid grid-cols-3 gap-2 text-xs">
-        <div class="col-span-2"><label class="text-[10px] text-slate-400 block">KOD EAN/QR:</label><input type="text" id="newBarcode" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 font-mono text-white"></div>
-        <div class="flex items-end"><button type="button" onclick="generateRandomCode()" class="w-full bg-slate-700 text-xs py-2 rounded-lg font-bold">🎲 Losuj</button></div>
-      </div>
-      <div class="text-xs"><label class="text-[10px] text-slate-400 block">Nazwa produktu *:</label><input type="text" id="newName" oninput="autoPreviewNewItemCategory()" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 font-bold text-white"></div>
-      <div class="grid grid-cols-2 gap-2 text-xs">
-        <div><label class="text-[10px] text-slate-400 block">Kategoria:</label><input type="text" id="newCategory" list="categoryPresetsList" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white"></div>
-        <div><label class="text-[10px] text-slate-400 block">Regał:</label><input type="text" id="newLocation" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white"></div>
-      </div>
-      <div class="grid grid-cols-4 gap-2 text-xs">
-        <div><label class="text-[10px] text-slate-400 block">Stan:</label><input type="number" id="newQty" value="1" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center text-emerald-400 font-bold"></div>
-        <div><label class="text-[10px] text-slate-400 block">Jedn:</label><select id="newUnit" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white"><option value="szt.">szt.</option><option value="op.">op.</option><option value="kg">kg</option><option value="l">l</option></select></div>
-        <div><label class="text-[10px] text-slate-400 block">Min:</label><input type="number" id="newMinQty" value="6" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center text-rose-400 font-bold"></div>
-        <div><label class="text-[10px] text-slate-400 block">Netto:</label><input type="number" step="0.01" id="newPrice" value="0.00" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center text-white font-bold"></div>
-      </div>
-      <div class="flex justify-end gap-2 pt-2 border-t border-slate-700"><button type="button" onclick="hideModal('newItemModal')" class="px-3 py-2 rounded-xl text-xs">Anuluj</button><button type="submit" class="bg-emerald-500 text-slate-950 font-black px-5 py-2 rounded-xl text-xs">Zapisz</button></div>
-    </form>
-  </div>
-  
-  <div id="editItemModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50">
-    <form onsubmit="saveEditedItem(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl">
-      <div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">✏️ Edycja Towaru</h3><button type="button" onclick="hideModal('editItemModal')" class="text-slate-400 text-lg">✕</button></div>
-      <input type="hidden" id="editItemId">
-      <div class="grid grid-cols-2 gap-2 text-xs">
-        <div><label class="text-[10px] text-slate-400 block">Kod EAN / QR:</label><input type="text" id="editItemBarcode" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 font-mono text-white"></div>
-        <div><label class="text-[10px] text-slate-400 block">Lokalizacja:</label><input type="text" id="editItemLocation" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white"></div>
-      </div>
-      <div class="text-xs"><label class="text-[10px] text-slate-400 block">Nazwa produktu *:</label><input type="text" id="editItemName" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 font-bold text-white"></div>
-      <div class="text-xs"><label class="text-[10px] text-slate-400 block">Kategoria:</label><input type="text" id="editItemCategory" list="categoryPresetsList" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white"></div>
-      <div class="grid grid-cols-3 gap-2 text-xs bg-slate-900 p-2.5 rounded-xl border border-slate-700">
-        <div><label class="text-[9px] text-emerald-400 block">Cena netto:</label><input type="number" step="0.01" id="editItemPrice" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-emerald-400 text-center"></div>
-        <div><label class="text-[9px] text-slate-400 block">Baza 100%:</label><input type="number" step="0.01" id="editItemBasePrice" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-slate-200 text-center"></div>
-        <div><label class="text-[9px] text-amber-300 block">Rabat %:</label><input type="number" step="0.1" id="editItemDiscount" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-amber-300 font-bold text-center"></div>
-      </div>
-      <div class="grid grid-cols-2 gap-2 text-xs">
-        <div><label class="text-[10px] text-slate-400 block">Jednostka:</label><select id="editItemUnit" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white"><option value="szt.">szt.</option><option value="op.">op.</option><option value="zgrz.">zgrz.</option><option value="kg">kg</option><option value="l">l</option></select></div>
-        <div><label class="text-[10px] text-slate-400 block">Stan minimalny:</label><input type="number" id="editItemMinQty" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center font-bold text-rose-400"></div>
-      </div>
-      <div class="flex justify-end gap-2 pt-2 border-t border-slate-700"><button type="button" onclick="hideModal('editItemModal')" class="px-3 py-2 rounded-xl text-xs">Anuluj</button><button type="submit" class="bg-indigo-600 text-white font-black px-5 py-2 rounded-xl text-xs">Zapisz</button></div>
-    </form>
-  </div>
-
-  <!-- POZOSTAŁE MODALE (PODGLĄDY, DRUKOWANIE) -->
+  <!-- POZOSTAŁE MODALE (EDYCJA, KREATOR, PODGLĄDY) -->
+  <div id="newItemModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50"><form onsubmit="saveNewItem(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl"><div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">➕ Nowy Towar</h3><button type="button" onclick="hideModal('newItemModal')" class="text-slate-400 text-lg">✕</button></div><div class="flex items-center gap-3"><img id="newItemPhotoPreview" src="" class="hidden w-14 h-14 rounded-xl object-cover bg-black"><button type="button" onclick="document.getElementById('itemLabelPhotoInput').click(); currentLabelPhotoTarget = 'NEW';" class="flex-1 bg-indigo-950 border border-indigo-600 text-indigo-300 text-xs font-bold py-2 px-3 rounded-xl">📷 Zdjęcie etykiety (AI)</button></div><div class="grid grid-cols-3 gap-2 text-xs"><div class="col-span-2"><label class="text-[10px] text-slate-400 block">KOD EAN/QR:</label><input type="text" id="newBarcode" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 font-mono text-white"></div><div class="flex items-end"><button type="button" onclick="generateRandomCode()" class="w-full bg-slate-700 text-xs py-2 rounded-lg font-bold">🎲 Losuj</button></div></div><div class="text-xs"><label class="text-[10px] text-slate-400 block">Nazwa produktu *:</label><input type="text" id="newName" oninput="autoPreviewNewItemCategory()" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 font-bold text-white"></div><div class="grid grid-cols-2 gap-2 text-xs"><div><label class="text-[10px] text-slate-400 block">Kategoria:</label><input type="text" id="newCategory" list="categoryPresetsList" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white"></div><div><label class="text-[10px] text-slate-400 block">Regał:</label><input type="text" id="newLocation" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white"></div></div><div class="grid grid-cols-4 gap-2 text-xs"><div><label class="text-[10px] text-slate-400 block">Stan:</label><input type="number" id="newQty" value="1" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center text-emerald-400 font-bold"></div><div><label class="text-[10px] text-slate-400 block">Jedn:</label><select id="newUnit" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white"><option value="szt.">szt.</option><option value="op.">op.</option><option value="kg">kg</option><option value="l">l</option></select></div><div><label class="text-[10px] text-slate-400 block">Min:</label><input type="number" id="newMinQty" value="6" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center text-rose-400 font-bold"></div><div><label class="text-[10px] text-slate-400 block">Netto:</label><input type="number" step="0.01" id="newPrice" value="0.00" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center text-white font-bold"></div></div><div class="flex justify-end gap-2 pt-2 border-t border-slate-700"><button type="button" onclick="hideModal('newItemModal')" class="px-3 py-2 rounded-xl text-xs">Anuluj</button><button type="submit" class="bg-emerald-500 text-slate-950 font-black px-5 py-2 rounded-xl text-xs">Zapisz</button></div></form></div>
+  <div id="editItemModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50"><form onsubmit="saveEditedItem(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl"><div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">✏️ Edycja Towaru</h3><button type="button" onclick="hideModal('editItemModal')" class="text-slate-400 text-lg">✕</button></div><input type="hidden" id="editItemId"><div class="grid grid-cols-2 gap-2 text-xs"><div><label class="text-[10px] text-slate-400 block">Kod EAN / QR:</label><input type="text" id="editItemBarcode" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 font-mono text-white"></div><div><label class="text-[10px] text-slate-400 block">Lokalizacja:</label><input type="text" id="editItemLocation" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white"></div></div><div class="text-xs"><label class="text-[10px] text-slate-400 block">Nazwa produktu *:</label><input type="text" id="editItemName" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 font-bold text-white"></div><div class="text-xs"><label class="text-[10px] text-slate-400 block">Kategoria:</label><input type="text" id="editItemCategory" list="categoryPresetsList" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white"></div><div class="grid grid-cols-3 gap-2 text-xs bg-slate-900 p-2.5 rounded-xl border border-slate-700"><div><label class="text-[9px] text-emerald-400 block">Cena netto:</label><input type="number" step="0.01" id="editItemPrice" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-emerald-400 text-center"></div><div><label class="text-[9px] text-slate-400 block">Baza 100%:</label><input type="number" step="0.01" id="editItemBasePrice" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-slate-200 text-center"></div><div><label class="text-[9px] text-amber-300 block">Rabat %:</label><input type="number" step="0.1" id="editItemDiscount" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 text-amber-300 font-bold text-center"></div></div><div class="grid grid-cols-2 gap-2 text-xs"><div><label class="text-[10px] text-slate-400 block">Jednostka:</label><select id="editItemUnit" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white"><option value="szt.">szt.</option><option value="op.">op.</option><option value="zgrz.">zgrz.</option><option value="kg">kg</option><option value="l">l</option></select></div><div><label class="text-[10px] text-slate-400 block">Stan minimalny:</label><input type="number" id="editItemMinQty" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-center font-bold text-rose-400"></div></div><div class="flex justify-end gap-2 pt-2 border-t border-slate-700"><button type="button" onclick="hideModal('editItemModal')" class="px-3 py-2 rounded-xl text-xs">Anuluj</button><button type="submit" class="bg-indigo-600 text-white font-black px-5 py-2 rounded-xl text-xs">Zapisz</button></div></form></div>
+  <div id="inventoryAuditModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto"><div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-2xl w-full p-4 space-y-3 max-h-[95vh] flex flex-col"><div class="flex justify-between items-center border-b border-slate-700 pb-2"><div><span class="text-[9px] uppercase font-bold px-2 py-0.5 rounded bg-cyan-950 text-cyan-300">Audyt</span><h3 class="text-sm font-bold text-white mt-0.5">Spis z Natury</h3></div><button onclick="hideModal('inventoryAuditModal')" class="text-slate-400 text-xl font-bold">✕</button></div><div id="auditItemsContainer" class="flex-1 overflow-y-auto space-y-2 pr-1 max-h-[60vh]"></div><div class="flex justify-between items-center pt-2 border-t border-slate-700"><button onclick="hideModal('inventoryAuditModal')" class="px-3 py-2 rounded-xl text-xs text-slate-400">Anuluj</button><button onclick="finalizeInventoryAudit()" class="bg-emerald-500 text-slate-950 font-black px-5 py-2.5 rounded-xl text-xs">✓ Wyrównaj Stany</button></div></div></div>
+  <div id="editDeliveryModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto"><form onsubmit="saveEditedDelivery(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 max-h-[94vh] flex flex-col"><div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">✏️ Edytuj Fakturę</h3><button type="button" onclick="hideModal('editDeliveryModal')" class="text-slate-400 text-xl font-bold">✕</button></div><input type="hidden" id="editDelivId"><div class="flex-1 overflow-y-auto space-y-3 pr-1 text-xs"><div class="bg-slate-900 border border-slate-700 p-3 rounded-xl grid grid-cols-2 sm:grid-cols-3 gap-2"><div><label class="text-[10px] text-slate-400 block">Dostawca:</label><input type="text" id="editDelivSupplier" required class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-white"></div><div><label class="text-[10px] text-slate-400 block">Nr Faktury:</label><input type="text" id="editDelivDocNum" required class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-mono text-amber-400"></div><div><label class="text-[10px] text-emerald-300 font-bold block">👤 Przyjął:</label><input type="text" id="editDelivReceiver" class="w-full bg-slate-800 border border-emerald-700/60 rounded p-1.5 font-bold text-emerald-400"></div><div><label class="text-[10px] text-emerald-400 block">Netto prod.:</label><input type="text" id="editDelivTotalNet" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-emerald-400"></div><div><label class="text-[10px] text-cyan-300 block">Netto z kaucją:</label><input type="text" id="editDelivTotalNetWithDep" class="w-full bg-slate-800 border border-cyan-700/60 rounded p-1.5 font-bold text-cyan-300"></div><div><label class="text-[10px] text-slate-400 block">Suma Brutto:</label><input type="text" id="editDelivTotalGross" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-slate-200"></div></div><div class="space-y-1.5"><div class="flex justify-between items-center"><span class="text-[10px] text-slate-300 font-bold uppercase">Pozycje:</span><button type="button" onclick="addEditDeliveryItemRow()" class="text-[10px] bg-indigo-950 text-indigo-300 border border-indigo-700 px-2 py-0.5 rounded-lg font-bold">+ Wiersz</button></div><div id="editDelivItemsList" class="space-y-1.5"></div></div></div><div class="flex justify-end gap-2 pt-2 border-t border-slate-700"><button type="button" onclick="hideModal('editDeliveryModal')" class="px-3 py-2 rounded-xl text-xs text-slate-400">Anuluj</button><button type="submit" class="bg-indigo-600 text-white font-black px-5 py-2 rounded-xl text-xs">Zapisz zmiany</button></div></form></div>
   <div id="sheetPreviewModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-2.5 z-50 overflow-y-auto"><div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-3xl w-full p-4 space-y-3 max-h-[95vh] flex flex-col"><div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 id="sheetPreviewModalTitle" class="text-sm font-bold text-white">Podgląd Dokumentu</h3><button onclick="hideModal('sheetPreviewModal')" class="text-slate-400 text-xl font-bold">✕</button></div><div class="flex-1 overflow-auto bg-white p-2 rounded-xl border border-slate-600 text-black"><div id="sheetPreviewContainer"></div></div><div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-700"><button onclick="hideModal('sheetPreviewModal')" class="px-3 py-2 rounded-xl text-xs text-slate-300">Zamknij</button><div class="flex gap-2"><button onclick="downloadCurrentSheetAsExcel()" class="bg-emerald-500 text-slate-950 font-black px-4 py-2 rounded-xl text-xs">📥 Pobierz plik (.xls)</button><button onclick="triggerBrowserPrintSheet()" class="bg-amber-500 text-slate-950 font-black px-4 py-2 rounded-xl text-xs">🖨️ Drukuj / PDF</button></div></div></div></div>
   <div id="imagePreviewModal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto"><div class="max-w-xl w-full bg-slate-900 border border-slate-700 rounded-2xl p-3 flex flex-col items-center"><div class="w-full flex justify-between items-center border-b border-slate-800 pb-2 mb-2"><h4 id="imagePreviewTitle" class="text-xs font-bold text-white truncate">Podgląd</h4><button onclick="closeImagePreviewModal()" class="text-slate-400 text-xl font-black">✕</button></div><div id="imagePreviewTabs" class="w-full flex gap-2 mb-2 hidden"></div><div class="w-full flex items-center justify-center max-h-[75vh] overflow-auto bg-black/60 rounded-xl p-1"><img id="imagePreviewElement" src="" class="max-w-full max-h-[72vh] object-contain rounded-lg"></div><div class="w-full flex justify-end pt-2"><button onclick="closeImagePreviewModal()" class="bg-slate-800 text-white font-bold px-4 py-2 rounded-xl text-xs">Zamknij</button></div></div></div>
   <div id="depositModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50"><form onsubmit="saveDepositModal(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3"><div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">♻️ Pozycja Kaucyjna</h3><button type="button" onclick="hideModal('depositModal')" class="text-slate-400">✕</button></div><input type="hidden" id="depModalId"><div><label class="text-[11px] text-slate-300 block mb-1">Nazwa kaucji *:</label><input type="text" id="depModalName" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold"></div><div class="grid grid-cols-2 gap-2"><div><label class="text-[11px] text-slate-300 block mb-1">Rodzaj:</label><select id="depModalCategory" onchange="handleDepCategoryPreset()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white"><option value="PET_CAN_050">PET / Puszka (0,50)</option><option value="BUTELKA_SZKLO">Szkło (1,00)</option><option value="SKRZYNKA">Skrzynka</option><option value="PALETA_INNE">Paleta / Inne</option></select></div><div><label class="text-[11px] text-slate-300 block mb-1">Stawka (PLN):</label><input type="number" step="0.01" id="depModalPrice" value="0.50" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-cyan-400 font-bold text-center"></div></div><div><label class="text-[11px] text-slate-300 block mb-1">Ilość (szt.):</label><input type="number" id="depModalQty" value="1" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold text-center"></div><div class="flex justify-end gap-2 pt-2 border-t border-slate-700"><button type="button" onclick="hideModal('depositModal')" class="px-3 py-1.5 rounded-xl text-xs text-slate-300">Anuluj</button><button type="submit" class="bg-cyan-500 text-slate-950 font-black px-4 py-1.5 rounded-xl text-xs">Zapisz</button></div></form></div>
   <div id="eventDispatchModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto"><div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 max-h-[94vh] flex flex-col"><div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">Rejestracja Wyjazdu z Karty</h3><button onclick="hideModal('eventDispatchModal')" class="text-slate-400 text-xl font-bold">✕</button></div><div id="eventDispatchLoading" class="py-12 flex flex-col items-center"><div class="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div></div><div id="eventDispatchContent" class="hidden flex-1 overflow-y-auto space-y-3 pr-1"><div class="bg-slate-900 p-2.5 rounded-xl grid grid-cols-2 gap-2 text-xs"><div><span class="text-[10px] text-slate-400 block">Numer:</span><input type="text" id="evDispNum" class="w-full bg-slate-800 border border-slate-700 rounded p-1 font-mono font-bold text-amber-400"></div><div><span class="text-[10px] text-slate-400 block">Data:</span><input type="text" id="evDispDate" class="w-full bg-slate-800 border border-slate-700 rounded p-1 text-slate-200"></div><div class="col-span-2"><span class="text-[10px] text-slate-400 block">Nazwa:</span><input type="text" id="evDispName" class="w-full bg-slate-800 border border-slate-700 rounded p-1 font-bold text-white"></div></div><div id="evDispItemsList" class="space-y-2"></div></div><div id="eventDispatchActions" class="hidden pt-2.5 border-t border-slate-700 flex justify-end gap-2"><button onclick="hideModal('eventDispatchModal')" class="px-4 py-2 rounded-xl text-xs text-slate-400">Anuluj</button><button onclick="confirmAndApplyEventDispatch()" class="bg-blue-600 text-white font-black px-5 py-2 rounded-xl text-xs">🚚 Zatwierdź</button></div></div></div>
   <div id="eventReturnModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto"><div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 max-h-[94vh] flex flex-col"><div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 id="evReturnModalTitle" class="text-sm font-bold text-white">Rozliczenie Zwrotu</h3><button onclick="hideModal('eventReturnModal')" class="text-slate-400 text-xl font-bold">✕</button></div><div id="evReturnLoading" class="py-12 flex flex-col items-center"><div class="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div></div><div id="evReturnContent" class="hidden flex-1 overflow-y-auto space-y-3 pr-1"><div class="bg-slate-900 border border-emerald-700/60 p-2.5 rounded-xl space-y-2 text-xs"><div class="flex justify-between items-center"><span class="text-[10px] text-emerald-300 font-bold">🎯 Realizacja:</span><input type="text" id="evReturnDateInput" class="bg-slate-800 border border-slate-700 rounded px-2 py-0.5 text-xs text-emerald-400 font-mono w-24 text-center"></div><select id="evReturnEventSelect" onchange="handleReturnEventSelectChange()" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white font-bold"></select></div><div id="evReturnItemsList" class="space-y-2.5"></div></div><div id="evReturnActions" class="hidden pt-2.5 border-t border-slate-700 flex justify-end gap-2"><button onclick="hideModal('eventReturnModal')" class="px-4 py-2 rounded-xl text-xs text-slate-400">Anuluj</button><button onclick="confirmAndApplyEventReturn()" class="bg-emerald-500 text-slate-950 font-black px-5 py-2 rounded-xl text-xs">✓ Zatwierdź Zwrot</button></div></div></div>
-  <div id="editDeliveryModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto"><form onsubmit="saveEditedDelivery(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 max-h-[94vh] flex flex-col"><div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">✏️ Edytuj Fakturę</h3><button type="button" onclick="hideModal('editDeliveryModal')" class="text-slate-400 text-xl font-bold">✕</button></div><input type="hidden" id="editDelivId"><div class="flex-1 overflow-y-auto space-y-3 pr-1 text-xs"><div class="bg-slate-900 border border-slate-700 p-3 rounded-xl grid grid-cols-2 sm:grid-cols-3 gap-2"><div><label class="text-[10px] text-slate-400 block">Dostawca:</label><input type="text" id="editDelivSupplier" required class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-white"></div><div><label class="text-[10px] text-slate-400 block">Nr Faktury:</label><input type="text" id="editDelivDocNum" required class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-mono text-amber-400"></div><div><label class="text-[10px] text-emerald-300 font-bold block">👤 Przyjął:</label><input type="text" id="editDelivReceiver" class="w-full bg-slate-800 border border-emerald-700/60 rounded p-1.5 font-bold text-emerald-400"></div><div><label class="text-[10px] text-emerald-400 block">Netto prod.:</label><input type="text" id="editDelivTotalNet" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-emerald-400"></div><div><label class="text-[10px] text-cyan-300 block">Netto z kaucją:</label><input type="text" id="editDelivTotalNetWithDep" class="w-full bg-slate-800 border border-cyan-700/60 rounded p-1.5 font-bold text-cyan-300"></div><div><label class="text-[10px] text-slate-400 block">Suma Brutto:</label><input type="text" id="editDelivTotalGross" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-slate-200"></div></div><div class="space-y-1.5"><div class="flex justify-between items-center"><span class="text-[10px] text-slate-300 font-bold uppercase">Pozycje:</span><button type="button" onclick="addEditDeliveryItemRow()" class="text-[10px] bg-indigo-950 text-indigo-300 border border-indigo-700 px-2 py-0.5 rounded-lg font-bold">+ Wiersz</button></div><div id="editDelivItemsList" class="space-y-1.5"></div></div></div><div class="flex justify-end gap-2 pt-2 border-t border-slate-700"><button type="button" onclick="hideModal('editDeliveryModal')" class="px-3 py-2 rounded-xl text-xs text-slate-400">Anuluj</button><button type="submit" class="bg-indigo-600 text-white font-black px-5 py-2 rounded-xl text-xs">Zapisz zmiany</button></div></form></div>
-  <div id="customContextMenu" class="fixed hidden z-50 bg-slate-800/95 border border-slate-700 rounded-xl shadow-2xl py-1.5 w-56"><button onclick="contextActionEdit()" class="w-full text-left px-3.5 py-2 text-xs text-slate-200 hover:bg-slate-700">✏️ Edytuj dane i zdjęcie</button><button onclick="contextActionOpenStock()" class="w-full text-left px-3.5 py-2 text-xs text-slate-200 hover:bg-slate-700">⚡ Operacja stanu i historia</button><button onclick="contextActionPrintQR()" class="w-full text-left px-3.5 py-2 text-xs text-slate-200 hover:bg-slate-700">🏷️ Drukuj etykietę QR</button><div class="border-t border-slate-700 my-1"></div><button onclick="contextActionDelete()" class="w-full text-left px-3.5 py-2 text-xs text-rose-400 font-bold">🗑️ Usuń tę pozycję</button></div>
+  <div id="customContextMenu" class="fixed hidden z-50 bg-slate-800/95 border border-slate-700 rounded-xl shadow-2xl py-1.5 w-56"><button onclick="contextActionEdit()" class="w-full text-left px-3.5 py-2 text-xs text-slate-200 hover:bg-slate-700">✏️ Edytuj</button><button onclick="contextActionOpenStock()" class="w-full text-left px-3.5 py-2 text-xs text-slate-200 hover:bg-slate-700">⚡ Operacje</button><button onclick="contextActionPrintQR()" class="w-full text-left px-3.5 py-2 text-xs text-slate-200 hover:bg-slate-700">🏷️ Drukuj QR</button><div class="border-t border-slate-700 my-1"></div><button onclick="contextActionDelete()" class="w-full text-left px-3.5 py-2 text-xs text-rose-400 font-bold">🗑️ Usuń pozycję</button></div>
+  <div id="generateSheetModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto"><div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-4 space-y-3 max-h-[94vh] flex flex-col"><div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">📋 Karta Wydania na Realizację</h3><button onclick="hideModal('generateSheetModal')" class="text-slate-400 text-lg font-bold">✕</button></div><div class="grid grid-cols-2 gap-2 text-xs"><div><label class="text-[10px] text-slate-400 block">Numer imprezy:</label><input type="text" id="genSheetNum" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 font-bold text-amber-400"></div><div><label class="text-[10px] text-slate-400 block">Data wydania:</label><input type="text" id="genSheetDate" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-slate-200"></div><div class="col-span-2"><label class="text-[10px] text-slate-400 block">Nazwa imprezy / Klient:</label><input type="text" id="genSheetName" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 font-bold text-white"></div></div><div class="bg-slate-900 border border-slate-700 p-2.5 rounded-xl flex gap-1.5"><select id="genSheetAddSelect" class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white"></select><button type="button" onclick="addItemToSheetCreator()" class="bg-indigo-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs">+ Dodaj</button></div><div id="genSheetItemsList" class="space-y-1.5 flex-1 overflow-y-auto pr-1 min-h-[120px] max-h-60"></div><div class="flex justify-end gap-2 pt-2 border-t border-slate-700"><button onclick="hideModal('generateSheetModal')" class="px-3 py-2 rounded-xl text-xs text-slate-400">Anuluj</button><button onclick="finalizeSheetCreator(true)" class="bg-blue-600 hover:bg-blue-500 text-white font-black px-4 py-2 rounded-xl text-xs">🚚 Wydaj w teren i Generuj</button></div></div></div>
+  <div id="rwTransferModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto"><div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-4 space-y-3 max-h-[94vh] flex flex-col shadow-2xl"><div class="flex justify-between items-center border-b border-slate-700 pb-2"><div><span class="text-[9px] uppercase font-bold px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-700/50">Dokument RW</span><h3 class="text-sm font-bold text-white mt-0.5">🏢 Nowy Rozchód Wewnętrzny</h3></div><button onclick="hideModal('rwTransferModal')" class="text-slate-400 text-lg font-bold">✕</button></div><div class="grid grid-cols-2 gap-2 text-xs"><div><label class="text-[10px] text-slate-400 block">Nr dokumentu RW:</label><input type="text" id="rwTransferNum" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 font-mono font-bold text-amber-400"></div><div><label class="text-[10px] text-slate-400 block">Data wydania:</label><input type="text" id="rwTransferDate" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-slate-200"></div><div class="col-span-2"><label class="text-[10px] text-slate-400 block">Cel rozchodu / Odbiorca *:</label><input type="text" id="rwTransferDestination" list="rwDestinationsList" class="w-full bg-slate-900 border border-amber-500/70 rounded-lg p-1.5 font-bold text-white"></div></div><div class="bg-slate-900 border border-slate-700 p-2.5 rounded-xl flex gap-1.5"><select id="rwTransferAddSelect" class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white"></select><button type="button" onclick="addItemToRwCreator()" class="bg-amber-500 text-slate-950 font-black px-3 py-1.5 rounded-lg text-xs">+ Dodaj</button></div><div id="rwTransferItemsList" class="space-y-1.5 flex-1 overflow-y-auto pr-1 min-h-[120px] max-h-60"></div><div class="bg-slate-900/90 border border-amber-800/60 p-2 rounded-xl flex justify-between items-center text-xs"><span class="text-slate-300 font-bold">Łączna wartość RW:</span><span id="rwTransferTotalValLabel" class="text-amber-400 font-black text-sm">0.00 zł netto</span></div><div class="flex justify-end gap-2 pt-2 border-t border-slate-700"><button onclick="hideModal('rwTransferModal')" class="px-3 py-2 rounded-xl text-xs text-slate-400">Anuluj</button><button onclick="finalizeRwTransfer()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-xl text-xs shadow">🏢 Zapisz RW</button></div></div></div>
 
   <!-- DOLNA BELKA NAWIGACJI -->
   <nav class="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 border-t border-slate-800 px-2 py-2 flex items-center justify-around shadow-2xl">
     <button onclick="switchMainTab('stock')" id="navBtnStock" class="flex flex-col items-center gap-1 text-emerald-400 py-1 px-2"><span class="text-lg">📦</span><span class="text-[10px] font-bold">Magazyn</span></button>
     <button onclick="switchMainTab('events')" id="navBtnEvents" class="flex flex-col items-center gap-1 text-slate-400 py-1 px-2"><span class="text-lg">🎉</span><span class="text-[10px] font-bold">Eventy</span></button>
     <button onclick="switchMainTab('rw')" id="navBtnRw" class="flex flex-col items-center gap-1 text-slate-400 py-1 px-2"><span class="text-lg">🏢</span><span class="text-[10px] font-bold">RW</span></button>
-    <button onclick="openInvoiceUploadModal()" class="flex flex-col items-center justify-center -mt-5 bg-gradient-to-tr from-indigo-600 to-purple-600 text-white w-14 h-14 rounded-full shadow-lg border-2 border-slate-900"><span class="text-xl">⚡</span><span class="text-[9px] font-black">AI FAKT</span></button>
+    <button onclick="openInvoiceUploadModal()" class="flex flex-col items-center justify-center -mt-5 bg-gradient-to-tr from-indigo-600 to-purple-600 text-white w-14 h-14 rounded-full shadow-lg border-2 border-slate-900 hover:scale-105 transition"><span class="text-xl">⚡</span><span class="text-[9px] font-black">AI FAKT</span></button>
     <button onclick="switchMainTab('deposits')" id="navBtnDeposits" class="flex flex-col items-center gap-1 text-slate-400 py-1 px-2"><span class="text-lg">♻️</span><span class="text-[10px] font-bold">Kaucje</span></button>
     <button onclick="switchMainTab('deliveries')" id="navBtnDeliveries" class="flex flex-col items-center gap-1 text-slate-400 py-1 px-2"><span class="text-lg">📑</span><span class="text-[10px] font-bold">Faktury</span></button>
     <button onclick="openNewItemModal('')" class="flex flex-col items-center gap-1 text-slate-400 py-1 px-2"><span class="text-lg">➕</span><span class="text-[10px] font-bold">Nowy</span></button>
   </nav>
 
-  <!-- SKRYPT GŁÓWNY (GLOBALNY Z AUTO-RETRY) -->
   <script>
     const VALID_PINS = ['1114', '2026', 'Royal2026'];
-    const SUPABASE_BASE_URL = 'https://gojacqzjkrfjlnwokyeg.supabase.co/rest/v1';
+    const SUPABASE_BASE_URL = 'https://' + 'gojacqzjkrfjlnwokyeg' + '.supabase.co/rest/v1';
     const SUPABASE_KEY = 'sb_publishable_EuUrE98PR8SAVwnrIMP60g_RUAL0KSp';
     const GEMINI_API_KEY = 'AQ.Ab8RN6JQHVTxqmEE-mAigOjJGt4ghfMGxGYDTjNUt0MGeq2f5Q';
 
@@ -540,6 +474,7 @@
     }
     function toDbItem(it) { const n = normalizeItem(it); return { id: n.id, barcode: n.barcode, name: n.name, category: n.category, location: n.location, qty: n.qty, in_field: n.inField, min_qty: n.minQty, unit: n.unit, price: n.price, updated_at: new Date() }; }
 
+    // BARDZO WAŻNE: DEKLARACJA GLOBALNYCH ZMIENNYCH (TYLKO RAZ)
     let inventory = safeGetLocal('magazyn_offline_items').map(normalizeItem).filter(Boolean);
     let deliveries = safeGetLocal('magazyn_offline_deliveries');
     let deposits = safeGetLocal('magazyn_offline_deposits');
@@ -689,94 +624,62 @@
       }).join('');
     }
 
-    function openEditModal(id) {
-      const it = inventory.find(i => String(i.id) === String(id)); if (!it) return;
-      hideModal('actionModal'); tempEditItemPhoto = it.photo || '';
-      if (tempEditItemPhoto) { el('editItemPhotoPreview').src = tempEditItemPhoto; el('editItemPhotoPreview').classList.remove('hidden'); } else el('editItemPhotoPreview').classList.add('hidden');
-      el('editItemId').value = it.id; el('editItemBarcode').value = it.barcode; el('editItemName').value = it.name; el('editItemPrice').value = Number(it.price || 0).toFixed(2);
-      el('editItemBasePrice').value = Number(it.basePrice || it.price || 0).toFixed(2); el('editItemDiscount').value = Number(it.discountPercent || 0);
-      el('editItemCategory').value = it.category || 'Napoje'; el('editItemLocation').value = it.location || '-'; el('editItemUnit').value = it.unit || 'szt.'; el('editItemMinQty').value = it.minQty || 0;
-      showModal('editItemModal');
+    function openInventoryAuditModal() {
+      const container = el('auditItemsContainer');
+      if (inventory.length === 0) return alert("Brak towarów w bazie.");
+      container.innerHTML = inventory.map(it => `<div class="bg-slate-900 border border-slate-700 p-2.5 rounded-xl flex items-center justify-between gap-2 text-xs"><div class="flex-1 truncate"><span class="font-bold text-white block truncate">${it.name}</span><span class="text-[10px] text-slate-400">System: <strong>${it.qty}</strong> ${it.unit} • ${it.category}</span></div><div class="flex items-center gap-1.5"><span class="text-[10px] text-cyan-300 font-bold">Stan faktyczny:</span><input type="number" id="audit_input_${it.id}" value="${it.qty}" min="0" class="w-20 bg-slate-800 border border-cyan-500 rounded p-1 text-center font-black text-cyan-400 text-xs"></div></div>`).join('');
+      showModal('inventoryAuditModal');
     }
 
-    async function saveEditedItem(e) {
-      e.preventDefault(); const it = inventory.find(i => String(i.id) === String(el('editItemId').value)); if (!it) return;
-      it.barcode = el('editItemBarcode').value.trim(); it.name = el('editItemName').value.trim(); it.price = parseFloat(el('editItemPrice').value) || 0;
-      it.basePrice = parseFloat(el('editItemBasePrice').value) || it.price; it.discountPercent = parseFloat(el('editItemDiscount').value) || 0;
-      it.category = el('editItemCategory').value.trim() || 'Napoje'; it.location = el('editItemLocation').value.trim() || '-'; it.unit = el('editItemUnit').value; it.minQty = parseInt(el('editItemMinQty').value) || 0;
-      if (tempEditItemPhoto) it.photo = tempEditItemPhoto; learnProductRule(it.name, it.category, it.unit, it.photo, 0, it.basePrice, it.discountPercent);
-      safeSetLocal('magazyn_offline_items', inventory); renderInventory(); hideModal('editItemModal');
-      if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${it.id}`, 'PATCH', toDbItem(it)); } catch (err) {} }
-    }
-
-    function openActionModal(id) {
-      const it = inventory.find(i => String(i.id) === String(id)); if (!it) return;
-      selectedItemId = it.id;
-      if (it.photo) { el('modalItemThumb').src = it.photo; el('modalItemThumb').classList.remove('hidden'); } else el('modalItemThumb').classList.add('hidden');
-      el('modalItemCategory').innerText = `${it.category || 'Napoje'} • ${it.location || '-'}`; el('modalItemName').innerText = it.name; el('modalItemBarcode').innerText = `KOD: ${it.barcode}`; el('modalItemPrice').innerText = `${Number(it.price || 0).toFixed(2)} zł`;
-      const hasDisc = Number(it.discountPercent) > 0 || (Number(it.basePrice) > Number(it.price) + 0.01);
-      el('modalItemDiscountInfo').innerText = hasDisc ? `po rabacie -${it.discountPercent}% (100%: ${Number(it.basePrice).toFixed(2)} zł)` : 'cena bez rabatu';
-      el('modalItemQty').innerText = it.qty; el('modalItemUnit').innerText = it.unit || 'szt.'; el('modalItemInField').innerText = it.inField || 0; el('modalStepQty').value = 1;
-      const logs = stockLogs.filter(l => String(l.item_id) === String(it.id)).slice(0, 10);
-      el('modalItemLogsList').innerHTML = logs.length === 0 ? `<span class="text-slate-500 italic">Brak historii.</span>` : logs.map(l => `<div class="flex justify-between text-slate-300 border-b border-slate-800/60 pb-0.5"><span>${l.action_type} ${l.note ? `(${l.note})` : ''}</span><span class="font-bold ${l.qty_change > 0 ? 'text-emerald-400' : 'text-rose-400'}">${l.qty_change > 0 ? '+' : ''}${l.qty_change}</span></div>`).join('');
-      showModal('actionModal');
-    }
-
-    function adjustStepQty(d) { el('modalStepQty').value = Math.max(1, (parseInt(el('modalStepQty').value) || 1) + d); }
-
-    async function deleteCurrentItem() {
-      if (!confirm('Usunąć pozycję?')) return;
-      const tid = selectedItemId; inventory = inventory.filter(i => String(i.id) !== String(tid));
-      safeSetLocal('magazyn_offline_items', inventory); renderInventory(); hideModal('actionModal');
-      if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${tid}`, 'DELETE'); } catch (e) {} }
-    }
-
-    function generateRandomCode() { el('newBarcode').value = 'RC-' + Math.floor(100000 + Math.random() * 900000); }
-    function openNewItemModal(p) {
-      tempNewItemPhoto = ''; el('newItemPhotoPreview').classList.add('hidden');
-      el('newBarcode').value = p || ('RC-' + Math.floor(100000 + Math.random() * 900000)); el('newName').value = ''; el('newPrice').value = '0.00'; el('newCategory').value = 'Napoje • Kawa / Herbata / Dodatki'; el('newUnit').value = 'szt.'; el('newLocation').value = ''; el('newQty').value = 1; showModal('newItemModal');
-    }
-
-    async function saveNewItem(e) {
-      e.preventDefault(); const name = el('newName').value.trim(); const existing = findBestInventoryMatch(name);
-      const q = parseInt(el('newQty').value) || 0, p = parseFloat(el('newPrice').value) || 0, u = el('newUnit').value;
-      const chosenCat = el('newCategory').value.trim() || classifyProductSmartLocal(name) || 'Napoje';
-      learnProductRule(name, chosenCat, u, tempNewItemPhoto);
-      if (existing && cleanCanonicalKey(existing.name) === cleanCanonicalKey(name)) {
-        existing.qty += q; if (p > 0) existing.price = p; existing.category = chosenCat; if (tempNewItemPhoto) existing.photo = tempNewItemPhoto;
-        safeSetLocal('magazyn_offline_items', inventory); renderInventory(); hideModal('newItemModal');
-        if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${existing.id}`, 'PATCH', toDbItem(existing)); } catch (err) {} }
-        return;
+    async function finalizeInventoryAudit() {
+      if (!confirm("Zatwierdzić spis z natury i zaktualizować stany magazynowe w systemie?")) return;
+      let diffCount = 0;
+      for (const it of inventory) {
+        const inputEl = el(`audit_input_${it.id}`);
+        if (!inputEl) continue;
+        const realQty = parseInt(inputEl.value, 10);
+        if (isNaN(realQty)) continue;
+        const diff = realQty - it.qty;
+        if (diff !== 0) {
+          diffCount++;
+          const oldQty = it.qty;
+          it.qty = realQty;
+          recordStockLog(it.id, it.name, diff > 0 ? 'Inwentaryzacja (Nadwyżka)' : 'Inwentaryzacja (Niedobór)', diff, `System: ${oldQty} -> Faktycznie: ${realQty}`);
+          if (isCloudOnline) { try { await apiRequest(`/inventory?id=eq.${it.id}`, 'PATCH', { qty: it.qty, updated_at: new Date() }); } catch (e) {} }
+        }
       }
-      const ni = normalizeItem({ id: Date.now().toString(), barcode: el('newBarcode').value.trim(), name, price: p, category: chosenCat, location: el('newLocation').value.trim() || '-', qty: q, inField: 0, unit: u, minQty: parseInt(el('newMinQty').value) || 0, photo: tempNewItemPhoto });
-      inventory.push(ni); recordStockLog(ni.id, ni.name, 'Utworzenie pozycji', ni.qty);
-      safeSetLocal('magazyn_offline_items', inventory); renderInventory(); hideModal('newItemModal');
-      if (isCloudOnline) { try { await apiRequest('/inventory', 'POST', toDbItem(ni)); } catch (e) {} }
+      safeSetLocal('magazyn_offline_items', inventory);
+      hideModal('inventoryAuditModal');
+      renderInventory();
+      renderStockLogs();
+      alert(`✓ Inwentaryzacja zakończona! Wprowadzono korekty dla ${diffCount} pozycji.`);
     }
 
-    function handleScannedCode(code) {
-      if (!code) return; const clean = code.trim(); triggerScanFeedback();
-      const f = inventory.find(i => String(i.barcode).toLowerCase() === clean.toLowerCase());
-      if (f) openActionModal(f.id); else if (confirm(`Kod "${clean}" nie istnieje. Dodać?`)) openNewItemModal(clean);
+    function renderStockLogs() {
+      const list = el('stockLogsList'); if (!list) return;
+      if (stockLogs.length === 0) { list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak wpisów w dzienniku operacji.</div>`; return; }
+      list.innerHTML = stockLogs.slice(0, 100).map(l => {
+        const dateStr = l.created_at ? new Date(l.created_at).toLocaleString('pl-PL') : '-';
+        const isPos = Number(l.qty_change) > 0;
+        return `<div class="bg-slate-800 border border-slate-700 rounded-xl p-2.5 flex items-center justify-between text-xs gap-2"><div class="min-w-0 flex-1"><div class="flex items-center gap-2 flex-wrap"><span class="font-bold text-white truncate">${l.item_name}</span><span class="text-[9px] px-1.5 py-0.5 rounded bg-slate-900 text-slate-300 font-bold">${l.action_type}</span></div>${l.note ? `<p class="text-[10px] text-slate-400 mt-0.5 truncate">${l.note}</p>` : ''}<span class="text-[9px] text-slate-500 block mt-0.5">${dateStr}</span></div><div class="font-black text-sm ${isPos ? 'text-emerald-400' : 'text-rose-400'} flex-shrink-0">${isPos ? '+' : ''}${l.qty_change}</div></div>`;
+      }).join('');
     }
-    function handleManualBarcodeSubmit(e) { e.preventDefault(); handleScannedCode(el('barcodeInput').value); el('barcodeInput').value = ''; }
+    function clearStockLogs() { if (!confirm("Wyczyścić centralny dziennik ruchów?")) return; stockLogs = []; safeSetLocal('magazyn_offline_stock_logs', stockLogs); renderStockLogs(); }
 
-    function toggleCamera() {
-      const c = el('cameraContainer'), b = el('btnToggleCamera');
-      if (isCameraRunning && html5QrCode) { html5QrCode.stop().then(() => { c.classList.add('hidden'); b.innerText = 'Skaner QR'; isCameraRunning = false; }); return; }
-      c.classList.remove('hidden'); b.innerText = 'Zatrzymaj';
-      html5QrCode = new Html5Qrcode("reader");
-      html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 140 } }, (d) => { html5QrCode.stop().then(() => { c.classList.add('hidden'); b.innerText = 'Skaner QR'; isCameraRunning = false; handleScannedCode(d); }); }, () => {}).then(() => { isCameraRunning = true; }).catch(() => { alert("Błąd kamery."); c.classList.add('hidden'); b.innerText = 'Skaner QR'; });
+    function openInvoiceUploadModal() { resetInvoicePhotos(); showModal('invoiceCaptureModal'); }
+    function closeInvoiceUploadModal() { hideModal('invoiceCaptureModal'); }
+    function resetInvoicePhotos() { invoiceFilePart1 = null; invoiceFilePart2 = null; [1, 2].forEach(s => { el(`invoiceSlot${s}Empty`)?.classList.remove('hidden'); el(`invoiceSlot${s}Preview`)?.classList.add('hidden'); el(`invoiceSlot${s}Done`)?.classList.add('hidden'); if (el(`invoicePhotoInput${s}`)) el(`invoicePhotoInput${s}`).value = ''; }); if (el('btnProcessInvoice')) el('btnProcessInvoice').disabled = true; }
+    
+    async function handleInvoicePhotoSelected(e, slot) {
+      const files = Array.from(e.target.files || []); if (files.length === 0) return;
+      try {
+        if (files.length >= 2 && slot === 1) { invoiceFilePart1 = await prepareFileForGemini(files[0]); invoiceFilePart2 = await prepareFileForGemini(files[1]); updateSlotUI(1, invoiceFilePart1); updateSlotUI(2, invoiceFilePart2); }
+        else { const prep = await prepareFileForGemini(files[0]); if (slot === 1) { invoiceFilePart1 = prep; updateSlotUI(1, prep); } else { invoiceFilePart2 = prep; updateSlotUI(2, prep); } }
+        if (el('btnProcessInvoice')) el('btnProcessInvoice').disabled = !(invoiceFilePart1 || invoiceFilePart2);
+      } catch (err) { alert(err.message || "Błąd pliku."); } e.target.value = '';
     }
+    function updateSlotUI(slot, prep) { el(`invoiceSlot${slot}Empty`)?.classList.add('hidden'); const prev = el(`invoiceSlot${slot}Preview`); if (prev && !prep.isPdf) { prev.src = prep.previewUrl; prev.classList.remove('hidden'); } el(`invoiceSlot${slot}Done`)?.classList.remove('hidden'); }
 
-    function openPrintLabelModal() {
-      const it = inventory.find(i => String(i.id) === String(selectedItemId)); if (!it) return;
-      el('printItemName').innerText = it.name; el('printItemCategory').innerText = `${it.category} • ${it.location}`; el('printItemBarcode').innerText = it.barcode;
-      el('printQRCode').innerHTML = ''; new QRCode(el('printQRCode'), { text: it.barcode, width: 140, height: 140 });
-      document.body.classList.remove('print-mode-sheet'); document.body.classList.add('print-mode-qr'); window.print();
-    }
-
-    // --- SEKCJA: ZAAWANSOWANE ZAPYTANIA API Z AUTO-RETRY ---
     function prepareFileForGemini(file, maxW = 950, q = 0.65) {
       return new Promise((res, rej) => {
         if (!file) return rej(new Error("Brak pliku"));
@@ -803,35 +706,22 @@
         for (const m of models) {
           try {
             const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${GEMINI_API_KEY}`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                contents: [{ parts }],
-                generationConfig: { response_mime_type: "application/json", temperature: 0.1 }
-              })
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ contents: [{ parts }], generationConfig: { response_mime_type: "application/json", temperature: 0.1 } })
             });
             const j = await res.json(); 
-            if (j.error) { 
-               lastErr = j.error.message; 
-               continue; 
-            }
-            if (j.candidates?.[0]?.content) {
-               return JSON.parse(j.candidates[0].content.parts[0].text.replace(/```json/gi, '').replace(/```/g, '').trim());
-            }
+            if (j.error) { lastErr = j.error.message; continue; }
+            if (j.candidates?.[0]?.content) { return JSON.parse(j.candidates[0].content.parts[0].text.replace(/```json/gi, '').replace(/```/g, '').trim()); }
           } catch (e) { lastErr = e.message; }
         }
-        
         if (attempt < 3) {
-           const loadingEl = document.getElementById('aiLoadingState');
-           if (loadingEl && loadingEl.querySelector('p')) {
-              loadingEl.querySelector('p').innerText = `Serwery przeciążone. Ponawiam próbę (${attempt}/3)...`;
-           }
+           const loadingEl = document.getElementById('aiLoadingText');
+           if (loadingEl) loadingEl.innerText = `Serwery przeciążone. Ponawiam próbę (${attempt}/3)...`;
            await new Promise(r => setTimeout(r, 2000));
         }
       }
       throw new Error("Serwery Google AI są mocno przeciążone (" + lastErr + "). Spróbuj ponownie za chwilę.");
     }
-    // --------------------------------------------------------
 
     function startMultiInvoiceProcessing() {
       const parts = [invoiceFilePart1, invoiceFilePart2].filter(Boolean); if (parts.length === 0) return;
@@ -844,7 +734,7 @@
         currentExtractedDelivery = { supplier: parsed.supplier || 'Hurtownia', docNumber: parsed.docNumber || ('FV/' + new Date().toLocaleDateString('pl-PL')), receiver: '', totalNet: Number(parsed.totalNetProducts) || 0, totalNetWithDep: Number(parsed.totalNetWithDeposits) || 0, totalGross: Number(parsed.totalGross) || 0, items: processedItems, deposits: (parsed.deposits || []).map(d => ({ name: d.name || 'Kaucja', qty: Number(d.qty) || 1, unitPrice: Number(d.unitPrice) || 0.50, category: d.category || (Number(d.unitPrice) === 1 ? 'BUTELKA_SZKLO' : (Number(d.unitPrice) === 0.5 ? 'PET_CAN_050' : 'SKRZYNKA')) })), images: parts.map(p => p.previewUrl) };
         el('aiSupplierInput').value = currentExtractedDelivery.supplier; el('aiDocNumInput').value = currentExtractedDelivery.docNumber; el('aiReceiverInput').value = 'Bartek'; renderAiModalItems(); checkInvoiceDuplicateLive();
         el('aiLoadingState').classList.add('hidden'); el('aiItemsContainer').classList.remove('hidden'); el('aiModalActions').classList.remove('hidden');
-      }).catch(err => { hideModal('aiModal'); alert(err.message); });
+      }).catch(err => { hideModal('aiModal'); alert("Błąd AI: " + err.message); });
     }
     
     function closeAiModal() { hideModal('aiModal'); currentExtractedDelivery = null; }
@@ -980,7 +870,6 @@
       if (!lastParsedReturnData) return;
       el('evReturnItemsList').innerHTML = lastParsedReturnData.map((it, idx) => `<div class="bg-slate-900 border border-slate-700 p-2.5 rounded-xl flex items-center justify-between gap-2 text-xs"><div class="flex-1 truncate"><span class="font-bold text-white block truncate">${idx + 1}. ${it.name}</span><span class="text-[10px] text-slate-400">Wydano: ${it.dispatched} ${it.unit || 'szt.'} • Konsumpcja: <strong class="text-amber-400">${Math.max(0, it.dispatched - (it.returned || 0))}</strong></span></div><div class="flex items-center gap-1.5"><span class="text-[10px] text-emerald-300">Zwrot:</span><input type="number" min="0" max="${it.dispatched}" value="${it.returned || 0}" oninput="lastParsedReturnData[${idx}].returned=Math.max(0,parseInt(this.value)||0);lastParsedReturnData[${idx}].consumed=Math.max(0,lastParsedReturnData[${idx}].dispatched-lastParsedReturnData[${idx}].returned);renderEventReturnItems()" class="w-16 bg-slate-800 border border-emerald-500 rounded p-1 text-center font-black text-emerald-400"></div></div>`).join('');
     }
-    function triggerAutoReturnSheetUpload() { el('eventAutoReturnSheetInput').click(); }
     async function processAutoEventReturnSheetImage(e) {
       const file = e.target.files[0]; if (!file) return; showModal('eventReturnModal'); el('evReturnLoading').classList.remove('hidden'); el('evReturnContent').classList.add('hidden'); el('evReturnActions').classList.add('hidden');
       try {
@@ -992,8 +881,6 @@
         renderEventReturnItems(); el('evReturnLoading').classList.add('hidden'); el('evReturnContent').classList.remove('hidden'); el('evReturnActions').classList.remove('hidden');
       } catch (err) { hideModal('eventReturnModal'); alert(err.message); } e.target.value = '';
     }
-    async function processEventReturnSheetImage(e) { return processAutoEventReturnSheetImage(e); }
-    async function processEventReturnProductsImage(e) { return processAutoEventReturnSheetImage(e); }
     async function confirmAndApplyEventReturn() {
       const ev = events.find(x => String(x.id) === String(currentActiveReturnEventId)); if (!ev || !lastParsedReturnData) return;
       for (const it of lastParsedReturnData) {
@@ -1027,7 +914,7 @@
     function openImagePreviewModal(title, images) { el('imagePreviewTitle').innerText = title || 'Podgląd'; const tabs = el('imagePreviewTabs'); if (images.length > 1) { tabs.classList.remove('hidden'); tabs.innerHTML = images.map((src, i) => `<button onclick="el('imagePreviewElement').src='${src}'" class="bg-slate-800 border border-slate-600 text-xs px-3 py-1 rounded-lg text-white font-bold">Strona ${i + 1}</button>`).join(''); } else tabs.classList.add('hidden'); el('imagePreviewElement').src = images[0] || ''; showModal('imagePreviewModal'); }
     function closeImagePreviewModal() { hideModal('imagePreviewModal'); }
     
-    window.switchMainTab = function(tab) {
+    function switchMainTab(tab) {
       const allTabs = ['Stock', 'Events', 'Rw', 'Deliveries', 'Deposits', 'Logs', 'Alerts'];
       allTabs.forEach(t => {
         el(`view${t}`)?.classList.add('hidden');
@@ -1048,31 +935,30 @@
       else if (tab === 'logs') renderStockLogs();
       else if (tab === 'alerts') renderPriceAlerts();
       triggerScanFeedback();
-    };
+    }
 
-    window.handleItemContextMenu = function(e, id) { e.preventDefault(); contextMenuItemId = id; selectedItemId = id; const m = el('customContextMenu'); m.classList.remove('hidden'); m.style.left = `${Math.min(e.clientX, window.innerWidth - 230)}px`; m.style.top = `${Math.min(e.clientY, window.innerHeight - 200)}px`; };
-    window.hideContextMenu = function() { el('customContextMenu')?.classList.add('hidden'); };
-    window.contextActionEdit = function() { hideContextMenu(); if (contextMenuItemId) openEditModal(contextMenuItemId); };
-    window.contextActionOpenStock = function() { hideContextMenu(); if (contextMenuItemId) openActionModal(contextMenuItemId); };
-    window.contextActionPrintQR = function() { hideContextMenu(); if (contextMenuItemId) { selectedItemId = contextMenuItemId; openPrintLabelModal(); } };
-    window.contextActionDelete = function() { hideContextMenu(); if (contextMenuItemId) { selectedItemId = contextMenuItemId; deleteCurrentItem(); } };
-    window.handleItemCardClick = function(e, id) { if (isSelectMode) { toggleSelectItem(id, !selectedItemIds.has(id)); renderInventory(); } else openActionModal(id); };
+    function handleItemContextMenu(e, id) { e.preventDefault(); contextMenuItemId = id; selectedItemId = id; const m = el('customContextMenu'); m.classList.remove('hidden'); m.style.left = `${Math.min(e.clientX, window.innerWidth - 230)}px`; m.style.top = `${Math.min(e.clientY, window.innerHeight - 200)}px`; }
+    function hideContextMenu() { el('customContextMenu')?.classList.add('hidden'); }
+    function contextActionEdit() { hideContextMenu(); if (contextMenuItemId) openEditModal(contextMenuItemId); }
+    function contextActionOpenStock() { hideContextMenu(); if (contextMenuItemId) openActionModal(contextMenuItemId); }
+    function contextActionPrintQR() { hideContextMenu(); if (contextMenuItemId) { selectedItemId = contextMenuItemId; openPrintLabelModal(); } }
+    function contextActionDelete() { hideContextMenu(); if (contextMenuItemId) { selectedItemId = contextMenuItemId; deleteCurrentItem(); } }
+    function handleItemCardClick(e, id) { if (isSelectMode) { toggleSelectItem(id, !selectedItemIds.has(id)); renderInventory(); } else openActionModal(id); }
 
-    window.toggleSelectMode = function() {
+    function toggleSelectMode() {
       isSelectMode = !isSelectMode; const b = el('btnToggleSelectMode'), bar = el('bulkActionBar');
       if (isSelectMode) { b.innerHTML = "✕ Zakończ"; bar.classList.remove('hidden'); }
       else { b.innerHTML = "Wybór"; bar.classList.add('hidden'); selectedItemIds.clear(); }
       el('bulkSelectedCount').innerText = `Wybrano: ${selectedItemIds.size}`; renderInventory();
-    };
-    window.toggleSelectItem = function(id, c) { if (c) selectedItemIds.add(id); else selectedItemIds.delete(id); el('bulkSelectedCount').innerText = `Wybrano: ${selectedItemIds.size}`; };
-    window.toggleSelectAll = function() { if (selectedItemIds.size === inventory.length) selectedItemIds.clear(); else inventory.forEach(i => selectedItemIds.add(i.id)); el('bulkSelectedCount').innerText = `Wybrano: ${selectedItemIds.size}`; renderInventory(); };
-
-    window.deleteSelectedItems = async function() {
+    }
+    function toggleSelectItem(id, c) { if (c) selectedItemIds.add(id); else selectedItemIds.delete(id); el('bulkSelectedCount').innerText = `Wybrano: ${selectedItemIds.size}`; }
+    function toggleSelectAll() { if (selectedItemIds.size === inventory.length) selectedItemIds.clear(); else inventory.forEach(i => selectedItemIds.add(i.id)); el('bulkSelectedCount').innerText = `Wybrano: ${selectedItemIds.size}`; renderInventory(); }
+    async function deleteSelectedItems() {
       if (selectedItemIds.size === 0 || !confirm(`Usunąć ${selectedItemIds.size} pozycji?`)) return;
       const ids = Array.from(selectedItemIds); inventory = inventory.filter(i => !selectedItemIds.has(i.id));
       safeSetLocal('magazyn_offline_items', inventory); toggleSelectMode(); renderInventory();
       if (isCloudOnline) { for (const id of ids) { try { await apiRequest(`/inventory?id=eq.${id}`, 'DELETE'); } catch (e) {} } }
-    };
+    }
 
     window.buildRoyalCateringSheetHTML = function(data) {
       const isRw = data.isRwDoc;
@@ -1082,22 +968,20 @@
       for (let i = 0; i < Math.max(0, 15 - items.length); i++) { rows += `<tr style="height:24px;text-align:center;"><td style="border:1px solid #000;">${items.length + i + 1}</td><td style="border:1px solid #000;">&nbsp;</td><td style="border:1px solid #000;">&nbsp;</td><td style="border:1px solid #000;">&nbsp;</td>${isRw ? '<td colspan="6" style="border:1px solid #000;">&nbsp;</td>' : '<td style="border:1px solid #000;">&nbsp;</td><td style="border:1px solid #000;background:#d9ead3;">&nbsp;</td><td style="border:1px solid #000;background:#d9ead3;">&nbsp;</td><td style="border:1px solid #000;background:#d9ead3;">&nbsp;</td><td style="border:1px solid #000;background:#d9ead3;">&nbsp;</td><td style="border:1px solid #000;">&nbsp;</td>'}</tr>`; }
       return `<div style="border:2px solid #000;width:100%;box-sizing:border-box;background:white;color:black;font-family:Arial,sans-serif;"><table style="width:100%;border-collapse:collapse;text-align:center;font-size:11px;"><tr><td rowspan="4" style="width:20%;border:2px solid #000;font-size:15px;font-weight:bold;padding:4px;">ROYAL CATERING</td><td colspan="2" style="background:#ffff00;font-weight:bold;border:1px solid #000;padding:4px;">DATA WYDANIA:</td><td rowspan="4" style="width:30%;background:#ffff00;font-size:12px;font-weight:900;border:2px solid #000;padding:5px;">${title}</td><td colspan="2" style="background:#ffff00;font-weight:bold;border:1px solid #000;padding:4px;">CEL / ODBIORCA:</td></tr><tr><td colspan="2" style="border:1px solid #000;font-weight:bold;padding:4px;">${data.dispatchDate || '-'}</td><td colspan="2" style="border:1px solid #000;padding:4px;font-weight:bold;">${isRw ? (data.eventName || 'Użytek wewnętrzny') : (data.returnDate || '-')}</td></tr><tr><td colspan="2" style="background:#ffff00;font-weight:bold;border:1px solid #000;padding:4px;">DOKUMENT, #NUMER:</td><td colspan="2" style="border:1px solid #000;padding:4px;">&nbsp;</td></tr><tr><td colspan="2" style="border:1px solid #000;font-weight:bold;padding:4px;">${data.eventNumber || ''} ${isRw ? '' : data.eventName}</td><td colspan="2" style="border:1px solid #000;padding:4px;">&nbsp;</td></tr></table><table style="width:100%;border-collapse:collapse;font-size:10px;"><thead><tr style="background:#ffff00;font-weight:bold;text-align:center;"><th style="border:1px solid #000;width:4%;padding:4px;">Nr</th><th style="border:1px solid #000;width:36%;padding:4px;text-align:left;">NAZWA</th><th style="border:1px solid #000;width:6%;padding:4px;">Jedn.</th><th style="border:1px solid #000;width:8%;padding:4px;">Ilość</th>${isRw ? '<th style="border:1px solid #000;width:12%;padding:4px;">Cena netto</th><th colspan="5" style="border:1px solid #000;width:34%;padding:4px;">Wartość netto</th>' : '<th style="border:1px solid #000;width:9%;padding:4px;">Podpis Magazyn</th><th style="border:1px solid #000;width:9%;background:#d9ead3;padding:4px;">Sprawdzenie</th><th style="border:1px solid #000;width:9%;background:#d9ead3;padding:4px;">Konsumpcja</th><th style="border:1px solid #000;width:7%;background:#d9ead3;padding:4px;">Zwrot</th><th style="border:1px solid #000;width:6%;background:#d9ead3;padding:4px;">Podpis</th><th style="border:1px solid #000;width:6%;padding:4px;">Odbiór</th>'}</tr></thead><tbody>${rows}</tbody></table></div>`;
     };
-
-    window.openSheetPreviewModal = function(sheetData) {
-      currentPreviewSheetData = sheetData;
-      const html = buildRoyalCateringSheetHTML(sheetData);
+    function openSheetPreviewModal(sheetData) {
+      currentPreviewSheetData = sheetData; const html = buildRoyalCateringSheetHTML(sheetData);
       el('sheetPreviewModalTitle').innerText = `${sheetData.isRwDoc ? 'Dokument RW' : (sheetData.isReturn ? 'Rozliczenie' : 'Karta Wydania')}: ${sheetData.eventNumber} ${sheetData.eventName}`;
       el('sheetPreviewContainer').innerHTML = html; el('printableSheet').innerHTML = html; showModal('sheetPreviewModal');
-    };
-    window.triggerBrowserPrintSheet = function() { document.body.classList.remove('print-mode-qr'); document.body.classList.add('print-mode-sheet'); window.print(); };
-    window.downloadCurrentSheetAsExcel = function() {
+    }
+    function triggerBrowserPrintSheet() { document.body.classList.remove('print-mode-qr'); document.body.classList.add('print-mode-sheet'); window.print(); }
+    function downloadCurrentSheetAsExcel() {
       if (!currentPreviewSheetData) return;
       const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"></head><body>${buildRoyalCateringSheetHTML(currentPreviewSheetData)}</body></html>`;
       const blob = new Blob(['\uFEFF' + html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
       const link = document.createElement('a'); link.href = URL.createObjectURL(blob);
       link.download = `${(currentPreviewSheetData.isRwDoc ? 'Dokument_RW_' : (currentPreviewSheetData.isReturn ? 'Rozliczenie_' : 'Karta_Wydania_')) + currentPreviewSheetData.eventNumber}.xls`.replace(/[^a-zA-Z0-9._-]/g, '_');
       link.click();
-    };
+    }
     
     // START
     fetchAllData();
