@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>MagazynRC - WMS v6.7 (VAT & Fixes)</title>
+  <title>MagazynRC - WMS v6.8</title>
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#0f172a">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -47,7 +47,7 @@
   <header class="bg-slate-800/90 backdrop-blur border-b border-slate-700/80 sticky top-0 z-30 px-3 py-2 flex items-center justify-between shadow-md">
     <div class="flex items-center space-x-2">
       <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-base shadow">M</div>
-      <div><h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v6.7</span></h1><p id="syncStatus" class="text-[10px] text-amber-400 font-medium leading-none mt-0.5">Inicjalizacja...</p></div>
+      <div><h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v6.8</span></h1><p id="syncStatus" class="text-[10px] text-amber-400 font-medium leading-none mt-0.5">Inicjalizacja...</p></div>
     </div>
     <div class="flex items-center gap-1.5 relative">
       <button onclick="runOnlineAIClassifier(true)" class="bg-purple-950 text-purple-300 text-xs px-2.5 py-1.5 rounded-lg font-bold border border-purple-700/60 shadow hover:bg-purple-900 transition">🧠 Ucz AI</button>
@@ -68,7 +68,7 @@
     </div>
   </header>
 
-  <!-- JEDYNE UKRYTE INPUTY DO OBSŁUGI PLIKÓW -->
+  <!-- JEDYNE UKRYTE INPUTY -->
   <input type="file" id="shelfCountInput" accept="image/*,application/pdf" multiple class="hidden" onchange="processShelfCountImage(event, false)">
   <input type="file" id="shelfCountAppendInput" accept="image/*,application/pdf" multiple class="hidden" onchange="processShelfCountImage(event, true)">
   <input type="file" id="itemLabelPhotoInput" accept="image/*" class="hidden" onchange="handleItemLabelPhoto(event)">
@@ -143,7 +143,7 @@
         <button id="btnToggleSelectMode" onclick="toggleSelectMode()" class="bg-indigo-500/20 border border-indigo-500/60 text-indigo-300 text-xs px-3 py-2 rounded-xl font-bold">Wybór</button>
       </div>
 
-      <!-- BELKA AKCJI (Na Event, Na RW, Usuń) -->
+      <!-- BELKA AKCJI -->
       <div id="bulkActionBar" class="hidden bg-slate-800 border border-indigo-500/80 rounded-xl p-2.5 flex flex-wrap gap-2 items-center justify-between">
         <div class="flex items-center gap-2"><button onclick="toggleSelectAll()" class="text-xs bg-slate-700 text-slate-200 px-2.5 py-1 rounded-lg">Zaznacz wszystko</button><span id="bulkSelectedCount" class="text-xs font-bold text-amber-400">Wybrano: 0</span></div>
         <div class="flex flex-wrap gap-2"><button onclick="openGenerateSheetModal()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-3 py-1.5 rounded-lg">Na Event</button><button onclick="openRwTransferModal()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs px-3 py-1.5 rounded-lg">Na RW</button><button onclick="deleteSelectedItems()" class="bg-rose-600 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg">Usuń</button></div>
@@ -220,9 +220,8 @@
     </section>
   </main>
 
-  <!-- ==================== MODALE ==================== -->
+  <!-- ==================== WŁAŚCIWE MODALE (BEZ DUPLIKATÓW) ==================== -->
 
-  <!-- MODAL WGRYWANIA FAKTURY -->
   <div id="invoiceCaptureModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50">
     <div ondragover="handleDragOver(event, this)" ondragleave="handleDragLeave(event, this)" ondrop="handleDropFiles(event, 'INVOICE')" class="bg-slate-800 border-2 border-dashed border-slate-600 rounded-2xl max-w-md w-full p-4 space-y-3">
       <div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">⚡ Wgraj Fakturę</h3><button onclick="closeInvoiceUploadModal()" class="text-slate-400 text-xl font-bold">✕</button></div>
@@ -246,7 +245,6 @@
     </div>
   </div>
 
-  <!-- MODAL AI (WERYFIKACJA FAKTURY Z VAT) -->
   <div id="aiModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-2xl w-full p-4 space-y-3 max-h-[95vh] flex flex-col">
       <div class="flex justify-between items-start border-b border-slate-700 pb-2"><div><span class="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-indigo-950 text-indigo-300">Smart OCR</span><h3 class="text-sm font-bold text-white mt-1">Weryfikacja Dostawy</h3></div><button onclick="closeAiModal()" class="text-slate-400 text-xl font-bold">✕</button></div>
@@ -309,7 +307,6 @@
     </div>
   </div>
 
-  <!-- MODAL NOWY TOWAR -->
   <div id="newItemModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50">
     <form onsubmit="saveNewItem(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">➕ Nowy Towar</h3><button type="button" onclick="hideModal('newItemModal')" class="text-slate-400 text-lg">✕</button></div>
@@ -340,7 +337,6 @@
     </form>
   </div>
   
-  <!-- MODAL EDYCJA TOWARU -->
   <div id="editItemModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50">
     <form onsubmit="saveEditedItem(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">✏️ Edycja Towaru</h3><button type="button" onclick="hideModal('editItemModal')" class="text-slate-400 text-lg">✕</button></div>
@@ -365,16 +361,24 @@
     </form>
   </div>
 
-  <!-- INNE MODALE (BEZ ZMIAN W STOSUNKU DO POPRZEDNICH WERSJI) -->
   <div id="inventoryAuditModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto"><div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-2xl w-full p-4 space-y-3 max-h-[95vh] flex flex-col"><div class="flex justify-between items-center border-b border-slate-700 pb-2"><div><span class="text-[9px] uppercase font-bold px-2 py-0.5 rounded bg-cyan-950 text-cyan-300">Audyt</span><h3 class="text-sm font-bold text-white mt-0.5">Spis z Natury</h3></div><button onclick="hideModal('inventoryAuditModal')" class="text-slate-400 text-xl font-bold">✕</button></div><div id="auditItemsContainer" class="flex-1 overflow-y-auto space-y-2 pr-1 max-h-[60vh]"></div><div class="flex justify-between items-center pt-2 border-t border-slate-700"><button onclick="hideModal('inventoryAuditModal')" class="px-3 py-2 rounded-xl text-xs text-slate-400">Anuluj</button><button onclick="finalizeInventoryAudit()" class="bg-emerald-500 text-slate-950 font-black px-5 py-2.5 rounded-xl text-xs">✓ Wyrównaj Stany</button></div></div></div>
+  
   <div id="editDeliveryModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto"><form onsubmit="saveEditedDelivery(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 max-h-[94vh] flex flex-col"><div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">✏️ Edytuj Fakturę</h3><button type="button" onclick="hideModal('editDeliveryModal')" class="text-slate-400 text-xl font-bold">✕</button></div><input type="hidden" id="editDelivId"><div class="flex-1 overflow-y-auto space-y-3 pr-1 text-xs"><div class="bg-slate-900 border border-slate-700 p-3 rounded-xl grid grid-cols-2 sm:grid-cols-3 gap-2"><div><label class="text-[10px] text-slate-400 block">Dostawca:</label><input type="text" id="editDelivSupplier" required class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-white"></div><div><label class="text-[10px] text-slate-400 block">Nr Faktury:</label><input type="text" id="editDelivDocNum" required class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-mono text-amber-400"></div><div><label class="text-[10px] text-emerald-300 font-bold block">👤 Przyjął:</label><input type="text" id="editDelivReceiver" class="w-full bg-slate-800 border border-emerald-700/60 rounded p-1.5 font-bold text-emerald-400"></div><div><label class="text-[10px] text-emerald-400 block">Netto prod.:</label><input type="text" id="editDelivTotalNet" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-emerald-400"></div><div><label class="text-[10px] text-cyan-300 block">Netto z kaucją:</label><input type="text" id="editDelivTotalNetWithDep" class="w-full bg-slate-800 border border-cyan-700/60 rounded p-1.5 font-bold text-cyan-300"></div><div><label class="text-[10px] text-slate-400 block">Suma Brutto:</label><input type="text" id="editDelivTotalGross" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-slate-200"></div></div><div class="space-y-1.5"><div class="flex justify-between items-center"><span class="text-[10px] text-slate-300 font-bold uppercase">Pozycje:</span><button type="button" onclick="addEditDeliveryItemRow()" class="text-[10px] bg-indigo-950 text-indigo-300 border border-indigo-700 px-2 py-0.5 rounded-lg font-bold">+ Wiersz</button></div><div id="editDelivItemsList" class="space-y-1.5"></div></div></div><div class="flex justify-end gap-2 pt-2 border-t border-slate-700"><button type="button" onclick="hideModal('editDeliveryModal')" class="px-3 py-2 rounded-xl text-xs text-slate-400">Anuluj</button><button type="submit" class="bg-indigo-600 text-white font-black px-5 py-2 rounded-xl text-xs">Zapisz zmiany</button></div></form></div>
+  
   <div id="sheetPreviewModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-2.5 z-50 overflow-y-auto"><div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-3xl w-full p-4 space-y-3 max-h-[95vh] flex flex-col"><div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 id="sheetPreviewModalTitle" class="text-sm font-bold text-white">Podgląd Dokumentu</h3><button onclick="hideModal('sheetPreviewModal')" class="text-slate-400 text-xl font-bold">✕</button></div><div class="flex-1 overflow-auto bg-white p-2 rounded-xl border border-slate-600 text-black"><div id="sheetPreviewContainer"></div></div><div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-700"><button onclick="hideModal('sheetPreviewModal')" class="px-3 py-2 rounded-xl text-xs text-slate-300">Zamknij</button><div class="flex gap-2"><button onclick="downloadCurrentSheetAsExcel()" class="bg-emerald-500 text-slate-950 font-black px-4 py-2 rounded-xl text-xs">📥 Pobierz plik (.xls)</button><button onclick="triggerBrowserPrintSheet()" class="bg-amber-500 text-slate-950 font-black px-4 py-2 rounded-xl text-xs">🖨️ Drukuj / PDF</button></div></div></div></div>
+  
   <div id="imagePreviewModal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto"><div class="max-w-xl w-full bg-slate-900 border border-slate-700 rounded-2xl p-3 flex flex-col items-center"><div class="w-full flex justify-between items-center border-b border-slate-800 pb-2 mb-2"><h4 id="imagePreviewTitle" class="text-xs font-bold text-white truncate">Podgląd</h4><button onclick="closeImagePreviewModal()" class="text-slate-400 text-xl font-black">✕</button></div><div id="imagePreviewTabs" class="w-full flex gap-2 mb-2 hidden"></div><div class="w-full flex items-center justify-center max-h-[75vh] overflow-auto bg-black/60 rounded-xl p-1"><img id="imagePreviewElement" src="" class="max-w-full max-h-[72vh] object-contain rounded-lg"></div><div class="w-full flex justify-end pt-2"><button onclick="closeImagePreviewModal()" class="bg-slate-800 text-white font-bold px-4 py-2 rounded-xl text-xs">Zamknij</button></div></div></div>
+  
   <div id="depositModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50"><form onsubmit="saveDepositModal(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3"><div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">♻️ Pozycja Kaucyjna</h3><button type="button" onclick="hideModal('depositModal')" class="text-slate-400">✕</button></div><input type="hidden" id="depModalId"><div><label class="text-[11px] text-slate-300 block mb-1">Nazwa kaucji *:</label><input type="text" id="depModalName" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold"></div><div class="grid grid-cols-2 gap-2"><div><label class="text-[11px] text-slate-300 block mb-1">Rodzaj:</label><select id="depModalCategory" onchange="handleDepCategoryPreset()" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-white"><option value="PET_CAN_050">PET / Puszka (0,50)</option><option value="BUTELKA_SZKLO">Szkło (1,00)</option><option value="SKRZYNKA">Skrzynka</option><option value="PALETA_INNE">Paleta / Inne</option></select></div><div><label class="text-[11px] text-slate-300 block mb-1">Stawka (PLN):</label><input type="number" step="0.01" id="depModalPrice" value="0.50" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-cyan-400 font-bold text-center"></div></div><div><label class="text-[11px] text-slate-300 block mb-1">Ilość (szt.):</label><input type="number" id="depModalQty" value="1" required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold text-center"></div><div class="flex justify-end gap-2 pt-2 border-t border-slate-700"><button type="button" onclick="hideModal('depositModal')" class="px-3 py-1.5 rounded-xl text-xs text-slate-300">Anuluj</button><button type="submit" class="bg-cyan-500 text-slate-950 font-black px-4 py-1.5 rounded-xl text-xs">Zapisz</button></div></form></div>
+  
   <div id="eventDispatchModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto"><div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 max-h-[94vh] flex flex-col"><div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">Rejestracja Wyjazdu z Karty</h3><button onclick="hideModal('eventDispatchModal')" class="text-slate-400 text-xl font-bold">✕</button></div><div id="eventDispatchLoading" class="py-12 flex flex-col items-center"><div class="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin"></div></div><div id="eventDispatchContent" class="hidden flex-1 overflow-y-auto space-y-3 pr-1"><div class="bg-slate-900 p-2.5 rounded-xl grid grid-cols-2 gap-2 text-xs"><div><span class="text-[10px] text-slate-400 block">Numer:</span><input type="text" id="evDispNum" class="w-full bg-slate-800 border border-slate-700 rounded p-1 font-mono font-bold text-amber-400"></div><div><span class="text-[10px] text-slate-400 block">Data:</span><input type="text" id="evDispDate" class="w-full bg-slate-800 border border-slate-700 rounded p-1 text-slate-200"></div><div class="col-span-2"><span class="text-[10px] text-slate-400 block">Nazwa:</span><input type="text" id="evDispName" class="w-full bg-slate-800 border border-slate-700 rounded p-1 font-bold text-white"></div></div><div id="evDispItemsList" class="space-y-2"></div></div><div id="eventDispatchActions" class="hidden pt-2.5 border-t border-slate-700 flex justify-end gap-2"><button onclick="hideModal('eventDispatchModal')" class="px-4 py-2 rounded-xl text-xs text-slate-400">Anuluj</button><button onclick="confirmAndApplyEventDispatch()" class="bg-blue-600 text-white font-black px-5 py-2 rounded-xl text-xs">🚚 Zatwierdź</button></div></div></div>
+  
   <div id="eventReturnModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto"><div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 max-h-[94vh] flex flex-col"><div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 id="evReturnModalTitle" class="text-sm font-bold text-white">Rozliczenie Zwrotu</h3><button onclick="hideModal('eventReturnModal')" class="text-slate-400 text-xl font-bold">✕</button></div><div id="evReturnLoading" class="py-12 flex flex-col items-center"><div class="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div></div><div id="evReturnContent" class="hidden flex-1 overflow-y-auto space-y-3 pr-1"><div class="bg-slate-900 border border-emerald-700/60 p-2.5 rounded-xl space-y-2 text-xs"><div class="flex justify-between items-center"><span class="text-[10px] text-emerald-300 font-bold">🎯 Realizacja:</span><input type="text" id="evReturnDateInput" class="bg-slate-800 border border-slate-700 rounded px-2 py-0.5 text-xs text-emerald-400 font-mono w-24 text-center"></div><select id="evReturnEventSelect" onchange="handleReturnEventSelectChange()" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white font-bold"></select></div><div id="evReturnItemsList" class="space-y-2.5"></div></div><div id="evReturnActions" class="hidden pt-2.5 border-t border-slate-700 flex justify-end gap-2"><button onclick="hideModal('eventReturnModal')" class="px-4 py-2 rounded-xl text-xs text-slate-400">Anuluj</button><button onclick="confirmAndApplyEventReturn()" class="bg-emerald-500 text-slate-950 font-black px-5 py-2 rounded-xl text-xs">✓ Zatwierdź Zwrot</button></div></div></div>
+  
   <div id="customContextMenu" class="fixed hidden z-50 bg-slate-800/95 border border-slate-700 rounded-xl shadow-2xl py-1.5 w-56"><button onclick="contextActionEdit()" class="w-full text-left px-3.5 py-2 text-xs text-slate-200 hover:bg-slate-700">✏️ Edytuj</button><button onclick="contextActionOpenStock()" class="w-full text-left px-3.5 py-2 text-xs text-slate-200 hover:bg-slate-700">⚡ Operacje</button><button onclick="contextActionPrintQR()" class="w-full text-left px-3.5 py-2 text-xs text-slate-200 hover:bg-slate-700">🏷️ Drukuj QR</button><div class="border-t border-slate-700 my-1"></div><button onclick="contextActionDelete()" class="w-full text-left px-3.5 py-2 text-xs text-rose-400 font-bold">🗑️ Usuń pozycję</button></div>
+  
   <div id="generateSheetModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto"><div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-4 space-y-3 max-h-[94vh] flex flex-col"><div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">📋 Karta Wydania na Realizację</h3><button onclick="hideModal('generateSheetModal')" class="text-slate-400 text-lg font-bold">✕</button></div><div class="grid grid-cols-2 gap-2 text-xs"><div><label class="text-[10px] text-slate-400 block">Numer imprezy:</label><input type="text" id="genSheetNum" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 font-bold text-amber-400"></div><div><label class="text-[10px] text-slate-400 block">Data wydania:</label><input type="text" id="genSheetDate" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-slate-200"></div><div class="col-span-2"><label class="text-[10px] text-slate-400 block">Nazwa imprezy / Klient:</label><input type="text" id="genSheetName" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 font-bold text-white"></div></div><div class="bg-slate-900 border border-slate-700 p-2.5 rounded-xl flex gap-1.5"><select id="genSheetAddSelect" class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white"></select><button type="button" onclick="addItemToSheetCreator()" class="bg-indigo-600 text-white font-bold px-3 py-1.5 rounded-lg text-xs">+ Dodaj</button></div><div id="genSheetItemsList" class="space-y-1.5 flex-1 overflow-y-auto pr-1 min-h-[120px] max-h-60"></div><div class="flex justify-end gap-2 pt-2 border-t border-slate-700"><button onclick="hideModal('generateSheetModal')" class="px-3 py-2 rounded-xl text-xs text-slate-400">Anuluj</button><button onclick="finalizeSheetCreator(true)" class="bg-blue-600 hover:bg-blue-500 text-white font-black px-4 py-2 rounded-xl text-xs">🚚 Wydaj w teren i Generuj</button></div></div></div>
+  
   <div id="rwTransferModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto"><div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-4 space-y-3 max-h-[94vh] flex flex-col shadow-2xl"><div class="flex justify-between items-center border-b border-slate-700 pb-2"><div><span class="text-[9px] uppercase font-bold px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-700/50">Dokument RW</span><h3 class="text-sm font-bold text-white mt-0.5">🏢 Nowy Rozchód Wewnętrzny</h3></div><button onclick="hideModal('rwTransferModal')" class="text-slate-400 text-lg font-bold">✕</button></div><div class="grid grid-cols-2 gap-2 text-xs"><div><label class="text-[10px] text-slate-400 block">Nr dokumentu RW:</label><input type="text" id="rwTransferNum" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 font-mono font-bold text-amber-400"></div><div><label class="text-[10px] text-slate-400 block">Data wydania:</label><input type="text" id="rwTransferDate" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-1.5 text-slate-200"></div><div class="col-span-2"><label class="text-[10px] text-slate-400 block">Cel rozchodu / Odbiorca *:</label><input type="text" id="rwTransferDestination" list="rwDestinationsList" class="w-full bg-slate-900 border border-amber-500/70 rounded-lg p-1.5 font-bold text-white"></div></div><div class="bg-slate-900 border border-slate-700 p-2.5 rounded-xl flex gap-1.5"><select id="rwTransferAddSelect" class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-xs text-white"></select><button type="button" onclick="addItemToRwCreator()" class="bg-amber-500 text-slate-950 font-black px-3 py-1.5 rounded-lg text-xs">+ Dodaj</button></div><div id="rwTransferItemsList" class="space-y-1.5 flex-1 overflow-y-auto pr-1 min-h-[120px] max-h-60"></div><div class="bg-slate-900/90 border border-amber-800/60 p-2 rounded-xl flex justify-between items-center text-xs"><span class="text-slate-300 font-bold">Łączna wartość RW:</span><span id="rwTransferTotalValLabel" class="text-amber-400 font-black text-sm">0.00 zł netto</span></div><div class="flex justify-end gap-2 pt-2 border-t border-slate-700"><button onclick="hideModal('rwTransferModal')" class="px-3 py-2 rounded-xl text-xs text-slate-400">Anuluj</button><button onclick="finalizeRwTransfer()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black px-4 py-2 rounded-xl text-xs shadow">🏢 Zapisz RW</button></div></div></div>
 
   <!-- DOLNA BELKA NAWIGACJI -->
@@ -615,10 +619,10 @@
       if (!field) return []; if (Array.isArray(field)) return field.filter(Boolean); const s = String(field).trim();
       if (s.startsWith('[')) { try { return JSON.parse(s).filter(Boolean); } catch (e) { return []; } } if (s.startsWith('data:') || s.startsWith('http')) return [s]; return [];
     }
-    async function recordStockLog(itemId, itemName, actionType, qtyChange, note = '') {
+    function recordStockLog(itemId, itemName, actionType, qtyChange, note = '') {
       const logEntry = { id: Date.now().toString() + '_' + Math.floor(Math.random() * 1000), item_id: String(itemId), item_name: String(itemName), action_type: actionType, qty_change: qtyChange, note: note, created_at: new Date() };
       stockLogs.unshift(logEntry); safeSetLocal('magazyn_offline_stock_logs', stockLogs);
-      if (isCloudOnline) { try { await apiRequest('/stock_logs', 'POST', logEntry); } catch (e) {} }
+      if (isCloudOnline) { apiRequest('/stock_logs', 'POST', logEntry).catch(()=>{}); }
     }
     async function apiRequest(endpoint, method = 'GET', body = null) {
       const ctrl = new AbortController(); const tid = setTimeout(() => ctrl.abort(), 5000);
@@ -776,18 +780,25 @@
       document.body.classList.remove('print-mode-sheet'); document.body.classList.add('print-mode-qr'); window.print();
     }
 
-    window.openInvoiceUploadModal = function() { resetInvoicePhotos(); showModal('invoiceCaptureModal'); };
-    window.closeInvoiceUploadModal = function() { hideModal('invoiceCaptureModal'); };
-    window.resetInvoicePhotos = function() { invoiceFilePart1 = null; invoiceFilePart2 = null; [1, 2].forEach(s => { el(`invoiceSlot${s}Empty`)?.classList.remove('hidden'); el(`invoiceSlot${s}Preview`)?.classList.add('hidden'); el(`invoiceSlot${s}Done`)?.classList.add('hidden'); if (el(`invoicePhotoInput${s}`)) el(`invoicePhotoInput${s}`).value = ''; }); if (el('btnProcessInvoice')) el('btnProcessInvoice').disabled = true; };
+    function openInvoiceUploadModal() { resetInvoicePhotos(); showModal('invoiceCaptureModal'); }
+    function closeInvoiceUploadModal() { hideModal('invoiceCaptureModal'); }
+    function resetInvoicePhotos() { invoiceFilePart1 = null; invoiceFilePart2 = null; [1, 2].forEach(s => { el(`invoiceSlot${s}Empty`)?.classList.remove('hidden'); el(`invoiceSlot${s}Preview`)?.classList.add('hidden'); el(`invoiceSlot${s}Done`)?.classList.add('hidden'); if (el(`invoicePhotoInput${s}`)) el(`invoicePhotoInput${s}`).value = ''; }); if (el('btnProcessInvoice')) el('btnProcessInvoice').disabled = true; }
     
-    window.handleInvoicePhotoSelected = async function(e, slot) {
+    function handleInvoicePhotoSelected(e, slot) {
       const files = Array.from(e.target.files || []); if (files.length === 0) return;
-      try {
-        if (files.length >= 2 && slot === 1) { invoiceFilePart1 = await prepareFileForGemini(files[0]); invoiceFilePart2 = await prepareFileForGemini(files[1]); updateSlotUI(1, invoiceFilePart1); updateSlotUI(2, invoiceFilePart2); }
-        else { const prep = await prepareFileForGemini(files[0]); if (slot === 1) { invoiceFilePart1 = prep; updateSlotUI(1, prep); } else { invoiceFilePart2 = prep; updateSlotUI(2, prep); } }
-        if (el('btnProcessInvoice')) el('btnProcessInvoice').disabled = !(invoiceFilePart1 || invoiceFilePart2);
-      } catch (err) { alert(err.message || "Błąd pliku."); } e.target.value = '';
-    };
+      if (files.length >= 2 && slot === 1) {
+        Promise.all([prepareFileForGemini(files[0]), prepareFileForGemini(files[1])]).then(preps => {
+          invoiceFilePart1 = preps[0]; invoiceFilePart2 = preps[1]; updateSlotUI(1, invoiceFilePart1); updateSlotUI(2, invoiceFilePart2);
+          if (el('btnProcessInvoice')) el('btnProcessInvoice').disabled = false;
+        }).catch(err => alert(err.message));
+      } else {
+        prepareFileForGemini(files[0]).then(prep => {
+          if (slot === 1) { invoiceFilePart1 = prep; updateSlotUI(1, prep); } else { invoiceFilePart2 = prep; updateSlotUI(2, prep); }
+          if (el('btnProcessInvoice')) el('btnProcessInvoice').disabled = false;
+        }).catch(err => alert(err.message));
+      }
+      e.target.value = '';
+    }
     function updateSlotUI(slot, prep) { el(`invoiceSlot${slot}Empty`)?.classList.add('hidden'); const prev = el(`invoiceSlot${slot}Preview`); if (prev && !prep.isPdf) { prev.src = prep.previewUrl; prev.classList.remove('hidden'); } el(`invoiceSlot${slot}Done`)?.classList.remove('hidden'); }
 
     function prepareFileForGemini(file, maxW = 950, q = 0.65) {
@@ -811,7 +822,6 @@
       const models = ['gemini-3.5-flash-lite', 'gemini-1.5-flash', 'gemini-3.8-flash', 'gemini-1.5-pro'];
       const parts = [{ text: promptText }, ...mediaParts.map(m => typeof m === 'string' ? { inline_data: { mime_type: 'image/jpeg', data: m } } : { inline_data: { mime_type: m.mimeType || 'image/jpeg', data: m.base64 } })];
       let lastErr = '';
-      
       for (let attempt = 1; attempt <= 4; attempt++) {
         for (const m of models) {
           try {
@@ -833,10 +843,10 @@
       throw new Error("Serwery Google AI są przeciążone (" + lastErr + "). Spróbuj ponownie za chwilę.");
     }
 
-    window.startMultiInvoiceProcessing = function() {
+    function startMultiInvoiceProcessing() {
       const parts = [invoiceFilePart1, invoiceFilePart2].filter(Boolean); if (parts.length === 0) return;
       hideModal('invoiceCaptureModal'); showModal('aiModal'); el('aiLoadingState').classList.remove('hidden'); el('aiItemsContainer').classList.add('hidden'); el('aiModalActions').classList.add('hidden');
-      queryGeminiAPI(`Przeanalizuj fakturę/WZ. Zignoruj wszystkie wiersze zaczynające się od słów "Opłata" (np. Opłata Cukier, Kofeina), "Cena zaokrąglona" lub "Kaucja", nie traktuj ich jako oddzielnych pozycji. Szukając ilości (qty) pobierz wartość z kolumny "Ilość" lub "Sztuki", zignoruj pojemności napojów (np. 0.7 L). Kwotę netto wylicz samodzielnie jako [Wartość Netto Pozycji] podzielona przez [Ilość]. Zwróć ściśle JSON: { "supplier": string, "docNumber": string, "items": [{ "name": string, "qty": number, "unit": string, "packSize": number, "netUnitPrice": number, "vatRate": number, "baseUnitPrice": number, "discountPercent": number }], "deposits": [{ "name": string, "qty": number, "unitPrice": number, "category": string }] }`, parts).then(parsed => {
+      queryGeminiAPI(`Przeanalizuj fakturę/WZ. SZCZEGÓŁOWE ZASADY: 1) ZIGNORUJ CAŁKOWICIE wszystkie wiersze zaczynające się słowami "Opłata" (np. OplataCukier, OplataKofeinaTauryna), "Cena zaokrąglona za sztuke" oraz "Kaucja". Traktuj je jako część głównego produktu, absolutnie NIE twórz z nich osobnych pozycji. 2) Kolumnę z ilością (qty) pobierz jako całkowitą sumę zgrzewek lub sztuk (zależnie od głównej kolumny Ilość). 3) CENA NETTO (netUnitPrice): Odczytaj całkowitą "Wartość Netto" dla danej pozycji z faktury i samodzielnie podziel ją przez wyczytaną wcześniej ilość (netUnitPrice = WartoscNetto / Ilość). Zwróć ściśle JSON: { "supplier": string, "docNumber": string, "items": [{ "name": string, "qty": number, "unit": string, "packSize": number, "netUnitPrice": number, "vatRate": number, "baseUnitPrice": number, "discountPercent": number }], "deposits": [{ "name": string, "qty": number, "unitPrice": number, "category": string }] }`, parts).then(parsed => {
         const processedItems = (parsed.items || []).map(it => {
           const mult = detectSmartPackMultiplier(it.name, it.unit, Number(it.packSize) || 1, Number(it.netUnitPrice) || 0), rawQty = Number(it.qty) || 1, rawPrice = Number(it.netUnitPrice) || 0, rawBase = Number(it.baseUnitPrice) || rawPrice, finalQty = mult > 1 ? rawQty * mult : rawQty, finalPrice = mult > 1 ? +(rawPrice / mult).toFixed(2) : +rawPrice.toFixed(2), finalBase = mult > 1 ? +(rawBase / mult).toFixed(2) : +rawBase.toFixed(2);
           return { name: String(it.name || '').trim(), qty: finalQty, unit: mult > 1 ? 'szt.' : (it.unit || 'szt.'), packSize: mult, price: finalPrice, vat: Number(it.vatRate) || 23, basePrice: finalBase, discountPercent: Number(it.discountPercent) || 0, category: classifyProductSmartLocal(it.name) || 'Napoje • Pozostałe' };
@@ -845,10 +855,10 @@
         el('aiSupplierInput').value = currentExtractedDelivery.supplier; el('aiDocNumInput').value = currentExtractedDelivery.docNumber; el('aiReceiverInput').value = 'Bartek'; renderAiModalItems(); checkInvoiceDuplicateLive();
         el('aiLoadingState').classList.add('hidden'); el('aiItemsContainer').classList.remove('hidden'); el('aiModalActions').classList.remove('hidden');
       }).catch(err => { hideModal('aiModal'); alert("Błąd AI: " + err.message); });
-    };
+    }
     
-    window.closeAiModal = function() { hideModal('aiModal'); currentExtractedDelivery = null; };
-    window.renderAiModalItems = function() {
+    function closeAiModal() { hideModal('aiModal'); currentExtractedDelivery = null; }
+    function renderAiModalItems() {
       if (!currentExtractedDelivery) return; const list = el('aiItemsList');
       list.innerHTML = currentExtractedDelivery.items.map((it, idx) => {
         const match = findBestInventoryMatch(it.name);
@@ -856,9 +866,9 @@
       }).join('');
       el('aiDepositsList').innerHTML = currentExtractedDelivery.deposits.map((d, idx) => `<div class="bg-slate-900 border border-cyan-800/60 p-2 rounded-xl grid grid-cols-12 gap-1.5 items-center text-xs"><input type="text" value="${d.name.replace(/"/g, '&quot;')}" oninput="currentExtractedDelivery.deposits[${idx}].name=this.value" class="col-span-6 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-white font-bold"><input type="number" value="${d.qty}" oninput="currentExtractedDelivery.deposits[${idx}].qty=parseInt(this.value)||0;recalcAiModalTotals()" class="col-span-2 bg-slate-800 border border-slate-700 rounded p-1 text-center font-bold text-cyan-400"><input type="number" step="0.01" value="${d.unitPrice}" oninput="currentExtractedDelivery.deposits[${idx}].unitPrice=parseFloat(this.value)||0;recalcAiModalTotals()" class="col-span-3 bg-slate-800 border border-slate-700 rounded p-1 text-center text-white"><button type="button" onclick="currentExtractedDelivery.deposits.splice(${idx},1);renderAiModalItems()" class="col-span-1 text-rose-400 font-bold text-center">✕</button></div>`).join('');
       recalcAiModalTotals();
-    };
-    window.addManualDepositRowToModal = function() { if (!currentExtractedDelivery) return; currentExtractedDelivery.deposits.push({ name: 'Kaucja PET / Puszka', qty: 12, unitPrice: 0.50, category: 'PET_CAN_050' }); renderAiModalItems(); };
-    window.recalcAiModalTotals = function() {
+    }
+    function addManualDepositRowToModal() { if (!currentExtractedDelivery) return; currentExtractedDelivery.deposits.push({ name: 'Kaucja PET / Puszka', qty: 12, unitPrice: 0.50, category: 'PET_CAN_050' }); renderAiModalItems(); }
+    function recalcAiModalTotals() {
       if (!currentExtractedDelivery) return;
       let totalNet = 0, totalVat = 0;
       currentExtractedDelivery.items.forEach(i => {
@@ -873,8 +883,8 @@
       el('aiTotalDepositsSumInput').value = depSum.toFixed(2);
       el('aiTotalNetWithDepInput').value = (totalNet + depSum).toFixed(2);
       el('aiTotalGrossInput').value = (totalNet + totalVat + depSum).toFixed(2);
-    };
-    window.confirmAndApplyDelivery = async function(mode) {
+    }
+    function confirmAndApplyDelivery(mode) {
       if (!currentExtractedDelivery) return; const docNum = el('aiDocNumInput').value.trim() || 'FV', supplier = el('aiSupplierInput').value.trim() || 'Dostawca', receiver = el('aiReceiverInput').value.trim() || 'Magazyn';
       if (mode === 'FULL_DELIVERY' && checkInvoiceDuplicateLive()) return;
       for (const it of currentExtractedDelivery.items) {
@@ -901,9 +911,9 @@
         deliveries.unshift(newDeliv); safeSetLocal('magazyn_offline_deliveries', deliveries); if (isCloudOnline) { apiRequest('/deliveries', 'POST', newDeliv).catch(()=>{}); }
       }
       safeSetLocal('magazyn_offline_items', inventory); safeSetLocal('magazyn_offline_deposits', deposits); safeSetLocal('magazyn_offline_price_alerts', priceAlerts); closeAiModal(); renderInventory(); renderDeliveries(); renderDeposits(); renderPriceAlerts(); triggerScanFeedback(); alert(mode === 'FULL_DELIVERY' ? `📥 Przyjęto fakturę!` : `📚 Zaktualizowano katalog!`);
-    };
+    }
 
-    window.renderDeliveries = function() {
+    function renderDeliveries() {
       const list = el('deliveriesList'); if (!list) return; if (deliveries.length === 0) { list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak faktur.</div>`; return; }
       list.innerHTML = deliveries.map(d => {
         let parsed = { items: [], deposits: [], receiver: d.receiver || '' };
@@ -911,26 +921,26 @@
         const imgs = parseDeliveryImages(d.image_url), dateStr = d.created_at ? new Date(d.created_at).toLocaleDateString('pl-PL') : '-';
         return `<div class="bg-slate-800 border border-slate-700 rounded-2xl p-3.5 space-y-2.5 shadow"><div class="flex justify-between items-start gap-2 flex-wrap"><div><div class="flex items-center gap-2 flex-wrap"><span class="font-mono text-xs font-black text-amber-400">${d.doc_number || 'FV'}</span><span class="text-xs font-bold text-white">${d.supplier || 'Dostawca'}</span><span class="text-[10px] text-slate-400">📅 ${dateStr}</span>${parsed.receiver ? `<span class="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-700/50 px-2 py-0.5 rounded font-bold">👤 ${parsed.receiver}</span>` : ''}</div><div class="flex items-center gap-3 text-[11px] mt-1"><span class="text-emerald-400 font-bold">Netto: ${d.total_net || '0.00'} zł</span>${d.total_net_with_dep ? `<span class="text-cyan-300 font-bold">Z kaucją: ${d.total_net_with_dep} zł</span>` : ''}<span class="text-slate-300">Brutto: ${d.total_gross || '0.00'} zł</span></div></div><div class="flex gap-1.5">${imgs.length > 0 ? `<button onclick="openDeliveryPreview('${d.id}')" class="bg-slate-700 text-indigo-300 text-xs px-2.5 py-1.5 rounded-xl font-bold">🖼️ (${imgs.length})</button>` : ''}<button onclick="openEditDeliveryModal('${d.id}')" class="bg-slate-700 text-slate-200 text-xs px-2.5 py-1.5 rounded-xl font-bold">✏️ Edytuj</button><button onclick="deleteDelivery('${d.id}')" class="bg-rose-950 text-rose-300 border border-rose-700/50 text-xs px-2.5 py-1.5 rounded-xl font-bold">🗑️</button></div></div><div class="bg-slate-900 rounded-xl p-2 text-[11px] space-y-1 max-h-40 overflow-y-auto">${parsed.items.map((it, i) => `<div class="flex justify-between text-slate-300 border-b border-slate-800/50 pb-0.5"><span>${i + 1}. ${it.name}</span><span class="font-bold text-emerald-400">${it.qty} ${it.unit || 'szt.'} • ${Number(it.price || 0).toFixed(2)} zł</span></div>`).join('')}${parsed.deposits.map(dep => `<div class="flex justify-between text-cyan-300 border-b border-slate-800/50 pb-0.5"><span>♻️ ${dep.name}</span><span class="font-bold">${dep.qty} szt. • ${Number(dep.unitPrice || 0).toFixed(2)} zł</span></div>`).join('')}</div></div>`;
       }).join('');
-    };
-    window.openDeliveryPreview = function(id) { const d = deliveries.find(x => String(x.id) === String(id)); if (!d) return; const imgs = parseDeliveryImages(d.image_url); if (imgs.length > 0) openImagePreviewModal(`${d.doc_number}`, imgs); };
-    window.openEditDeliveryModal = function(id) {
+    }
+    function openDeliveryPreview(id) { const d = deliveries.find(x => String(x.id) === String(id)); if (!d) return; const imgs = parseDeliveryImages(d.image_url); if (imgs.length > 0) openImagePreviewModal(`${d.doc_number}`, imgs); }
+    function openEditDeliveryModal(id) {
       const d = deliveries.find(x => String(x.id) === String(id)); if (!d) return;
       let parsed = { items: [], deposits: [], receiver: d.receiver || '' };
       try { const raw = typeof d.items_json === 'string' ? JSON.parse(d.items_json) : (d.items_json || {}); if (Array.isArray(raw)) parsed.items = raw; else { parsed.items = raw.items || []; parsed.deposits = raw.deposits || []; parsed.receiver = raw.receiver || d.receiver || ''; } } catch (e) {}
       el('editDelivId').value = d.id; el('editDelivSupplier').value = d.supplier || ''; el('editDelivDocNum').value = d.doc_number || ''; el('editDelivReceiver').value = parsed.receiver || ''; el('editDelivTotalNet').value = d.total_net || '0.00'; el('editDelivTotalNetWithDep').value = d.total_net_with_dep || '0.00'; el('editDelivTotalGross').value = d.total_gross || '0.00';
       editingDeliveryItems = JSON.parse(JSON.stringify(parsed.items || [])); editingDeliveryPhotos = parseDeliveryImages(d.image_url); renderEditDeliveryItems(); renderEditDeliveryPhotos(); showModal('editDeliveryModal');
-    };
-    window.renderEditDeliveryItems = function() { el('editDelivItemsList').innerHTML = editingDeliveryItems.map((it, idx) => `<div class="grid grid-cols-12 gap-1.5 items-center bg-slate-900 p-1.5 rounded-lg"><input type="text" value="${(it.name || '').replace(/"/g, '&quot;')}" oninput="editingDeliveryItems[${idx}].name=this.value" class="col-span-6 bg-slate-800 border border-slate-700 rounded p-1 text-white"><input type="number" value="${it.qty || 0}" oninput="editingDeliveryItems[${idx}].qty=parseFloat(this.value)||0" class="col-span-2 bg-slate-800 border border-slate-700 rounded p-1 text-center text-emerald-400 font-bold"><input type="number" step="0.01" value="${it.price || 0}" oninput="editingDeliveryItems[${idx}].price=parseFloat(this.value)||0" class="col-span-3 bg-slate-800 border border-slate-700 rounded p-1 text-center text-white"><button type="button" onclick="editingDeliveryItems.splice(${idx},1);renderEditDeliveryItems()" class="col-span-1 text-rose-400 font-bold">✕</button></div>`).join(''); };
-    window.addEditDeliveryItemRow = function() { editingDeliveryItems.push({ name: 'Nowa pozycja', qty: 1, unit: 'szt.', price: 0 }); renderEditDeliveryItems(); };
-    window.renderEditDeliveryPhotos = function() { el('editDelivPhotosList').innerHTML = editingDeliveryPhotos.map((src, idx) => `<div class="relative flex-shrink-0"><img src="${src}" class="h-16 w-16 object-cover rounded-lg border border-slate-600"><button type="button" onclick="editingDeliveryPhotos.splice(${idx},1);renderEditDeliveryPhotos()" class="absolute -top-1 -right-1 bg-rose-600 text-white rounded-full w-5 h-5 text-[10px] font-bold">✕</button></div>`).join(''); };
-    window.handleEditDeliveryAddPhoto = async function(e) { const file = e.target.files[0]; if (!file) return; prepareFileForGemini(file).then(p => { editingDeliveryPhotos.push(p.previewUrl); renderEditDeliveryPhotos(); }).catch(()=>{}); e.target.value = ''; };
-    window.saveEditedDelivery = async function(e) {
+    }
+    function renderEditDeliveryItems() { el('editDelivItemsList').innerHTML = editingDeliveryItems.map((it, idx) => `<div class="grid grid-cols-12 gap-1.5 items-center bg-slate-900 p-1.5 rounded-lg"><input type="text" value="${(it.name || '').replace(/"/g, '&quot;')}" oninput="editingDeliveryItems[${idx}].name=this.value" class="col-span-6 bg-slate-800 border border-slate-700 rounded p-1 text-white"><input type="number" value="${it.qty || 0}" oninput="editingDeliveryItems[${idx}].qty=parseFloat(this.value)||0" class="col-span-2 bg-slate-800 border border-slate-700 rounded p-1 text-center text-emerald-400 font-bold"><input type="number" step="0.01" value="${it.price || 0}" oninput="editingDeliveryItems[${idx}].price=parseFloat(this.value)||0" class="col-span-3 bg-slate-800 border border-slate-700 rounded p-1 text-center text-white"><button type="button" onclick="editingDeliveryItems.splice(${idx},1);renderEditDeliveryItems()" class="col-span-1 text-rose-400 font-bold">✕</button></div>`).join(''); }
+    function addEditDeliveryItemRow() { editingDeliveryItems.push({ name: 'Nowa pozycja', qty: 1, unit: 'szt.', price: 0 }); renderEditDeliveryItems(); }
+    function renderEditDeliveryPhotos() { el('editDelivPhotosList').innerHTML = editingDeliveryPhotos.map((src, idx) => `<div class="relative flex-shrink-0"><img src="${src}" class="h-16 w-16 object-cover rounded-lg border border-slate-600"><button type="button" onclick="editingDeliveryPhotos.splice(${idx},1);renderEditDeliveryPhotos()" class="absolute -top-1 -right-1 bg-rose-600 text-white rounded-full w-5 h-5 text-[10px] font-bold">✕</button></div>`).join(''); }
+    function handleEditDeliveryAddPhoto(e) { const file = e.target.files[0]; if (!file) return; prepareFileForGemini(file).then(p => { editingDeliveryPhotos.push(p.previewUrl); renderEditDeliveryPhotos(); }).catch(()=>{}); e.target.value = ''; }
+    function saveEditedDelivery(e) {
       e.preventDefault(); const d = deliveries.find(x => String(x.id) === String(el('editDelivId').value)); if (!d) return; let depositsBackup = [];
       try { const raw = typeof d.items_json === 'string' ? JSON.parse(d.items_json) : (d.items_json || {}); depositsBackup = raw.deposits || []; } catch (err) {}
       d.supplier = el('editDelivSupplier').value.trim(); d.doc_number = el('editDelivDocNum').value.trim(); d.receiver = el('editDelivReceiver').value.trim(); d.total_net = el('editDelivTotalNet').value.trim(); d.total_net_with_dep = el('editDelivTotalNetWithDep').value.trim(); d.total_gross = el('editDelivTotalGross').value.trim(); d.items_json = JSON.stringify({ items: editingDeliveryItems, deposits: depositsBackup, receiver: d.receiver }); d.image_url = JSON.stringify(editingDeliveryPhotos);
       safeSetLocal('magazyn_offline_deliveries', deliveries); renderDeliveries(); hideModal('editDeliveryModal'); if (isCloudOnline) { apiRequest(`/deliveries?id=eq.${d.id}`, 'PATCH', d).catch(()=>{}); }
-    };
-    window.deleteDelivery = async function(id) {
+    }
+    function deleteDelivery(id) {
       const d = deliveries.find(x => String(x.id) === String(id)); if (!d) return; if (!confirm(`Usunąć fakturę i cofnąć towary?`)) return;
       try {
         const raw = typeof d.items_json === 'string' ? JSON.parse(d.items_json) : (d.items_json || {}); const items = Array.isArray(raw) ? raw : (raw.items || []), deps = Array.isArray(raw) ? [] : (raw.deposits || []);
@@ -938,9 +948,9 @@
         for (const dep of deps) { const exDep = findBestDepositMatch(dep.name, dep.unitPrice); if (exDep) { exDep.qty = Math.max(0, (Number(exDep.qty) || 0) - (Number(dep.qty) || 0)); if (isCloudOnline) { apiRequest(`/deposits?id=eq.${exDep.id}`, 'PATCH', { qty: exDep.qty }).catch(()=>{}); } } }
       } catch (e) {}
       deliveries = deliveries.filter(x => String(x.id) !== String(id)); safeSetLocal('magazyn_offline_items', inventory); safeSetLocal('magazyn_offline_deposits', deposits); safeSetLocal('magazyn_offline_deliveries', deliveries); renderInventory(); renderDeposits(); renderDeliveries(); if (isCloudOnline) { apiRequest(`/deliveries?id=eq.${id}`, 'DELETE').catch(()=>{}); }
-    };
+    }
 
-    window.renderDeposits = function() {
+    function renderDeposits() {
       const list = el('depositsList'); if (!list) return;
       let petQty = 0, petVal = 0, glassQty = 0, glassVal = 0, crateQty = 0, crateVal = 0;
       deposits.forEach(d => { const q = Number(d.qty) || 0, p = Number(d.unit_price) || 0, v = q * p; if (d.category === 'PET_CAN_050' || Math.abs(p - 0.5) < 0.05) { petQty += q; petVal += v; } else if (d.category === 'BUTELKA_SZKLO' || Math.abs(p - 1.0) < 0.05) { glassQty += q; glassVal += v; } else { crateQty += q; crateVal += v; } });
@@ -952,14 +962,17 @@
         const val = ((Number(d.qty) || 0) * (Number(d.unit_price) || 0)).toFixed(2);
         return `<div class="bg-slate-800 border border-cyan-800/50 rounded-xl p-3 flex items-center justify-between gap-2"><div><h4 class="font-bold text-xs text-white">${d.name}</h4><p class="text-[10px] text-cyan-400 font-bold">${Number(d.unit_price).toFixed(2)} zł / szt. • Wartość: ${val} zł</p></div><div class="flex items-center gap-1.5"><button onclick="adjustDepositQty('${d.id}', -1)" class="w-7 h-7 rounded-lg bg-slate-700 text-white font-bold text-xs">-</button><span class="font-black text-sm text-cyan-300 min-w-[36px] text-center">${d.qty}</span><button onclick="adjustDepositQty('${d.id}', 1)" class="w-7 h-7 rounded-lg bg-slate-700 text-white font-bold text-xs">+</button><button onclick="deleteDeposit('${d.id}')" class="text-rose-400 text-xs ml-1">🗑️</button></div></div>`;
       }).join('');
-    };
-    window.openNewDepositModal = function() { el('depModalId').value = ''; el('depModalName').value = 'Kaucja PET / Puszka 0,50 zł'; el('depModalCategory').value = 'PET_CAN_050'; el('depModalPrice').value = '0.50'; el('depModalQty').value = '12'; showModal('depositModal'); };
-    window.handleDepCategoryPreset = function() { const c = el('depModalCategory').value; if (c === 'PET_CAN_050') { el('depModalPrice').value = '0.50'; el('depModalName').value = 'Kaucja PET / Puszka 0,50 zł'; } else if (c === 'BUTELKA_SZKLO') { el('depModalPrice').value = '1.00'; el('depModalName').value = 'Kaucja Butelka Szkło 1,00 zł'; } else if (c === 'SKRZYNKA') { el('depModalPrice').value = '15.00'; el('depModalName').value = 'Skrzynka plastikowa zwrotna'; } else { el('depModalPrice').value = '50.00'; el('depModalName').value = 'Paleta EURO'; } };
-    window.saveDepositModal = async function(e) { e.preventDefault(); const name = el('depModalName').value.trim(), category = el('depModalCategory').value, unit_price = parseFloat(el('depModalPrice').value) || 0, qty = parseInt(el('depModalQty').value) || 0; const ex = findBestDepositMatch(name, unit_price); if (ex) { ex.qty = (Number(ex.qty) || 0) + qty; if (isCloudOnline) { apiRequest(`/deposits?id=eq.${ex.id}`, 'PATCH', { qty: ex.qty }).catch(()=>{}); } } else { const nd = { id: Date.now().toString(), name, category, unit_price, qty, created_at: new Date() }; deposits.push(nd); if (isCloudOnline) { apiRequest('/deposits', 'POST', nd).catch(()=>{}); } } safeSetLocal('magazyn_offline_deposits', deposits); renderDeposits(); hideModal('depositModal'); };
-    window.adjustDepositQty = async function(id, delta) { const d = deposits.find(x => String(x.id) === String(id)); if (!d) return; d.qty = Math.max(0, (Number(d.qty) || 0) + delta); safeSetLocal('magazyn_offline_deposits', deposits); renderDeposits(); if (isCloudOnline) { apiRequest(`/deposits?id=eq.${d.id}`, 'PATCH', { qty: d.qty }).catch(()=>{}); } };
-    window.deleteDeposit = async function(id) { if (!confirm("Usunąć tę pozycję kaucyjną?")) return; deposits = deposits.filter(x => String(x.id) !== String(id)); safeSetLocal('magazyn_offline_deposits', deposits); renderDeposits(); if (isCloudOnline) { apiRequest(`/deposits?id=eq.${id}`, 'DELETE').catch(()=>{}); } };
+    }
+    function openNewDepositModal() { el('depModalId').value = ''; el('depModalName').value = 'Kaucja PET / Puszka 0,50 zł'; el('depModalCategory').value = 'PET_CAN_050'; el('depModalPrice').value = '0.50'; el('depModalQty').value = '12'; showModal('depositModal'); }
+    function handleDepCategoryPreset() { const c = el('depModalCategory').value; if (c === 'PET_CAN_050') { el('depModalPrice').value = '0.50'; el('depModalName').value = 'Kaucja PET / Puszka 0,50 zł'; } else if (c === 'BUTELKA_SZKLO') { el('depModalPrice').value = '1.00'; el('depModalName').value = 'Kaucja Butelka Szkło 1,00 zł'; } else if (c === 'SKRZYNKA') { el('depModalPrice').value = '15.00'; el('depModalName').value = 'Skrzynka plastikowa zwrotna'; } else { el('depModalPrice').value = '50.00'; el('depModalName').value = 'Paleta EURO'; } }
+    function saveDepositModal(e) {
+      e.preventDefault(); const name = el('depModalName').value.trim(), category = el('depModalCategory').value, unit_price = parseFloat(el('depModalPrice').value) || 0, qty = parseInt(el('depModalQty').value) || 0; const ex = findBestDepositMatch(name, unit_price); 
+      if (ex) { ex.qty = (Number(ex.qty) || 0) + qty; if (isCloudOnline) { apiRequest(`/deposits?id=eq.${ex.id}`, 'PATCH', { qty: ex.qty }).catch(()=>{}); } } else { const nd = { id: Date.now().toString(), name, category, unit_price, qty, created_at: new Date() }; deposits.push(nd); if (isCloudOnline) { apiRequest('/deposits', 'POST', nd).catch(()=>{}); } } safeSetLocal('magazyn_offline_deposits', deposits); renderDeposits(); hideModal('depositModal'); 
+    }
+    function adjustDepositQty(id, delta) { const d = deposits.find(x => String(x.id) === String(id)); if (!d) return; d.qty = Math.max(0, (Number(d.qty) || 0) + delta); safeSetLocal('magazyn_offline_deposits', deposits); renderDeposits(); if (isCloudOnline) { apiRequest(`/deposits?id=eq.${d.id}`, 'PATCH', { qty: d.qty }).catch(()=>{}); } }
+    function deleteDeposit(id) { if (!confirm("Usunąć tę pozycję kaucyjną?")) return; deposits = deposits.filter(x => String(x.id) !== String(id)); safeSetLocal('magazyn_offline_deposits', deposits); renderDeposits(); if (isCloudOnline) { apiRequest(`/deposits?id=eq.${id}`, 'DELETE').catch(()=>{}); } }
 
-    window.renderEvents = function() {
+    function renderEvents() {
       const list = el('eventsList'); if (!list) return;
       const activeCount = events.filter(e => e.status === 'W trakcie').length; const badge = el('activeEventsBadge'); if (badge) { if (activeCount > 0) { badge.innerText = activeCount; badge.classList.remove('hidden'); } else badge.classList.add('hidden'); }
       if (events.length === 0) { list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak zarejestrowanych wydań eventowych.</div>`; return; }
@@ -969,8 +982,8 @@
         const cost = items.reduce((sum, it) => sum + (it.consumed !== undefined ? it.consumed : (it.dispatched || 0)) * (it.netPrice || 0), 0);
         return `<div class="bg-slate-800 border ${isActive ? 'border-blue-500/70' : 'border-slate-700'} rounded-2xl p-3.5 space-y-2.5 shadow"><div class="flex justify-between items-start gap-2 flex-wrap"><div><div class="flex items-center gap-2"><span class="font-mono text-xs font-black text-amber-400">${ev.event_number || '#EV'}</span><span class="text-[9px] font-bold px-2 py-0.5 rounded ${isActive ? 'bg-blue-950 text-blue-300 border border-blue-700' : 'bg-emerald-950 text-emerald-300 border border-emerald-700'}">${ev.status || 'W trakcie'}</span></div><h4 class="font-bold text-sm text-white mt-1">${ev.event_name || 'Realizacja'}</h4><p class="text-[10px] text-slate-400">Wydano: ${ev.dispatch_date || '-'} ${ev.return_date ? `• Rozliczono: ${ev.return_date}` : ''}</p>${ev.return_date ? `<p class="text-[10px] text-emerald-400 bg-emerald-950/40 border border-emerald-800/60 px-2 py-0.5 rounded inline-block font-bold mt-1">Koszt towaru netto: ${cost.toFixed(2)} zł</p>` : ''}</div><div class="flex gap-1.5 flex-wrap">${isActive ? `<button onclick="openEventReturnModal('${ev.id}')" class="bg-emerald-500 text-slate-950 font-black text-xs px-3 py-1.5 rounded-xl shadow">📥 Rozlicz</button>` : ''}<button onclick="printEventSheet('${ev.id}', '${isActive ? 'DISPATCH' : 'RETURN'}')" class="bg-slate-700 text-slate-200 font-bold text-xs px-2.5 py-1.5 rounded-xl">🖨️ Karta</button><button onclick="deleteEvent('${ev.id}')" class="text-rose-400 text-xs px-1.5">🗑️</button></div></div><div class="bg-slate-900 rounded-xl p-2 text-[11px] space-y-1 max-h-44 overflow-y-auto">${items.map((it, i) => `<div class="flex justify-between text-slate-300 border-b border-slate-800/50 pb-0.5"><span>${i + 1}. ${it.name}</span><span class="font-bold text-blue-300">Wyd: ${it.dispatched} ${it.returned !== undefined ? `• Zwr: ${it.returned} • Zuż: ${it.consumed || 0}` : ''}</span></div>`).join('')}</div></div>`;
       }).join('');
-    };
-    window.processEventDispatchImage = async function(e) {
+    }
+    function processEventDispatchImage(e) {
       const file = e.target.files[0]; if (!file) return; showModal('eventDispatchModal'); el('eventDispatchLoading').classList.remove('hidden'); el('eventDispatchContent').classList.add('hidden'); el('eventDispatchActions').classList.add('hidden');
       prepareFileForGemini(file).then(prep => {
         queryGeminiAPI(`Odczytaj Kartę Wydania. Zwróć JSON: { "eventNumber": string, "eventName": string, "dispatchDate": string, "items": [{ "name": string, "dispatched": number, "unit": string }] }`, [prep]).then(res => {
@@ -978,23 +991,23 @@
         }).catch(err => { hideModal('eventDispatchModal'); alert(err.message); });
       }).catch(err => { hideModal('eventDispatchModal'); alert(err.message); });
       e.target.value = '';
-    };
-    window.confirmAndApplyEventDispatch = async function() {
+    }
+    function confirmAndApplyEventDispatch() {
       if (!currentExtractedEventDispatch) return; const evNum = el('evDispNum').value.trim(), evDate = el('evDispDate').value.trim(), evName = el('evDispName').value.trim(), items = currentExtractedEventDispatch.items || [];
       for (const it of items) { const inv = findBestInventoryMatch(it.name); if (inv) { const q = Number(it.dispatched) || 0; inv.qty = Math.max(0, inv.qty - q); inv.inField = (inv.inField || 0) + q; it.netPrice = inv.price || 0; if (isCloudOnline) { apiRequest(`/inventory?id=eq.${inv.id}`, 'PATCH', { qty: inv.qty, in_field: inv.inField }).catch(()=>{}); } } }
       const newEv = { id: Date.now().toString(), event_number: evNum, event_name: evName, dispatch_date: evDate, return_date: '', status: 'W trakcie', items_json: items, dispatch_image: currentExtractedEventDispatch.image || '', return_image: '', created_at: new Date() }; events.unshift(newEv); safeSetLocal('magazyn_offline_items', inventory); safeSetLocal('magazyn_offline_events', events); if (isCloudOnline) { apiRequest('/events', 'POST', newEv).catch(()=>{}); } hideModal('eventDispatchModal'); renderInventory(); renderEvents();
-    };
-    window.openEventReturnModal = function(eventId) { currentActiveReturnEventId = String(eventId); el('evReturnLoading').classList.add('hidden'); el('evReturnContent').classList.remove('hidden'); el('evReturnActions').classList.remove('hidden'); el('evReturnDateInput').value = new Date().toLocaleDateString('pl-PL'); el('evReturnEventSelect').innerHTML = events.map(ev => `<option value="${ev.id}" ${String(ev.id) === String(eventId) ? 'selected' : ''}>${ev.event_number} - ${ev.event_name}</option>`).join(''); handleReturnEventSelectChange(); showModal('eventReturnModal'); };
-    window.handleReturnEventSelectChange = function() {
+    }
+    function openEventReturnModal(eventId) { currentActiveReturnEventId = String(eventId); el('evReturnLoading').classList.add('hidden'); el('evReturnContent').classList.remove('hidden'); el('evReturnActions').classList.remove('hidden'); el('evReturnDateInput').value = new Date().toLocaleDateString('pl-PL'); el('evReturnEventSelect').innerHTML = events.map(ev => `<option value="${ev.id}" ${String(ev.id) === String(eventId) ? 'selected' : ''}>${ev.event_number} - ${ev.event_name}</option>`).join(''); handleReturnEventSelectChange(); showModal('eventReturnModal'); }
+    function handleReturnEventSelectChange() {
       currentActiveReturnEventId = el('evReturnEventSelect').value; const ev = events.find(x => String(x.id) === String(currentActiveReturnEventId)); if (!ev) return;
       let items = []; try { items = typeof ev.items_json === 'string' ? JSON.parse(ev.items_json) : (ev.items_json || []); } catch (e) {}
       lastParsedReturnData = items.map(it => ({ ...it, returned: it.returned !== undefined ? it.returned : 0, consumed: it.consumed !== undefined ? it.consumed : it.dispatched, netPrice: it.netPrice || 0 })); renderEventReturnItems();
-    };
-    window.renderEventReturnItems = function() {
+    }
+    function renderEventReturnItems() {
       if (!lastParsedReturnData) return;
       el('evReturnItemsList').innerHTML = lastParsedReturnData.map((it, idx) => `<div class="bg-slate-900 border border-slate-700 p-2.5 rounded-xl flex items-center justify-between gap-2 text-xs"><div class="flex-1 truncate"><span class="font-bold text-white block truncate">${idx + 1}. ${it.name}</span><span class="text-[10px] text-slate-400">Wydano: ${it.dispatched} ${it.unit || 'szt.'} • Konsumpcja: <strong class="text-amber-400">${Math.max(0, it.dispatched - (it.returned || 0))}</strong></span></div><div class="flex items-center gap-1.5"><span class="text-[10px] text-emerald-300">Zwrot:</span><input type="number" min="0" max="${it.dispatched}" value="${it.returned || 0}" oninput="lastParsedReturnData[${idx}].returned=Math.max(0,parseInt(this.value)||0);lastParsedReturnData[${idx}].consumed=Math.max(0,lastParsedReturnData[${idx}].dispatched-lastParsedReturnData[${idx}].returned);renderEventReturnItems()" class="w-16 bg-slate-800 border border-emerald-500 rounded p-1 text-center font-black text-emerald-400"></div></div>`).join('');
-    };
-    window.processAutoEventReturnSheetImage = async function(e) {
+    }
+    function processAutoEventReturnSheetImage(e) {
       const file = e.target.files[0]; if (!file) return; showModal('eventReturnModal'); el('evReturnLoading').classList.remove('hidden'); el('evReturnContent').classList.add('hidden'); el('evReturnActions').classList.add('hidden');
       prepareFileForGemini(file).then(prep => {
         queryGeminiAPI(`Odczytaj Rozliczenie Zwrotu. Zwróć JSON: { "eventNumber": string, "eventName": string, "items": [{ "name": string, "dispatched": number, "returned": number, "consumed": number }] }`, [prep]).then(res => {
@@ -1005,20 +1018,20 @@
           renderEventReturnItems(); el('evReturnLoading').classList.add('hidden'); el('evReturnContent').classList.remove('hidden'); el('evReturnActions').classList.remove('hidden');
         }).catch(err => { hideModal('eventReturnModal'); alert(err.message); });
       }).catch(err => { hideModal('eventReturnModal'); alert(err.message); }); e.target.value = '';
-    };
-    window.processEventReturnSheetImage = async function(e) { return processAutoEventReturnSheetImage(e); };
-    window.processEventReturnProductsImage = async function(e) { return processAutoEventReturnSheetImage(e); };
-    window.confirmAndApplyEventReturn = async function() {
+    }
+    function processEventReturnSheetImage(e) { return processAutoEventReturnSheetImage(e); }
+    function processEventReturnProductsImage(e) { return processAutoEventReturnSheetImage(e); }
+    function confirmAndApplyEventReturn() {
       const ev = events.find(x => String(x.id) === String(currentActiveReturnEventId)); if (!ev || !lastParsedReturnData) return;
       for (const it of lastParsedReturnData) {
         const inv = findBestInventoryMatch(it.name);
         if (inv) { const disp = Number(it.dispatched) || 0, ret = Number(it.returned) || 0; inv.inField = Math.max(0, (inv.inField || 0) - disp); inv.qty = (Number(inv.qty) || 0) + ret; recordStockLog(inv.id, inv.name, 'Zwrot z Eventu', ret, `${ev.event_number}`); if (isCloudOnline) { apiRequest(`/inventory?id=eq.${inv.id}`, 'PATCH', { qty: inv.qty, in_field: inv.inField }).catch(()=>{}); } }
       }
       ev.status = 'Rozliczony'; ev.return_date = el('evReturnDateInput').value.trim() || new Date().toLocaleDateString('pl-PL'); ev.items_json = lastParsedReturnData; safeSetLocal('magazyn_offline_items', inventory); safeSetLocal('magazyn_offline_events', events); if (isCloudOnline) { apiRequest(`/events?id=eq.${ev.id}`, 'PATCH', { status: ev.status, return_date: ev.return_date, items_json: ev.items_json }).catch(()=>{}); } hideModal('eventReturnModal'); renderInventory(); renderEvents(); alert(`✓ Rozliczono zwrot!`);
-    };
-    window.deleteEvent = async function(id) { if (!confirm("Usunąć ten event z historii?")) return; events = events.filter(x => String(x.id) !== String(id)); safeSetLocal('magazyn_offline_events', events); renderEvents(); if (isCloudOnline) { apiRequest(`/events?id=eq.${id}`, 'DELETE').catch(()=>{}); } };
+    }
+    function deleteEvent(id) { if (!confirm("Usunąć ten event z historii?")) return; events = events.filter(x => String(x.id) !== String(id)); safeSetLocal('magazyn_offline_events', events); renderEvents(); if (isCloudOnline) { apiRequest(`/events?id=eq.${id}`, 'DELETE').catch(()=>{}); } }
 
-    window.processShelfCountImage = async function(e, append = false) {
+    function processShelfCountImage(e, append = false) {
       const files = Array.from(e.target.files || []); if (files.length === 0) return; if (!append) currentShelfCountItems = [];
       showModal('shelfCountModal'); el('shelfCountLoading').classList.remove('hidden'); el('shelfCountContent').classList.add('hidden'); el('shelfCountActions').classList.add('hidden');
       Promise.all(files.map(f => prepareFileForGemini(f))).then(preps => {
@@ -1027,23 +1040,23 @@
           renderShelfCountItems(); el('shelfCountLoading').classList.add('hidden'); el('shelfCountContent').classList.remove('hidden'); el('shelfCountActions').classList.remove('hidden');
         }).catch(err => { hideModal('shelfCountModal'); alert(err.message); });
       }).catch(err => { hideModal('shelfCountModal'); alert(err.message); }); e.target.value = '';
-    };
-    window.renderShelfCountItems = function() { el('shelfCountItemsList').innerHTML = currentShelfCountItems.map((it, idx) => { const match = findBestInventoryMatch(it.name); return `<div class="bg-slate-900 border border-slate-700 p-2 rounded-xl flex items-center justify-between gap-2 text-xs"><div class="flex-1 truncate"><input type="text" value="${it.name}" oninput="currentShelfCountItems[${idx}].name=this.value" class="w-full bg-slate-800 border border-slate-700 rounded p-1 text-white font-bold"><span class="text-[10px] text-slate-400">${match ? `Baza: ${match.name} (Stan: ${match.qty})` : 'Nowy towar'}</span></div><input type="number" value="${it.qty}" oninput="currentShelfCountItems[${idx}].qty=parseInt(this.value)||0" class="w-16 bg-slate-800 border border-purple-500 rounded p-1 text-center font-black text-purple-300"><button onclick="currentShelfCountItems.splice(${idx},1);renderShelfCountItems()" class="text-rose-400 font-bold px-1">✕</button></div>`; }).join(''); };
-    window.applyShelfCountResults = async function(mode) {
+    }
+    function renderShelfCountItems() { el('shelfCountItemsList').innerHTML = currentShelfCountItems.map((it, idx) => { const match = findBestInventoryMatch(it.name); return `<div class="bg-slate-900 border border-slate-700 p-2 rounded-xl flex items-center justify-between gap-2 text-xs"><div class="flex-1 truncate"><input type="text" value="${it.name}" oninput="currentShelfCountItems[${idx}].name=this.value" class="w-full bg-slate-800 border border-slate-700 rounded p-1 text-white font-bold"><span class="text-[10px] text-slate-400">${match ? `Baza: ${match.name} (Stan: ${match.qty})` : 'Nowy towar'}</span></div><input type="number" value="${it.qty}" oninput="currentShelfCountItems[${idx}].qty=parseInt(this.value)||0" class="w-16 bg-slate-800 border border-purple-500 rounded p-1 text-center font-black text-purple-300"><button onclick="currentShelfCountItems.splice(${idx},1);renderShelfCountItems()" class="text-rose-400 font-bold px-1">✕</button></div>`; }).join(''); }
+    function applyShelfCountResults(mode) {
       for (const it of currentShelfCountItems) { const match = findBestInventoryMatch(it.name); if (match) { match.qty = mode === 'SET' ? (Number(it.qty) || 0) : ((Number(match.qty) || 0) + (Number(it.qty) || 0)); if (isCloudOnline) { apiRequest(`/inventory?id=eq.${match.id}`, 'PATCH', { qty: match.qty }).catch(()=>{}); } } else { const ni = normalizeItem({ id: Date.now().toString() + Math.random().toString().slice(2, 5), barcode: 'RC-' + Math.floor(100000 + Math.random() * 900000), name: it.name, qty: Number(it.qty) || 0, minQty: 6, unit: 'szt.' }); inventory.push(ni); if (isCloudOnline) { apiRequest('/inventory', 'POST', toDbItem(ni)).catch(()=>{}); } } }
       safeSetLocal('magazyn_offline_items', inventory); hideModal('shelfCountModal'); renderInventory();
-    };
+    }
     
-    window.renderPriceAlerts = function() {
+    function renderPriceAlerts() {
       const list = el('alertsList'); if (!list) return; const badge = el('alertsCountBadge'); if (badge) { if (priceAlerts.length > 0) { badge.innerText = priceAlerts.length; badge.classList.remove('hidden'); } else badge.classList.add('hidden'); }
       if (priceAlerts.length === 0) { list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak alertów cenowych.</div>`; return; }
       list.innerHTML = priceAlerts.map(a => { const diff = (Number(a.new_price) || 0) - (Number(a.old_price) || 0); return `<div class="bg-slate-800 border ${diff > 0 ? 'border-rose-500/60' : 'border-emerald-500/60'} rounded-xl p-3 flex justify-between items-center text-xs"><div><h4 class="font-bold text-white">${a.item_name}</h4><p class="text-[10px] text-slate-400">${a.supplier || ''} • ${a.doc_number || ''}</p></div><div class="text-right"><span class="text-slate-400 line-through mr-1">${Number(a.old_price).toFixed(2)} zł</span><span class="font-black ${diff > 0 ? 'text-rose-400' : 'text-emerald-400'}">${Number(a.new_price).toFixed(2)} zł (${diff > 0 ? '+' : ''}${diff.toFixed(2)} zł)</span></div></div>`; }).join('');
-    };
-    window.clearPriceAlerts = function() { if (!confirm("Wyczyścić historię?")) return; priceAlerts = []; safeSetLocal('magazyn_offline_price_alerts', priceAlerts); renderPriceAlerts(); };
-    window.openImagePreviewModal = function(title, images) { el('imagePreviewTitle').innerText = title || 'Podgląd'; const tabs = el('imagePreviewTabs'); if (images.length > 1) { tabs.classList.remove('hidden'); tabs.innerHTML = images.map((src, i) => `<button onclick="el('imagePreviewElement').src='${src}'" class="bg-slate-800 border border-slate-600 text-xs px-3 py-1 rounded-lg text-white font-bold">Strona ${i + 1}</button>`).join(''); } else tabs.classList.add('hidden'); el('imagePreviewElement').src = images[0] || ''; showModal('imagePreviewModal'); };
-    window.closeImagePreviewModal = function() { hideModal('imagePreviewModal'); };
+    }
+    function clearPriceAlerts() { if (!confirm("Wyczyścić historię?")) return; priceAlerts = []; safeSetLocal('magazyn_offline_price_alerts', priceAlerts); renderPriceAlerts(); }
+    function openImagePreviewModal(title, images) { el('imagePreviewTitle').innerText = title || 'Podgląd'; const tabs = el('imagePreviewTabs'); if (images.length > 1) { tabs.classList.remove('hidden'); tabs.innerHTML = images.map((src, i) => `<button onclick="el('imagePreviewElement').src='${src}'" class="bg-slate-800 border border-slate-600 text-xs px-3 py-1 rounded-lg text-white font-bold">Strona ${i + 1}</button>`).join(''); } else tabs.classList.add('hidden'); el('imagePreviewElement').src = images[0] || ''; showModal('imagePreviewModal'); }
+    function closeImagePreviewModal() { hideModal('imagePreviewModal'); }
     
-    window.switchMainTab = function(tab) {
+    function switchMainTab(tab) {
       const allTabs = ['Stock', 'Events', 'Rw', 'Deliveries', 'Deposits', 'Logs', 'Alerts'];
       allTabs.forEach(t => {
         el(`view${t}`)?.classList.add('hidden');
@@ -1064,30 +1077,30 @@
       else if (tab === 'logs') renderStockLogs();
       else if (tab === 'alerts') renderPriceAlerts();
       triggerScanFeedback();
-    };
+    }
 
-    window.handleItemContextMenu = function(e, id) { e.preventDefault(); contextMenuItemId = id; selectedItemId = id; const m = el('customContextMenu'); m.classList.remove('hidden'); m.style.left = `${Math.min(e.clientX, window.innerWidth - 230)}px`; m.style.top = `${Math.min(e.clientY, window.innerHeight - 200)}px`; };
-    window.hideContextMenu = function() { el('customContextMenu')?.classList.add('hidden'); };
-    window.contextActionEdit = function() { hideContextMenu(); if (contextMenuItemId) openEditModal(contextMenuItemId); };
-    window.contextActionOpenStock = function() { hideContextMenu(); if (contextMenuItemId) openActionModal(contextMenuItemId); };
-    window.contextActionPrintQR = function() { hideContextMenu(); if (contextMenuItemId) { selectedItemId = contextMenuItemId; openPrintLabelModal(); } };
-    window.contextActionDelete = function() { hideContextMenu(); if (contextMenuItemId) { selectedItemId = contextMenuItemId; deleteCurrentItem(); } };
-    window.handleItemCardClick = function(e, id) { if (isSelectMode) { toggleSelectItem(id, !selectedItemIds.has(id)); renderInventory(); } else openActionModal(id); };
+    function handleItemContextMenu(e, id) { e.preventDefault(); contextMenuItemId = id; selectedItemId = id; const m = el('customContextMenu'); m.classList.remove('hidden'); m.style.left = `${Math.min(e.clientX, window.innerWidth - 230)}px`; m.style.top = `${Math.min(e.clientY, window.innerHeight - 200)}px`; }
+    function hideContextMenu() { el('customContextMenu')?.classList.add('hidden'); }
+    function contextActionEdit() { hideContextMenu(); if (contextMenuItemId) openEditModal(contextMenuItemId); }
+    function contextActionOpenStock() { hideContextMenu(); if (contextMenuItemId) openActionModal(contextMenuItemId); }
+    function contextActionPrintQR() { hideContextMenu(); if (contextMenuItemId) { selectedItemId = contextMenuItemId; openPrintLabelModal(); } }
+    function contextActionDelete() { hideContextMenu(); if (contextMenuItemId) { selectedItemId = contextMenuItemId; deleteCurrentItem(); } }
+    function handleItemCardClick(e, id) { if (isSelectMode) { toggleSelectItem(id, !selectedItemIds.has(id)); renderInventory(); } else openActionModal(id); }
 
-    window.toggleSelectMode = function() {
+    function toggleSelectMode() {
       isSelectMode = !isSelectMode; const b = el('btnToggleSelectMode'), bar = el('bulkActionBar');
       if (isSelectMode) { b.innerHTML = "✕ Zakończ"; bar.classList.remove('hidden'); }
       else { b.innerHTML = "Wybór"; bar.classList.add('hidden'); selectedItemIds.clear(); }
       el('bulkSelectedCount').innerText = `Wybrano: ${selectedItemIds.size}`; renderInventory();
-    };
-    window.toggleSelectItem = function(id, c) { if (c) selectedItemIds.add(id); else selectedItemIds.delete(id); el('bulkSelectedCount').innerText = `Wybrano: ${selectedItemIds.size}`; };
-    window.toggleSelectAll = function() { if (selectedItemIds.size === inventory.length) selectedItemIds.clear(); else inventory.forEach(i => selectedItemIds.add(i.id)); el('bulkSelectedCount').innerText = `Wybrano: ${selectedItemIds.size}`; renderInventory(); };
-    window.deleteSelectedItems = function() {
+    }
+    function toggleSelectItem(id, c) { if (c) selectedItemIds.add(id); else selectedItemIds.delete(id); el('bulkSelectedCount').innerText = `Wybrano: ${selectedItemIds.size}`; }
+    function toggleSelectAll() { if (selectedItemIds.size === inventory.length) selectedItemIds.clear(); else inventory.forEach(i => selectedItemIds.add(i.id)); el('bulkSelectedCount').innerText = `Wybrano: ${selectedItemIds.size}`; renderInventory(); }
+    function deleteSelectedItems() {
       if (selectedItemIds.size === 0 || !confirm(`Usunąć ${selectedItemIds.size} pozycji?`)) return;
       const ids = Array.from(selectedItemIds); inventory = inventory.filter(i => !selectedItemIds.has(i.id));
       safeSetLocal('magazyn_offline_items', inventory); toggleSelectMode(); renderInventory();
       if (isCloudOnline) { ids.forEach(id => { apiRequest(`/inventory?id=eq.${id}`, 'DELETE').catch(()=>{}); }); }
-    };
+    }
 
     window.buildRoyalCateringSheetHTML = function(data) {
       const isRw = data.isRwDoc;
@@ -1098,37 +1111,37 @@
       return `<div style="border:2px solid #000;width:100%;box-sizing:border-box;background:white;color:black;font-family:Arial,sans-serif;"><table style="width:100%;border-collapse:collapse;text-align:center;font-size:11px;"><tr><td rowspan="4" style="width:20%;border:2px solid #000;font-size:15px;font-weight:bold;padding:4px;">ROYAL CATERING</td><td colspan="2" style="background:#ffff00;font-weight:bold;border:1px solid #000;padding:4px;">DATA WYDANIA:</td><td rowspan="4" style="width:30%;background:#ffff00;font-size:12px;font-weight:900;border:2px solid #000;padding:5px;">${title}</td><td colspan="2" style="background:#ffff00;font-weight:bold;border:1px solid #000;padding:4px;">CEL / ODBIORCA:</td></tr><tr><td colspan="2" style="border:1px solid #000;font-weight:bold;padding:4px;">${data.dispatchDate || '-'}</td><td colspan="2" style="border:1px solid #000;padding:4px;font-weight:bold;">${isRw ? (data.eventName || 'Użytek wewnętrzny') : (data.returnDate || '-')}</td></tr><tr><td colspan="2" style="background:#ffff00;font-weight:bold;border:1px solid #000;padding:4px;">DOKUMENT, #NUMER:</td><td colspan="2" style="border:1px solid #000;padding:4px;">&nbsp;</td></tr><tr><td colspan="2" style="border:1px solid #000;font-weight:bold;padding:4px;">${data.eventNumber || ''} ${isRw ? '' : data.eventName}</td><td colspan="2" style="border:1px solid #000;padding:4px;">&nbsp;</td></tr></table><table style="width:100%;border-collapse:collapse;font-size:10px;"><thead><tr style="background:#ffff00;font-weight:bold;text-align:center;"><th style="border:1px solid #000;width:4%;padding:4px;">Nr</th><th style="border:1px solid #000;width:36%;padding:4px;text-align:left;">NAZWA</th><th style="border:1px solid #000;width:6%;padding:4px;">Jedn.</th><th style="border:1px solid #000;width:8%;padding:4px;">Ilość</th>${isRw ? '<th style="border:1px solid #000;width:12%;padding:4px;">Cena netto</th><th colspan="5" style="border:1px solid #000;width:34%;padding:4px;">Wartość netto</th>' : '<th style="border:1px solid #000;width:9%;padding:4px;">Podpis Magazyn</th><th style="border:1px solid #000;width:9%;background:#d9ead3;padding:4px;">Sprawdzenie</th><th style="border:1px solid #000;width:9%;background:#d9ead3;padding:4px;">Konsumpcja</th><th style="border:1px solid #000;width:7%;background:#d9ead3;padding:4px;">Zwrot</th><th style="border:1px solid #000;width:6%;background:#d9ead3;padding:4px;">Podpis</th><th style="border:1px solid #000;width:6%;padding:4px;">Odbiór</th>'}</tr></thead><tbody>${rows}</tbody></table></div>`;
     };
 
-    window.openSheetPreviewModal = function(sheetData) {
+    function openSheetPreviewModal(sheetData) {
       currentPreviewSheetData = sheetData;
       const html = buildRoyalCateringSheetHTML(sheetData);
       el('sheetPreviewModalTitle').innerText = `${sheetData.isRwDoc ? 'Dokument RW' : (sheetData.isReturn ? 'Rozliczenie' : 'Karta Wydania')}: ${sheetData.eventNumber} ${sheetData.eventName}`;
       el('sheetPreviewContainer').innerHTML = html; el('printableSheet').innerHTML = html; showModal('sheetPreviewModal');
-    };
-    window.triggerBrowserPrintSheet = function() { document.body.classList.remove('print-mode-qr'); document.body.classList.add('print-mode-sheet'); window.print(); };
-    window.downloadCurrentSheetAsExcel = function() {
+    }
+    function triggerBrowserPrintSheet() { document.body.classList.remove('print-mode-qr'); document.body.classList.add('print-mode-sheet'); window.print(); }
+    function downloadCurrentSheetAsExcel() {
       if (!currentPreviewSheetData) return;
       const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"></head><body>${buildRoyalCateringSheetHTML(currentPreviewSheetData)}</body></html>`;
       const blob = new Blob(['\uFEFF' + html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
       const link = document.createElement('a'); link.href = URL.createObjectURL(blob);
       link.download = `${(currentPreviewSheetData.isRwDoc ? 'Dokument_RW_' : (currentPreviewSheetData.isReturn ? 'Rozliczenie_' : 'Karta_Wydania_')) + currentPreviewSheetData.eventNumber}.xls`.replace(/[^a-zA-Z0-9._-]/g, '_');
       link.click();
-    };
+    }
 
-    window.openRwTransferModal = function(allowEmpty = false) {
+    function openRwTransferModal(allowEmpty = false) {
       if (!allowEmpty && selectedItemIds.size === 0 && rwCreatorMap.size === 0) return alert("Zaznacz pozycje.");
       selectedItemIds.forEach(id => { if (!rwCreatorMap.has(String(id))) { const it = inventory.find(x => String(x.id) === String(id)); rwCreatorMap.set(String(id), Math.min(it?.qty || 1, 1) || 1); } });
       el('rwTransferNum').value = 'RW-' + String(rwTransfers.length + 1).padStart(2, '0') + '/' + new Date().getFullYear().toString().slice(-2);
       el('rwTransferDate').value = new Date().toLocaleDateString('pl-PL'); el('rwTransferDestination').value = '';
       el('rwTransferAddSelect').innerHTML = `<option value="">-- Wybierz towar (${inventory.length}) --</option>` + inventory.map(it => `<option value="${it.id}">[${it.category}] ${it.name} (Stan: ${it.qty} ${it.unit})</option>`).join('');
       renderRwCreatorItems(); showModal('rwTransferModal');
-    };
-    window.addItemToRwCreator = function() {
+    }
+    function addItemToRwCreator() {
       const id = el('rwTransferAddSelect').value; if (!id) return;
       const it = inventory.find(x => String(x.id) === String(id)); if (!it) return;
       rwCreatorMap.set(String(id), (rwCreatorMap.get(String(id)) || 0) + 1);
       el('rwTransferAddSelect').value = ''; renderRwCreatorItems();
-    };
-    window.renderRwCreatorItems = function() {
+    }
+    function renderRwCreatorItems() {
       const list = el('rwTransferItemsList');
       if (rwCreatorMap.size === 0) { list.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs">Lista jest pusta. Wybierz towar powyżej.</div>`; el('rwTransferTotalValLabel').innerText = '0.00 zł netto'; return; }
       let sum = 0;
@@ -1138,8 +1151,8 @@
         return `<div class="bg-slate-900 border border-slate-700 rounded-xl p-2.5 flex items-center justify-between text-xs gap-2"><div class="flex-1 truncate"><span class="font-bold text-white block truncate">${idx + 1}. ${it.name}</span><span class="text-[10px] text-slate-400">Magazyn: ${it.qty} ${it.unit} • Koszt: ${Number(it.price).toFixed(2)} zł</span></div><div class="flex items-center gap-1.5"><span class="text-[10px] text-amber-300 font-bold">${rowVal.toFixed(2)} zł</span><input type="number" value="${qty}" min="1" max="${it.qty || 9999}" oninput="rwCreatorMap.set('${it.id}', Math.max(1, parseInt(this.value)||1)); renderRwCreatorItems();" class="w-16 bg-slate-800 border border-amber-500/70 rounded-lg p-1.5 text-center font-black text-amber-400 text-xs"><button type="button" onclick="rwCreatorMap.delete('${it.id}'); renderRwCreatorItems();" class="text-rose-400 font-bold px-1.5">✕</button></div></div>`;
       }).join('');
       el('rwTransferTotalValLabel').innerText = sum.toFixed(2) + ' zł netto';
-    };
-    window.finalizeRwTransfer = async function() {
+    }
+    function finalizeRwTransfer() {
       if (rwCreatorMap.size === 0) return alert("Dodaj przynajmniej jedną pozycję do RW.");
       const rwNum = el('rwTransferNum').value.trim() || 'RW', rwDate = el('rwTransferDate').value.trim() || new Date().toLocaleDateString('pl-PL'), rwDest = el('rwTransferDestination').value.trim() || 'Biuro / Baza';
       const payload = []; let totalNetVal = 0;
@@ -1154,32 +1167,32 @@
       rwTransfers.unshift(newTransfer); safeSetLocal('magazyn_offline_items', inventory); safeSetLocal('magazyn_offline_rw_transfers', rwTransfers);
       rwCreatorMap.clear(); hideModal('rwTransferModal'); if (isSelectMode) toggleSelectMode();
       renderInventory(); renderRwTransfers(); switchMainTab('rw'); openSheetPreviewModal({ eventNumber: newTransfer.transfer_number, eventName: newTransfer.destination, dispatchDate: newTransfer.transfer_date, isReturn: false, isRwDoc: true, items: payload }); alert(`🏢 Zarejestrowano RW (${rwDest})!`);
-    };
+    }
 
-    window.openCreatorFromEventsTab = function() { sheetCreatorMap.clear(); openGenerateSheetModal(true); };
-    window.openGenerateSheetModal = function(allowEmpty = false) {
+    function openCreatorFromEventsTab() { sheetCreatorMap.clear(); openGenerateSheetModal(true); }
+    function openGenerateSheetModal(allowEmpty = false) {
       selectedItemIds.forEach(id => { if (!sheetCreatorMap.has(String(id))) { const it = inventory.find(x => String(x.id) === String(id)); sheetCreatorMap.set(String(id), Math.min(it?.qty || 12, 12) || 1); } });
       if (!allowEmpty && sheetCreatorMap.size === 0) return alert("Wybierz pozycje z listy.");
       el('genSheetNum').value = '#' + Math.floor(100 + Math.random() * 899);
       el('genSheetDate').value = new Date().toLocaleDateString('pl-PL'); el('genSheetName').value = '';
       el('genSheetAddSelect').innerHTML = `<option value="">-- Wybierz towar (${inventory.length}) --</option>` + inventory.map(it => `<option value="${it.id}">[${it.category}] ${it.name} (Stan: ${it.qty})</option>`).join('');
       renderSheetCreatorItems(); showModal('generateSheetModal');
-    };
-    window.addItemToSheetCreator = function() {
+    }
+    function addItemToSheetCreator() {
       const id = el('genSheetAddSelect').value; if (!id) return;
       const it = inventory.find(x => String(x.id) === String(id)); if (!it) return;
       sheetCreatorMap.set(String(id), (sheetCreatorMap.get(String(id)) || 0) + (Math.min(it.qty, 6) || 1));
       el('genSheetAddSelect').value = ''; renderSheetCreatorItems();
-    };
-    window.renderSheetCreatorItems = function() {
+    }
+    function renderSheetCreatorItems() {
       const list = el('genSheetItemsList');
       if (sheetCreatorMap.size === 0) { list.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs">Wybierz towar powyżej.</div>`; return; }
       list.innerHTML = Array.from(sheetCreatorMap.entries()).map(([id, qty], idx) => {
         const it = inventory.find(x => String(x.id) === String(id)); if (!it) return '';
         return `<div class="bg-slate-900 border border-slate-700 rounded-xl p-2.5 flex items-center justify-between text-xs gap-2"><div class="flex-1 truncate"><span class="font-bold text-white block truncate">${idx + 1}. ${it.name}</span><span class="text-[10px] text-slate-400">Stan: ${it.qty} ${it.unit}</span></div><div class="flex items-center gap-1.5"><input type="number" value="${qty}" min="1" oninput="sheetCreatorMap.set('${it.id}', Math.max(1, parseInt(this.value)||1))" class="w-16 bg-slate-800 border border-amber-500/70 rounded-lg p-1.5 text-center font-black text-amber-400 text-xs"><button type="button" onclick="sheetCreatorMap.delete('${it.id}');renderSheetCreatorItems()" class="text-rose-400 font-bold px-1.5">✕</button></div></div>`;
       }).join('');
-    };
-    window.finalizeSheetCreator = async function(createEvent = true) {
+    }
+    function finalizeSheetCreator(createEvent = true) {
       if (sheetCreatorMap.size === 0) return alert("Dodaj przynajmniej jedną pozycję.");
       const evNum = el('genSheetNum').value.trim() || '#EVENT', evDate = el('genSheetDate').value.trim() || new Date().toLocaleDateString('pl-PL'), evName = el('genSheetName').value.trim() || 'Realizacja Cateringowa';
       const payload = [];
@@ -1199,7 +1212,7 @@
       }
       sheetCreatorMap.clear(); hideModal('generateSheetModal'); if (isSelectMode) toggleSelectMode();
       renderInventory(); renderEvents(); openSheetPreviewModal({ eventNumber: evNum, eventName: evName, dispatchDate: evDate, returnDate: '', isReturn: false, items: payload });
-    };
+    }
 
     // START
     fetchAllData();
