@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>MagazynRC - WMS v7.0</title>
+  <title>MagazynRC - WMS v7.1 (Fixes)</title>
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#0f172a">
   <script src="https://cdn.tailwindcss.com"></script>
@@ -47,7 +47,7 @@
   <header class="bg-slate-800/90 backdrop-blur border-b border-slate-700/80 sticky top-0 z-30 px-3 py-2 flex items-center justify-between shadow-md">
     <div class="flex items-center space-x-2">
       <div class="bg-emerald-500 text-slate-950 font-black px-2.5 py-1 rounded-lg text-base shadow">M</div>
-      <div><h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v7.0</span></h1><p id="syncStatus" class="text-[10px] text-amber-400 font-medium leading-none mt-0.5">Inicjalizacja...</p></div>
+      <div><h1 class="font-bold text-sm leading-tight">MagazynRC <span class="text-[10px] font-normal text-emerald-400 bg-emerald-950/70 border border-emerald-700/50 px-1.5 py-0.5 rounded ml-1">v7.1</span></h1><p id="syncStatus" class="text-[10px] text-amber-400 font-medium leading-none mt-0.5">Inicjalizacja...</p></div>
     </div>
     <div class="flex items-center gap-1.5 relative">
       <button onclick="runOnlineAIClassifier(true)" class="bg-purple-950 text-purple-300 text-xs px-2.5 py-1.5 rounded-lg font-bold border border-purple-700/60 shadow hover:bg-purple-900 transition">🧠 Ucz AI</button>
@@ -68,7 +68,6 @@
     </div>
   </header>
 
-  <!-- JEDYNE UKRYTE INPUTY DO OBSŁUGI PLIKÓW -->
   <input type="file" id="shelfCountInput" accept="image/*,application/pdf" multiple class="hidden" onchange="processShelfCountImage(event, false)">
   <input type="file" id="shelfCountAppendInput" accept="image/*,application/pdf" multiple class="hidden" onchange="processShelfCountImage(event, true)">
   <input type="file" id="itemLabelPhotoInput" accept="image/*" class="hidden" onchange="handleItemLabelPhoto(event)">
@@ -91,7 +90,7 @@
   </datalist>
 
   <main class="max-w-4xl mx-auto p-3.5 space-y-4">
-    <!-- STATYSTYKI GŁÓWNE -->
+    <!-- STATYSTYKI -->
     <div class="grid grid-cols-5 gap-1.5 text-center">
       <div onclick="switchMainTab('stock')" class="bg-slate-800/80 border border-slate-700/70 p-2 rounded-xl cursor-pointer hover:bg-slate-800 transition"><p class="text-[9px] text-slate-400">W bazie</p><p id="statTotalItems" class="text-sm font-bold text-white mt-0.5">0</p></div>
       <div onclick="switchMainTab('stock')" class="bg-slate-800/80 border border-slate-700/70 p-2 rounded-xl cursor-pointer hover:bg-slate-800 transition"><p class="text-[9px] text-slate-400">Magazyn</p><p id="statTotalValue" class="text-[11px] font-black text-emerald-400 mt-1 truncate">0 zł</p></div>
@@ -116,10 +115,7 @@
       <section ondragover="handleDragOver(event, this)" ondragleave="handleDragLeave(event, this)" ondrop="handleDropFiles(event, 'SHELF')" class="bg-slate-800/90 border-2 border-dashed border-slate-700 rounded-2xl p-3.5 shadow-lg space-y-3">
         <div class="flex items-center justify-between flex-wrap gap-2">
           <div><h2 class="font-bold text-xs text-white">📷 Skaner / Szybkie dodawanie</h2></div>
-          <div class="flex gap-2">
-            <button onclick="document.getElementById('shelfCountInput').click()" class="bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl">👁️ Licz ze zdjęcia</button>
-            <button id="btnToggleCamera" onclick="toggleCamera()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-1.5 rounded-xl">Skaner QR</button>
-          </div>
+          <div class="flex gap-2"><button onclick="document.getElementById('shelfCountInput').click()" class="bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold px-3 py-1.5 rounded-xl">👁️ Licz ze zdjęcia</button><button id="btnToggleCamera" onclick="toggleCamera()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-1.5 rounded-xl">Skaner QR</button></div>
         </div>
         <div id="cameraContainer" class="hidden overflow-hidden rounded-xl bg-black border border-slate-700"><div id="reader" class="w-full"></div></div>
         <form onsubmit="handleManualBarcodeSubmit(event)" class="flex gap-2">
@@ -128,7 +124,6 @@
         </form>
       </section>
 
-      <!-- FEFO PILL -->
       <div class="flex gap-1.5 overflow-x-auto pb-0.5 text-xs">
         <button onclick="setCategoryPill('ALL')" id="pillCat_ALL" class="bg-emerald-600 text-slate-950 font-black px-3 py-1.5 rounded-xl whitespace-nowrap">Wszystko <span id="countCat_ALL" class="text-[10px]">(0)</span></button>
         <button onclick="setCategoryPill('ALCOHOL')" id="pillCat_ALCOHOL" class="bg-slate-800 text-slate-300 border border-slate-700 px-3 py-1.5 rounded-xl whitespace-nowrap">🍷 Alkohole <span id="countCat_ALCOHOL" class="text-[10px]">(0)</span></button>
@@ -142,8 +137,6 @@
         <input type="text" id="searchFilter" oninput="renderInventory()" placeholder="Szukaj produktu..." class="flex-1 min-w-[200px] bg-slate-800 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white" />
         <button id="btnToggleSelectMode" onclick="toggleSelectMode()" class="bg-indigo-500/20 border border-indigo-500/60 text-indigo-300 text-xs px-3 py-2 rounded-xl font-bold">Wybór</button>
       </div>
-
-      <!-- BELKA AKCJI (Na Event, Na RW, Usuń) -->
       <div id="bulkActionBar" class="hidden bg-slate-800 border border-indigo-500/80 rounded-xl p-2.5 flex flex-wrap gap-2 items-center justify-between">
         <div class="flex items-center gap-2"><button onclick="toggleSelectAll()" class="text-xs bg-slate-700 text-slate-200 px-2.5 py-1 rounded-lg">Zaznacz wszystko</button><span id="bulkSelectedCount" class="text-xs font-bold text-amber-400">Wybrano: 0</span></div>
         <div class="flex flex-wrap gap-2"><button onclick="openGenerateSheetModal()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-3 py-1.5 rounded-lg">Na Event</button><button onclick="openRwTransferModal()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs px-3 py-1.5 rounded-lg">Na RW</button><button onclick="deleteSelectedItems()" class="bg-rose-600 text-white font-bold text-xs px-2.5 py-1.5 rounded-lg">Usuń</button></div>
@@ -279,6 +272,7 @@
     </div>
   </div>
 
+  <!-- MODAL: KARTA POJEDYNCZEGO TOWARU -->
   <div id="actionModal" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-3 z-50">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl">
       <div class="flex justify-between items-start border-b border-slate-700 pb-2 gap-2">
@@ -309,6 +303,7 @@
     </div>
   </div>
 
+  <!-- MODAL: NOWY TOWAR (Z POLEm NA ZDJĘCIE) -->
   <div id="newItemModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50">
     <form onsubmit="saveNewItem(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">➕ Nowy Towar</h3><button type="button" onclick="hideModal('newItemModal')" class="text-slate-400 text-lg">✕</button></div>
@@ -339,10 +334,18 @@
     </form>
   </div>
   
+  <!-- MODAL: EDYCJA TOWARU (NAPRAWIONA STRUKTURA ZDJĘCIA) -->
   <div id="editItemModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50">
     <form onsubmit="saveEditedItem(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-4 space-y-3 shadow-2xl">
       <div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">✏️ Edycja Towaru</h3><button type="button" onclick="hideModal('editItemModal')" class="text-slate-400 text-lg">✕</button></div>
       <input type="hidden" id="editItemId">
+      
+      <!-- BŁĄD USUNIĘTY: Brakowało tego diva w v6.8 -->
+      <div class="flex items-center gap-3">
+        <img id="editItemPhotoPreview" src="" class="hidden w-14 h-14 rounded-xl object-cover bg-black">
+        <button type="button" onclick="document.getElementById('itemLabelPhotoInput').click(); currentLabelPhotoTarget = 'EDIT';" class="flex-1 bg-indigo-950 border border-indigo-600 text-indigo-300 text-xs font-bold py-2 px-3 rounded-xl">📷 Zmień zdjęcie (AI)</button>
+      </div>
+
       <div class="grid grid-cols-2 gap-2 text-xs">
         <div><label class="text-[10px] text-slate-400 block">Kod EAN / QR:</label><input type="text" id="editItemBarcode" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 font-mono text-white"></div>
         <div><label class="text-[10px] text-amber-400 font-bold block">Data przydatności:</label><input type="date" id="editItemExpiry" class="w-full bg-slate-900 border border-amber-600/50 rounded-lg p-2 text-center text-white"></div>
@@ -365,8 +368,42 @@
 
   <div id="inventoryAuditModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto"><div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-2xl w-full p-4 space-y-3 max-h-[95vh] flex flex-col"><div class="flex justify-between items-center border-b border-slate-700 pb-2"><div><span class="text-[9px] uppercase font-bold px-2 py-0.5 rounded bg-cyan-950 text-cyan-300">Audyt</span><h3 class="text-sm font-bold text-white mt-0.5">Spis z Natury</h3></div><button onclick="hideModal('inventoryAuditModal')" class="text-slate-400 text-xl font-bold">✕</button></div><div id="auditItemsContainer" class="flex-1 overflow-y-auto space-y-2 pr-1 max-h-[60vh]"></div><div class="flex justify-between items-center pt-2 border-t border-slate-700"><button onclick="hideModal('inventoryAuditModal')" class="px-3 py-2 rounded-xl text-xs text-slate-400">Anuluj</button><button onclick="finalizeInventoryAudit()" class="bg-emerald-500 text-slate-950 font-black px-5 py-2.5 rounded-xl text-xs">✓ Wyrównaj Stany</button></div></div></div>
   
-  <div id="editDeliveryModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto"><form onsubmit="saveEditedDelivery(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 max-h-[94vh] flex flex-col"><div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">✏️ Edytuj Fakturę</h3><button type="button" onclick="hideModal('editDeliveryModal')" class="text-slate-400 text-xl font-bold">✕</button></div><input type="hidden" id="editDelivId"><div class="flex-1 overflow-y-auto space-y-3 pr-1 text-xs"><div class="bg-slate-900 border border-slate-700 p-3 rounded-xl grid grid-cols-2 sm:grid-cols-3 gap-2"><div><label class="text-[10px] text-slate-400 block">Dostawca:</label><input type="text" id="editDelivSupplier" required class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-white"></div><div><label class="text-[10px] text-slate-400 block">Nr Faktury:</label><input type="text" id="editDelivDocNum" required class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-mono text-amber-400"></div><div><label class="text-[10px] text-emerald-300 font-bold block">👤 Przyjął:</label><input type="text" id="editDelivReceiver" class="w-full bg-slate-800 border border-emerald-700/60 rounded p-1.5 font-bold text-emerald-400"></div><div><label class="text-[10px] text-emerald-400 block">Netto prod.:</label><input type="text" id="editDelivTotalNet" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-emerald-400"></div><div><label class="text-[10px] text-cyan-300 block">Netto z kaucją:</label><input type="text" id="editDelivTotalNetWithDep" class="w-full bg-slate-800 border border-cyan-700/60 rounded p-1.5 font-bold text-cyan-300"></div><div><label class="text-[10px] text-slate-400 block">Suma Brutto:</label><input type="text" id="editDelivTotalGross" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-slate-200"></div></div><div class="space-y-1.5"><div class="flex justify-between items-center"><span class="text-[10px] text-slate-300 font-bold uppercase">Pozycje:</span><button type="button" onclick="addEditDeliveryItemRow()" class="text-[10px] bg-indigo-950 text-indigo-300 border border-indigo-700 px-2 py-0.5 rounded-lg font-bold">+ Wiersz</button></div><div id="editDelivItemsList" class="space-y-1.5"></div></div></div><div class="flex justify-end gap-2 pt-2 border-t border-slate-700"><button type="button" onclick="hideModal('editDeliveryModal')" class="px-3 py-2 rounded-xl text-xs text-slate-400">Anuluj</button><button type="submit" class="bg-indigo-600 text-white font-black px-5 py-2 rounded-xl text-xs">Zapisz zmiany</button></div></form></div>
-  
+  <!-- MODAL: EDYCJA FAKTURY (NAPRAWIONA STRUKTURA ZDJĘCIA) -->
+  <div id="editDeliveryModal" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto">
+    <form onsubmit="saveEditedDelivery(event)" class="bg-slate-800 border border-slate-700 rounded-2xl max-w-xl w-full p-4 space-y-3 max-h-[94vh] flex flex-col">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 class="text-sm font-bold text-white">✏️ Edytuj Fakturę</h3><button type="button" onclick="hideModal('editDeliveryModal')" class="text-slate-400 text-xl font-bold">✕</button></div>
+      <input type="hidden" id="editDelivId">
+      <div class="flex-1 overflow-y-auto space-y-3 pr-1 text-xs">
+        <div class="bg-slate-900 border border-slate-700 p-3 rounded-xl grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <div><label class="text-[10px] text-slate-400 block">Dostawca:</label><input type="text" id="editDelivSupplier" required class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-white"></div>
+          <div><label class="text-[10px] text-slate-400 block">Nr Faktury:</label><input type="text" id="editDelivDocNum" required class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-mono text-amber-400"></div>
+          <div><label class="text-[10px] text-emerald-300 font-bold block">👤 Przyjął:</label><input type="text" id="editDelivReceiver" class="w-full bg-slate-800 border border-emerald-700/60 rounded p-1.5 font-bold text-emerald-400"></div>
+          <div><label class="text-[10px] text-emerald-400 block">Netto prod.:</label><input type="text" id="editDelivTotalNet" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-emerald-400"></div>
+          <div><label class="text-[10px] text-cyan-300 block">Netto z kaucją:</label><input type="text" id="editDelivTotalNetWithDep" class="w-full bg-slate-800 border border-cyan-700/60 rounded p-1.5 font-bold text-cyan-300"></div>
+          <div><label class="text-[10px] text-slate-400 block">Suma Brutto:</label><input type="text" id="editDelivTotalGross" class="w-full bg-slate-800 border border-slate-700 rounded p-1.5 font-bold text-slate-200"></div>
+        </div>
+
+        <!-- BŁĄD USUNIĘTY: Tego elementu brakowało w kodzie! Przez to JS crashował podczas otwierania okienka. -->
+        <div class="space-y-1.5 border-t border-slate-700 pt-2">
+          <div class="flex justify-between items-center">
+            <span class="text-[10px] text-slate-300 font-bold uppercase">Zdjęcia:</span>
+            <button type="button" onclick="document.getElementById('editDelivPhotoInput').click()" class="text-[10px] bg-slate-700 text-slate-300 border border-slate-600 px-2 py-0.5 rounded-lg font-bold">+ Zdjęcie</button>
+          </div>
+          <div id="editDelivPhotosList" class="flex gap-2 overflow-x-auto pb-1"></div>
+        </div>
+
+        <div class="space-y-1.5 border-t border-slate-700 pt-2">
+          <div class="flex justify-between items-center"><span class="text-[10px] text-slate-300 font-bold uppercase">Pozycje:</span><button type="button" onclick="addEditDeliveryItemRow()" class="text-[10px] bg-indigo-950 text-indigo-300 border border-indigo-700 px-2 py-0.5 rounded-lg font-bold">+ Wiersz</button></div>
+          <div id="editDelivItemsList" class="space-y-1.5"></div>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-2 border-t border-slate-700">
+        <button type="button" onclick="hideModal('editDeliveryModal')" class="px-3 py-2 rounded-xl text-xs text-slate-400">Anuluj</button>
+        <button type="submit" class="bg-indigo-600 text-white font-black px-5 py-2 rounded-xl text-xs">Zapisz zmiany</button>
+      </div>
+    </form>
+  </div>
+
   <div id="sheetPreviewModal" class="fixed inset-0 bg-black/90 backdrop-blur-md hidden items-center justify-center p-2.5 z-50 overflow-y-auto"><div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-3xl w-full p-4 space-y-3 max-h-[95vh] flex flex-col"><div class="flex justify-between items-center border-b border-slate-700 pb-2"><h3 id="sheetPreviewModalTitle" class="text-sm font-bold text-white">Podgląd Dokumentu</h3><button onclick="hideModal('sheetPreviewModal')" class="text-slate-400 text-xl font-bold">✕</button></div><div class="flex-1 overflow-auto bg-white p-2 rounded-xl border border-slate-600 text-black"><div id="sheetPreviewContainer"></div></div><div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-700"><button onclick="hideModal('sheetPreviewModal')" class="px-3 py-2 rounded-xl text-xs text-slate-300">Zamknij</button><div class="flex gap-2"><button onclick="downloadCurrentSheetAsExcel()" class="bg-emerald-500 text-slate-950 font-black px-4 py-2 rounded-xl text-xs">📥 Pobierz plik (.xls)</button><button onclick="triggerBrowserPrintSheet()" class="bg-amber-500 text-slate-950 font-black px-4 py-2 rounded-xl text-xs">🖨️ Drukuj / PDF</button></div></div></div></div>
   
   <div id="imagePreviewModal" class="fixed inset-0 bg-black/95 backdrop-blur-md hidden items-center justify-center p-3 z-50 overflow-y-auto"><div class="max-w-xl w-full bg-slate-900 border border-slate-700 rounded-2xl p-3 flex flex-col items-center"><div class="w-full flex justify-between items-center border-b border-slate-800 pb-2 mb-2"><h4 id="imagePreviewTitle" class="text-xs font-bold text-white truncate">Podgląd</h4><button onclick="closeImagePreviewModal()" class="text-slate-400 text-xl font-black">✕</button></div><div id="imagePreviewTabs" class="w-full flex gap-2 mb-2 hidden"></div><div class="w-full flex items-center justify-center max-h-[75vh] overflow-auto bg-black/60 rounded-xl p-1"><img id="imagePreviewElement" src="" class="max-w-full max-h-[72vh] object-contain rounded-lg"></div><div class="w-full flex justify-end pt-2"><button onclick="closeImagePreviewModal()" class="bg-slate-800 text-white font-bold px-4 py-2 rounded-xl text-xs">Zamknij</button></div></div></div>
@@ -918,23 +955,45 @@
       }).join('');
     };
     window.openDeliveryPreview = function(id) { const d = deliveries.find(x => String(x.id) === String(id)); if (!d) return; const imgs = parseDeliveryImages(d.image_url); if (imgs.length > 0) openImagePreviewModal(`${d.doc_number}`, imgs); };
+    
+    // NAPRAWIONA FUNKCJA OTWIERANIA MODALA EDYCJI FAKTURY
     window.openEditDeliveryModal = function(id) {
       const d = deliveries.find(x => String(x.id) === String(id)); if (!d) return;
       let parsed = { items: [], deposits: [], receiver: d.receiver || '' };
       try { const raw = typeof d.items_json === 'string' ? JSON.parse(d.items_json) : (d.items_json || {}); if (Array.isArray(raw)) parsed.items = raw; else { parsed.items = raw.items || []; parsed.deposits = raw.deposits || []; parsed.receiver = raw.receiver || d.receiver || ''; } } catch (e) {}
-      el('editDelivId').value = d.id; el('editDelivSupplier').value = d.supplier || ''; el('editDelivDocNum').value = d.doc_number || ''; el('editDelivReceiver').value = parsed.receiver || ''; el('editDelivTotalNet').value = d.total_net || '0.00'; el('editDelivTotalNetWithDep').value = d.total_net_with_dep || '0.00'; el('editDelivTotalGross').value = d.total_gross || '0.00';
-      editingDeliveryItems = JSON.parse(JSON.stringify(parsed.items || [])); editingDeliveryPhotos = parseDeliveryImages(d.image_url); renderEditDeliveryItems(); renderEditDeliveryPhotos(); showModal('editDeliveryModal');
+      
+      const modalIdField = document.getElementById('editDelivId');
+      if(modalIdField) {
+        modalIdField.value = d.id; 
+        document.getElementById('editDelivSupplier').value = d.supplier || ''; 
+        document.getElementById('editDelivDocNum').value = d.doc_number || ''; 
+        document.getElementById('editDelivReceiver').value = parsed.receiver || ''; 
+        document.getElementById('editDelivTotalNet').value = d.total_net || '0.00'; 
+        document.getElementById('editDelivTotalNetWithDep').value = d.total_net_with_dep || '0.00'; 
+        document.getElementById('editDelivTotalGross').value = d.total_gross || '0.00';
+        editingDeliveryItems = JSON.parse(JSON.stringify(parsed.items || [])); 
+        editingDeliveryPhotos = parseDeliveryImages(d.image_url); 
+        renderEditDeliveryItems(); 
+        renderEditDeliveryPhotos(); 
+        
+        const modal = document.getElementById('editDeliveryModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+      }
     };
+    
     window.renderEditDeliveryItems = function() { el('editDelivItemsList').innerHTML = editingDeliveryItems.map((it, idx) => `<div class="grid grid-cols-12 gap-1.5 items-center bg-slate-900 p-1.5 rounded-lg"><input type="text" value="${(it.name || '').replace(/"/g, '&quot;')}" oninput="editingDeliveryItems[${idx}].name=this.value" class="col-span-6 bg-slate-800 border border-slate-700 rounded p-1 text-white"><input type="number" value="${it.qty || 0}" oninput="editingDeliveryItems[${idx}].qty=parseFloat(this.value)||0" class="col-span-2 bg-slate-800 border border-slate-700 rounded p-1 text-center text-emerald-400 font-bold"><input type="number" step="0.01" value="${it.price || 0}" oninput="editingDeliveryItems[${idx}].price=parseFloat(this.value)||0" class="col-span-3 bg-slate-800 border border-slate-700 rounded p-1 text-center text-white"><button type="button" onclick="editingDeliveryItems.splice(${idx},1);renderEditDeliveryItems()" class="col-span-1 text-rose-400 font-bold">✕</button></div>`).join(''); };
     window.addEditDeliveryItemRow = function() { editingDeliveryItems.push({ name: 'Nowa pozycja', qty: 1, unit: 'szt.', price: 0 }); renderEditDeliveryItems(); };
     window.renderEditDeliveryPhotos = function() { el('editDelivPhotosList').innerHTML = editingDeliveryPhotos.map((src, idx) => `<div class="relative flex-shrink-0"><img src="${src}" class="h-16 w-16 object-cover rounded-lg border border-slate-600"><button type="button" onclick="editingDeliveryPhotos.splice(${idx},1);renderEditDeliveryPhotos()" class="absolute -top-1 -right-1 bg-rose-600 text-white rounded-full w-5 h-5 text-[10px] font-bold">✕</button></div>`).join(''); };
     window.handleEditDeliveryAddPhoto = async function(e) { const file = e.target.files[0]; if (!file) return; prepareFileForGemini(file).then(p => { editingDeliveryPhotos.push(p.previewUrl); renderEditDeliveryPhotos(); }).catch(()=>{}); e.target.value = ''; };
+    
     window.saveEditedDelivery = async function(e) {
       e.preventDefault(); const d = deliveries.find(x => String(x.id) === String(el('editDelivId').value)); if (!d) return; let depositsBackup = [];
       try { const raw = typeof d.items_json === 'string' ? JSON.parse(d.items_json) : (d.items_json || {}); depositsBackup = raw.deposits || []; } catch (err) {}
       d.supplier = el('editDelivSupplier').value.trim(); d.doc_number = el('editDelivDocNum').value.trim(); d.receiver = el('editDelivReceiver').value.trim(); d.total_net = el('editDelivTotalNet').value.trim(); d.total_net_with_dep = el('editDelivTotalNetWithDep').value.trim(); d.total_gross = el('editDelivTotalGross').value.trim(); d.items_json = JSON.stringify({ items: editingDeliveryItems, deposits: depositsBackup, receiver: d.receiver }); d.image_url = JSON.stringify(editingDeliveryPhotos);
       safeSetLocal('magazyn_offline_deliveries', deliveries); renderDeliveries(); hideModal('editDeliveryModal'); if (isCloudOnline) { apiRequest(`/deliveries?id=eq.${d.id}`, 'PATCH', d).catch(()=>{}); }
     };
+    
     window.deleteDelivery = async function(id) {
       const d = deliveries.find(x => String(x.id) === String(id)); if (!d) return; if (!confirm(`Usunąć fakturę i cofnąć towary?`)) return;
       try {
@@ -960,7 +1019,10 @@
     };
     window.openNewDepositModal = function() { el('depModalId').value = ''; el('depModalName').value = 'Kaucja PET / Puszka 0,50 zł'; el('depModalCategory').value = 'PET_CAN_050'; el('depModalPrice').value = '0.50'; el('depModalQty').value = '12'; showModal('depositModal'); };
     window.handleDepCategoryPreset = function() { const c = el('depModalCategory').value; if (c === 'PET_CAN_050') { el('depModalPrice').value = '0.50'; el('depModalName').value = 'Kaucja PET / Puszka 0,50 zł'; } else if (c === 'BUTELKA_SZKLO') { el('depModalPrice').value = '1.00'; el('depModalName').value = 'Kaucja Butelka Szkło 1,00 zł'; } else if (c === 'SKRZYNKA') { el('depModalPrice').value = '15.00'; el('depModalName').value = 'Skrzynka plastikowa zwrotna'; } else { el('depModalPrice').value = '50.00'; el('depModalName').value = 'Paleta EURO'; } };
-    window.saveDepositModal = async function(e) { e.preventDefault(); const name = el('depModalName').value.trim(), category = el('depModalCategory').value, unit_price = parseFloat(el('depModalPrice').value) || 0, qty = parseInt(el('depModalQty').value) || 0; const ex = findBestDepositMatch(name, unit_price); if (ex) { ex.qty = (Number(ex.qty) || 0) + qty; if (isCloudOnline) { apiRequest(`/deposits?id=eq.${ex.id}`, 'PATCH', { qty: ex.qty }).catch(()=>{}); } } else { const nd = { id: Date.now().toString(), name, category, unit_price, qty, created_at: new Date() }; deposits.push(nd); if (isCloudOnline) { apiRequest('/deposits', 'POST', nd).catch(()=>{}); } } safeSetLocal('magazyn_offline_deposits', deposits); renderDeposits(); hideModal('depositModal'); };
+    window.saveDepositModal = async function(e) {
+      e.preventDefault(); const name = el('depModalName').value.trim(), category = el('depModalCategory').value, unit_price = parseFloat(el('depModalPrice').value) || 0, qty = parseInt(el('depModalQty').value) || 0; const ex = findBestDepositMatch(name, unit_price); 
+      if (ex) { ex.qty = (Number(ex.qty) || 0) + qty; if (isCloudOnline) { apiRequest(`/deposits?id=eq.${ex.id}`, 'PATCH', { qty: ex.qty }).catch(()=>{}); } } else { const nd = { id: Date.now().toString(), name, category, unit_price, qty, created_at: new Date() }; deposits.push(nd); if (isCloudOnline) { apiRequest('/deposits', 'POST', nd).catch(()=>{}); } } safeSetLocal('magazyn_offline_deposits', deposits); renderDeposits(); hideModal('depositModal'); 
+    };
     window.adjustDepositQty = async function(id, delta) { const d = deposits.find(x => String(x.id) === String(id)); if (!d) return; d.qty = Math.max(0, (Number(d.qty) || 0) + delta); safeSetLocal('magazyn_offline_deposits', deposits); renderDeposits(); if (isCloudOnline) { apiRequest(`/deposits?id=eq.${d.id}`, 'PATCH', { qty: d.qty }).catch(()=>{}); } };
     window.deleteDeposit = async function(id) { if (!confirm("Usunąć tę pozycję kaucyjną?")) return; deposits = deposits.filter(x => String(x.id) !== String(id)); safeSetLocal('magazyn_offline_deposits', deposits); renderDeposits(); if (isCloudOnline) { apiRequest(`/deposits?id=eq.${id}`, 'DELETE').catch(()=>{}); } };
 
@@ -1048,165 +1110,7 @@
     window.openImagePreviewModal = function(title, images) { el('imagePreviewTitle').innerText = title || 'Podgląd'; const tabs = el('imagePreviewTabs'); if (images.length > 1) { tabs.classList.remove('hidden'); tabs.innerHTML = images.map((src, i) => `<button onclick="el('imagePreviewElement').src='${src}'" class="bg-slate-800 border border-slate-600 text-xs px-3 py-1 rounded-lg text-white font-bold">Strona ${i + 1}</button>`).join(''); } else tabs.classList.add('hidden'); el('imagePreviewElement').src = images[0] || ''; showModal('imagePreviewModal'); };
     window.closeImagePreviewModal = function() { hideModal('imagePreviewModal'); };
     
-    window.switchMainTab = function(tab) {
-      const allTabs = ['Stock', 'Events', 'Rw', 'Deliveries', 'Deposits', 'Logs', 'Alerts'];
-      allTabs.forEach(t => {
-        el(`view${t}`)?.classList.add('hidden');
-        if (el(`tab${t}HeaderBtn`)) el(`tab${t}HeaderBtn`).className = 'pb-2 border-b-2 border-transparent text-slate-400 whitespace-nowrap font-bold';
-        if (el(`navBtn${t}`)) el(`navBtn${t}`).className = 'flex flex-col items-center gap-1 text-slate-400 py-1 px-2';
-      });
-      const styles = { stock: ['Stock', 'emerald'], events: ['Events', 'blue'], rw: ['Rw', 'amber'], deliveries: ['Deliveries', 'indigo'], deposits: ['Deposits', 'cyan'], logs: ['Logs', 'purple'], alerts: ['Alerts', 'rose'] };
-      const [name, col] = styles[tab] || styles.stock;
-      el(`view${name}`)?.classList.remove('hidden');
-      if (el(`tab${name}HeaderBtn`)) el(`tab${name}HeaderBtn`).className = `pb-2 border-b-2 border-${col}-500 text-${col}-400 font-bold whitespace-nowrap`;
-      if (el(`navBtn${name}`)) el(`navBtn${name}`).className = `flex flex-col items-center gap-1 text-${col}-400 py-1 px-2`;
-
-      if (tab === 'stock') renderInventory();
-      else if (tab === 'events') renderEvents();
-      else if (tab === 'rw') renderRwTransfers();
-      else if (tab === 'deliveries') renderDeliveries();
-      else if (tab === 'deposits') renderDeposits();
-      else if (tab === 'logs') renderStockLogs();
-      else if (tab === 'alerts') renderPriceAlerts();
-      triggerScanFeedback();
-    };
-
-    window.handleItemContextMenu = function(e, id) { e.preventDefault(); contextMenuItemId = id; selectedItemId = id; const m = el('customContextMenu'); m.classList.remove('hidden'); m.style.left = `${Math.min(e.clientX, window.innerWidth - 230)}px`; m.style.top = `${Math.min(e.clientY, window.innerHeight - 200)}px`; };
-    window.hideContextMenu = function() { el('customContextMenu')?.classList.add('hidden'); };
-    window.contextActionEdit = function() { hideContextMenu(); if (contextMenuItemId) openEditModal(contextMenuItemId); };
-    window.contextActionOpenStock = function() { hideContextMenu(); if (contextMenuItemId) openActionModal(contextMenuItemId); };
-    window.contextActionPrintQR = function() { hideContextMenu(); if (contextMenuItemId) { selectedItemId = contextMenuItemId; openPrintLabelModal(); } };
-    window.contextActionDelete = function() { hideContextMenu(); if (contextMenuItemId) { selectedItemId = contextMenuItemId; deleteCurrentItem(); } };
-    window.handleItemCardClick = function(e, id) { if (isSelectMode) { toggleSelectItem(id, !selectedItemIds.has(id)); renderInventory(); } else openActionModal(id); };
-
-    window.toggleSelectMode = function() {
-      isSelectMode = !isSelectMode; const b = el('btnToggleSelectMode'), bar = el('bulkActionBar');
-      if (isSelectMode) { b.innerHTML = "✕ Zakończ"; bar.classList.remove('hidden'); }
-      else { b.innerHTML = "Wybór"; bar.classList.add('hidden'); selectedItemIds.clear(); }
-      el('bulkSelectedCount').innerText = `Wybrano: ${selectedItemIds.size}`; renderInventory();
-    };
-    window.toggleSelectItem = function(id, c) { if (c) selectedItemIds.add(id); else selectedItemIds.delete(id); el('bulkSelectedCount').innerText = `Wybrano: ${selectedItemIds.size}`; };
-    window.toggleSelectAll = function() { if (selectedItemIds.size === inventory.length) selectedItemIds.clear(); else inventory.forEach(i => selectedItemIds.add(i.id)); el('bulkSelectedCount').innerText = `Wybrano: ${selectedItemIds.size}`; renderInventory(); };
-    window.deleteSelectedItems = function() {
-      if (selectedItemIds.size === 0 || !confirm(`Usunąć ${selectedItemIds.size} pozycji?`)) return;
-      const ids = Array.from(selectedItemIds); inventory = inventory.filter(i => !selectedItemIds.has(i.id));
-      safeSetLocal('magazyn_offline_items', inventory); toggleSelectMode(); renderInventory();
-      if (isCloudOnline) { ids.forEach(id => { apiRequest(`/inventory?id=eq.${id}`, 'DELETE').catch(()=>{}); }); }
-    };
-
-    window.buildRoyalCateringSheetHTML = function(data) {
-      const isRw = data.isRwDoc;
-      const title = isRw ? "DOKUMENT RW<br>ROZCHÓD WEWNĘTRZNY / KOSZTY" : (data.isReturn ? "ROZLICZENIE ZWROTU<br>I KONSUMPCJI<br>Z REALIZACJI" : "WYDANIE NAPOJÓW<br>I ALKOHOLU<br>NA REALIZACJĘ");
-      const items = data.items || [];
-      let rows = items.map((it, idx) => `<tr style="height:24px;text-align:center;"><td style="border:1px solid #000;font-weight:bold;">${idx + 1}</td><td style="border:1px solid #000;text-align:left;padding-left:6px;font-weight:bold;">${it.name}</td><td style="border:1px solid #000;">${it.unit || 'szt.'}</td><td style="border:1px solid #000;font-weight:bold;font-size:12px;">${it.dispatched !== undefined ? it.dispatched : ''}</td>${isRw ? `<td style="border:1px solid #000;font-weight:bold;">${it.netPrice ? Number(it.netPrice).toFixed(2)+' zł' : '-'}</td><td colspan="5" style="border:1px solid #000;font-weight:bold;text-align:right;padding-right:8px;">${it.rowNet ? Number(it.rowNet).toFixed(2)+' zł' : '-'}</td>` : `<td style="border:1px solid #000;">&nbsp;</td><td style="border:1px solid #000;background:#d9ead3;">&nbsp;</td><td style="border:1px solid #000;background:#d9ead3;font-weight:bold;">${data.isReturn && it.consumed !== undefined ? it.consumed : ''}</td><td style="border:1px solid #000;background:#d9ead3;font-weight:bold;">${data.isReturn && it.returned !== undefined ? it.returned : ''}</td><td style="border:1px solid #000;background:#d9ead3;">&nbsp;</td><td style="border:1px solid #000;">&nbsp;</td>`}</tr>`).join('');
-      for (let i = 0; i < Math.max(0, 15 - items.length); i++) { rows += `<tr style="height:24px;text-align:center;"><td style="border:1px solid #000;">${items.length + i + 1}</td><td style="border:1px solid #000;">&nbsp;</td><td style="border:1px solid #000;">&nbsp;</td><td style="border:1px solid #000;">&nbsp;</td>${isRw ? '<td colspan="6" style="border:1px solid #000;">&nbsp;</td>' : '<td style="border:1px solid #000;">&nbsp;</td><td style="border:1px solid #000;background:#d9ead3;">&nbsp;</td><td style="border:1px solid #000;background:#d9ead3;">&nbsp;</td><td style="border:1px solid #000;background:#d9ead3;">&nbsp;</td><td style="border:1px solid #000;background:#d9ead3;">&nbsp;</td><td style="border:1px solid #000;">&nbsp;</td>'}</tr>`; }
-      return `<div style="border:2px solid #000;width:100%;box-sizing:border-box;background:white;color:black;font-family:Arial,sans-serif;"><table style="width:100%;border-collapse:collapse;text-align:center;font-size:11px;"><tr><td rowspan="4" style="width:20%;border:2px solid #000;font-size:15px;font-weight:bold;padding:4px;">ROYAL CATERING</td><td colspan="2" style="background:#ffff00;font-weight:bold;border:1px solid #000;padding:4px;">DATA WYDANIA:</td><td rowspan="4" style="width:30%;background:#ffff00;font-size:12px;font-weight:900;border:2px solid #000;padding:5px;">${title}</td><td colspan="2" style="background:#ffff00;font-weight:bold;border:1px solid #000;padding:4px;">CEL / ODBIORCA:</td></tr><tr><td colspan="2" style="border:1px solid #000;font-weight:bold;padding:4px;">${data.dispatchDate || '-'}</td><td colspan="2" style="border:1px solid #000;padding:4px;font-weight:bold;">${isRw ? (data.eventName || 'Użytek wewnętrzny') : (data.returnDate || '-')}</td></tr><tr><td colspan="2" style="background:#ffff00;font-weight:bold;border:1px solid #000;padding:4px;">DOKUMENT, #NUMER:</td><td colspan="2" style="border:1px solid #000;padding:4px;">&nbsp;</td></tr><tr><td colspan="2" style="border:1px solid #000;font-weight:bold;padding:4px;">${data.eventNumber || ''} ${isRw ? '' : data.eventName}</td><td colspan="2" style="border:1px solid #000;padding:4px;">&nbsp;</td></tr></table><table style="width:100%;border-collapse:collapse;font-size:10px;"><thead><tr style="background:#ffff00;font-weight:bold;text-align:center;"><th style="border:1px solid #000;width:4%;padding:4px;">Nr</th><th style="border:1px solid #000;width:36%;padding:4px;text-align:left;">NAZWA</th><th style="border:1px solid #000;width:6%;padding:4px;">Jedn.</th><th style="border:1px solid #000;width:8%;padding:4px;">Ilość</th>${isRw ? '<th style="border:1px solid #000;width:12%;padding:4px;">Cena netto</th><th colspan="5" style="border:1px solid #000;width:34%;padding:4px;">Wartość netto</th>' : '<th style="border:1px solid #000;width:9%;padding:4px;">Podpis Magazyn</th><th style="border:1px solid #000;width:9%;background:#d9ead3;padding:4px;">Sprawdzenie</th><th style="border:1px solid #000;width:9%;background:#d9ead3;padding:4px;">Konsumpcja</th><th style="border:1px solid #000;width:7%;background:#d9ead3;padding:4px;">Zwrot</th><th style="border:1px solid #000;width:6%;background:#d9ead3;padding:4px;">Podpis</th><th style="border:1px solid #000;width:6%;padding:4px;">Odbiór</th>'}</tr></thead><tbody>${rows}</tbody></table></div>`;
-    };
-
-    window.openSheetPreviewModal = function(sheetData) {
-      currentPreviewSheetData = sheetData;
-      const html = buildRoyalCateringSheetHTML(sheetData);
-      el('sheetPreviewModalTitle').innerText = `${sheetData.isRwDoc ? 'Dokument RW' : (sheetData.isReturn ? 'Rozliczenie' : 'Karta Wydania')}: ${sheetData.eventNumber} ${sheetData.eventName}`;
-      el('sheetPreviewContainer').innerHTML = html; el('printableSheet').innerHTML = html; showModal('sheetPreviewModal');
-    };
-    window.triggerBrowserPrintSheet = function() { document.body.classList.remove('print-mode-qr'); document.body.classList.add('print-mode-sheet'); window.print(); };
-    window.downloadCurrentSheetAsExcel = function() {
-      if (!currentPreviewSheetData) return;
-      const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"></head><body>${buildRoyalCateringSheetHTML(currentPreviewSheetData)}</body></html>`;
-      const blob = new Blob(['\uFEFF' + html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
-      const link = document.createElement('a'); link.href = URL.createObjectURL(blob);
-      link.download = `${(currentPreviewSheetData.isRwDoc ? 'Dokument_RW_' : (currentPreviewSheetData.isReturn ? 'Rozliczenie_' : 'Karta_Wydania_')) + currentPreviewSheetData.eventNumber}.xls`.replace(/[^a-zA-Z0-9._-]/g, '_');
-      link.click();
-    };
-
-    window.openRwTransferModal = function(allowEmpty = false) {
-      if (!allowEmpty && selectedItemIds.size === 0 && rwCreatorMap.size === 0) return alert("Zaznacz pozycje.");
-      selectedItemIds.forEach(id => { if (!rwCreatorMap.has(String(id))) { const it = inventory.find(x => String(x.id) === String(id)); rwCreatorMap.set(String(id), Math.min(it?.qty || 1, 1) || 1); } });
-      el('rwTransferNum').value = 'RW-' + String(rwTransfers.length + 1).padStart(2, '0') + '/' + new Date().getFullYear().toString().slice(-2);
-      el('rwTransferDate').value = new Date().toLocaleDateString('pl-PL'); el('rwTransferDestination').value = '';
-      el('rwTransferAddSelect').innerHTML = `<option value="">-- Wybierz towar (${inventory.length}) --</option>` + inventory.map(it => `<option value="${it.id}">[${it.category}] ${it.name} (Stan: ${it.qty} ${it.unit})</option>`).join('');
-      renderRwCreatorItems(); showModal('rwTransferModal');
-    };
-    window.addItemToRwCreator = function() {
-      const id = el('rwTransferAddSelect').value; if (!id) return;
-      const it = inventory.find(x => String(x.id) === String(id)); if (!it) return;
-      rwCreatorMap.set(String(id), (rwCreatorMap.get(String(id)) || 0) + 1);
-      el('rwTransferAddSelect').value = ''; renderRwCreatorItems();
-    };
-    window.renderRwCreatorItems = function() {
-      const list = el('rwTransferItemsList');
-      if (rwCreatorMap.size === 0) { list.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs">Lista jest pusta. Wybierz towar powyżej.</div>`; el('rwTransferTotalValLabel').innerText = '0.00 zł netto'; return; }
-      let sum = 0;
-      list.innerHTML = Array.from(rwCreatorMap.entries()).map(([id, qty], idx) => {
-        const it = inventory.find(x => String(x.id) === String(id)); if (!it) return '';
-        const rowVal = qty * (Number(it.price) || 0); sum += rowVal;
-        return `<div class="bg-slate-900 border border-slate-700 rounded-xl p-2.5 flex items-center justify-between text-xs gap-2"><div class="flex-1 truncate"><span class="font-bold text-white block truncate">${idx + 1}. ${it.name}</span><span class="text-[10px] text-slate-400">Magazyn: ${it.qty} ${it.unit} • Koszt: ${Number(it.price).toFixed(2)} zł</span></div><div class="flex items-center gap-1.5"><span class="text-[10px] text-amber-300 font-bold">${rowVal.toFixed(2)} zł</span><input type="number" value="${qty}" min="1" max="${it.qty || 9999}" oninput="rwCreatorMap.set('${it.id}', Math.max(1, parseInt(this.value)||1)); renderRwCreatorItems();" class="w-16 bg-slate-800 border border-amber-500/70 rounded-lg p-1.5 text-center font-black text-amber-400 text-xs"><button type="button" onclick="rwCreatorMap.delete('${it.id}'); renderRwCreatorItems();" class="text-rose-400 font-bold px-1.5">✕</button></div></div>`;
-      }).join('');
-      el('rwTransferTotalValLabel').innerText = sum.toFixed(2) + ' zł netto';
-    };
-    window.finalizeRwTransfer = async function() {
-      if (rwCreatorMap.size === 0) return alert("Dodaj przynajmniej jedną pozycję do RW.");
-      const rwNum = el('rwTransferNum').value.trim() || 'RW', rwDate = el('rwTransferDate').value.trim() || new Date().toLocaleDateString('pl-PL'), rwDest = el('rwTransferDestination').value.trim() || 'Biuro / Baza';
-      const payload = []; let totalNetVal = 0;
-      for (const [id, qty] of rwCreatorMap.entries()) {
-        const it = inventory.find(x => String(x.id) === String(id)); if (!it) continue;
-        const p = Number(it.price) || 0; const rowVal = qty * p; totalNetVal += rowVal;
-        payload.push({ itemId: it.id, name: it.name, transferredQty: qty, returnedQty: 0, unit: it.unit || 'szt.', netPrice: p, rowNet: rowVal });
-        it.qty = Math.max(0, it.qty - qty); recordStockLog(it.id, it.name, 'Rozchód RW', -qty, `${rwNum} • ${rwDest}`);
-        if (isCloudOnline) { apiRequest(`/inventory?id=eq.${it.id}`, 'PATCH', { qty: it.qty, updated_at: new Date() }).catch(()=>{}); }
-      }
-      const newTransfer = { id: Date.now().toString(), transfer_number: rwNum, destination: rwDest, transfer_date: rwDate, total_net_value: totalNetVal.toFixed(2), items_json: payload, created_at: new Date() };
-      rwTransfers.unshift(newTransfer); safeSetLocal('magazyn_offline_items', inventory); safeSetLocal('magazyn_offline_rw_transfers', rwTransfers);
-      rwCreatorMap.clear(); hideModal('rwTransferModal'); if (isSelectMode) toggleSelectMode();
-      renderInventory(); renderRwTransfers(); switchMainTab('rw'); openSheetPreviewModal({ eventNumber: newTransfer.transfer_number, eventName: newTransfer.destination, dispatchDate: newTransfer.transfer_date, isReturn: false, isRwDoc: true, items: payload }); alert(`🏢 Zarejestrowano RW (${rwDest})!`);
-    };
-
-    window.openCreatorFromEventsTab = function() { sheetCreatorMap.clear(); openGenerateSheetModal(true); };
-    window.openGenerateSheetModal = function(allowEmpty = false) {
-      selectedItemIds.forEach(id => { if (!sheetCreatorMap.has(String(id))) { const it = inventory.find(x => String(x.id) === String(id)); sheetCreatorMap.set(String(id), Math.min(it?.qty || 12, 12) || 1); } });
-      if (!allowEmpty && sheetCreatorMap.size === 0) return alert("Wybierz pozycje z listy.");
-      el('genSheetNum').value = '#' + Math.floor(100 + Math.random() * 899);
-      el('genSheetDate').value = new Date().toLocaleDateString('pl-PL'); el('genSheetName').value = '';
-      el('genSheetAddSelect').innerHTML = `<option value="">-- Wybierz towar (${inventory.length}) --</option>` + inventory.map(it => `<option value="${it.id}">[${it.category}] ${it.name} (Stan: ${it.qty})</option>`).join('');
-      renderSheetCreatorItems(); showModal('generateSheetModal');
-    };
-    window.addItemToSheetCreator = function() {
-      const id = el('genSheetAddSelect').value; if (!id) return;
-      const it = inventory.find(x => String(x.id) === String(id)); if (!it) return;
-      sheetCreatorMap.set(String(id), (sheetCreatorMap.get(String(id)) || 0) + (Math.min(it.qty, 6) || 1));
-      el('genSheetAddSelect').value = ''; renderSheetCreatorItems();
-    };
-    window.renderSheetCreatorItems = function() {
-      const list = el('genSheetItemsList');
-      if (sheetCreatorMap.size === 0) { list.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs">Wybierz towar powyżej.</div>`; return; }
-      list.innerHTML = Array.from(sheetCreatorMap.entries()).map(([id, qty], idx) => {
-        const it = inventory.find(x => String(x.id) === String(id)); if (!it) return '';
-        return `<div class="bg-slate-900 border border-slate-700 rounded-xl p-2.5 flex items-center justify-between text-xs gap-2"><div class="flex-1 truncate"><span class="font-bold text-white block truncate">${idx + 1}. ${it.name}</span><span class="text-[10px] text-slate-400">Stan: ${it.qty} ${it.unit}</span></div><div class="flex items-center gap-1.5"><input type="number" value="${qty}" min="1" oninput="sheetCreatorMap.set('${it.id}', Math.max(1, parseInt(this.value)||1))" class="w-16 bg-slate-800 border border-amber-500/70 rounded-lg p-1.5 text-center font-black text-amber-400 text-xs"><button type="button" onclick="sheetCreatorMap.delete('${it.id}');renderSheetCreatorItems()" class="text-rose-400 font-bold px-1.5">✕</button></div></div>`;
-      }).join('');
-    };
-    window.finalizeSheetCreator = async function(createEvent = true) {
-      if (sheetCreatorMap.size === 0) return alert("Dodaj przynajmniej jedną pozycję.");
-      const evNum = el('genSheetNum').value.trim() || '#EVENT', evDate = el('genSheetDate').value.trim() || new Date().toLocaleDateString('pl-PL'), evName = el('genSheetName').value.trim() || 'Realizacja Cateringowa';
-      const payload = [];
-      for (const [id, qty] of sheetCreatorMap.entries()) {
-        const it = inventory.find(x => String(x.id) === String(id)); if (!it) continue;
-        payload.push({ name: it.name, dispatched: qty, unit: it.unit || 'szt.', netPrice: it.price || 0 });
-        if (createEvent) {
-          it.qty = Math.max(0, it.qty - qty); it.inField = (it.inField || 0) + qty;
-          recordStockLog(it.id, it.name, 'Event Wyjazd', -qty, `${evNum} ${evName}`);
-          if (isCloudOnline) { apiRequest(`/inventory?id=eq.${it.id}`, 'PATCH', { qty: it.qty, in_field: it.inField, updated_at: new Date() }).catch(()=>{}); }
-        }
-      }
-      if (createEvent) {
-        const newEv = { id: Date.now().toString(), event_number: evNum, event_name: evName, dispatch_date: evDate, return_date: '', status: 'W trakcie', items_json: payload, dispatch_image: '', return_image: '', created_at: new Date() };
-        events.unshift(newEv); safeSetLocal('magazyn_offline_items', inventory); safeSetLocal('magazyn_offline_events', events);
-        if (isCloudOnline) { apiRequest('/events', 'POST', newEv).catch(()=>{}); }
-      }
-      sheetCreatorMap.clear(); hideModal('generateSheetModal'); if (isSelectMode) toggleSelectMode();
-      renderInventory(); renderEvents(); openSheetPreviewModal({ eventNumber: evNum, eventName: evName, dispatchDate: evDate, returnDate: '', isReturn: false, items: payload });
-    };
-
-    // START
+    // --- Inicjalizacja Start ---
     fetchAllData();
   </script>
 </body>
