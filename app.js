@@ -1253,4 +1253,3 @@ window.finalizeSheetCreator = async function(createEvent = true) {
   sheetCreatorMap.clear(); hideModal('generateSheetModal'); if (isSelectMode) toggleSelectMode();
   renderInventory(); renderEvents(); openSheetPreviewModal({ eventNumber: evNum, eventName: evName, dispatchDate: evDate, returnDate: '', isReturn: false, items: payload });
 };
-```
