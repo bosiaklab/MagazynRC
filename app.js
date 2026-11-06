@@ -1,197 +1,44 @@
-```javascript
 const VALID_PINS = ['1114', '2026', 'Royal2026'];
 const SUPABASE_BASE_URL = 'https://gojacqzjkrfjlnwokyeg.supabase.co/rest/v1';
 const SUPABASE_KEY = 'sb_publishable_EuUrE98PR8SAVwnrIMP60g_RUAL0KSp';
 const GEMINI_API_KEY = 'AQ.Ab8RN6JQHVTxqmEE-mAigOjJGt4ghfMGxGYDTjNUt0MGeq2f5Q';
 
-// --- BEZPIECZNE FUNKCJE DOM (ZAPOBIEGAJĄ CRASHOM) ---
 function el(id) { return document.getElementById(id); }
 function safeVal(id, val) { const e = el(id); if (e) { if (val !== undefined) e.value = val; return e.value; } return ''; }
 function safeText(id, val) { const e = el(id); if (e) { if (val !== undefined) e.innerText = val; return e.innerText; } return ''; }
-
 function showModal(id) { const m = el(id); if (m) { m.classList.remove('hidden'); m.classList.add('flex'); } }
 function hideModal(id) { const m = el(id); if (m) { m.classList.add('hidden'); m.classList.remove('flex'); } }
 
-// --- AUTORYZACJA ---
 function checkAuth() {
-  if (localStorage.getItem('magazyn_auth_pin') === 'true') { el('authOverlay')?.classList.add('hidden'); document.body.style.overflow = ''; }
-  else { el('authOverlay')?.classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+  if (localStorage.getItem('magazyn_auth_pin') === 'true') { 
+    el('authOverlay')?.classList.add('hidden'); 
+    document.body.style.overflow = ''; 
+  } else { 
+    el('authOverlay')?.classList.remove('hidden'); 
+    document.body.style.overflow = 'hidden'; 
+  }
 }
 
 function handleLogin(e) {
-  e.preventDefault(); const pin = safeVal('authPin').trim();
-  if (VALID_PINS.includes(pin)) { localStorage.setItem('magazyn_auth_pin', 'true'); el('authError')?.classList.add('hidden'); el('authOverlay')?.classList.add('hidden'); document.body.style.overflow = ''; }
-  else { el('authError')?.classList.remove('hidden'); safeVal('authPin', ''); }
+  if (e) e.preventDefault(); 
+  const pin = safeVal('authPin').trim();
+  if (VALID_PINS.includes(pin)) { 
+    localStorage.setItem('magazyn_auth_pin', 'true'); 
+    el('authError')?.classList.add('hidden'); 
+    el('authOverlay')?.classList.add('hidden'); 
+    document.body.style.overflow = ''; 
+  } else { 
+    el('authError')?.classList.remove('hidden'); 
+    safeVal('authPin', ''); 
+  }
 }
 
-function lockApp() { localStorage.removeItem('magazyn_auth_pin'); safeVal('authPin', ''); checkAuth(); }
+function lockApp() { 
+  localStorage.removeItem('magazyn_auth_pin'); 
+  safeVal('authPin', ''); 
+  checkAuth(); 
+}
 
-// --- EVENT LISTENERY (PODŁĄCZENIE PRZYCISKÓW HTML -> JS) ---
-document.addEventListener('DOMContentLoaded', () => {
-    // Logowanie
-    el('loginForm')?.addEventListener('submit', handleLogin);
-    
-    // Zamykanie menu po kliknięciu gdziekolwiek
-    document.body.addEventListener('click', () => {
-        hideContextMenu();
-        hideToolsMenu();
-    });
-
-    // Górne menu i narzędzia
-    el('btnLearnAI')?.addEventListener('click', () => runOnlineAIClassifier(true));
-    el('btnMergeDups')?.addEventListener('click', mergeExistingDuplicates);
-    el('btnAudit')?.addEventListener('click', openInventoryAuditModal);
-    el('btnToolsMenu')?.addEventListener('click', (e) => { e.stopPropagation(); toggleToolsMenu(); });
-    
-    el('btnCopyLowStock')?.addEventListener('click', copyLowStockWhatsApp);
-    el('btnExportCsv')?.addEventListener('click', exportCSV);
-    el('btnExportBackup')?.addEventListener('click', exportBackup);
-    el('btnImportBackup')?.addEventListener('click', triggerImport);
-    el('btnLockApp')?.addEventListener('click', lockApp);
-
-    // Kafelki kategorii
-    ['ALL', 'ALCOHOL', 'BEVERAGE', 'DISPOSABLES', 'EXPIRING', 'LOW'].forEach(cat => {
-        el(`pillCat_${cat}`)?.addEventListener('click', () => setCategoryPill(cat));
-    });
-
-    // Inne
-    el('btnToggleSelectMode')?.addEventListener('click', toggleSelectMode);
-    el('searchFilter')?.addEventListener('input', renderInventory);
-    
-    // Akcje masowe
-    el('btnSelectAll')?.addEventListener('click', toggleSelectAll);
-    el('btnBulkEvent')?.addEventListener('click', () => openGenerateSheetModal());
-    el('btnBulkRw')?.addEventListener('click', () => openRwTransferModal());
-    el('btnBulkDelete')?.addEventListener('click', deleteSelectedItems);
-
-    // Wydania i zwroty
-    el('btnNewEventTab')?.addEventListener('click', openCreatorFromEventsTab);
-    el('dropZoneEventDisp')?.addEventListener('click', () => el('eventDispatchInput')?.click());
-    el('dropZoneEventRet')?.addEventListener('click', () => el('eventAutoReturnSheetInput')?.click());
-
-    // RW
-    el('btnNewRwTab')?.addEventListener('click', () => openRwTransferModal(true));
-
-    // Faktury
-    el('btnAddInvoice')?.addEventListener('click', openInvoiceUploadModal);
-    el('dropZoneInvoice')?.addEventListener('click', (e) => {
-        // Zapobieganie kliknięciu w cały div, jeśli kliknięto w sam przycisk
-        if(e.target.id !== 'btnAddInvoice') openInvoiceUploadModal();
-    });
-
-    // Kaucje
-    el('btnAddDeposit')?.addEventListener('click', openNewDepositModal);
-
-    // Dziennik i Alerty
-    el('btnClearLogs')?.addEventListener('click', clearStockLogs);
-    el('btnClearAlerts')?.addEventListener('click', clearPriceAlerts);
-
-    // Modale (Zamykanie)
-    el('btnCloseInvCap')?.addEventListener('click', closeInvoiceUploadModal);
-    el('btnCloseAiModal')?.addEventListener('click', closeAiModal);
-    el('btnCloseActModal')?.addEventListener('click', () => hideModal('actionModal'));
-    el('btnCloseNewModal')?.addEventListener('click', () => hideModal('newItemModal'));
-    el('btnCloseEditModal')?.addEventListener('click', () => hideModal('editItemModal'));
-    el('btnCloseAudit')?.addEventListener('click', () => hideModal('inventoryAuditModal'));
-    el('btnCloseEdDeliv')?.addEventListener('click', () => hideModal('editDeliveryModal'));
-    el('btnCloseSheetPrev')?.addEventListener('click', () => hideModal('sheetPreviewModal'));
-    el('btnCloseImgPrev')?.addEventListener('click', closeImagePreviewModal);
-    el('btnCloseDepModal')?.addEventListener('click', () => hideModal('depositModal'));
-    el('btnCloseEvDisp')?.addEventListener('click', () => hideModal('eventDispatchModal'));
-    el('btnCloseEvRet')?.addEventListener('click', () => hideModal('eventReturnModal'));
-    el('btnCloseGenSheet')?.addEventListener('click', () => hideModal('generateSheetModal'));
-    el('btnCloseRwModal')?.addEventListener('click', () => hideModal('rwTransferModal'));
-
-    // Modale (Anuluj/Zapisz/Reset/Zatwierdź)
-    el('btnResetInv')?.addEventListener('click', resetInvoicePhotos);
-    el('btnProcessInvoice')?.addEventListener('click', startMultiInvoiceProcessing);
-    
-    el('btnCancelAiModal')?.addEventListener('click', closeAiModal);
-    el('btnConfirmCatalogOnly')?.addEventListener('click', () => confirmAndApplyDelivery('CATALOG_ONLY'));
-    el('btnConfirmFullDelivery')?.addEventListener('click', () => confirmAndApplyDelivery('FULL_DELIVERY'));
-
-    el('btnMinusQty')?.addEventListener('click', () => adjustStepQty(-1));
-    el('btnPlusQty')?.addEventListener('click', () => adjustStepQty(1));
-    el('btnActAdd')?.addEventListener('click', () => executeStockAction('ADD'));
-    el('btnActRem')?.addEventListener('click', () => executeStockAction('REMOVE'));
-    el('btnActFld')?.addEventListener('click', () => executeStockAction('TO_FIELD'));
-    el('btnActRw')?.addEventListener('click', () => executeStockAction('TO_RW'));
-    el('btnActLoss')?.addEventListener('click', () => executeStockAction('LOSS'));
-    el('btnActDel')?.addEventListener('click', deleteCurrentItem);
-    el('btnActQr')?.addEventListener('click', openPrintLabelModal);
-    el('btnActEdit')?.addEventListener('click', () => openEditModal(selectedItemId));
-
-    el('newItemForm')?.addEventListener('submit', saveNewItem);
-    el('btnCancelNew')?.addEventListener('click', () => hideModal('newItemModal'));
-    el('btnNewLblPh')?.addEventListener('click', () => { el('itemLabelPhotoInput')?.click(); currentLabelPhotoTarget = 'NEW'; });
-    el('btnProcessLabelAI_NEW')?.addEventListener('click', processLabelPhotosAI);
-    el('btnNewRandCd')?.addEventListener('click', generateRandomCode);
-
-    el('editItemForm')?.addEventListener('submit', saveEditedItem);
-    el('btnCancelEdit')?.addEventListener('click', () => hideModal('editItemModal'));
-    el('btnEditLblPh')?.addEventListener('click', () => { el('itemLabelPhotoInput')?.click(); currentLabelPhotoTarget = 'EDIT'; });
-    el('btnProcessLabelAI_EDIT')?.addEventListener('click', processLabelPhotosAI);
-    
-    el('btnCancelAudit')?.addEventListener('click', () => hideModal('inventoryAuditModal'));
-    el('btnFinalizeAudit')?.addEventListener('click', finalizeInventoryAudit);
-
-    el('editDeliveryForm')?.addEventListener('submit', saveEditedDelivery);
-    el('btnCancelEdDel')?.addEventListener('click', () => hideModal('editDeliveryModal'));
-    el('btnEdDelPh')?.addEventListener('click', () => el('editDelivPhotoInput')?.click());
-    el('btnEdDelRow')?.addEventListener('click', addEditDeliveryItemRow);
-
-    el('btnCancelSheetPrev')?.addEventListener('click', () => hideModal('sheetPreviewModal'));
-    el('btnDlExcel')?.addEventListener('click', downloadCurrentSheetAsExcel);
-    el('btnPrintPdf')?.addEventListener('click', triggerBrowserPrintSheet);
-
-    el('btnCancelImgPrev')?.addEventListener('click', closeImagePreviewModal);
-
-    el('depositForm')?.addEventListener('submit', saveDepositModal);
-    el('btnCancelDep')?.addEventListener('click', () => hideModal('depositModal'));
-
-    el('btnCancelEvDisp')?.addEventListener('click', () => hideModal('eventDispatchModal'));
-    el('btnConfirmEvDisp')?.addEventListener('click', confirmAndApplyEventDispatch);
-
-    el('btnCancelEvRet')?.addEventListener('click', () => hideModal('eventReturnModal'));
-    el('btnConfirmEvRet')?.addEventListener('click', confirmAndApplyEventReturn);
-    el('evReturnEventSelect')?.addEventListener('change', handleReturnEventSelectChange);
-
-    el('btnCancelGenSheet')?.addEventListener('click', () => hideModal('generateSheetModal'));
-    el('btnConfirmGenSheet')?.addEventListener('click', () => finalizeSheetCreator(true));
-    el('btnGenSheetAdd')?.addEventListener('click', addItemToSheetCreator);
-
-    el('btnCancelRw')?.addEventListener('click', () => hideModal('rwTransferModal'));
-    el('btnConfirmRw')?.addEventListener('click', finalizeRwTransfer);
-    el('btnRwAdd')?.addEventListener('click', addItemToRwCreator);
-
-    // Nawigacja dolna
-    ['Stock', 'Events', 'Rw', 'Deposits', 'Deliveries'].forEach(tab => {
-        el(`navBtn${tab}`)?.addEventListener('click', () => switchMainTab(tab.toLowerCase()));
-        el(`tab${tab}HeaderBtn`)?.addEventListener('click', () => switchMainTab(tab.toLowerCase()));
-    });
-    el('tabLogsHeaderBtn')?.addEventListener('click', () => switchMainTab('logs'));
-    el('tabAlertsHeaderBtn')?.addEventListener('click', () => switchMainTab('alerts'));
-    
-    el('navBtnInvoice')?.addEventListener('click', openInvoiceUploadModal);
-    el('navBtnNewItem')?.addEventListener('click', () => openNewItemModal(''));
-    
-    // Inicjalizacja skanera
-    el('btnCountFromPhoto')?.addEventListener('click', () => el('shelfCountInput')?.click());
-    el('btnToggleCamera')?.addEventListener('click', toggleCamera);
-    el('barcodeSearchForm')?.addEventListener('submit', handleManualBarcodeSubmit);
-    
-    // Context Menu
-    el('ctxEdit')?.addEventListener('click', contextActionEdit);
-    el('ctxStock')?.addEventListener('click', contextActionOpenStock);
-    el('ctxQr')?.addEventListener('click', contextActionPrintQR);
-    el('ctxDel')?.addEventListener('click', contextActionDelete);
-
-    // Uruchomienie aplikacji
-    checkAuth();
-    fetchAllData();
-});
-
-// --- MENU I BACKUP ---
 function toggleToolsMenu() { el('toolsMenuDropdown')?.classList.toggle('hidden'); }
 function hideToolsMenu() { el('toolsMenuDropdown')?.classList.add('hidden'); }
 
@@ -231,7 +78,6 @@ function importBackup(e) {
   reader.readAsText(file); e.target.value = '';
 }
 
-// --- DRAG & DROP / WKLEJANIE ---
 function handleDragOver(e, zoneEl) { e.preventDefault(); e.stopPropagation(); if (zoneEl) zoneEl.classList.add('drag-over'); }
 function handleDragLeave(e, zoneEl) { e.preventDefault(); e.stopPropagation(); if (zoneEl) zoneEl.classList.remove('drag-over'); }
 window.handleDropFiles = async function(e, targetMode) {
@@ -260,9 +106,8 @@ async function routeIncomingFiles(files, targetMode) {
   else if (targetMode === 'LABEL_EDIT') { currentLabelPhotoTarget = 'EDIT'; await handleItemLabelPhoto({ target: { files, value: '' } }); }
 }
 
-// --- AI ETYKIETY (MINI GALERIA) ---
 let labelPhotosArray = [];
-window.handleItemLabelPhoto = async function(e) {
+async function handleItemLabelPhoto(e) {
   const file = e.target.files?.[0]; if (!file) return;
   if (labelPhotosArray.length >= 3) { alert("Możesz dodać maksymalnie 3 zdjęcia etykiet."); return; }
   try {
@@ -271,9 +116,9 @@ window.handleItemLabelPhoto = async function(e) {
     renderLabelPhotos();
   } catch (err) { alert("Błąd zdjęcia: " + err.message); }
   e.target.value = '';
-};
+}
 
-window.renderLabelPhotos = function() {
+function renderLabelPhotos() {
   const listId = currentLabelPhotoTarget === 'NEW' ? 'newLabelPhotosList' : 'editLabelPhotosList';
   const list = el(listId);
   if (!list) return;
@@ -296,11 +141,11 @@ window.renderLabelPhotos = function() {
   } else {
      tempEditItemPhoto = labelPhotosArray.length > 0 ? (labelPhotosArray[0].previewUrl || labelPhotosArray[0]) : '';
   }
-};
+}
 
 window.removeLabelPhoto = function(idx) { labelPhotosArray.splice(idx, 1); renderLabelPhotos(); };
 
-window.processLabelPhotosAI = async function() {
+async function processLabelPhotosAI() {
   const validMedia = labelPhotosArray.filter(p => typeof p !== 'string');
   if(validMedia.length === 0) { alert("Dodaj nowe zdjęcia z aparatu lub galerii, aby AI mogło je odczytać."); return; }
   
@@ -322,7 +167,39 @@ window.processLabelPhotosAI = async function() {
   } finally {
     if(btn) { btn.disabled = false; btn.innerText = currentLabelPhotoTarget === 'NEW' ? "🚀 Odczytaj Etykiety" : "🚀 Aktualizuj z Etykiet"; }
   }
-};
+}
+
+function cleanCanonicalKey(text) { return (text || '').toLowerCase().replace(/['’`"´]/g, '').replace(/,/g, '.').replace(/\b(\d+)\s*ml\b/gi, (_, ml) => (parseInt(ml, 10) / 1000).toString()).replace(/\b(0\.\d+|1\.5|1)\s*l\b/gi, '$1').replace(/\bx\s*\d+\b/gi, ' ').replace(/\bzgrz\b|\bders\b|\bdrs\b|\bop\b|\bszt\b|\bbut\b/gi, ' ').replace(/[^a-z0-9ąćęłńóśźż.%]/g, ' ').replace(/\s+/g, ' ').trim(); }
+const STRICT_VARIETALS_AND_FLAVORS = ['cabernet', 'merlot', 'chardonnay', 'pinot', 'grigio', 'noir', 'shiraz', 'syrah', 'primitivo', 'tempranillo', 'riesling', 'malbec', 'carmenere', 'chianti', 'prosecco', 'cava', 'frizzante', 'muscat', 'moscato', 'zero', 'light', 'max', 'bez laktozy', 'sojowe', 'owsiane', 'perlage', 'niegaz', 'jabłk', 'apple', 'pomarańcz', 'orange', 'cytryn', 'lemon', 'lime', 'grejpfrut', 'porzeczk', 'malin', 'truskawk', 'mango', 'brzoskwin', 'peach', 'berry', 'aromatic', 'tonic', 'tonik', 'ginger'];
+
+function extractProductSpecs(text) {
+  const s = cleanCanonicalKey(text), caps = (s.match(/\b0\.\d+\b|\b1\.5\b|\b1\b/g) || []), pack = [];
+  if (/\bpet\b/.test(s)) pack.push('pet'); if (/\brgb\b|\bszk[łl]/.test(s)) pack.push('rgb'); if (/\bcan\b|\bpusz/.test(s)) pack.push('can');
+  let wineColor = ''; if (/czerwone|rouge|\bred\b|cabernet|merlot|shiraz|syrah|primitivo|malbec|chianti/.test(s)) wineColor = 'red'; else if (/białe|biale|blanc|\bwhite\b|chardonnay|riesling|grigio/.test(s)) wineColor = 'white'; else if (/różowe|rozowe|\brose\b|rosato/.test(s)) wineColor = 'rose';
+  return { caps, pack, wineColor, strictTokens: STRICT_VARIETALS_AND_FLAVORS.filter(v => s.includes(v)) };
+}
+
+function areSpecsCompatible(nameA, nameB) {
+  const a = extractProductSpecs(nameA), b = extractProductSpecs(nameB);
+  if (a.caps.length > 0 && b.caps.length > 0 && a.caps[0] !== b.caps[0]) return false;
+  if (a.pack.length > 0 && b.pack.length > 0 && a.pack[0] !== b.pack[0]) return false;
+  if (a.wineColor && b.wineColor && a.wineColor !== b.wineColor) return false;
+  for (const token of STRICT_VARIETALS_AND_FLAVORS) { if (a.strictTokens.includes(token) !== b.strictTokens.includes(token)) return false; } return true;
+}
+
+function findBestInventoryMatch(targetName) {
+  if (!targetName) return null; const targetKey = cleanCanonicalKey(targetName); if (targetKey.length < 3) return null;
+  for (const item of inventory) { if (cleanCanonicalKey(item.name) === targetKey && areSpecsCompatible(targetName, item.name)) return item; }
+  const ignore = new Set(['can', 'rgb', 'pet', 'drs', 'szt', 'but', 'zgrz', 'wino', 'wine', '0.187', '0.25', '0.3', '0.33', '0.5', '0.7', '0.75', '0.85', '1.0']);
+  const tWords = targetKey.split(' ').filter(w => w.length >= 3 && !ignore.has(w) && !w.includes('%')); if (tWords.length === 0) return null;
+  let best = null, bestR = 0;
+  for (const item of inventory) {
+    if (!areSpecsCompatible(targetName, item.name)) continue;
+    const iWords = cleanCanonicalKey(item.name).split(' ').filter(w => w.length >= 3 && !ignore.has(w) && !w.includes('%')); if (iWords.length === 0) continue;
+    let ov = 0; for (const tw of tWords) { if (iWords.some(iw => iw === tw || (iw.length >= 5 && tw.length >= 5 && iw.slice(0, 5) === tw.slice(0, 5)))) ov++; }
+    const r = ov / Math.max(tWords.length, iWords.length); if ((ov >= 2 && r >= 0.65) || (ov >= 1 && tWords.length === 1 && iWords.length === 1)) { if (r > bestR) { bestR = r; best = item; } }
+  } return best;
+}
 
 function classifyProductSmartLocal(name, currentCategory = '') {
   const n = (name || '').toLowerCase(); const key = cleanCanonicalKey(name);
@@ -417,35 +294,7 @@ function checkInvoiceDuplicateLive() {
   else { el('aiDuplicateWarningBanner')?.classList.add('hidden'); if (btn) { btn.disabled = false; btn.innerHTML = `📥 Nowa dostawa`; } } return ex;
 }
 
-function cleanCanonicalKey(text) { return (text || '').toLowerCase().replace(/['’`"´]/g, '').replace(/,/g, '.').replace(/\b(\d+)\s*ml\b/gi, (_, ml) => (parseInt(ml, 10) / 1000).toString()).replace(/\b(0\.\d+|1\.5|1)\s*l\b/gi, '$1').replace(/\bx\s*\d+\b/gi, ' ').replace(/\bzgrz\b|\bders\b|\bdrs\b|\bop\b|\bszt\b|\bbut\b/gi, ' ').replace(/[^a-z0-9ąćęłńóśźż.%]/g, ' ').replace(/\s+/g, ' ').trim(); }
-
-function extractProductSpecs(text) {
-  const s = cleanCanonicalKey(text), caps = (s.match(/\b0\.\d+\b|\b1\.5\b|\b1\b/g) || []), pack = [];
-  if (/\bpet\b/.test(s)) pack.push('pet'); if (/\brgb\b|\bszk[łl]/.test(s)) pack.push('rgb'); if (/\bcan\b|\bpusz/.test(s)) pack.push('can');
-  let wineColor = ''; if (/czerwone|rouge|\bred\b|cabernet|merlot|shiraz|syrah|primitivo|malbec|chianti/.test(s)) wineColor = 'red'; else if (/białe|biale|blanc|\bwhite\b|chardonnay|riesling|grigio/.test(s)) wineColor = 'white'; else if (/różowe|rozowe|\brose\b|rosato/.test(s)) wineColor = 'rose';
-  return { caps, pack, wineColor, strictTokens: STRICT_VARIETALS_AND_FLAVORS.filter(v => s.includes(v)) };
-}
-function areSpecsCompatible(nameA, nameB) {
-  const a = extractProductSpecs(nameA), b = extractProductSpecs(nameB);
-  if (a.caps.length > 0 && b.caps.length > 0 && a.caps[0] !== b.caps[0]) return false;
-  if (a.pack.length > 0 && b.pack.length > 0 && a.pack[0] !== b.pack[0]) return false;
-  if (a.wineColor && b.wineColor && a.wineColor !== b.wineColor) return false;
-  for (const token of STRICT_VARIETALS_AND_FLAVORS) { if (a.strictTokens.includes(token) !== b.strictTokens.includes(token)) return false; } return true;
-}
-function findBestInventoryMatch(targetName) {
-  if (!targetName) return null; const targetKey = cleanCanonicalKey(targetName); if (targetKey.length < 3) return null;
-  for (const item of inventory) { if (cleanCanonicalKey(item.name) === targetKey && areSpecsCompatible(targetName, item.name)) return item; }
-  const ignore = new Set(['can', 'rgb', 'pet', 'drs', 'szt', 'but', 'zgrz', 'wino', 'wine', '0.187', '0.25', '0.3', '0.33', '0.5', '0.7', '0.75', '0.85', '1.0']);
-  const tWords = targetKey.split(' ').filter(w => w.length >= 3 && !ignore.has(w) && !w.includes('%')); if (tWords.length === 0) return null;
-  let best = null, bestR = 0;
-  for (const item of inventory) {
-    if (!areSpecsCompatible(targetName, item.name)) continue;
-    const iWords = cleanCanonicalKey(item.name).split(' ').filter(w => w.length >= 3 && !ignore.has(w) && !w.includes('%')); if (iWords.length === 0) continue;
-    let ov = 0; for (const tw of tWords) { if (iWords.some(iw => iw === tw || (iw.length >= 5 && tw.length >= 5 && iw.slice(0, 5) === tw.slice(0, 5)))) ov++; }
-    const r = ov / Math.max(tWords.length, iWords.length); if ((ov >= 2 && r >= 0.65) || (ov >= 1 && tWords.length === 1 && iWords.length === 1)) { if (r > bestR) { bestR = r; best = item; } }
-  } return best;
-}
-
+function normalizeText(t) { return (t || '').toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()\[\]]/g, ' ').replace(/\s+/g, ' ').trim(); }
 function findBestEventMatch(scannedNumber, scannedName) {
   const cleanNum = (scannedNumber || '').replace(/[^0-9a-zA-Z]/g, '').toLowerCase(), cleanName = normalizeText(scannedName), sorted = [...events].sort((a, b) => (a.status === 'W trakcie' ? -1 : 1));
   if (cleanNum.length >= 2) { for (const ev of sorted) { const evNum = (ev.event_number || '').replace(/[^0-9a-zA-Z]/g, '').toLowerCase(); if (evNum && (evNum === cleanNum || evNum.includes(cleanNum) || cleanNum.includes(evNum))) return ev; } }
@@ -552,7 +401,7 @@ function renderInventory() {
     const grp = getMainCategoryGroup(item), badgeColor = grp === 'ALCOHOL' ? 'bg-amber-950 text-amber-300 border border-amber-700/50' : (grp === 'DISPOSABLES' ? 'bg-purple-950 text-purple-300 border border-purple-700/50' : 'bg-sky-950 text-sky-300 border border-sky-700/50'), hasDiscount = Number(item.discountPercent) > 0 || (Number(item.basePrice) > Number(item.price) + 0.01);
     const expDays = item.expiryDate ? Math.floor((new Date(item.expiryDate) - new Date()) / 86400000) : 999;
     const expiryBadge = item.expiryDate ? (expDays < 0 ? `<span class="text-rose-500 font-black text-[9px] bg-rose-950/50 px-1 rounded border border-rose-800">⚠️ PO TERMINIE (${item.expiryDate})</span>` : (expDays <= 30 ? `<span class="text-amber-400 font-bold text-[9px] bg-amber-950/50 px-1 rounded border border-amber-700">⏳ Zostaje ${expDays} dni</span>` : `<span class="text-slate-500 text-[9px]">📅 ${item.expiryDate}</span>`)) : '';
-    return `<div oncontextmenu="handleItemContextMenu(event, '${item.id}')" onclick="handleItemCardClick(event, '${item.id}')" class="bg-slate-800 border ${isChecked ? 'border-amber-400' : (isLow ? 'border-rose-500/60' : 'border-slate-700/80')} rounded-xl p-3 flex items-center justify-between cursor-pointer gap-2.5 pointer-events-auto">${isSelectMode ? `<div onclick="event.stopPropagation()"><input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleSelectItem('${item.id}', this.checked)" class="w-4 h-4 rounded cursor-pointer pointer-events-auto"></div>` : ''}${item.photo ? `<img src="${item.photo}" class="w-11 h-11 rounded-lg object-cover border border-slate-600 bg-black flex-shrink-0">` : ''}<div class="space-y-1 flex-1 min-w-0"><div class="flex items-center gap-1.5 flex-wrap"><span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${badgeColor}">${item.category || 'Napoje'}</span><span class="text-[11px] text-slate-400">📍 ${item.location || '-'}</span><span class="text-[11px] text-slate-500 font-mono">#${item.barcode}</span></div><h4 class="font-bold text-xs text-white truncate">${item.name}</h4><div class="flex items-center gap-2 flex-wrap text-[10px]"><span class="text-emerald-400 font-bold">${Number(item.price || 0).toFixed(2)} zł / ${item.unit || 'szt.'}</span>${hasDiscount ? `<span class="bg-amber-950/80 text-amber-300 border border-amber-700/50 px-1.5 py-0.2 rounded text-[9px] font-bold">🏷️ po rabacie ${item.discountPercent ? `-${item.discountPercent}% ` : ''}${item.basePrice ? `(100%: ${Number(item.basePrice).toFixed(2)} zł)` : ''}</span>` : `<span class="text-slate-500 text-[9px]">(cena reg.)</span>`}<span class="text-slate-400">(Wartość: ${itemVal} zł)</span>${expiryBadge}${isLow ? `<span class="text-rose-400 font-medium">${item.qty === 0 ? '⚪ Stan 0' : `⚠️ Min: ${item.minQty}`}</span>` : ''}</div></div><div class="text-right flex items-center gap-2 flex-shrink-0">${item.inField > 0 ? `<div class="bg-blue-950/60 border border-blue-700/50 px-2 py-0.5 rounded-lg text-center"><span class="text-[9px] text-blue-300 block">W terenie</span><span class="font-bold text-xs text-blue-400">${item.inField}</span></div>` : ''}<div class="bg-slate-900 px-2.5 py-1 rounded-xl border border-slate-700 min-w-[56px] text-center"><span class="text-[9px] text-slate-400 block">Magazyn</span><span class="font-black text-sm ${isLow ? 'text-rose-400' : 'text-emerald-400'}">${item.qty}</span><span class="text-[9px] text-slate-400">${item.unit || 'szt.'}</span></div></div></div>`;
+    return `<div oncontextmenu="window.handleItemContextMenu(event, '${item.id}')" onclick="window.handleItemCardClick(event, '${item.id}')" class="bg-slate-800 border ${isChecked ? 'border-amber-400' : (isLow ? 'border-rose-500/60' : 'border-slate-700/80')} rounded-xl p-3 flex items-center justify-between cursor-pointer gap-2.5 pointer-events-auto">${isSelectMode ? `<div onclick="event.stopPropagation()"><input type="checkbox" ${isChecked ? 'checked' : ''} onchange="window.toggleSelectItem('${item.id}', this.checked)" class="w-4 h-4 rounded cursor-pointer pointer-events-auto"></div>` : ''}${item.photo ? `<img src="${item.photo}" class="w-11 h-11 rounded-lg object-cover border border-slate-600 bg-black flex-shrink-0">` : ''}<div class="space-y-1 flex-1 min-w-0"><div class="flex items-center gap-1.5 flex-wrap"><span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${badgeColor}">${item.category || 'Napoje'}</span><span class="text-[11px] text-slate-400">📍 ${item.location || '-'}</span><span class="text-[11px] text-slate-500 font-mono">#${item.barcode}</span></div><h4 class="font-bold text-xs text-white truncate">${item.name}</h4><div class="flex items-center gap-2 flex-wrap text-[10px]"><span class="text-emerald-400 font-bold">${Number(item.price || 0).toFixed(2)} zł / ${item.unit || 'szt.'}</span>${hasDiscount ? `<span class="bg-amber-950/80 text-amber-300 border border-amber-700/50 px-1.5 py-0.2 rounded text-[9px] font-bold">🏷️ po rabacie ${item.discountPercent ? `-${item.discountPercent}% ` : ''}${item.basePrice ? `(100%: ${Number(item.basePrice).toFixed(2)} zł)` : ''}</span>` : `<span class="text-slate-500 text-[9px]">(cena reg.)</span>`}<span class="text-slate-400">(Wartość: ${itemVal} zł)</span>${expiryBadge}${isLow ? `<span class="text-rose-400 font-medium">${item.qty === 0 ? '⚪ Stan 0' : `⚠️ Min: ${item.minQty}`}</span>` : ''}</div></div><div class="text-right flex items-center gap-2 flex-shrink-0">${item.inField > 0 ? `<div class="bg-blue-950/60 border border-blue-700/50 px-2 py-0.5 rounded-lg text-center"><span class="text-[9px] text-blue-300 block">W terenie</span><span class="font-bold text-xs text-blue-400">${item.inField}</span></div>` : ''}<div class="bg-slate-900 px-2.5 py-1 rounded-xl border border-slate-700 min-w-[56px] text-center"><span class="text-[9px] text-slate-400 block">Magazyn</span><span class="font-black text-sm ${isLow ? 'text-rose-400' : 'text-emerald-400'}">${item.qty}</span><span class="text-[9px] text-slate-400">${item.unit || 'szt.'}</span></div></div></div>`;
   }).join('');
 }
 
@@ -576,7 +425,6 @@ window.openEditModal = function(id) {
   currentLabelPhotoTarget = 'EDIT';
   labelPhotosArray = it.photo ? [it.photo] : [];
   renderLabelPhotos();
-  
   showModal('editItemModal');
 }
 
@@ -835,7 +683,6 @@ function prepareFileForGemini(file, maxW = 950, q = 0.65) {
   });
 }
 
-// --- FUNKCJA GEMINI DOSTĘPNA GLOBALNIE ---
 window.queryGeminiAPI = async function(promptText, mediaParts = []) {
   const models = ['gemini-3.5-flash-lite', 'gemini-1.5-flash', 'gemini-3.8-flash', 'gemini-1.5-pro'];
   const parts = [{ text: promptText }, ...mediaParts.map(m => typeof m === 'string' ? { inline_data: { mime_type: 'image/jpeg', data: m } } : { inline_data: { mime_type: m.mimeType || 'image/jpeg', data: m.base64 } })];
@@ -880,14 +727,14 @@ window.renderAiModalItems = function() {
   if (list) {
       list.innerHTML = currentExtractedDelivery.items.map((it, idx) => {
         const match = findBestInventoryMatch(it.name);
-        return `<div class="bg-slate-900 border border-slate-700 p-2.5 rounded-xl space-y-1.5 text-xs"><div class="flex justify-between items-center gap-2"><input type="text" value="${it.name.replace(/"/g, '&quot;')}" oninput="currentExtractedDelivery.items[${idx}].name=this.value" class="flex-1 bg-slate-800 border border-slate-700 rounded px-2 py-1 font-bold text-white"><button type="button" onclick="currentExtractedDelivery.items.splice(${idx},1);renderAiModalItems()" class="text-rose-400 font-bold px-1.5 cursor-pointer">✕</button></div><div class="grid grid-cols-4 gap-1.5 items-center"><div><span class="text-[9px] text-slate-400 block">Ilość (${it.unit}):</span><input type="number" value="${it.qty}" oninput="currentExtractedDelivery.items[${idx}].qty=parseFloat(this.value)||0;recalcAiModalTotals()" class="w-full bg-slate-800 border border-emerald-600/60 rounded p-1 text-center font-black text-emerald-400"></div><div><span class="text-[9px] text-slate-400 block">Netto szt.:</span><input type="number" step="0.01" value="${it.price}" oninput="currentExtractedDelivery.items[${idx}].price=parseFloat(this.value)||0;recalcAiModalTotals()" class="w-full bg-slate-800 border border-slate-700 rounded p-1 text-center font-bold text-white"></div><div><span class="text-[9px] text-slate-400 block">VAT %:</span><input type="number" value="${it.vat || 23}" oninput="currentExtractedDelivery.items[${idx}].vat=parseInt(this.value)||23;recalcAiModalTotals()" class="w-full bg-slate-800 border border-slate-700 rounded p-1 text-center font-bold text-amber-300"></div><div><span class="text-[9px] text-slate-400 block">Kat:</span><input type="text" list="categoryPresetsList" value="${it.category}" onchange="currentExtractedDelivery.items[${idx}].category=this.value" class="w-full bg-slate-800 border border-slate-700 rounded p-1 text-[10px] text-slate-200"></div></div><div class="text-[10px] ${match ? 'text-indigo-300' : 'text-amber-300'}">${match ? `🔗 Połączy z: ${match.name} (Stan: ${match.qty})` : `✨ Nowa pozycja`} ${it.packSize > 1 ? `• Zgrzewka (x${it.packSize})` : ''}</div></div>`;
+        return `<div class="bg-slate-900 border border-slate-700 p-2.5 rounded-xl space-y-1.5 text-xs"><div class="flex justify-between items-center gap-2"><input type="text" value="${it.name.replace(/"/g, '&quot;')}" oninput="currentExtractedDelivery.items[${idx}].name=this.value" class="flex-1 bg-slate-800 border border-slate-700 rounded px-2 py-1 font-bold text-white"><button type="button" onclick="currentExtractedDelivery.items.splice(${idx},1);window.renderAiModalItems()" class="text-rose-400 font-bold px-1.5 cursor-pointer">✕</button></div><div class="grid grid-cols-4 gap-1.5 items-center"><div><span class="text-[9px] text-slate-400 block">Ilość (${it.unit}):</span><input type="number" value="${it.qty}" oninput="currentExtractedDelivery.items[${idx}].qty=parseFloat(this.value)||0;window.recalcAiModalTotals()" class="w-full bg-slate-800 border border-emerald-600/60 rounded p-1 text-center font-black text-emerald-400"></div><div><span class="text-[9px] text-slate-400 block">Netto szt.:</span><input type="number" step="0.01" value="${it.price}" oninput="currentExtractedDelivery.items[${idx}].price=parseFloat(this.value)||0;window.recalcAiModalTotals()" class="w-full bg-slate-800 border border-slate-700 rounded p-1 text-center font-bold text-white"></div><div><span class="text-[9px] text-slate-400 block">VAT %:</span><input type="number" value="${it.vat || 23}" oninput="currentExtractedDelivery.items[${idx}].vat=parseInt(this.value)||23;window.recalcAiModalTotals()" class="w-full bg-slate-800 border border-slate-700 rounded p-1 text-center font-bold text-amber-300"></div><div><span class="text-[9px] text-slate-400 block">Kat:</span><input type="text" list="categoryPresetsList" value="${it.category}" onchange="currentExtractedDelivery.items[${idx}].category=this.value" class="w-full bg-slate-800 border border-slate-700 rounded p-1 text-[10px] text-slate-200"></div></div><div class="text-[10px] ${match ? 'text-indigo-300' : 'text-amber-300'}">${match ? `🔗 Połączy z: ${match.name} (Stan: ${match.qty})` : `✨ Nowa pozycja`} ${it.packSize > 1 ? `• Zgrzewka (x${it.packSize})` : ''}</div></div>`;
       }).join('');
   }
   const depList = el('aiDepositsList');
   if(depList) {
-      depList.innerHTML = currentExtractedDelivery.deposits.map((d, idx) => `<div class="bg-slate-900 border border-cyan-800/60 p-2 rounded-xl grid grid-cols-12 gap-1.5 items-center text-xs"><input type="text" value="${d.name.replace(/"/g, '&quot;')}" oninput="currentExtractedDelivery.deposits[${idx}].name=this.value" class="col-span-6 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-white font-bold"><input type="number" value="${d.qty}" oninput="currentExtractedDelivery.deposits[${idx}].qty=parseInt(this.value)||0;recalcAiModalTotals()" class="col-span-2 bg-slate-800 border border-slate-700 rounded p-1 text-center font-bold text-cyan-400"><input type="number" step="0.01" value="${d.unitPrice}" oninput="currentExtractedDelivery.deposits[${idx}].unitPrice=parseFloat(this.value)||0;recalcAiModalTotals()" class="col-span-3 bg-slate-800 border border-slate-700 rounded p-1 text-center text-white"><button type="button" onclick="currentExtractedDelivery.deposits.splice(${idx},1);renderAiModalItems()" class="col-span-1 text-rose-400 font-bold text-center cursor-pointer">✕</button></div>`).join('');
+      depList.innerHTML = currentExtractedDelivery.deposits.map((d, idx) => `<div class="bg-slate-900 border border-cyan-800/60 p-2 rounded-xl grid grid-cols-12 gap-1.5 items-center text-xs"><input type="text" value="${d.name.replace(/"/g, '&quot;')}" oninput="currentExtractedDelivery.deposits[${idx}].name=this.value" class="col-span-6 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-white font-bold"><input type="number" value="${d.qty}" oninput="currentExtractedDelivery.deposits[${idx}].qty=parseInt(this.value)||0;window.recalcAiModalTotals()" class="col-span-2 bg-slate-800 border border-slate-700 rounded p-1 text-center font-bold text-cyan-400"><input type="number" step="0.01" value="${d.unitPrice}" oninput="currentExtractedDelivery.deposits[${idx}].unitPrice=parseFloat(this.value)||0;window.recalcAiModalTotals()" class="col-span-3 bg-slate-800 border border-slate-700 rounded p-1 text-center text-white"><button type="button" onclick="currentExtractedDelivery.deposits.splice(${idx},1);window.renderAiModalItems()" class="col-span-1 text-rose-400 font-bold text-center cursor-pointer">✕</button></div>`).join('');
   }
-  recalcAiModalTotals();
+  window.recalcAiModalTotals();
 };
 window.addManualDepositRowToModal = function() { if (!currentExtractedDelivery) return; currentExtractedDelivery.deposits.push({ name: 'Kaucja PET / Puszka', qty: 12, unitPrice: 0.50, category: 'PET_CAN_050' }); renderAiModalItems(); };
 window.recalcAiModalTotals = function() {
@@ -941,7 +788,7 @@ window.renderDeliveries = function() {
     let parsed = { items: [], deposits: [], receiver: d.receiver || '' };
     try { const raw = typeof d.items_json === 'string' ? JSON.parse(d.items_json) : (d.items_json || {}); if (Array.isArray(raw)) parsed.items = raw; else { parsed.items = raw.items || []; parsed.deposits = raw.deposits || []; parsed.receiver = raw.receiver || d.receiver || ''; } } catch (e) {}
     const imgs = parseDeliveryImages(d.image_url), dateStr = d.created_at ? new Date(d.created_at).toLocaleDateString('pl-PL') : '-';
-    return `<div class="bg-slate-800 border border-slate-700 rounded-2xl p-3.5 space-y-2.5 shadow cursor-pointer"><div class="flex justify-between items-start gap-2 flex-wrap"><div><div class="flex items-center gap-2 flex-wrap"><span class="font-mono text-xs font-black text-amber-400">${d.doc_number || 'FV'}</span><span class="text-xs font-bold text-white">${d.supplier || 'Dostawca'}</span><span class="text-[10px] text-slate-400">📅 ${dateStr}</span>${parsed.receiver ? `<span class="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-700/50 px-2 py-0.5 rounded font-bold">👤 ${parsed.receiver}</span>` : ''}</div><div class="flex items-center gap-3 text-[11px] mt-1"><span class="text-emerald-400 font-bold">Netto: ${d.total_net || '0.00'} zł</span>${d.total_net_with_dep ? `<span class="text-cyan-300 font-bold">Z kaucją: ${d.total_net_with_dep} zł</span>` : ''}<span class="text-slate-300">Brutto: ${d.total_gross || '0.00'} zł</span></div></div><div class="flex gap-1.5">${imgs.length > 0 ? `<button type="button" onclick="openDeliveryPreview('${d.id}')" class="bg-slate-700 text-indigo-300 text-xs px-2.5 py-1.5 rounded-xl font-bold cursor-pointer">🖼️ (${imgs.length})</button>` : ''}<button type="button" onclick="openEditDeliveryModal('${d.id}')" class="bg-slate-700 text-slate-200 text-xs px-2.5 py-1.5 rounded-xl font-bold cursor-pointer relative z-50">✏️ Edytuj</button><button type="button" onclick="deleteDelivery('${d.id}')" class="bg-rose-950 text-rose-300 border border-rose-700/50 text-xs px-2.5 py-1.5 rounded-xl font-bold cursor-pointer">🗑️</button></div></div><div class="bg-slate-900 rounded-xl p-2 text-[11px] space-y-1 max-h-40 overflow-y-auto">${parsed.items.map((it, i) => `<div class="flex justify-between text-slate-300 border-b border-slate-800/50 pb-0.5"><span>${i + 1}. ${it.name}</span><span class="font-bold text-emerald-400">${it.qty} ${it.unit || 'szt.'} • ${Number(it.price || 0).toFixed(2)} zł</span></div>`).join('')}${parsed.deposits.map(dep => `<div class="flex justify-between text-cyan-300 border-b border-slate-800/50 pb-0.5"><span>♻️ ${dep.name}</span><span class="font-bold">${dep.qty} szt. • ${Number(dep.unitPrice || 0).toFixed(2)} zł</span></div>`).join('')}</div></div>`;
+    return `<div class="bg-slate-800 border border-slate-700 rounded-2xl p-3.5 space-y-2.5 shadow cursor-pointer"><div class="flex justify-between items-start gap-2 flex-wrap"><div><div class="flex items-center gap-2 flex-wrap"><span class="font-mono text-xs font-black text-amber-400">${d.doc_number || 'FV'}</span><span class="text-xs font-bold text-white">${d.supplier || 'Dostawca'}</span><span class="text-[10px] text-slate-400">📅 ${dateStr}</span>${parsed.receiver ? `<span class="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-700/50 px-2 py-0.5 rounded font-bold">👤 ${parsed.receiver}</span>` : ''}</div><div class="flex items-center gap-3 text-[11px] mt-1"><span class="text-emerald-400 font-bold">Netto: ${d.total_net || '0.00'} zł</span>${d.total_net_with_dep ? `<span class="text-cyan-300 font-bold">Z kaucją: ${d.total_net_with_dep} zł</span>` : ''}<span class="text-slate-300">Brutto: ${d.total_gross || '0.00'} zł</span></div></div><div class="flex gap-1.5">${imgs.length > 0 ? `<button type="button" onclick="window.openDeliveryPreview('${d.id}')" class="bg-slate-700 text-indigo-300 text-xs px-2.5 py-1.5 rounded-xl font-bold cursor-pointer">🖼️ (${imgs.length})</button>` : ''}<button type="button" onclick="window.openEditDeliveryModal('${d.id}')" class="bg-slate-700 text-slate-200 text-xs px-2.5 py-1.5 rounded-xl font-bold cursor-pointer relative z-50">✏️ Edytuj</button><button type="button" onclick="window.deleteDelivery('${d.id}')" class="bg-rose-950 text-rose-300 border border-rose-700/50 text-xs px-2.5 py-1.5 rounded-xl font-bold cursor-pointer">🗑️</button></div></div><div class="bg-slate-900 rounded-xl p-2 text-[11px] space-y-1 max-h-40 overflow-y-auto">${parsed.items.map((it, i) => `<div class="flex justify-between text-slate-300 border-b border-slate-800/50 pb-0.5"><span>${i + 1}. ${it.name}</span><span class="font-bold text-emerald-400">${it.qty} ${it.unit || 'szt.'} • ${Number(it.price || 0).toFixed(2)} zł</span></div>`).join('')}${parsed.deposits.map(dep => `<div class="flex justify-between text-cyan-300 border-b border-slate-800/50 pb-0.5"><span>♻️ ${dep.name}</span><span class="font-bold">${dep.qty} szt. • ${Number(dep.unitPrice || 0).toFixed(2)} zł</span></div>`).join('')}</div></div>`;
   }).join('');
 };
 window.openDeliveryPreview = function(id) { const d = deliveries.find(x => String(x.id) === String(id)); if (!d) return; const imgs = parseDeliveryImages(d.image_url); if (imgs.length > 0) openImagePreviewModal(`${d.doc_number}`, imgs); };
@@ -968,9 +815,9 @@ window.openEditDeliveryModal = function(id) {
   }
 };
 
-window.renderEditDeliveryItems = function() { const l = el('editDelivItemsList'); if(l) l.innerHTML = editingDeliveryItems.map((it, idx) => `<div class="grid grid-cols-12 gap-1.5 items-center bg-slate-900 p-1.5 rounded-lg"><input type="text" value="${(it.name || '').replace(/"/g, '&quot;')}" oninput="editingDeliveryItems[${idx}].name=this.value" class="col-span-6 bg-slate-800 border border-slate-700 rounded p-1 text-white"><input type="number" value="${it.qty || 0}" oninput="editingDeliveryItems[${idx}].qty=parseFloat(this.value)||0" class="col-span-2 bg-slate-800 border border-slate-700 rounded p-1 text-center text-emerald-400 font-bold"><input type="number" step="0.01" value="${it.price || 0}" oninput="editingDeliveryItems[${idx}].price=parseFloat(this.value)||0" class="col-span-3 bg-slate-800 border border-slate-700 rounded p-1 text-center text-white"><button type="button" onclick="editingDeliveryItems.splice(${idx},1);renderEditDeliveryItems()" class="col-span-1 text-rose-400 font-bold cursor-pointer">✕</button></div>`).join(''); };
+window.renderEditDeliveryItems = function() { const l = el('editDelivItemsList'); if(l) l.innerHTML = editingDeliveryItems.map((it, idx) => `<div class="grid grid-cols-12 gap-1.5 items-center bg-slate-900 p-1.5 rounded-lg"><input type="text" value="${(it.name || '').replace(/"/g, '&quot;')}" oninput="editingDeliveryItems[${idx}].name=this.value" class="col-span-6 bg-slate-800 border border-slate-700 rounded p-1 text-white"><input type="number" value="${it.qty || 0}" oninput="editingDeliveryItems[${idx}].qty=parseFloat(this.value)||0" class="col-span-2 bg-slate-800 border border-slate-700 rounded p-1 text-center text-emerald-400 font-bold"><input type="number" step="0.01" value="${it.price || 0}" oninput="editingDeliveryItems[${idx}].price=parseFloat(this.value)||0" class="col-span-3 bg-slate-800 border border-slate-700 rounded p-1 text-center text-white"><button type="button" onclick="editingDeliveryItems.splice(${idx},1);window.renderEditDeliveryItems()" class="col-span-1 text-rose-400 font-bold cursor-pointer">✕</button></div>`).join(''); };
 window.addEditDeliveryItemRow = function() { editingDeliveryItems.push({ name: 'Nowa pozycja', qty: 1, unit: 'szt.', price: 0 }); renderEditDeliveryItems(); };
-window.renderEditDeliveryPhotos = function() { const p = el('editDelivPhotosList'); if(p) p.innerHTML = editingDeliveryPhotos.map((src, idx) => `<div class="relative flex-shrink-0"><img src="${src}" class="h-16 w-16 object-cover rounded-lg border border-slate-600"><button type="button" onclick="editingDeliveryPhotos.splice(${idx},1);renderEditDeliveryPhotos()" class="absolute -top-1 -right-1 bg-rose-600 text-white rounded-full w-5 h-5 text-[10px] font-bold cursor-pointer">✕</button></div>`).join(''); };
+window.renderEditDeliveryPhotos = function() { const p = el('editDelivPhotosList'); if(p) p.innerHTML = editingDeliveryPhotos.map((src, idx) => `<div class="relative flex-shrink-0"><img src="${src}" class="h-16 w-16 object-cover rounded-lg border border-slate-600"><button type="button" onclick="editingDeliveryPhotos.splice(${idx},1);window.renderEditDeliveryPhotos()" class="absolute -top-1 -right-1 bg-rose-600 text-white rounded-full w-5 h-5 text-[10px] font-bold cursor-pointer">✕</button></div>`).join(''); };
 window.handleEditDeliveryAddPhoto = async function(e) { const file = e.target.files[0]; if (!file) return; prepareFileForGemini(file).then(p => { editingDeliveryPhotos.push(p.previewUrl); renderEditDeliveryPhotos(); }).catch(()=>{}); e.target.value = ''; };
 
 window.saveEditedDelivery = async function(e) {
@@ -1000,7 +847,7 @@ window.renderDeposits = function() {
   if (deposits.length === 0) { list.innerHTML = `<div class="text-center py-8 text-slate-500 text-xs">Brak pozycji kaucyjnych.</div>`; return; }
   list.innerHTML = deposits.map(d => {
     const val = ((Number(d.qty) || 0) * (Number(d.unit_price) || 0)).toFixed(2);
-    return `<div class="bg-slate-800 border border-cyan-800/50 rounded-xl p-3 flex items-center justify-between gap-2"><div><h4 class="font-bold text-xs text-white">${d.name}</h4><p class="text-[10px] text-cyan-400 font-bold">${Number(d.unit_price).toFixed(2)} zł / szt. • Wartość: ${val} zł</p></div><div class="flex items-center gap-1.5"><button type="button" onclick="adjustDepositQty('${d.id}', -1)" class="w-7 h-7 rounded-lg bg-slate-700 text-white font-bold text-xs cursor-pointer">-</button><span class="font-black text-sm text-cyan-300 min-w-[36px] text-center">${d.qty}</span><button type="button" onclick="adjustDepositQty('${d.id}', 1)" class="w-7 h-7 rounded-lg bg-slate-700 text-white font-bold text-xs cursor-pointer">+</button><button type="button" onclick="deleteDeposit('${d.id}')" class="text-rose-400 text-xs ml-1 cursor-pointer">🗑️</button></div></div>`;
+    return `<div class="bg-slate-800 border border-cyan-800/50 rounded-xl p-3 flex items-center justify-between gap-2"><div><h4 class="font-bold text-xs text-white">${d.name}</h4><p class="text-[10px] text-cyan-400 font-bold">${Number(d.unit_price).toFixed(2)} zł / szt. • Wartość: ${val} zł</p></div><div class="flex items-center gap-1.5"><button type="button" onclick="window.adjustDepositQty('${d.id}', -1)" class="w-7 h-7 rounded-lg bg-slate-700 text-white font-bold text-xs cursor-pointer">-</button><span class="font-black text-sm text-cyan-300 min-w-[36px] text-center">${d.qty}</span><button type="button" onclick="window.adjustDepositQty('${d.id}', 1)" class="w-7 h-7 rounded-lg bg-slate-700 text-white font-bold text-xs cursor-pointer">+</button><button type="button" onclick="window.deleteDeposit('${d.id}')" class="text-rose-400 text-xs ml-1 cursor-pointer">🗑️</button></div></div>`;
   }).join('');
 };
 window.openNewDepositModal = function() { safeVal('depModalId', ''); safeVal('depModalName', 'Kaucja PET / Puszka 0,50 zł'); safeVal('depModalCategory', 'PET_CAN_050'); safeVal('depModalPrice', '0.50'); safeVal('depModalQty', '12'); showModal('depositModal'); };
@@ -1020,7 +867,7 @@ window.renderEvents = function() {
     let items = []; try { items = typeof ev.items_json === 'string' ? JSON.parse(ev.items_json) : (ev.items_json || []); } catch (e) {}
     const isActive = ev.status === 'W trakcie';
     const cost = items.reduce((sum, it) => sum + (it.consumed !== undefined ? it.consumed : (it.dispatched || 0)) * (it.netPrice || 0), 0);
-    return `<div class="bg-slate-800 border ${isActive ? 'border-blue-500/70' : 'border-slate-700'} rounded-2xl p-3.5 space-y-2.5 shadow cursor-pointer"><div class="flex justify-between items-start gap-2 flex-wrap"><div><div class="flex items-center gap-2"><span class="font-mono text-xs font-black text-amber-400">${ev.event_number || '#EV'}</span><span class="text-[9px] font-bold px-2 py-0.5 rounded ${isActive ? 'bg-blue-950 text-blue-300 border border-blue-700' : 'bg-emerald-950 text-emerald-300 border border-emerald-700'}">${ev.status || 'W trakcie'}</span></div><h4 class="font-bold text-sm text-white mt-1">${ev.event_name || 'Realizacja'}</h4><p class="text-[10px] text-slate-400">Wydano: ${ev.dispatch_date || '-'} ${ev.return_date ? `• Rozliczono: ${ev.return_date}` : ''}</p>${ev.return_date ? `<p class="text-[10px] text-emerald-400 bg-emerald-950/40 border border-emerald-800/60 px-2 py-0.5 rounded inline-block font-bold mt-1">Koszt towaru netto: ${cost.toFixed(2)} zł</p>` : ''}</div><div class="flex gap-1.5 flex-wrap">${isActive ? `<button type="button" onclick="openEventReturnModal('${ev.id}')" class="bg-emerald-500 text-slate-950 font-black text-xs px-3 py-1.5 rounded-xl shadow cursor-pointer">📥 Rozlicz</button>` : ''}<button type="button" onclick="printEventSheet('${ev.id}', '${isActive ? 'DISPATCH' : 'RETURN'}')" class="bg-slate-700 text-slate-200 font-bold text-xs px-2.5 py-1.5 rounded-xl cursor-pointer">🖨️ Karta</button><button type="button" onclick="deleteEvent('${ev.id}')" class="text-rose-400 text-xs px-1.5 cursor-pointer">🗑️</button></div></div><div class="bg-slate-900 rounded-xl p-2 text-[11px] space-y-1 max-h-44 overflow-y-auto">${items.map((it, i) => `<div class="flex justify-between text-slate-300 border-b border-slate-800/50 pb-0.5"><span>${i + 1}. ${it.name}</span><span class="font-bold text-blue-300">Wyd: ${it.dispatched} ${it.returned !== undefined ? `• Zwr: ${it.returned} • Zuż: ${it.consumed || 0}` : ''}</span></div>`).join('')}</div></div>`;
+    return `<div class="bg-slate-800 border ${isActive ? 'border-blue-500/70' : 'border-slate-700'} rounded-2xl p-3.5 space-y-2.5 shadow cursor-pointer"><div class="flex justify-between items-start gap-2 flex-wrap"><div><div class="flex items-center gap-2"><span class="font-mono text-xs font-black text-amber-400">${ev.event_number || '#EV'}</span><span class="text-[9px] font-bold px-2 py-0.5 rounded ${isActive ? 'bg-blue-950 text-blue-300 border border-blue-700' : 'bg-emerald-950 text-emerald-300 border border-emerald-700'}">${ev.status || 'W trakcie'}</span></div><h4 class="font-bold text-sm text-white mt-1">${ev.event_name || 'Realizacja'}</h4><p class="text-[10px] text-slate-400">Wydano: ${ev.dispatch_date || '-'} ${ev.return_date ? `• Rozliczono: ${ev.return_date}` : ''}</p>${ev.return_date ? `<p class="text-[10px] text-emerald-400 bg-emerald-950/40 border border-emerald-800/60 px-2 py-0.5 rounded inline-block font-bold mt-1">Koszt towaru netto: ${cost.toFixed(2)} zł</p>` : ''}</div><div class="flex gap-1.5 flex-wrap">${isActive ? `<button type="button" onclick="window.openEventReturnModal('${ev.id}')" class="bg-emerald-500 text-slate-950 font-black text-xs px-3 py-1.5 rounded-xl shadow cursor-pointer">📥 Rozlicz</button>` : ''}<button type="button" onclick="window.printEventSheet('${ev.id}', '${isActive ? 'DISPATCH' : 'RETURN'}')" class="bg-slate-700 text-slate-200 font-bold text-xs px-2.5 py-1.5 rounded-xl cursor-pointer">🖨️ Karta</button><button type="button" onclick="window.deleteEvent('${ev.id}')" class="text-rose-400 text-xs px-1.5 cursor-pointer">🗑️</button></div></div><div class="bg-slate-900 rounded-xl p-2 text-[11px] space-y-1 max-h-44 overflow-y-auto">${items.map((it, i) => `<div class="flex justify-between text-slate-300 border-b border-slate-800/50 pb-0.5"><span>${i + 1}. ${it.name}</span><span class="font-bold text-blue-300">Wyd: ${it.dispatched} ${it.returned !== undefined ? `• Zwr: ${it.returned} • Zuż: ${it.consumed || 0}` : ''}</span></div>`).join('')}</div></div>`;
   }).join('');
 };
 window.processEventDispatchImage = async function(e) {
@@ -1045,7 +892,7 @@ window.handleReturnEventSelectChange = function() {
 };
 window.renderEventReturnItems = function() {
   if (!lastParsedReturnData) return;
-  el('evReturnItemsList').innerHTML = lastParsedReturnData.map((it, idx) => `<div class="bg-slate-900 border border-slate-700 p-2.5 rounded-xl flex items-center justify-between gap-2 text-xs"><div class="flex-1 truncate"><span class="font-bold text-white block truncate">${idx + 1}. ${it.name}</span><span class="text-[10px] text-slate-400">Wydano: ${it.dispatched} ${it.unit || 'szt.'} • Konsumpcja: <strong class="text-amber-400">${Math.max(0, it.dispatched - (it.returned || 0))}</strong></span></div><div class="flex items-center gap-1.5"><span class="text-[10px] text-emerald-300">Zwrot:</span><input type="number" min="0" max="${it.dispatched}" value="${it.returned || 0}" oninput="lastParsedReturnData[${idx}].returned=Math.max(0,parseInt(this.value)||0);lastParsedReturnData[${idx}].consumed=Math.max(0,lastParsedReturnData[${idx}].dispatched-lastParsedReturnData[${idx}].returned);renderEventReturnItems()" class="w-16 bg-slate-800 border border-emerald-500 rounded p-1 text-center font-black text-emerald-400"></div></div>`).join('');
+  el('evReturnItemsList').innerHTML = lastParsedReturnData.map((it, idx) => `<div class="bg-slate-900 border border-slate-700 p-2.5 rounded-xl flex items-center justify-between gap-2 text-xs"><div class="flex-1 truncate"><span class="font-bold text-white block truncate">${idx + 1}. ${it.name}</span><span class="text-[10px] text-slate-400">Wydano: ${it.dispatched} ${it.unit || 'szt.'} • Konsumpcja: <strong class="text-amber-400">${Math.max(0, it.dispatched - (it.returned || 0))}</strong></span></div><div class="flex items-center gap-1.5"><span class="text-[10px] text-emerald-300">Zwrot:</span><input type="number" min="0" max="${it.dispatched}" value="${it.returned || 0}" oninput="lastParsedReturnData[${idx}].returned=Math.max(0,parseInt(this.value)||0);lastParsedReturnData[${idx}].consumed=Math.max(0,lastParsedReturnData[${idx}].dispatched-lastParsedReturnData[${idx}].returned);window.renderEventReturnItems()" class="w-16 bg-slate-800 border border-emerald-500 rounded p-1 text-center font-black text-emerald-400"></div></div>`).join('');
 };
 window.processAutoEventReturnSheetImage = async function(e) {
   const file = e.target.files[0]; if (!file) return; showModal('eventReturnModal'); el('evReturnLoading').classList.remove('hidden'); el('evReturnContent').classList.add('hidden'); el('evReturnActions').classList.add('hidden');
@@ -1081,7 +928,7 @@ window.processShelfCountImage = async function(e, append = false) {
     }).catch(err => { hideModal('shelfCountModal'); alert(err.message); });
   }).catch(err => { hideModal('shelfCountModal'); alert(err.message); }); e.target.value = '';
 };
-window.renderShelfCountItems = function() { el('shelfCountItemsList').innerHTML = currentShelfCountItems.map((it, idx) => { const match = findBestInventoryMatch(it.name); return `<div class="bg-slate-900 border border-slate-700 p-2 rounded-xl flex items-center justify-between gap-2 text-xs"><div class="flex-1 truncate"><input type="text" value="${it.name}" oninput="currentShelfCountItems[${idx}].name=this.value" class="w-full bg-slate-800 border border-slate-700 rounded p-1 text-white font-bold"><span class="text-[10px] text-slate-400">${match ? `Baza: ${match.name} (Stan: ${match.qty})` : 'Nowy towar'}</span></div><input type="number" value="${it.qty}" oninput="currentShelfCountItems[${idx}].qty=parseInt(this.value)||0" class="w-16 bg-slate-800 border border-purple-500 rounded p-1 text-center font-black text-purple-300"><button type="button" onclick="currentShelfCountItems.splice(${idx},1);renderShelfCountItems()" class="text-rose-400 font-bold px-1 cursor-pointer">✕</button></div>`; }).join(''); };
+window.renderShelfCountItems = function() { el('shelfCountItemsList').innerHTML = currentShelfCountItems.map((it, idx) => { const match = findBestInventoryMatch(it.name); return `<div class="bg-slate-900 border border-slate-700 p-2 rounded-xl flex items-center justify-between gap-2 text-xs"><div class="flex-1 truncate"><input type="text" value="${it.name}" oninput="currentShelfCountItems[${idx}].name=this.value" class="w-full bg-slate-800 border border-slate-700 rounded p-1 text-white font-bold"><span class="text-[10px] text-slate-400">${match ? `Baza: ${match.name} (Stan: ${match.qty})` : 'Nowy towar'}</span></div><input type="number" value="${it.qty}" oninput="currentShelfCountItems[${idx}].qty=parseInt(this.value)||0" class="w-16 bg-slate-800 border border-purple-500 rounded p-1 text-center font-black text-purple-300"><button type="button" onclick="currentShelfCountItems.splice(${idx},1);window.renderShelfCountItems()" class="text-rose-400 font-bold px-1 cursor-pointer">✕</button></div>`; }).join(''); };
 window.applyShelfCountResults = async function(mode) {
   for (const it of currentShelfCountItems) { const match = findBestInventoryMatch(it.name); if (match) { match.qty = mode === 'SET' ? (Number(it.qty) || 0) : ((Number(match.qty) || 0) + (Number(it.qty) || 0)); if (isCloudOnline) { apiRequest(`/inventory?id=eq.${match.id}`, 'PATCH', { qty: match.qty }).catch(()=>{}); } } else { const ni = normalizeItem({ id: Date.now().toString() + Math.random().toString().slice(2, 5), barcode: 'RC-' + Math.floor(100000 + Math.random() * 900000), name: it.name, qty: Number(it.qty) || 0, minQty: 6, unit: 'szt.' }); inventory.push(ni); if (isCloudOnline) { apiRequest('/inventory', 'POST', toDbItem(ni)).catch(()=>{}); } } }
   safeSetLocal('magazyn_offline_items', inventory); hideModal('shelfCountModal'); renderInventory();
@@ -1121,11 +968,11 @@ window.switchMainTab = function(tab) {
 
 window.handleItemContextMenu = function(e, id) { e.preventDefault(); contextMenuItemId = id; selectedItemId = id; const m = el('customContextMenu'); m.classList.remove('hidden'); m.style.left = `${Math.min(e.clientX, window.innerWidth - 230)}px`; m.style.top = `${Math.min(e.clientY, window.innerHeight - 200)}px`; };
 window.hideContextMenu = function() { el('customContextMenu')?.classList.add('hidden'); };
-window.contextActionEdit = function() { hideContextMenu(); if (contextMenuItemId) openEditModal(contextMenuItemId); };
-window.contextActionOpenStock = function() { hideContextMenu(); if (contextMenuItemId) openActionModal(contextMenuItemId); };
-window.contextActionPrintQR = function() { hideContextMenu(); if (contextMenuItemId) { selectedItemId = contextMenuItemId; openPrintLabelModal(); } };
-window.contextActionDelete = function() { hideContextMenu(); if (contextMenuItemId) { selectedItemId = contextMenuItemId; deleteCurrentItem(); } };
-window.handleItemCardClick = function(e, id) { if (isSelectMode) { toggleSelectItem(id, !selectedItemIds.has(id)); renderInventory(); } else openActionModal(id); };
+window.contextActionEdit = function() { hideContextMenu(); if (contextMenuItemId) window.openEditModal(contextMenuItemId); };
+window.contextActionOpenStock = function() { hideContextMenu(); if (contextMenuItemId) window.openActionModal(contextMenuItemId); };
+window.contextActionPrintQR = function() { hideContextMenu(); if (contextMenuItemId) { selectedItemId = contextMenuItemId; window.openPrintLabelModal(); } };
+window.contextActionDelete = function() { hideContextMenu(); if (contextMenuItemId) { selectedItemId = contextMenuItemId; window.deleteCurrentItem(); } };
+window.handleItemCardClick = function(e, id) { if (isSelectMode) { window.toggleSelectItem(id, !selectedItemIds.has(id)); window.renderInventory(); } else window.openActionModal(id); };
 
 window.toggleSelectMode = function() {
   isSelectMode = !isSelectMode; const b = el('btnToggleSelectMode'), bar = el('bulkActionBar');
@@ -1138,7 +985,7 @@ window.toggleSelectAll = function() { if (selectedItemIds.size === inventory.len
 window.deleteSelectedItems = function() {
   if (selectedItemIds.size === 0 || !confirm(`Usunąć ${selectedItemIds.size} pozycji?`)) return;
   const ids = Array.from(selectedItemIds); inventory = inventory.filter(i => !selectedItemIds.has(i.id));
-  safeSetLocal('magazyn_offline_items', inventory); toggleSelectMode(); renderInventory();
+  safeSetLocal('magazyn_offline_items', inventory); window.toggleSelectMode(); renderInventory();
   if (isCloudOnline) { ids.forEach(id => { apiRequest(`/inventory?id=eq.${id}`, 'DELETE').catch(()=>{}); }); }
 };
 
@@ -1153,14 +1000,14 @@ window.buildRoyalCateringSheetHTML = function(data) {
 
 window.openSheetPreviewModal = function(sheetData) {
   currentPreviewSheetData = sheetData;
-  const html = buildRoyalCateringSheetHTML(sheetData);
+  const html = window.buildRoyalCateringSheetHTML(sheetData);
   safeText('sheetPreviewModalTitle', `${sheetData.isRwDoc ? 'Dokument RW' : (sheetData.isReturn ? 'Rozliczenie' : 'Karta Wydania')}: ${sheetData.eventNumber} ${sheetData.eventName}`);
   el('sheetPreviewContainer').innerHTML = html; el('printableSheet').innerHTML = html; showModal('sheetPreviewModal');
 };
 window.triggerBrowserPrintSheet = function() { document.body.classList.remove('print-mode-qr'); document.body.classList.add('print-mode-sheet'); window.print(); };
 window.downloadCurrentSheetAsExcel = function() {
   if (!currentPreviewSheetData) return;
-  const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"></head><body>${buildRoyalCateringSheetHTML(currentPreviewSheetData)}</body></html>`;
+  const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="UTF-8"></head><body>${window.buildRoyalCateringSheetHTML(currentPreviewSheetData)}</body></html>`;
   const blob = new Blob(['\uFEFF' + html], { type: 'application/vnd.ms-excel;charset=utf-8;' });
   const link = document.createElement('a'); link.href = URL.createObjectURL(blob);
   link.download = `${(currentPreviewSheetData.isRwDoc ? 'Dokument_RW_' : (currentPreviewSheetData.isReturn ? 'Rozliczenie_' : 'Karta_Wydania_')) + currentPreviewSheetData.eventNumber}.xls`.replace(/[^a-zA-Z0-9._-]/g, '_');
@@ -1173,13 +1020,13 @@ window.openRwTransferModal = function(allowEmpty = false) {
   safeVal('rwTransferNum', 'RW-' + String(rwTransfers.length + 1).padStart(2, '0') + '/' + new Date().getFullYear().toString().slice(-2));
   safeVal('rwTransferDate', new Date().toLocaleDateString('pl-PL')); safeVal('rwTransferDestination', '');
   el('rwTransferAddSelect').innerHTML = `<option value="">-- Wybierz towar (${inventory.length}) --</option>` + inventory.map(it => `<option value="${it.id}">[${it.category}] ${it.name} (Stan: ${it.qty} ${it.unit})</option>`).join('');
-  renderRwCreatorItems(); showModal('rwTransferModal');
+  window.renderRwCreatorItems(); showModal('rwTransferModal');
 };
 window.addItemToRwCreator = function() {
   const id = safeVal('rwTransferAddSelect'); if (!id) return;
   const it = inventory.find(x => String(x.id) === String(id)); if (!it) return;
   rwCreatorMap.set(String(id), (rwCreatorMap.get(String(id)) || 0) + 1);
-  safeVal('rwTransferAddSelect', ''); renderRwCreatorItems();
+  safeVal('rwTransferAddSelect', ''); window.renderRwCreatorItems();
 };
 window.renderRwCreatorItems = function() {
   const list = el('rwTransferItemsList');
@@ -1188,7 +1035,7 @@ window.renderRwCreatorItems = function() {
   list.innerHTML = Array.from(rwCreatorMap.entries()).map(([id, qty], idx) => {
     const it = inventory.find(x => String(x.id) === String(id)); if (!it) return '';
     const rowVal = qty * (Number(it.price) || 0); sum += rowVal;
-    return `<div class="bg-slate-900 border border-slate-700 rounded-xl p-2.5 flex items-center justify-between text-xs gap-2"><div class="flex-1 truncate"><span class="font-bold text-white block truncate">${idx + 1}. ${it.name}</span><span class="text-[10px] text-slate-400">Magazyn: ${it.qty} ${it.unit} • Koszt: ${Number(it.price).toFixed(2)} zł</span></div><div class="flex items-center gap-1.5"><span class="text-[10px] text-amber-300 font-bold">${rowVal.toFixed(2)} zł</span><input type="number" value="${qty}" min="1" max="${it.qty || 9999}" oninput="rwCreatorMap.set('${it.id}', Math.max(1, parseInt(this.value)||1)); renderRwCreatorItems();" class="w-16 bg-slate-800 border border-amber-500/70 rounded-lg p-1.5 text-center font-black text-amber-400 text-xs"><button type="button" onclick="rwCreatorMap.delete('${it.id}'); renderRwCreatorItems();" class="text-rose-400 font-bold px-1.5 cursor-pointer">✕</button></div></div>`;
+    return `<div class="bg-slate-900 border border-slate-700 rounded-xl p-2.5 flex items-center justify-between text-xs gap-2"><div class="flex-1 truncate"><span class="font-bold text-white block truncate">${idx + 1}. ${it.name}</span><span class="text-[10px] text-slate-400">Magazyn: ${it.qty} ${it.unit} • Koszt: ${Number(it.price).toFixed(2)} zł</span></div><div class="flex items-center gap-1.5"><span class="text-[10px] text-amber-300 font-bold">${rowVal.toFixed(2)} zł</span><input type="number" value="${qty}" min="1" max="${it.qty || 9999}" oninput="rwCreatorMap.set('${it.id}', Math.max(1, parseInt(this.value)||1)); window.renderRwCreatorItems();" class="w-16 bg-slate-800 border border-amber-500/70 rounded-lg p-1.5 text-center font-black text-amber-400 text-xs"><button type="button" onclick="rwCreatorMap.delete('${it.id}'); window.renderRwCreatorItems();" class="text-rose-400 font-bold px-1.5 cursor-pointer">✕</button></div></div>`;
   }).join('');
   safeText('rwTransferTotalValLabel', sum.toFixed(2) + ' zł netto');
 };
@@ -1205,31 +1052,31 @@ window.finalizeRwTransfer = async function() {
   }
   const newTransfer = { id: Date.now().toString(), transfer_number: rwNum, destination: rwDest, transfer_date: rwDate, total_net_value: totalNetVal.toFixed(2), items_json: payload, created_at: new Date() };
   rwTransfers.unshift(newTransfer); safeSetLocal('magazyn_offline_items', inventory); safeSetLocal('magazyn_offline_rw_transfers', rwTransfers);
-  rwCreatorMap.clear(); hideModal('rwTransferModal'); if (isSelectMode) toggleSelectMode();
-  renderInventory(); renderRwTransfers(); switchMainTab('rw'); openSheetPreviewModal({ eventNumber: newTransfer.transfer_number, eventName: newTransfer.destination, dispatchDate: newTransfer.transfer_date, isReturn: false, isRwDoc: true, items: payload }); alert(`🏢 Zarejestrowano RW (${rwDest})!`);
+  rwCreatorMap.clear(); hideModal('rwTransferModal'); if (isSelectMode) window.toggleSelectMode();
+  window.renderInventory(); renderRwTransfers(); window.switchMainTab('rw'); window.openSheetPreviewModal({ eventNumber: newTransfer.transfer_number, eventName: newTransfer.destination, dispatchDate: newTransfer.transfer_date, isReturn: false, isRwDoc: true, items: payload }); alert(`🏢 Zarejestrowano RW (${rwDest})!`);
 };
 
-window.openCreatorFromEventsTab = function() { sheetCreatorMap.clear(); openGenerateSheetModal(true); };
+window.openCreatorFromEventsTab = function() { sheetCreatorMap.clear(); window.openGenerateSheetModal(true); };
 window.openGenerateSheetModal = function(allowEmpty = false) {
   selectedItemIds.forEach(id => { if (!sheetCreatorMap.has(String(id))) { const it = inventory.find(x => String(x.id) === String(id)); sheetCreatorMap.set(String(id), Math.min(it?.qty || 12, 12) || 1); } });
   if (!allowEmpty && sheetCreatorMap.size === 0) return alert("Wybierz pozycje z listy.");
   safeVal('genSheetNum', '#' + Math.floor(100 + Math.random() * 899));
   safeVal('genSheetDate', new Date().toLocaleDateString('pl-PL')); safeVal('genSheetName', '');
   el('genSheetAddSelect').innerHTML = `<option value="">-- Wybierz towar (${inventory.length}) --</option>` + inventory.map(it => `<option value="${it.id}">[${it.category}] ${it.name} (Stan: ${it.qty})</option>`).join('');
-  renderSheetCreatorItems(); showModal('generateSheetModal');
+  window.renderSheetCreatorItems(); showModal('generateSheetModal');
 };
 window.addItemToSheetCreator = function() {
   const id = safeVal('genSheetAddSelect'); if (!id) return;
   const it = inventory.find(x => String(x.id) === String(id)); if (!it) return;
   sheetCreatorMap.set(String(id), (sheetCreatorMap.get(String(id)) || 0) + (Math.min(it.qty, 6) || 1));
-  safeVal('genSheetAddSelect', ''); renderSheetCreatorItems();
+  safeVal('genSheetAddSelect', ''); window.renderSheetCreatorItems();
 };
 window.renderSheetCreatorItems = function() {
   const list = el('genSheetItemsList');
   if (sheetCreatorMap.size === 0) { list.innerHTML = `<div class="text-center py-6 text-slate-500 text-xs">Wybierz towar powyżej.</div>`; return; }
   list.innerHTML = Array.from(sheetCreatorMap.entries()).map(([id, qty], idx) => {
     const it = inventory.find(x => String(x.id) === String(id)); if (!it) return '';
-    return `<div class="bg-slate-900 border border-slate-700 rounded-xl p-2.5 flex items-center justify-between text-xs gap-2"><div class="flex-1 truncate"><span class="font-bold text-white block truncate">${idx + 1}. ${it.name}</span><span class="text-[10px] text-slate-400">Stan: ${it.qty} ${it.unit}</span></div><div class="flex items-center gap-1.5"><input type="number" value="${qty}" min="1" oninput="sheetCreatorMap.set('${it.id}', Math.max(1, parseInt(this.value)||1))" class="w-16 bg-slate-800 border border-amber-500/70 rounded-lg p-1.5 text-center font-black text-amber-400 text-xs"><button type="button" onclick="sheetCreatorMap.delete('${it.id}');renderSheetCreatorItems()" class="text-rose-400 font-bold px-1.5 cursor-pointer">✕</button></div></div>`;
+    return `<div class="bg-slate-900 border border-slate-700 rounded-xl p-2.5 flex items-center justify-between text-xs gap-2"><div class="flex-1 truncate"><span class="font-bold text-white block truncate">${idx + 1}. ${it.name}</span><span class="text-[10px] text-slate-400">Stan: ${it.qty} ${it.unit}</span></div><div class="flex items-center gap-1.5"><input type="number" value="${qty}" min="1" oninput="sheetCreatorMap.set('${it.id}', Math.max(1, parseInt(this.value)||1))" class="w-16 bg-slate-800 border border-amber-500/70 rounded-lg p-1.5 text-center font-black text-amber-400 text-xs"><button type="button" onclick="sheetCreatorMap.delete('${it.id}');window.renderSheetCreatorItems()" class="text-rose-400 font-bold px-1.5 cursor-pointer">✕</button></div></div>`;
   }).join('');
 };
 window.finalizeSheetCreator = async function(createEvent = true) {
@@ -1250,6 +1097,171 @@ window.finalizeSheetCreator = async function(createEvent = true) {
     events.unshift(newEv); safeSetLocal('magazyn_offline_items', inventory); safeSetLocal('magazyn_offline_events', events);
     if (isCloudOnline) { apiRequest('/events', 'POST', newEv).catch(()=>{}); }
   }
-  sheetCreatorMap.clear(); hideModal('generateSheetModal'); if (isSelectMode) toggleSelectMode();
-  renderInventory(); renderEvents(); openSheetPreviewModal({ eventNumber: evNum, eventName: evName, dispatchDate: evDate, returnDate: '', isReturn: false, items: payload });
+  sheetCreatorMap.clear(); hideModal('generateSheetModal'); if (isSelectMode) window.toggleSelectMode();
+  window.renderInventory(); renderEvents(); window.openSheetPreviewModal({ eventNumber: evNum, eventName: evName, dispatchDate: evDate, returnDate: '', isReturn: false, items: payload });
 };
+
+// --- GŁÓWNA FUNKCJA INICJALIZACYJNA PODPINACZKA ---
+function initAppBindings() {
+  const bind = (id, event, func) => {
+    const element = el(id);
+    if (element) {
+      element.addEventListener(event, func);
+    }
+  };
+
+  bind('loginForm', 'submit', window.handleLogin);
+  bind('btnLearnAI', 'click', () => window.queryGeminiAPI('', []).catch(()=>{ alert("AI uczy się automatycznie podczas odczytu i wprowadzania etykiet.") }));
+  bind('btnMergeDups', 'click', window.mergeExistingDuplicates || function(){});
+  bind('btnAudit', 'click', window.openInventoryAuditModal);
+  bind('btnToolsMenu', 'click', (e) => { e.stopPropagation(); window.toggleToolsMenu(); });
+  
+  bind('btnCopyLowStock', 'click', window.copyLowStockWhatsApp);
+  bind('btnExportCsv', 'click', window.exportCSV || function(){});
+  bind('btnExportBackup', 'click', window.exportBackup);
+  bind('btnImportBackup', 'click', window.triggerImport);
+  bind('btnLockApp', 'click', window.lockApp);
+  bind('backupInput', 'change', window.importBackup);
+
+  ['ALL', 'ALCOHOL', 'BEVERAGE', 'DISPOSABLES', 'EXPIRING', 'LOW'].forEach(cat => {
+    bind(`pillCat_${cat}`, 'click', () => window.setCategoryPill(cat));
+  });
+
+  bind('btnCountFromPhoto', 'click', () => el('shelfCountInput')?.click());
+  bind('btnToggleCamera', 'click', window.toggleCamera);
+  bind('barcodeSearchForm', 'submit', window.handleManualBarcodeSubmit);
+  bind('searchFilter', 'input', window.renderInventory);
+  bind('btnToggleSelectMode', 'click', window.toggleSelectMode);
+  bind('btnSelectAll', 'click', window.toggleSelectAll);
+  bind('btnBulkEvent', 'click', () => window.openGenerateSheetModal(false));
+  bind('btnBulkRw', 'click', () => window.openRwTransferModal(false));
+  bind('btnBulkDelete', 'click', window.deleteSelectedItems);
+
+  bind('btnNewEventTab', 'click', window.openCreatorFromEventsTab);
+  bind('dropZoneEventDisp', 'click', () => el('eventDispatchInput')?.click());
+  bind('dropZoneEventRet', 'click', () => el('eventAutoReturnSheetInput')?.click());
+
+  bind('btnNewRwTab', 'click', () => window.openRwTransferModal(true));
+  
+  bind('btnAddInvoice', 'click', window.openInvoiceUploadModal);
+  bind('dropZoneInvoice', 'click', (e) => { if(e.target.id !== 'btnAddInvoice') window.openInvoiceUploadModal(); });
+
+  bind('btnAddDeposit', 'click', window.openNewDepositModal);
+  bind('btnClearLogs', 'click', window.clearStockLogs);
+  bind('btnClearAlerts', 'click', window.clearPriceAlerts);
+
+  bind('btnCloseInvCap', 'click', window.closeInvoiceUploadModal);
+  bind('btnCloseAiModal', 'click', window.closeAiModal);
+  bind('btnCloseActModal', 'click', () => hideModal('actionModal'));
+  bind('btnCloseNewModal', 'click', () => hideModal('newItemModal'));
+  bind('btnCloseEditModal', 'click', () => hideModal('editItemModal'));
+  bind('btnCloseAudit', 'click', () => hideModal('inventoryAuditModal'));
+  bind('btnCloseEdDeliv', 'click', () => hideModal('editDeliveryModal'));
+  bind('btnCloseSheetPrev', 'click', () => hideModal('sheetPreviewModal'));
+  bind('btnCloseImgPrev', 'click', window.closeImagePreviewModal);
+  bind('btnCloseDepModal', 'click', () => hideModal('depositModal'));
+  bind('btnCloseEvDisp', 'click', () => hideModal('eventDispatchModal'));
+  bind('btnCloseEvRet', 'click', () => hideModal('eventReturnModal'));
+  bind('btnCloseGenSheet', 'click', () => hideModal('generateSheetModal'));
+  bind('btnCloseRwModal', 'click', () => hideModal('rwTransferModal'));
+
+  bind('dropZoneSlot1', 'click', () => el('invoicePhotoInput1')?.click());
+  bind('dropZoneSlot2', 'click', () => el('invoicePhotoInput2')?.click());
+  bind('btnResetInv', 'click', window.resetInvoicePhotos);
+  bind('btnProcessInvoice', 'click', window.startMultiInvoiceProcessing);
+
+  bind('btnCancelAiModal', 'click', window.closeAiModal);
+  bind('btnConfirmCatalogOnly', 'click', () => window.confirmAndApplyDelivery('CATALOG_ONLY'));
+  bind('btnConfirmFullDelivery', 'click', () => window.confirmAndApplyDelivery('FULL_DELIVERY'));
+  bind('btnAddAiDeposit', 'click', window.addManualDepositRowToModal);
+
+  bind('btnMinusQty', 'click', () => window.adjustStepQty(-1));
+  bind('btnPlusQty', 'click', () => window.adjustStepQty(1));
+  bind('btnActAdd', 'click', () => window.executeStockAction('ADD'));
+  bind('btnActRem', 'click', () => window.executeStockAction('REMOVE'));
+  bind('btnActFld', 'click', () => window.executeStockAction('TO_FIELD'));
+  bind('btnActRw', 'click', () => window.executeStockAction('TO_RW'));
+  bind('btnActLoss', 'click', () => window.executeStockAction('LOSS'));
+  bind('btnActDel', 'click', window.deleteCurrentItem);
+  bind('btnActQr', 'click', window.openPrintLabelModal);
+  bind('btnActEdit', 'click', () => window.openEditModal(window.selectedItemId));
+
+  bind('newItemForm', 'submit', window.saveNewItem);
+  bind('btnCancelNew', 'click', () => hideModal('newItemModal'));
+  bind('btnNewLblPh', 'click', () => { window.currentLabelPhotoTarget = 'NEW'; el('itemLabelPhotoInput')?.click(); });
+  bind('btnProcessLabelAI_NEW', 'click', window.processLabelPhotosAI);
+  bind('btnNewRandCd', 'click', window.generateRandomCode);
+  bind('newName', 'input', window.autoPreviewNewItemCategory);
+
+  bind('editItemForm', 'submit', window.saveEditedItem);
+  bind('btnCancelEdit', 'click', () => hideModal('editItemModal'));
+  bind('btnEditLblPh', 'click', () => { window.currentLabelPhotoTarget = 'EDIT'; el('itemLabelPhotoInput')?.click(); });
+  bind('btnProcessLabelAI_EDIT', 'click', window.processLabelPhotosAI);
+
+  bind('btnCancelAudit', 'click', () => hideModal('inventoryAuditModal'));
+  bind('btnFinalizeAudit', 'click', window.finalizeInventoryAudit);
+
+  bind('editDeliveryForm', 'submit', window.saveEditedDelivery);
+  bind('btnCancelEdDel', 'click', () => hideModal('editDeliveryModal'));
+  bind('btnEdDelPh', 'click', () => el('editDelivPhotoInput')?.click());
+  bind('btnEdDelRow', 'click', window.addEditDeliveryItemRow);
+
+  bind('btnCancelSheetPrev', 'click', () => hideModal('sheetPreviewModal'));
+  bind('btnDlExcel', 'click', window.downloadCurrentSheetAsExcel);
+  bind('btnPrintPdf', 'click', window.triggerBrowserPrintSheet);
+  
+  bind('btnCancelImgPrev', 'click', window.closeImagePreviewModal);
+
+  bind('depositForm', 'submit', window.saveDepositModal);
+  bind('btnCancelDep', 'click', () => hideModal('depositModal'));
+  bind('depModalCategory', 'change', window.handleDepCategoryPreset);
+
+  bind('btnCancelEvDisp', 'click', () => hideModal('eventDispatchModal'));
+  bind('btnConfirmEvDisp', 'click', window.confirmAndApplyEventDispatch);
+
+  bind('btnCancelEvRet', 'click', () => hideModal('eventReturnModal'));
+  bind('btnConfirmEvRet', 'click', window.confirmAndApplyEventReturn);
+  bind('evReturnEventSelect', 'change', window.handleReturnEventSelectChange);
+
+  bind('btnCancelGenSheet', 'click', () => hideModal('generateSheetModal'));
+  bind('btnConfirmGenSheet', 'click', () => window.finalizeSheetCreator(true));
+  bind('btnGenSheetAdd', 'click', window.addItemToSheetCreator);
+
+  bind('btnCancelRw', 'click', () => hideModal('rwTransferModal'));
+  bind('btnConfirmRw', 'click', window.finalizeRwTransfer);
+  bind('btnRwAdd', 'click', window.addItemToRwCreator);
+
+  ['Stock', 'Events', 'Rw', 'Deposits', 'Deliveries'].forEach(t => {
+    bind(`navBtn${t}`, 'click', () => window.switchMainTab(t.toLowerCase()));
+    bind(`tab${t}HeaderBtn`, 'click', () => window.switchMainTab(t.toLowerCase()));
+  });
+  bind('tabLogsHeaderBtn', 'click', () => window.switchMainTab('logs'));
+  bind('tabAlertsHeaderBtn', 'click', () => window.switchMainTab('alerts'));
+  
+  bind('navBtnInvoice', 'click', window.openInvoiceUploadModal);
+  bind('navBtnNewItem', 'click', () => window.openNewItemModal(''));
+  
+  bind('statBoxStock', 'click', () => window.switchMainTab('stock'));
+  bind('statBoxVal', 'click', () => window.switchMainTab('stock'));
+  bind('statBoxDep', 'click', () => window.switchMainTab('deposits'));
+  bind('statBoxRw', 'click', () => window.switchMainTab('rw'));
+  bind('statBoxEvents', 'click', () => window.switchMainTab('events'));
+
+  bind('ctxEdit', 'click', window.contextActionEdit);
+  bind('ctxStock', 'click', window.contextActionOpenStock);
+  bind('ctxQr', 'click', window.contextActionPrintQR);
+  bind('ctxDel', 'click', window.contextActionDelete);
+  
+  document.body.addEventListener('click', () => { window.hideContextMenu(); window.hideToolsMenu(); });
+}
+
+// ODPALENIE INICJALIZACJI
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAppBindings);
+} else {
+  initAppBindings();
+}
+
+// URUCHOMIENIE APLIKACJI
+checkAuth();
+fetchAllData();
